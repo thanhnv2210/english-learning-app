@@ -21,7 +21,11 @@
       "Bash(curl -s http://localhost:11434/api/tags)",
       "Bash(printf:*)",
       "Bash(python3 -c \"import sys,json; [print\\(m[''''name'''']\\) for m in json.load\\(sys.stdin\\)[''''models'''']]\")",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(./node_modules/.bin/tsc --noEmit 2>&1)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/node_modules/.bin/tsc --noEmit -p /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/tsconfig.json)"
     ]
   }
 }
