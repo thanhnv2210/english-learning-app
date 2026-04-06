@@ -8,7 +8,6 @@ import {
   jsonb,
   boolean,
   primaryKey,
-  unique,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
@@ -24,7 +23,7 @@ export const users = pgTable('users', {
 export const sessions = pgTable('sessions', {
   id: serial('id').primaryKey(),
   userId: integer('user_id').references(() => users.id),
-  type: text('type').notNull(), // 'writing' | 'speaking'
+  type: text('type').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
@@ -37,7 +36,7 @@ export const feedbackResults = pgTable('feedback_results', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
-// ─── Mock exam history ────────────────────────────────────────────────────────
+// ─── Shared types ─────────────────────────────────────────────────────────────
 
 export type TranscriptMessage = {
   id: string
@@ -45,11 +44,39 @@ export type TranscriptMessage = {
   content: string
 }
 
+export type FeedbackCriterion = {
+  criterion: string
+  score: number
+  targetScore: number
+  keyPoints: string[]
+}
+
+export type FeedbackResult = {
+  overallBand: number
+  targetBand: number
+  criteria: FeedbackCriterion[]
+}
+
+// ─── Cue cards (Part 2 — generated per session) ───────────────────────────────
+
+export const cueCards = pgTable('cue_cards', {
+  id: serial('id').primaryKey(),
+  prompt: text('prompt').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
+// ─── Mock exam history ────────────────────────────────────────────────────────
+
 export const mockExams = pgTable('mock_exams', {
   id: serial('id').primaryKey(),
-  skill: text('skill').notNull(), // 'speaking' | 'writing'
+  // 'speaking' = Part 1 | 'speaking_part2' = Part 2 | 'writing'
+  skill: text('skill').notNull(),
   transcript: jsonb('transcript').notNull().$type<TranscriptMessage[]>(),
   isFavorite: boolean('is_favorite').notNull().default(false),
+  // Nullable — populated after user requests feedback
+  feedback: jsonb('feedback').$type<FeedbackResult>(),
+  // Only set for Part 2 sessions
+  cueCardId: integer('cue_card_id').references(() => cueCards.id),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
@@ -71,10 +98,15 @@ export const examTags = pgTable(
   (t) => [primaryKey({ columns: [t.examId, t.tagId] })]
 )
 
-// ─── Relations (for Drizzle relational query builder) ─────────────────────────
+// ─── Relations ────────────────────────────────────────────────────────────────
 
-export const mockExamsRelations = relations(mockExams, ({ many }) => ({
+export const cueCardsRelations = relations(cueCards, ({ many }) => ({
+  exams: many(mockExams),
+}))
+
+export const mockExamsRelations = relations(mockExams, ({ many, one }) => ({
   examTags: many(examTags),
+  cueCard: one(cueCards, { fields: [mockExams.cueCardId], references: [cueCards.id] }),
 }))
 
 export const tagsRelations = relations(tags, ({ many }) => ({

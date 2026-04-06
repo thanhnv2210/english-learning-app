@@ -24,10 +24,10 @@
 
 *Goal: A working feedback loop graded against IELTS 6.5 criteria.*
 
-- [ ] **1.1 — IELTS_Examiner prompt**: System prompt that enforces strict examiner protocol (no helping, enforced transitions, no feedback during session)
-- [ ] **1.2 — TimerService**: Force part transitions; enforce 2-minute hard cutoff for Part 2
-- [ ] **1.3 — FeedbackGenerator**: Post-session Band 6.5 vs 7.0 gap analysis across all four criteria
-- [ ] **1.4 — Topic Injector**: Inject dev-friendly cue cards into Part 2 (e.g., "Describe a complex bug you solved")
+- [x] **1.1 — IELTS_Examiner prompt**: `src/lib/ielts/examiner/prompt.ts` — strict Part 1 protocol; `part2-prompt.ts` — Part 2 + cue card generation + feedback system prompt
+- [x] **1.2 — TimerService**: `src/lib/ielts/timer/use-timer.ts` — hook with start/stop/addTime/toggleEnabled; `TimerControl` (live display + toggle); `TimerAlertModal` (fires at 0 → "Add 2 min" or "Move to Part 3")
+- [x] **1.3 — FeedbackGenerator**: `POST /api/feedback` — post-session band scores (numbers) + keyPoints per criterion vs target profile; inline on same page (overrides previous); popup modal from History "View Feedback" button
+- [x] **1.4 — Topic Injector / Part 2 Simulator**: `generateAndSaveCueCard` server action — AI generates tech-themed cue card, saves to `cue_cards` table; separate `/speaking/part2` route with 1-min prep + 2-min speak timer
 - [ ] **Writing Task 2 interface**: Input for essays on tech topics with auto-scoring via the evaluation engine
 - [ ] **Target Profile System**: `user_config.json` storing current goal (hardcoded to `IELTS_6.5` for now); schema must support `IELTS_7.5` and `Business_Fluent` later
 
