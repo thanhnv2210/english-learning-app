@@ -28,8 +28,8 @@
 - [x] **1.2 — TimerService**: `src/lib/ielts/timer/use-timer.ts` — hook with start/stop/addTime/toggleEnabled; `TimerControl` (live display + toggle); `TimerAlertModal` (fires at 0 → "Add 2 min" or "Move to Part 3")
 - [x] **1.3 — FeedbackGenerator**: `POST /api/feedback` — post-session band scores (numbers) + keyPoints per criterion vs target profile; inline on same page (overrides previous); popup modal from History "View Feedback" button
 - [x] **1.4 — Topic Injector / Part 2 Simulator**: `generateAndSaveCueCard` server action — AI generates tech-themed cue card, saves to `cue_cards` table; separate `/speaking/part2` route with 1-min prep + 2-min speak timer
-- [ ] **Writing Task 2 interface**: Input for essays on tech topics with auto-scoring via the evaluation engine
-- [ ] **Target Profile System**: `user_config.json` storing current goal (hardcoded to `IELTS_6.5` for now); schema must support `IELTS_7.5` and `Business_Fluent` later
+- [x] **Writing Task 2 interface**: Domain selector → AI-generated essay topic → textarea → streaming evaluation (band scores via `POST /api/writing/evaluate`); saved to history
+- [x] **Target Profile System**: `users.targetProfile` in DB (upserted via `getDefaultUser()`); `parseTargetBand()` parses `IELTS_6.5` → `6.5`; `targetBand` flows into Speaking Pt 1, Pt 2, and Writing feedback
 
 ---
 

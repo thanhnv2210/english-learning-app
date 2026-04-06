@@ -13,9 +13,10 @@ import type { Message } from 'ai'
 type Props = {
   initialMessages?: TranscriptMessage[]
   resumeExamId?: number
+  targetBand?: number
 }
 
-export function SpeakingChat({ initialMessages, resumeExamId }: Props) {
+export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5 }: Props) {
   const router = useRouter()
   const timer = useTimer(5 * 60) // 5-min session guideline for Part 1
 
@@ -70,7 +71,7 @@ export function SpeakingChat({ initialMessages, resumeExamId }: Props) {
       const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript, skill: 'speaking', targetBand: 6.5 }),
+        body: JSON.stringify({ transcript, skill: 'speaking', targetBand }),
       })
       const data: FeedbackResult = await res.json()
       setFeedback(data)

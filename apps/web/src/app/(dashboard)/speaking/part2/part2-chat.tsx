@@ -18,11 +18,12 @@ type Props = {
   initialMessages?: TranscriptMessage[]
   resumeExamId?: number
   initialCueCard?: CueCard
+  targetBand?: number
 }
 
 type Stage = 'idle' | 'generating' | 'prep' | 'speaking' | 'ended'
 
-export function Part2Chat({ initialMessages, resumeExamId, initialCueCard }: Props) {
+export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targetBand = 6.5 }: Props) {
   const router = useRouter()
   const prepTimer = useTimer(60)    // 1-minute prep
   const speakTimer = useTimer(120)  // 2-minute speak
@@ -97,7 +98,7 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard }: Pro
       const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript, skill: 'speaking_part2', targetBand: 6.5 }),
+        body: JSON.stringify({ transcript, skill: 'speaking_part2', targetBand }),
       })
       const data: FeedbackResult = await res.json()
       setFeedback(data)
