@@ -36,7 +36,7 @@ async function fetchExams(filters: Filters) {
   return exams
 }
 
-const SKILLS = ['speaking', 'writing']
+const SKILLS = ['speaking', 'speaking_part2', 'writing']
 
 export default async function HistoryPage({
   searchParams,

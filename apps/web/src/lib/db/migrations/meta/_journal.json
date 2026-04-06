@@ -8,6 +8,13 @@
       "when": 1775456665116,
       "tag": "0000_greedy_the_santerians",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775461201100,
+      "tag": "0001_hot_santa_claus",
+      "breakpoints": true
     }
   ]
 }
