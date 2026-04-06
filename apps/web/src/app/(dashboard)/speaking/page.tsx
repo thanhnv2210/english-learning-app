@@ -3,7 +3,7 @@
 import { useChat } from 'ai/react'
 import { useRef, useEffect } from 'react'
 
-export default function Home() {
+export default function SpeakingPage() {
   const { messages, input, handleInputChange, handleSubmit, isLoading, append } = useChat({
     api: '/api/chat',
   })
@@ -20,29 +20,40 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <h1 className="mb-6 text-2xl font-bold">IELTS Speaking — Part 1</h1>
+    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Speaking — Part 1</h1>
+        <p className="mt-1 text-sm text-gray-500">
+          Answer naturally. The examiner will not help you — that is intentional.
+        </p>
+      </div>
 
       {!started ? (
-        <button
-          data-testid="start-btn"
-          onClick={startSession}
-          className="rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold hover:bg-blue-700 active:scale-95 transition-all"
-        >
-          Start Session
-        </button>
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-gray-200 bg-white p-10">
+          <p className="text-sm text-gray-500 text-center max-w-sm">
+            The examiner will ask 4–5 questions on everyday and tech topics. Respond as you would in
+            a real test.
+          </p>
+          <button
+            data-testid="start-btn"
+            onClick={startSession}
+            className="rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold hover:bg-blue-700 active:scale-95 transition-all"
+          >
+            Start Session
+          </button>
+        </div>
       ) : (
-        <div className="flex w-full max-w-2xl flex-col gap-4">
+        <div className="flex flex-col gap-4">
           {/* Chat messages */}
-          <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 min-h-64 max-h-[60vh] overflow-y-auto">
+          <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 min-h-64 max-h-[60vh] overflow-y-auto">
             {messages
               .filter((m) => m.content !== '__START__')
               .map((m) => (
                 <div
                   key={m.id}
-                  className={`rounded-lg px-4 py-2 text-sm leading-relaxed ${
+                  className={`rounded-lg px-4 py-2 text-sm leading-relaxed max-w-[85%] ${
                     m.role === 'assistant'
-                      ? 'self-start bg-white border border-gray-200 text-gray-800'
+                      ? 'self-start bg-gray-100 text-gray-800'
                       : 'self-end bg-blue-600 text-white'
                   }`}
                   {...(m.role === 'assistant' ? { 'data-testid': 'ai-message' } : {})}
@@ -77,6 +88,6 @@ export default function Home() {
           </form>
         </div>
       )}
-    </main>
+    </div>
   )
 }
