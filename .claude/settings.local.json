@@ -17,7 +17,10 @@
       "Bash(node:*)",
       "Bash(psql -U ThanhNguyen -c '\\\\l')",
       "Bash(psql -c '\\\\l')",
-      "Bash(psql postgres:*)"
+      "Bash(psql postgres:*)",
+      "Bash(curl -s http://localhost:11434/api/tags)",
+      "Bash(printf:*)",
+      "Bash(python3 -c \"import sys,json; [print\\(m[''''name'''']\\) for m in json.load\\(sys.stdin\\)[''''models'''']]\")"
     ]
   }
 }
