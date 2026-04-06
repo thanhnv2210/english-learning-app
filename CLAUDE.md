@@ -8,7 +8,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-The project is in the planning phase. No code or build system exists yet. See `Discussion.md` for technical design decisions and `RoadMap.md` for the sprint breakdown.
+The project is in the planning phase. No code or build system exists yet. See `Discussion.md` for technical design decisions, `RoadMap.md` for the sprint breakdown, and `docs/adr/` for architecture decision records.
+
+## Tech Stack
+
+| Layer | Choice |
+|-------|--------|
+| Frontend | Next.js 15 (App Router) |
+| Styling | Tailwind CSS |
+| AI/Streaming | Vercel AI SDK (`ai` package) |
+| Database | PostgreSQL (Docker) |
+
+See [ADR-0001](./docs/adr/0001-local-dev-environment-and-tech-stack.md) for rationale.
+
+## Commands
+
+```bash
+next dev --turbo   # canonical dev command — Turbopack, required for M1 memory constraints
+```
+
+> `next dev` (Webpack) must not be used for local development.
 
 ## Planned Architecture
 
