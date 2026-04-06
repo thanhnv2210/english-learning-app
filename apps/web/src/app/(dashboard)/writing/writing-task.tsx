@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { generateWritingTopic } from '@/app/actions/writing'
 import { saveExam, saveFeedback } from '@/app/actions/exam'
 import { FeedbackView } from '@/components/feedback-view'
-import { WRITING_DOMAINS } from '@/lib/ielts/writing/prompts'
 import type { FeedbackResult } from '@/lib/db/schema'
 import type { AuditResult } from '@/app/api/writing/audit/route'
 import type { VocabResult } from '@/app/api/writing/vocabulary/route'
@@ -28,9 +27,11 @@ type GapCriterion = {
   requiredChanges: string[]
 }
 
-type Props = { targetBand?: number }
+type Domain = { id: number; rank: number; name: string; description: string; category: string }
 
-export function WritingTask({ targetBand = 6.5 }: Props) {
+type Props = { targetBand?: number; domains: Domain[] }
+
+export function WritingTask({ targetBand = 6.5, domains }: Props) {
   const router = useRouter()
   const [, startTransition] = useTransition()
 
@@ -223,17 +224,18 @@ export function WritingTask({ targetBand = 6.5 }: Props) {
         <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-6">
           <p className="text-sm font-medium text-gray-700">Choose a topic domain:</p>
           <div className="grid grid-cols-2 gap-2">
-            {WRITING_DOMAINS.map((d) => (
+            {domains.map((d) => (
               <button
-                key={d}
-                onClick={() => setDomain(d)}
+                key={d.id}
+                onClick={() => setDomain(d.name)}
+                title={d.description}
                 className={`rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
-                  domain === d
+                  domain === d.name
                     ? 'border-blue-500 bg-blue-50 font-medium text-blue-700'
                     : 'border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
                 }`}
               >
-                {d}
+                {d.name}
               </button>
             ))}
           </div>

@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
+import { seedDefaultDomains } from '@/lib/db/domains'
 
 const DEFAULT_EMAIL = 'default@local.dev'
 
@@ -12,6 +13,8 @@ export async function getDefaultUser() {
     .insert(users)
     .values({ email: DEFAULT_EMAIL, targetProfile: 'IELTS_6.5' })
     .returning()
+
+  await seedDefaultDomains(created.id)
   return created
 }
 
