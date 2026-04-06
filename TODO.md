@@ -12,11 +12,11 @@
 - [x] Scaffold `apps/web` — Next.js 15, TypeScript, Tailwind v4, App Router, Turbopack
 - [x] Configure `apps/web/package.json` dev script to use `next dev --turbo`
 - [x] Scaffold `packages/shared` — `package.json` + barrel export
-- [ ] Install Vercel AI SDK in `apps/web` (`pnpm add ai`)
-- [ ] Start PostgreSQL — `docker compose -f docker/docker-compose.yml up -d`
-- [ ] Connect `apps/web/src/lib/db/` to local PostgreSQL; run initial migration
-- [ ] Configure `.env.local` in `apps/web` (Claude API key, `DATABASE_URL`, Whisper credentials)
-- [ ] Set up ESLint + Prettier across workspaces
+- [x] Install Vercel AI SDK in `apps/web` (`ai` v4)
+- [x] PostgreSQL — using local instance (ThanhNguyen@localhost:5432/ielts_dev); Docker mapped to 5433 to avoid conflict
+- [x] Connect `apps/web/src/lib/db/` to local PostgreSQL via Drizzle ORM; schema pushed (users, sessions, feedbackResults)
+- [x] Configure `.env.local` in `apps/web` (Claude API key, `DATABASE_URL`)
+- [x] Set up ESLint (flat config) + Prettier across workspaces
 
 ---
 

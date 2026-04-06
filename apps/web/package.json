@@ -6,22 +6,31 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint src/",
+    "db:push": "dotenv -e .env.local -- drizzle-kit push",
+    "db:studio": "dotenv -e .env.local -- drizzle-kit studio",
+    "db:generate": "dotenv -e .env.local -- drizzle-kit generate"
   },
   "dependencies": {
+    "ai": "^4",
+    "drizzle-orm": "^0.45.2",
     "next": "^15",
+    "postgres": "^3.4.9",
     "react": "^19",
-    "react-dom": "^19",
-    "ai": "^4"
+    "react-dom": "^19"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5",
-    "tailwindcss": "^4",
-    "@tailwindcss/postcss": "^4",
+    "dotenv-cli": "^11.0.0",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
-    "eslint-config-next": "^15"
+    "eslint-config-next": "^15",
+    "prettier": "^3.8.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

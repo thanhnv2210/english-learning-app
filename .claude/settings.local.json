@@ -6,7 +6,18 @@
       "Bash(npm install:*)",
       "Bash(pnpm install:*)",
       "Bash(pnpm approve-builds:*)",
-      "Bash(printf '\\\\n')"
+      "Bash(printf '\\\\n')",
+      "Bash(docker compose:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm drizzle-kit:*)",
+      "Bash(pnpm:*)",
+      "Bash(docker exec:*)",
+      "Bash(DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ielts_dev pnpm drizzle-kit push --verbose 2>&1)",
+      "Bash(DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ielts_dev npx drizzle-kit push 2>&1)",
+      "Bash(node:*)",
+      "Bash(psql -U ThanhNguyen -c '\\\\l')",
+      "Bash(psql -c '\\\\l')",
+      "Bash(psql postgres:*)"
     ]
   }
 }
