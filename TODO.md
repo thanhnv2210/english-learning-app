@@ -35,27 +35,27 @@
 
 ## Phase 1.5 — Writing Auditor
 
-*Goal: Precise writing feedback with band-level granularity.*
+*Goal: Precise writing feedback with visible multi-pass grading, vocabulary coaching, and outline critique.*
 
-- [ ] **1.5 — Band delta prompt**: Prompt template that pinpoints exactly what must change to move from Band 6.5 → 7.0
-- [ ] **1.6 — Vocabulary Replacer**: Detect dev-slang / informal language and suggest formal academic equivalents (AWL-aligned)
-- [ ] **1.7 — Drafting Mode**: Outline critique flow — AI critiques structure/logic before the user writes the full essay
-- [ ] **Multi-pass grading pipeline**:
-  - Pass 1: Structural Audit (word count, paragraph count, task fulfillment)
-  - Pass 2: Linguistic Analysis (simple vs academic vocabulary)
-  - Pass 3: Scoring & Gap Analysis (per-criterion band scores)
-- [ ] **JSON schema enforcement**: Standardize feedback output — `{ "criterion": "...", "score": 6.5, "suggestions": [...] }`
+- [x] **1.5 — Band delta**: `POST /api/writing/gap` — on-demand streaming call after scoring; "Show Gap Analysis" button; per-criterion "to move from X → Y you need to…" streamed JSON rendered as `GapPanel`
+- [x] **1.6 — Vocabulary Replacer**: Pass 2 (`POST /api/writing/vocabulary`) always runs on submit; returns `{ informalWords: {word, suggestion, reason}[] }`; rendered as `VocabPanel` with red→green word badges
+- [x] **1.7 — Drafting Mode**: Toggle on domain selector screen; structured outline fields (intro thesis · body 1 · body 2 · conclusion); `POST /api/writing/outline` streams critique; essay textarea unlocks after critique
+- [x] **Multi-pass pipeline** (replaces single-pass evaluate in UI):
+  - `POST /api/writing/audit` — Pass 1: structural check → `AuditResult` JSON; rendered as `AuditPanel`
+  - `POST /api/writing/vocabulary` — Pass 2: vocabulary analysis → `VocabResult` JSON; rendered as `VocabPanel`
+  - `POST /api/writing/score` — Pass 3: band scoring → streaming `FeedbackResult`; rendered as `FeedbackView`
+  - UI shows `PassRow` progress indicators (waiting → running → ✓) as each pass completes
 
 ---
 
 ## Phase 2 — Speaking & Fluency
 
-*Goal: Master the speaking interview with voice feedback.*
+*Goal: Voice-first practice loop — speak instead of type, detect fillers, surface academic vocabulary alternatives.*
 
-- [ ] **Speaking state machine**: `PART_1` → `PART_2_PREP` → `PART_2_SPEAK` → `PART_3` transitions with latency < 500ms for Parts 1 & 3
-- [ ] **Whisper STT integration**: Transcribe responses and flag hesitation fillers (`um`, `ah`)
-- [ ] **Per-turn evaluation**: Score Fluency (FC), Lexical Resource (LR), Grammatical Range (GRA) after each response
-- [ ] **Vocabulary Builder**: Integrate Academic Word List (AWL) into chat sessions — real-time suggestions for technical discussions
+- [ ] **2.1 — STT (Whisper)**: `POST /api/stt` — receives audio blob, runs Whisper transcription, returns `{ text: string }`; browser uses MediaRecorder (WebM/opus); speaking UI swaps keyboard input for a mic button + waveform indicator
+- [ ] **2.2 — Filler Detector**: Post-transcription regex scan for `um`, `ah`, `uh`, `like`, `you know`; annotate each turn with filler count; surface in per-turn badge + session-end summary ("3 fillers detected — try 'In addition' or 'What I mean is'")
+- [ ] **2.3 — Unified Speaking Session**: Single `SpeakingSession` state machine (`PART_1` → `PART_2_PREP` → `PART_2_SPEAK` → `PART_3` → `ENDED`); timer fires trigger automatic transitions; existing Part 1 + Part 2 routes become entry points into the unified flow
+- [ ] **2.4 — Vocabulary Builder**: Embedded AWL wordlist (`src/lib/ielts/vocabulary/awl.ts`); after each transcribed response, diff against AWL to find informal words and suggest 2–3 academic replacements; shown in a collapsible sidebar panel — never blocks the examiner response
 
 ---
 
