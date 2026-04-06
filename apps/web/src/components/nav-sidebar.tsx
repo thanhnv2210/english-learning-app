@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: '/speaking', label: 'Speaking', icon: '🎙' },
   { href: '/writing', label: 'Writing', icon: '✍' },
   { href: '/vocabulary', label: 'Vocabulary', icon: '📚' },
+  { href: '/history', label: 'History', icon: '🕐' },
 ]
 
 export function NavSidebar() {
