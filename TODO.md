@@ -7,12 +7,16 @@
 ## Setup
 
 - [x] Choose tech stack — Next.js 15, Tailwind CSS, Vercel AI SDK, PostgreSQL/Docker (see [ADR-0001](./docs/adr/0001-local-dev-environment-and-tech-stack.md))
-- [ ] Initialize Next.js 15 project (`npx create-next-app@latest --turbo`)
-- [ ] Configure Tailwind CSS
-- [ ] Install and configure Vercel AI SDK (`npm i ai`)
-- [ ] Connect to local PostgreSQL Docker instance; run initial migration
-- [ ] Configure environment variables (Claude API key, Whisper credentials)
-- [ ] Set up linting (ESLint), formatting (Prettier), and test runner
+- [x] Define repo strategy — pnpm monorepo, BFF pattern via Next.js API routes (see [ADR-0002](./docs/adr/0002-monorepo-single-repository.md))
+- [ ] Initialize pnpm workspace (`package.json` at root with `apps/*`, `packages/*`)
+- [ ] Scaffold `apps/web` — `pnpm create next-app@latest apps/web` (App Router, TypeScript, Tailwind, `--turbo`)
+- [ ] Configure `apps/web/package.json` dev script to use `next dev --turbo`
+- [ ] Scaffold `packages/shared` — `package.json` + TypeScript config
+- [ ] Install Vercel AI SDK in `apps/web` (`pnpm add ai`)
+- [ ] Start PostgreSQL — `docker compose -f docker/docker-compose.yml up -d`
+- [ ] Connect `apps/web/src/lib/db/` to local PostgreSQL; run initial migration
+- [ ] Configure `.env.local` in `apps/web` (Claude API key, `DATABASE_URL`, Whisper credentials)
+- [ ] Set up ESLint + Prettier across workspaces
 
 ---
 

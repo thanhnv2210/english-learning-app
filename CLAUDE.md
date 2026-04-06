@@ -14,20 +14,62 @@ The project is in the planning phase. No code or build system exists yet. See `D
 
 | Layer | Choice |
 |-------|--------|
-| Frontend | Next.js 15 (App Router) |
+| Repo | pnpm monorepo (`apps/*`, `packages/*`) |
+| Frontend + API | Next.js 15 App Router — `apps/web` |
 | Styling | Tailwind CSS |
 | AI/Streaming | Vercel AI SDK (`ai` package) |
-| Database | PostgreSQL (Docker) |
+| Database | PostgreSQL via Docker (`docker/docker-compose.yml`) |
 
-See [ADR-0001](./docs/adr/0001-local-dev-environment-and-tech-stack.md) for rationale.
+- [ADR-0001](./docs/adr/0001-local-dev-environment-and-tech-stack.md) — local dev environment rationale
+- [ADR-0002](./docs/adr/0002-monorepo-single-repository.md) — monorepo & BFF pattern rationale
+
+## Repository Structure
+
+```
+english-learning-app/
+├── apps/
+│   └── web/src/
+│       ├── app/
+│       │   ├── (auth)/              # Sign-in / sign-up pages
+│       │   ├── (dashboard)/         # writing/, speaking/, vocabulary/
+│       │   └── api/                 # Backend API routes (BFF)
+│       │       ├── evaluate/        # POST — writing scorer
+│       │       ├── speaking/        # POST — speaking session
+│       │       └── writing/         # POST — multi-pass auditor
+│       ├── components/              # Shared React components
+│       ├── lib/
+│       │   ├── ai/                  # AI SDK client & prompt templates
+│       │   ├── db/                  # PostgreSQL client & query helpers
+│       │   └── ielts/               # Core domain logic (no Next.js imports)
+│       │       ├── examiner/        # IELTS_Examiner prompt & protocol
+│       │       ├── feedback/        # FeedbackGenerator, gap analysis
+│       │       ├── timer/           # TimerService, part transitions
+│       │       └── vocabulary/      # AWL matcher, Vocabulary Replacer
+│       └── types/                   # App-local TypeScript types
+├── packages/
+│   └── shared/src/types/            # TargetProfile, FeedbackSchema (cross-workspace)
+├── docs/adr/
+└── docker/docker-compose.yml
+```
+
+**Key rule:** `app/api/` route handlers must be thin — validate input → call `lib/ielts/` → return response. No business logic inside route files.
 
 ## Commands
 
 ```bash
-next dev --turbo   # canonical dev command — Turbopack, required for M1 memory constraints
+# From repo root
+pnpm install                          # install all workspaces
+
+# From apps/web/
+pnpm dev                              # next dev --turbo (configured in apps/web/package.json)
+pnpm build                            # production build
+pnpm lint                             # ESLint
+
+# Docker (PostgreSQL)
+docker compose -f docker/docker-compose.yml up -d
 ```
 
-> `next dev` (Webpack) must not be used for local development.
+> `next dev` without `--turbo` must not be used for local development (M1 memory constraint).
 
 ## Planned Architecture
 
