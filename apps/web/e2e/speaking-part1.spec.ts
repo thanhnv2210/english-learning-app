@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('IELTS Part 1 Speaking Simulator', () => {
   test('full flow: start → receive question → send reply → receive follow-up', async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/speaking')
 
     // 1. "Start" button is visible before session begins
     const startBtn = page.getByTestId('start-btn')
