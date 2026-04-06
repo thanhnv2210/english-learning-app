@@ -98,6 +98,31 @@ export const examTags = pgTable(
   (t) => [primaryKey({ columns: [t.examId, t.tagId] })]
 )
 
+// ─── Writing domain catalogue ─────────────────────────────────────────────────
+
+export const writingDomains = pgTable('writing_domains', {
+  id: serial('id').primaryKey(),
+  rank: integer('rank').notNull().unique(),
+  name: text('name').notNull().unique(),
+  description: text('description').notNull(),
+  category: text('category').notNull(),
+})
+
+// ─── Per-user domain selection ────────────────────────────────────────────────
+
+export const userDomainPreferences = pgTable(
+  'user_domain_preferences',
+  {
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    domainId: integer('domain_id')
+      .notNull()
+      .references(() => writingDomains.id, { onDelete: 'cascade' }),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.domainId] })]
+)
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const cueCardsRelations = relations(cueCards, ({ many }) => ({
@@ -116,4 +141,13 @@ export const tagsRelations = relations(tags, ({ many }) => ({
 export const examTagsRelations = relations(examTags, ({ one }) => ({
   exam: one(mockExams, { fields: [examTags.examId], references: [mockExams.id] }),
   tag: one(tags, { fields: [examTags.tagId], references: [tags.id] }),
+}))
+
+export const writingDomainsRelations = relations(writingDomains, ({ many }) => ({
+  userPreferences: many(userDomainPreferences),
+}))
+
+export const userDomainPreferencesRelations = relations(userDomainPreferences, ({ one }) => ({
+  user: one(users, { fields: [userDomainPreferences.userId], references: [users.id] }),
+  domain: one(writingDomains, { fields: [userDomainPreferences.domainId], references: [writingDomains.id] }),
 }))

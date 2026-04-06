@@ -27,7 +27,9 @@
       "Bash(echo \"Exit: $?\")",
       "Bash(/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/node_modules/.bin/tsc --noEmit -p /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/tsconfig.json)",
       "Bash(brew services:*)",
-      "Bash(ollama list:*)"
+      "Bash(ollama list:*)",
+      "Bash(npx tsc:*)",
+      "Bash(xargs kill:*)"
     ]
   }
 }
