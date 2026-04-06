@@ -1,15 +1,21 @@
 'use client'
 
 import { useChat } from 'ai/react'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { saveExam } from '@/app/actions/exam'
+import type { TranscriptMessage } from '@/lib/db/schema'
 
 export default function SpeakingPage() {
+  const router = useRouter()
   const { messages, input, handleInputChange, handleSubmit, isLoading, append } = useChat({
     api: '/api/chat',
   })
 
   const bottomRef = useRef<HTMLDivElement>(null)
   const started = messages.length > 0
+  const [saved, setSaved] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -17,6 +23,17 @@ export default function SpeakingPage() {
 
   function startSession() {
     append({ role: 'user', content: '__START__' })
+  }
+
+  function endSession() {
+    startTransition(async () => {
+      const transcript: TranscriptMessage[] = messages
+        .filter((m) => m.content !== '__START__')
+        .map((m) => ({ id: m.id, role: m.role as 'user' | 'assistant', content: m.content }))
+
+      await saveExam({ skill: 'speaking', transcript })
+      setSaved(true)
+    })
   }
 
   return (
@@ -42,10 +59,20 @@ export default function SpeakingPage() {
             Start Session
           </button>
         </div>
+      ) : saved ? (
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-green-200 bg-green-50 p-10">
+          <p className="text-sm font-medium text-green-700">Session saved!</p>
+          <button
+            onClick={() => router.push('/history')}
+            className="rounded-lg bg-green-600 px-5 py-2 text-sm text-white font-semibold hover:bg-green-700"
+          >
+            View in History →
+          </button>
+        </div>
       ) : (
         <div className="flex flex-col gap-4">
           {/* Chat messages */}
-          <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 min-h-64 max-h-[60vh] overflow-y-auto">
+          <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 min-h-64 max-h-[55vh] overflow-y-auto">
             {messages
               .filter((m) => m.content !== '__START__')
               .map((m) => (
@@ -62,7 +89,9 @@ export default function SpeakingPage() {
                 </div>
               ))}
             {isLoading && (
-              <p className="self-start text-xs text-gray-400 animate-pulse">Examiner is speaking…</p>
+              <p className="self-start text-xs text-gray-400 animate-pulse">
+                Examiner is speaking…
+              </p>
             )}
             <div ref={bottomRef} />
           </div>
@@ -86,6 +115,15 @@ export default function SpeakingPage() {
               Send
             </button>
           </form>
+
+          {/* End session */}
+          <button
+            onClick={endSession}
+            disabled={isPending || isLoading || messages.filter((m) => m.content !== '__START__').length < 2}
+            className="self-end rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-500 hover:border-red-300 hover:text-red-500 disabled:opacity-30 transition-colors"
+          >
+            {isPending ? 'Saving…' : 'End & Save Session'}
+          </button>
         </div>
       )}
     </div>

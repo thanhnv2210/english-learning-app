@@ -20,7 +20,8 @@
       "Bash(psql postgres:*)",
       "Bash(curl -s http://localhost:11434/api/tags)",
       "Bash(printf:*)",
-      "Bash(python3 -c \"import sys,json; [print\\(m[''''name'''']\\) for m in json.load\\(sys.stdin\\)[''''models'''']]\")"
+      "Bash(python3 -c \"import sys,json; [print\\(m[''''name'''']\\) for m in json.load\\(sys.stdin\\)[''''models'''']]\")",
+      "Bash(psql:*)"
     ]
   }
 }
