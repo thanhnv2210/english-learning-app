@@ -15,6 +15,9 @@ build/
 .env.local
 .env.*.local
 
+# Local developer notes (machine-specific, never commit)
+ReadMeLocal.md
+
 # pnpm
 .pnpm-debug.log
 

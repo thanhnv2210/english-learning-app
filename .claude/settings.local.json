@@ -25,7 +25,9 @@
       "Bash(./node_modules/.bin/tsc --noEmit 2>&1)",
       "Bash(./node_modules/.bin/tsc --noEmit)",
       "Bash(echo \"Exit: $?\")",
-      "Bash(/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/node_modules/.bin/tsc --noEmit -p /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/tsconfig.json)"
+      "Bash(/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/node_modules/.bin/tsc --noEmit -p /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/tsconfig.json)",
+      "Bash(brew services:*)",
+      "Bash(ollama list:*)"
     ]
   }
 }
