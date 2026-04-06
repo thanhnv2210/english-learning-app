@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-The project is in the planning phase. No code or build system exists yet. See `Discussion.md` for technical design decisions, `RoadMap.md` for the sprint breakdown, and `docs/adr/` for architecture decision records.
+Next.js 15 scaffolded in `apps/web/`; ready for Phase 1 feature work. See `Discussion.md` for the full project vision and IELTS 6.5 objective. See `RoadMap.md` for the sprint breakdown and `docs/adr/` for architecture decision records.
 
 ## Tech Stack
 

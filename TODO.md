@@ -8,10 +8,10 @@
 
 - [x] Choose tech stack — Next.js 15, Tailwind CSS, Vercel AI SDK, PostgreSQL/Docker (see [ADR-0001](./docs/adr/0001-local-dev-environment-and-tech-stack.md))
 - [x] Define repo strategy — pnpm monorepo, BFF pattern via Next.js API routes (see [ADR-0002](./docs/adr/0002-monorepo-single-repository.md))
-- [ ] Initialize pnpm workspace (`package.json` at root with `apps/*`, `packages/*`)
-- [ ] Scaffold `apps/web` — `pnpm create next-app@latest apps/web` (App Router, TypeScript, Tailwind, `--turbo`)
-- [ ] Configure `apps/web/package.json` dev script to use `next dev --turbo`
-- [ ] Scaffold `packages/shared` — `package.json` + TypeScript config
+- [x] Initialize pnpm workspace (`package.json` at root with `apps/*`, `packages/*`)
+- [x] Scaffold `apps/web` — Next.js 15, TypeScript, Tailwind v4, App Router, Turbopack
+- [x] Configure `apps/web/package.json` dev script to use `next dev --turbo`
+- [x] Scaffold `packages/shared` — `package.json` + barrel export
 - [ ] Install Vercel AI SDK in `apps/web` (`pnpm add ai`)
 - [ ] Start PostgreSQL — `docker compose -f docker/docker-compose.yml up -d`
 - [ ] Connect `apps/web/src/lib/db/` to local PostgreSQL; run initial migration
