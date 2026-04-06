@@ -1,15 +1,18 @@
 # TODO — IELTS 6.5 Accelerator
 
-> Design specs: [Discussion.md](./Discussion.md) | Sprint breakdown: [RoadMap.md](./RoadMap.md)
+> Design specs: [Discussion.md](./Discussion.md) | Sprint breakdown: [RoadMap.md](./RoadMap.md) | ADRs: [docs/adr/](./docs/adr/)
 
 ---
 
 ## Setup
 
-- [ ] Choose tech stack (frontend framework, backend runtime, database)
-- [ ] Initialize project (package.json / pyproject.toml, folder structure)
+- [x] Choose tech stack — Next.js 15, Tailwind CSS, Vercel AI SDK, PostgreSQL/Docker (see [ADR-0001](./docs/adr/0001-local-dev-environment-and-tech-stack.md))
+- [ ] Initialize Next.js 15 project (`npx create-next-app@latest --turbo`)
+- [ ] Configure Tailwind CSS
+- [ ] Install and configure Vercel AI SDK (`npm i ai`)
+- [ ] Connect to local PostgreSQL Docker instance; run initial migration
 - [ ] Configure environment variables (Claude API key, Whisper credentials)
-- [ ] Set up linting, formatting, and test runner
+- [ ] Set up linting (ESLint), formatting (Prettier), and test runner
 
 ---
 
