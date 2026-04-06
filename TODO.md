@@ -1,6 +1,6 @@
 # TODO — IELTS 6.5 Accelerator
 
-> Design specs: [Discussion.md](./Discussion.md) | Sprint breakdown: [RoadMap.md](./RoadMap.md) | ADRs: [docs/adr/](./docs/adr/)
+> Design specs: [Discussion.md](./Discussion.md) | Sprint breakdown: [RoadMap.md](./RoadMap.md) | ADRs: [docs/adr/](./docs/adr/) | PDRs: [docs/pdr/](./docs/pdr/)
 
 ---
 
