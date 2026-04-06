@@ -109,6 +109,16 @@ export function WritingTask({ targetBand = 6.5 }: Props) {
 
     const transcript = [
       { id: 'topic', role: 'assistant' as const, content: topic },
+      // Outline entries — only present when drafting mode was used
+      ...(draftingMode && outlineCritique
+        ? [
+            { id: 'outline_introduction', role: 'user' as const, content: outline.introduction },
+            { id: 'outline_body1', role: 'user' as const, content: outline.body1 },
+            { id: 'outline_body2', role: 'user' as const, content: outline.body2 },
+            { id: 'outline_conclusion', role: 'user' as const, content: outline.conclusion },
+            { id: 'outline_critique', role: 'assistant' as const, content: outlineCritique },
+          ]
+        : []),
       { id: 'essay', role: 'user' as const, content: essay },
     ]
     const saved = await saveExam({ skill: 'writing', transcript })
