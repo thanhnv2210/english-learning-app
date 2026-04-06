@@ -1,0 +1,9 @@
+{
+  "name": "english-learning-app",
+  "private": true,
+  "packageManager": "pnpm@latest",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
