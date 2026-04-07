@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { vocabularyWords, vocabularyWordDomains, writingDomains } from '@/lib/db/schema'
-import { eq, sql } from 'drizzle-orm'
+import { asc, eq, inArray, sql } from 'drizzle-orm'
 import type { VocabWordFamily, VocabSynonym, VocabExamples } from '@/lib/db/schema'
 
 export type VocabularyCard = {
@@ -13,6 +13,26 @@ export type VocabularyCard = {
   examples: VocabExamples
   domains: string[]
   source: 'db' | 'ai'
+}
+
+/** All words in the catalogue, ordered alphabetically. Uses 2 queries (no N+1). */
+export async function getAllVocabularyWords(): Promise<VocabularyCard[]> {
+  const rows = await db.select().from(vocabularyWords).orderBy(asc(vocabularyWords.word))
+  if (rows.length === 0) return []
+
+  const allMappings = await db
+    .select({ wordId: vocabularyWordDomains.wordId, domainName: writingDomains.name })
+    .from(vocabularyWordDomains)
+    .innerJoin(writingDomains, eq(vocabularyWordDomains.domainId, writingDomains.id))
+
+  const domainsByWordId = new Map<number, string[]>()
+  for (const { wordId, domainName } of allMappings) {
+    const list = domainsByWordId.get(wordId) ?? []
+    list.push(domainName)
+    domainsByWordId.set(wordId, list)
+  }
+
+  return rows.map((row) => toCard(row, row.word, domainsByWordId.get(row.id) ?? [], 'db'))
 }
 
 /** Look up a single word by exact match (case-insensitive). */
@@ -37,7 +57,7 @@ export async function findWords(words: string[]): Promise<Map<string, Vocabulary
   const rows = await db
     .select()
     .from(vocabularyWords)
-    .where(sql`lower(${vocabularyWords.word}) = ANY(${lower})`)
+    .where(inArray(sql`lower(${vocabularyWords.word})`, lower))
 
   const result = new Map<string, VocabularyCard>()
   for (const row of rows) {
