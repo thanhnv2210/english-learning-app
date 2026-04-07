@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: '/speaking', label: 'Speaking Pt 1', icon: '🎤' },
   { href: '/speaking/part2', label: 'Speaking Pt 2', icon: '🎤' },
   { href: '/writing', label: 'Writing', icon: '✍' },
+  { href: '/reading', label: 'Reading', icon: '📖' },
   { href: '/vocabulary', label: 'Vocabulary', icon: '📚' },
   { href: '/history', label: 'History', icon: '🕐' },
 ]

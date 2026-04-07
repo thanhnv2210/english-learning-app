@@ -17,7 +17,7 @@
 *Goal: Full IELTS coverage — add Reading and Listening, show progress against target, expose the Target Switcher.*
 - [ ] **Progress Analytics**: `/analytics` dashboard — rolling band average per skill per criterion, trend over time, "Distance to target" summary
 - [ ] **Target Switcher UI**: `/settings` page — profile selector (`IELTS_6.5`, `IELTS_7.5`, `Business_Fluent`); update `users.targetProfile` via server action; load different prompt templates per profile
-- [ ] **Reading Module**: AI-generated tech-themed IELTS passages (~750 words) with 10–13 questions (T/F/NG, matching headings, short answer); 20-min timer; auto-scoring; saved to history as `skill: 'reading'`
+- [x] **Reading Module**: AI-generated tech-themed IELTS passages (~750 words) with 10–13 questions (T/F/NG, matching headings, short answer); 20-min timer; auto-scoring; saved to history as `skill: 'reading'`
 - [ ] **Listening Simulator**: AI-generated tech conversation transcript; browser TTS (`SpeechSynthesis`) reads it aloud; user completes note-completion blanks during/after playback; auto-scored; saved to history as `skill: 'listening'`
 
 ## Phase 3 Sprint Tasks
@@ -38,16 +38,13 @@
 - Nav sidebar: add "Settings" link at bottom (above the Target badge)
 - Target badge in sidebar footer reads the live DB value, not a hardcoded string
 
-### Task 3.3 — Reading Module
-- New route `/reading`
-- `POST /api/reading/passage` — AI generates a 700–900 word tech-themed passage (System Design, AI ethics, Automation, Cybersecurity) with 10–13 IELTS-style questions:
-  - True / False / Not Given (5–6 questions)
-  - Matching headings (3–4 questions)
-  - Short answer — no more than 3 words (2–3 questions)
-- 20-minute countdown timer (`useTimer`); alert at 0 with option to submit anyway
-- User selects/types answers; on submit: auto-score against answer key returned by AI; compute band estimate from % correct
-- Structured output schema: `{ passage, questions: { type, question, answer }[], totalBand }`
-- Save to history as `skill: 'reading'`; `FeedbackView` renders reading criteria (Understanding Main Ideas, Detail, Inference)
+### Task 3.3 — Reading Module ✅
+- Route `/reading`; API `POST /api/reading/passage`
+- AI generates 700–900 word tech-themed passage + 10 questions: 6 T/F/NG (radio buttons) + 4 short answer (text input, max 3 words)
+- Answer key embedded in AI response; auto-scored client-side (`scoreReading`, `estimateBand` in `lib/ielts/reading/prompts.ts`)
+- 20-minute `useTimer`; results shown per-question (✓/✗ + correct answer on miss)
+- `FeedbackResult` built from score and saved via `saveFeedback`; rendered with `FeedbackView`
+- Saved to history as `skill: 'reading'`
 
 ### Task 3.4 — Listening Simulator
 - New route `/listening`
