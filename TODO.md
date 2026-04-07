@@ -65,7 +65,10 @@
 
 - [ ] **3.1 — Progress Analytics**: `/analytics` page — query `mockExams` with feedback, compute rolling band average per skill per criterion (last 5 sessions), render summary cards + per-criterion gap table (green/amber/red badges); session count + last-practice date per skill
 - [ ] **3.2 — Target Switcher UI**: `/settings` page — `IELTS_6.5` / `IELTS_7.5` / `Business_Fluent` selector; server action updates `users.targetProfile`; `Business_Fluent` gets a new feedback prompt that drops band-score language; sidebar footer target badge reads live DB value
-- [x] **3.3 — Reading Module**: `/reading` + `POST /api/reading/passage` — AI generates 700–900 word tech passage + 10–13 questions (T/F/NG, matching headings, short answer); 20-min timer; auto-score on submit; band estimate; save as `skill: 'reading'`
+- [x] **3.3 — Reading Module**: `/reading` + `POST /api/reading/passage` — AI generates 700–900 word tech passage + 10 questions (6 T/F/NG + 4 short answer); 20-min timer; auto-score on submit; band estimate; save as `skill: 'reading'`
+  - [x] **Reading Library**: `reading_passages` table; domain selector → "Pick from Library" (random, count badge) or "Generate New" (auto-saves); server actions in `app/actions/reading.ts`; `lib/db/reading.ts` helpers
+  - [x] **Passage formatting**: `PassageParagraphs` renders `\n\n`-separated paragraphs as styled `<p>` elements; hidden separator spans preserve highlight char offsets; inline `\n` rendered as `<br>` in `HighlightedText`
+- [x] **3.3b — Speaking Part 1 Topic Selector**: `speaking_topics` table (rank, name, description, exampleQuestions jsonb); 10 topics seeded (`pnpm db:seed:speaking-topics`); `IELTS_PART1_EXAMINER_PROMPT` → function accepting optional topic; topic grid in `SpeakingChat` (toggle-select; preview panel; mixed session when none selected); topic sent in `useChat body` on every request
 - [ ] **3.4 — Listening Simulator**: `/listening` + `POST /api/listening/script` — AI generates 2-person tech conversation with 8–10 note-completion gaps; browser TTS (`SpeechSynthesis`, 2 voices) reads it aloud; play/pause/replay (2 plays max); user fills blanks; auto-score; save as `skill: 'listening'`
 
 ---
