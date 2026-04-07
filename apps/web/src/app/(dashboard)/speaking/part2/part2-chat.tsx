@@ -9,6 +9,7 @@ import { TimerControl } from '@/components/timer-control'
 import { TimerAlertModal } from '@/components/timer-alert-modal'
 import { FeedbackView } from '@/components/feedback-view'
 import { VocabularyDrawer } from '@/components/vocabulary-drawer'
+import { MicInput } from '@/components/mic-input'
 import { useTimer } from '@/lib/ielts/timer/use-timer'
 import type { TranscriptMessage, FeedbackResult } from '@/lib/db/schema'
 import type { Message } from 'ai'
@@ -201,24 +202,13 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
 
           {stage === 'speaking' && (
             <>
-              <form onSubmit={handleSubmit} className="flex gap-2">
-                <input
-                  data-testid="user-input"
-                  value={input}
-                  onChange={handleInputChange}
-                  placeholder="Type your response…"
-                  disabled={isLoading}
-                  className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-blue-500 disabled:opacity-50"
-                />
-                <button
-                  data-testid="send-btn"
-                  type="submit"
-                  disabled={isLoading || !input.trim()}
-                  className="rounded-lg bg-blue-600 px-5 py-2 text-sm text-white font-semibold hover:bg-blue-700 disabled:opacity-40"
-                >
-                  Send
-                </button>
-              </form>
+              <MicInput
+                value={input}
+                onChange={(v) => handleInputChange({ target: { value: v } } as React.ChangeEvent<HTMLInputElement>)}
+                onSubmit={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)}
+                disabled={isLoading}
+                placeholder="Type or speak your response…"
+              />
               <button
                 onClick={handleEndSession}
                 disabled={isSaving || isLoading || visibleMessages.length < 1}

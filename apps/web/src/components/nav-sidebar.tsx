@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation'
 
 const NAV_ITEMS = [
   { href: '/', label: 'Dashboard', icon: '⊞' },
-  { href: '/speaking', label: 'Speaking Pt 1', icon: '🎙' },
+  { href: '/speaking/session', label: 'Speaking (Full)', icon: '🎙' },
+  { href: '/speaking', label: 'Speaking Pt 1', icon: '🎤' },
   { href: '/speaking/part2', label: 'Speaking Pt 2', icon: '🎤' },
   { href: '/writing', label: 'Writing', icon: '✍' },
   { href: '/vocabulary', label: 'Vocabulary', icon: '📚' },
@@ -23,7 +24,7 @@ export function NavSidebar() {
 
       <nav className="flex flex-col gap-1">
         {NAV_ITEMS.map(({ href, label, icon }) => {
-          const active = href === '/' ? pathname === '/' : pathname.startsWith(href)
+          const active = href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
           return (
             <Link
               key={href}
