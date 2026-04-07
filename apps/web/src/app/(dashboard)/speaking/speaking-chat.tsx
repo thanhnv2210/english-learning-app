@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { saveExam, updateExamTranscript, saveFeedback } from '@/app/actions/exam'
 import { TimerControl } from '@/components/timer-control'
 import { FeedbackView } from '@/components/feedback-view'
+import { VocabularyDrawer } from '@/components/vocabulary-drawer'
 import { useTimer } from '@/lib/ielts/timer/use-timer'
 import type { TranscriptMessage, FeedbackResult } from '@/lib/db/schema'
 import type { Message } from 'ai'
@@ -198,6 +199,13 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5 }
                   </button>
                 </div>
               )}
+
+              <VocabularyDrawer
+                text={visibleMessages
+                  .filter((m) => m.role === 'user')
+                  .map((m) => m.content)
+                  .join(' ')}
+              />
             </div>
           )}
         </div>

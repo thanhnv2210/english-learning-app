@@ -29,7 +29,9 @@
       "Bash(brew services:*)",
       "Bash(ollama list:*)",
       "Bash(npx tsc:*)",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(grep -E \"\\\\.tsx$\")",
+      "Bash(ls:*)"
     ]
   }
 }

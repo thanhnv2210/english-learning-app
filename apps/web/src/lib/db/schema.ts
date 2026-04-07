@@ -98,6 +98,49 @@ export const examTags = pgTable(
   (t) => [primaryKey({ columns: [t.examId, t.tagId] })]
 )
 
+// ─── Vocabulary word catalogue ────────────────────────────────────────────────
+
+export type VocabWordFamily = {
+  noun?: string | null
+  verb?: string | null
+  adjective?: string | null
+  adverb?: string | null
+}
+
+export type VocabSynonym = {
+  word: string
+  type: 'synonym' | 'antonym'
+}
+
+export type VocabExamples = {
+  speaking: string
+  writing: [string, string]
+}
+
+export const vocabularyWords = pgTable('vocabulary_words', {
+  id: serial('id').primaryKey(),
+  word: text('word').notNull().unique(),
+  definition: text('definition').notNull(),
+  familyWords: jsonb('family_words').notNull().$type<VocabWordFamily>(),
+  synonyms: jsonb('synonyms').notNull().$type<VocabSynonym[]>(),
+  collocations: jsonb('collocations').notNull().$type<string[]>(),
+  examples: jsonb('examples').notNull().$type<VocabExamples>(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
+export const vocabularyWordDomains = pgTable(
+  'vocabulary_word_domains',
+  {
+    wordId: integer('word_id')
+      .notNull()
+      .references(() => vocabularyWords.id, { onDelete: 'cascade' }),
+    domainId: integer('domain_id')
+      .notNull()
+      .references(() => writingDomains.id, { onDelete: 'cascade' }),
+  },
+  (t) => [primaryKey({ columns: [t.wordId, t.domainId] })]
+)
+
 // ─── Writing domain catalogue ─────────────────────────────────────────────────
 
 export const writingDomains = pgTable('writing_domains', {
@@ -145,6 +188,16 @@ export const examTagsRelations = relations(examTags, ({ one }) => ({
 
 export const writingDomainsRelations = relations(writingDomains, ({ many }) => ({
   userPreferences: many(userDomainPreferences),
+  vocabularyWordDomains: many(vocabularyWordDomains),
+}))
+
+export const vocabularyWordsRelations = relations(vocabularyWords, ({ many }) => ({
+  domains: many(vocabularyWordDomains),
+}))
+
+export const vocabularyWordDomainsRelations = relations(vocabularyWordDomains, ({ one }) => ({
+  word: one(vocabularyWords, { fields: [vocabularyWordDomains.wordId], references: [vocabularyWords.id] }),
+  domain: one(writingDomains, { fields: [vocabularyWordDomains.domainId], references: [writingDomains.id] }),
 }))
 
 export const userDomainPreferencesRelations = relations(userDomainPreferences, ({ one }) => ({

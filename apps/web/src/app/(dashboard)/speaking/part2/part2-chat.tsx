@@ -8,6 +8,7 @@ import { generateAndSaveCueCard } from '@/app/actions/cue-card'
 import { TimerControl } from '@/components/timer-control'
 import { TimerAlertModal } from '@/components/timer-alert-modal'
 import { FeedbackView } from '@/components/feedback-view'
+import { VocabularyDrawer } from '@/components/vocabulary-drawer'
 import { useTimer } from '@/lib/ielts/timer/use-timer'
 import type { TranscriptMessage, FeedbackResult } from '@/lib/db/schema'
 import type { Message } from 'ai'
@@ -263,6 +264,15 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
                 View in History →
               </button>
             </div>
+          )}
+
+          {stage === 'ended' && (
+            <VocabularyDrawer
+              text={visibleMessages
+                .filter((m) => m.role === 'user')
+                .map((m) => m.content)
+                .join(' ')}
+            />
           )}
         </div>
       )}

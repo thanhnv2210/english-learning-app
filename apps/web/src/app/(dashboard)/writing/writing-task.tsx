@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import { generateWritingTopic } from '@/app/actions/writing'
 import { saveExam, saveFeedback } from '@/app/actions/exam'
 import { FeedbackView } from '@/components/feedback-view'
+import { VocabularyDrawer } from '@/components/vocabulary-drawer'
 import type { FeedbackResult } from '@/lib/db/schema'
 import type { AuditResult } from '@/app/api/writing/audit/route'
-import type { VocabResult } from '@/app/api/writing/vocabulary/route'
 
 type Stage =
   | 'select'
@@ -17,7 +17,6 @@ type Stage =
   | 'writing'
   | 'pass1'
   | 'pass2'
-  | 'pass3'
   | 'done'
 
 type GapCriterion = {
@@ -48,7 +47,6 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
 
   // ── Pass results ──
   const [audit, setAudit] = useState<AuditResult | null>(null)
-  const [vocab, setVocab] = useState<VocabResult | null>(null)
   const [scoreStream, setScoreStream] = useState('')
   const [feedback, setFeedback] = useState<FeedbackResult | null>(null)
 
@@ -134,18 +132,8 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
     const auditData: AuditResult = await auditRes.json()
     setAudit(auditData)
 
-    // Pass 2 — Vocabulary Analysis
+    // Pass 2 — Band Scoring (streamed)
     setStage('pass2')
-    const vocabRes = await fetch('/api/writing/vocabulary', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ essay, topic }),
-    })
-    const vocabData: VocabResult = await vocabRes.json()
-    setVocab(vocabData)
-
-    // Pass 3 — Scoring (streamed)
-    setStage('pass3')
     setScoreStream('')
     const full = await streamToState(
       '/api/writing/score',
@@ -200,7 +188,6 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
     setOutline({ introduction: '', body1: '', body2: '', conclusion: '' })
     setOutlineCritique('')
     setAudit(null)
-    setVocab(null)
     setScoreStream('')
     setFeedback(null)
     setGapStream('')
@@ -370,7 +357,7 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
       )}
 
       {/* ── Multi-pass progress ── */}
-      {(stage === 'pass1' || stage === 'pass2' || stage === 'pass3') && (
+      {(stage === 'pass1' || stage === 'pass2') && (
         <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-6">
           <p className="text-sm font-semibold text-gray-800">Evaluating your essay</p>
 
@@ -381,17 +368,12 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
               result={audit ? `${audit.wordCount} words · ${audit.paragraphCount} paragraphs · Task fulfilled: ${audit.taskFulfilled ? 'Yes' : 'No'}` : undefined}
             />
             <PassRow
-              label="Pass 2 — Vocabulary Analysis"
-              status={stage === 'pass1' ? 'waiting' : stage === 'pass2' ? 'running' : 'done'}
-              result={vocab ? `${vocab.informalWords.length} suggestion${vocab.informalWords.length !== 1 ? 's' : ''}` : undefined}
-            />
-            <PassRow
-              label="Pass 3 — Band Scoring"
-              status={stage === 'pass3' ? 'running' : 'waiting'}
+              label="Pass 2 — Band Scoring"
+              status={stage === 'pass1' ? 'waiting' : 'running'}
             />
           </div>
 
-          {stage === 'pass3' && scoreStream && (
+          {stage === 'pass2' && scoreStream && (
             <pre className="max-h-48 overflow-y-auto rounded-lg bg-gray-50 p-3 font-mono text-xs text-gray-600 whitespace-pre-wrap">
               {scoreStream}
             </pre>
@@ -419,9 +401,6 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
             </pre>
           )}
 
-          {/* Pass 2: vocabulary */}
-          {vocab && <VocabPanel vocab={vocab} />}
-
           {/* Gap analysis (on-demand) */}
           {feedback && (
             <GapPanel
@@ -433,19 +412,22 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
             />
           )}
 
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={handleReset}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-600 transition-colors hover:bg-gray-50"
-            >
-              New Essay
-            </button>
-            <button
-              onClick={() => router.push('/history')}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-600 transition-colors hover:bg-gray-50"
-            >
-              View in History →
-            </button>
+          <div className="flex items-center justify-between">
+            <VocabularyDrawer text={essay} />
+            <div className="flex gap-2">
+              <button
+                onClick={handleReset}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-600 transition-colors hover:bg-gray-50"
+              >
+                New Essay
+              </button>
+              <button
+                onClick={() => router.push('/history')}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-600 transition-colors hover:bg-gray-50"
+              >
+                View in History →
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -525,33 +507,6 @@ function AuditPanel({ audit }: { audit: AuditResult }) {
   )
 }
 
-function VocabPanel({ vocab }: { vocab: VocabResult }) {
-  if (vocab.informalWords.length === 0) {
-    return (
-      <div className="rounded-xl border border-gray-200 bg-white p-5">
-        <p className="text-sm font-semibold text-gray-800">Vocabulary</p>
-        <p className="mt-1 text-xs text-green-600">No informal words detected — strong academic register.</p>
-      </div>
-    )
-  }
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5">
-      <p className="mb-3 text-sm font-semibold text-gray-800">Vocabulary Replacer</p>
-      <div className="flex flex-col gap-2">
-        {vocab.informalWords.map(({ word, suggestion, reason }, i) => (
-          <div key={i} className="flex items-start gap-3 rounded-lg bg-gray-50 px-3 py-2">
-            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-              <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-mono text-red-700">{word}</span>
-              <span className="text-xs text-gray-400">→</span>
-              <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs font-mono text-green-700">{suggestion}</span>
-            </div>
-            <p className="mt-0.5 text-xs text-gray-400 max-w-xs">{reason}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 function GapPanel({
   gapResult,
