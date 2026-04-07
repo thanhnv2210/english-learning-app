@@ -31,7 +31,18 @@
       "Bash(npx tsc:*)",
       "Bash(xargs kill:*)",
       "Bash(grep -E \"\\\\.tsx$\")",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(cat '/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/speaking/part2/part2-chat.tsx')",
+      "Bash(cat '/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/vocabulary/vocabulary-list.tsx')",
+      "Bash(grep -r \"stt\\\\|speech.to.text\\\\|whisper\\\\|STT\" /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/ --include=*.ts --include=*.tsx)",
+      "Bash(grep:*)",
+      "Bash(curl -s -o /dev/null -w \"speaking/session: %{http_code}\\\\n\" http://localhost:3000/speaking/session)",
+      "Bash(curl -s -o /dev/null -w \"speaking \\(pt1\\): %{http_code}\\\\n\" http://localhost:3000/speaking)",
+      "Bash(curl -s -o /dev/null -w \"speaking/part2: %{http_code}\\\\n\" http://localhost:3000/speaking/part2)",
+      "Bash(curl -s -o /dev/null -w \"vocabulary: %{http_code}\\\\n\" http://localhost:3000/vocabulary)",
+      "Bash(curl -s -o /dev/null -w \"history: %{http_code}\\\\n\" http://localhost:3000/history)",
+      "Bash(curl:*)"
     ]
   }
 }
