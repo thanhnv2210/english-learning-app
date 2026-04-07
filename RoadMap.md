@@ -13,11 +13,50 @@
 - [x] **Unified Speaking Flow**: `/speaking/session` — single state machine (`idle → part1 → part2_generating → part2_prep → part2_speaking → part3 → ended`); Part 3 examiner prompt added; existing `/speaking` and `/speaking/part2` routes retained as standalone entry points
 - [x] **Vocabulary Builder**: AWL-based `VocabularyDrawer` integrated into all speaking sessions; post-session panel surfaces informal→academic word swaps
 
-## Phase 3: The "Target Switcher" (Weeks 6-10)
-*Goal: Add flexibility for different goals (IELTS 7.5, TOEFL, etc.).*
-- [ ] **Dynamic Scoring Profiles**: Refactor the evaluator to load different prompt templates based on the user's target.
-- [ ] **Reading/Listening Modules**: Add practice for technical whitepapers or dev podcasts with IELTS-style comprehension questions.
-- [ ] **Progress Analytics**: A dashboard showing "Distance to 6.5" across all 4 skills.
+## Phase 3: Complete the 4 Skills + Analytics (Weeks 6-10)
+*Goal: Full IELTS coverage — add Reading and Listening, show progress against target, expose the Target Switcher.*
+- [ ] **Progress Analytics**: `/analytics` dashboard — rolling band average per skill per criterion, trend over time, "Distance to target" summary
+- [ ] **Target Switcher UI**: `/settings` page — profile selector (`IELTS_6.5`, `IELTS_7.5`, `Business_Fluent`); update `users.targetProfile` via server action; load different prompt templates per profile
+- [ ] **Reading Module**: AI-generated tech-themed IELTS passages (~750 words) with 10–13 questions (T/F/NG, matching headings, short answer); 20-min timer; auto-scoring; saved to history as `skill: 'reading'`
+- [ ] **Listening Simulator**: AI-generated tech conversation transcript; browser TTS (`SpeechSynthesis`) reads it aloud; user completes note-completion blanks during/after playback; auto-scored; saved to history as `skill: 'listening'`
+
+## Phase 3 Sprint Tasks
+
+### Task 3.1 — Progress Analytics Dashboard
+- New route `/analytics`
+- Query all `mockExams` rows that have a `feedback` JSON blob
+- Compute per-skill rolling averages: overall band + per-criterion band (last 5 sessions)
+- UI: summary cards ("Speaking avg 6.0 · target 6.5 · gap −0.5") + per-criterion breakdown table
+- No charting library needed in MVP — plain table with colour-coded gap badges (same green/amber/red logic as `FeedbackView`)
+- Show session count and date of last practice per skill
+
+### Task 3.2 — Target Switcher UI
+- New route `/settings`
+- Profile options: `IELTS_6.5` (current), `IELTS_7.5`, `Business_Fluent`
+- Server action updates `users.targetProfile` in DB; page re-renders with new value
+- `Business_Fluent` requires a new feedback prompt framing: drop band-score language, focus on professional register, clarity, and conciseness
+- Nav sidebar: add "Settings" link at bottom (above the Target badge)
+- Target badge in sidebar footer reads the live DB value, not a hardcoded string
+
+### Task 3.3 — Reading Module
+- New route `/reading`
+- `POST /api/reading/passage` — AI generates a 700–900 word tech-themed passage (System Design, AI ethics, Automation, Cybersecurity) with 10–13 IELTS-style questions:
+  - True / False / Not Given (5–6 questions)
+  - Matching headings (3–4 questions)
+  - Short answer — no more than 3 words (2–3 questions)
+- 20-minute countdown timer (`useTimer`); alert at 0 with option to submit anyway
+- User selects/types answers; on submit: auto-score against answer key returned by AI; compute band estimate from % correct
+- Structured output schema: `{ passage, questions: { type, question, answer }[], totalBand }`
+- Save to history as `skill: 'reading'`; `FeedbackView` renders reading criteria (Understanding Main Ideas, Detail, Inference)
+
+### Task 3.4 — Listening Simulator
+- New route `/listening`
+- `POST /api/listening/script` — AI generates a 2-person tech conversation (e.g., engineer explaining a system to a PM) as a structured transcript with 8–10 note-completion gaps marked
+- Browser TTS (`window.speechSynthesis`) reads the transcript aloud — two voices (voice 0 = Speaker A, voice 1 = Speaker B) using `SpeechSynthesisUtterance`; no external API required
+- UI: note-completion form with blank fields; user fills in during or after playback
+- Playback controls: Play / Pause / Replay (the full transcript can be played twice, matching real IELTS rules)
+- On submit: compare user answers against gap key (case-insensitive, trim); score + band estimate
+- Save to history as `skill: 'listening'`
 
 ## Phase 4: Release & Community
 - [ ] **Peer Review Mode**: Let other "Tech Guys" review each other's practice essays.
