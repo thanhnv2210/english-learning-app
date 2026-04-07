@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useTransition, useCallback } from 'react'
+import { useState, useRef, useTransition, useCallback, Fragment } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveExam, saveFeedback } from '@/app/actions/exam'
 import { savePassageToLibrary, pickRandomPassage } from '@/app/actions/reading'
@@ -55,23 +55,91 @@ function HighlightedText({
   onRemove: (id: string) => void
 }) {
   const segs = buildSegments(text, highlights)
-  return (
-    <>
-      {segs.map((seg, i) =>
+  const nodes: React.ReactNode[] = []
+  let key = 0
+  for (const seg of segs) {
+    // Handle single \n within a segment as a line break
+    const lines = seg.text.split('\n')
+    lines.forEach((line, lineIdx) => {
+      if (lineIdx > 0) nodes.push(<br key={`br-${key++}`} />)
+      if (!line) return
+      nodes.push(
         seg.highlightId ? (
           <mark
-            key={i}
+            key={key++}
             onClick={() => onRemove(seg.highlightId!)}
             className="bg-yellow-200 text-gray-900 rounded-sm px-0.5 cursor-pointer hover:bg-red-100 transition-colors"
             title="Click to remove"
           >
-            {seg.text}
+            {line}
           </mark>
         ) : (
-          <span key={i}>{seg.text}</span>
+          <span key={key++}>{line}</span>
         )
-      )}
-    </>
+      )
+    })
+  }
+  return <>{nodes}</>
+}
+
+// Splits passage into paragraphs for visual formatting while preserving char offsets.
+// Hidden zero-size spans hold the \n\n separator text so document.createRange() still
+// returns the correct string length when computing highlight offsets.
+function PassageParagraphs({
+  text,
+  highlights,
+  onRemove,
+}: {
+  text: string
+  highlights: Highlight[]
+  onRemove: (id: string) => void
+}) {
+  const normalized = text.replace(/\r\n?/g, '\n')
+  // Split preserving separators so we can track exact offsets
+  const parts = normalized.split(/(\n{2,})/)
+
+  const paragraphs: { text: string; start: number; separator: string }[] = []
+  let offset = 0
+  for (const part of parts) {
+    if (/^\n+$/.test(part)) {
+      // separator — will be rendered as a hidden span
+      if (paragraphs.length > 0) {
+        paragraphs[paragraphs.length - 1] = { ...paragraphs[paragraphs.length - 1], separator: part }
+      }
+      offset += part.length
+    } else if (part) {
+      paragraphs.push({ text: part, start: offset, separator: '' })
+      offset += part.length
+    }
+  }
+
+  return (
+    <div>
+      {paragraphs.map((para, i) => {
+        const paraEnd = para.start + para.text.length
+        const localHighlights = highlights
+          .filter((h) => h.start < paraEnd && h.end > para.start)
+          .map((h) => ({
+            ...h,
+            start: Math.max(0, h.start - para.start),
+            end: Math.min(para.text.length, h.end - para.start),
+          }))
+
+        return (
+          <Fragment key={i}>
+            <p className={i < paragraphs.length - 1 ? 'mb-5' : ''}>
+              <HighlightedText text={para.text} highlights={localHighlights} onRemove={onRemove} />
+            </p>
+            {/* Invisible separator preserves char offsets in range.toString() calculations */}
+            {para.separator && (
+              <span aria-hidden="true" style={{ fontSize: 0, lineHeight: 0, display: 'inline' }}>
+                {para.separator}
+              </span>
+            )}
+          </Fragment>
+        )
+      })}
+    </div>
   )
 }
 
@@ -412,7 +480,7 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
             onMouseUp={handlePassageMouseUp}
             className={`flex-1 overflow-y-auto px-6 py-5 text-sm text-gray-800 leading-7 select-text ${highlightMode ? 'cursor-text' : 'cursor-default'}`}
           >
-            <HighlightedText
+            <PassageParagraphs
               text={passage.passage}
               highlights={passageHighlights}
               onRemove={(id) => setPassageHighlights((prev) => prev.filter((h) => h.id !== id))}
