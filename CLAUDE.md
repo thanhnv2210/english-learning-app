@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Phase 1 and Phase 2 complete. Phase 3 (Target Switcher, Reading/Listening, Analytics) is next. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, and `docs/adr/` for architecture decision records.
+Phase 1, 2, and partial Phase 3 complete. Done so far in Phase 3: Reading Module (with library, highlight system, paragraph formatting) and Speaking Part 1 topic selector. Still pending: Target Switcher UI, Progress Analytics, Listening Simulator. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, and `docs/adr/` for architecture decision records.
 
 ## Tech Stack
 
@@ -32,15 +32,20 @@ english-learning-app/
 │       ├── app/
 │       │   ├── (auth)/                   # Sign-in / sign-up pages
 │       │   ├── (dashboard)/
-│       │   │   ├── speaking/             # Part 1 standalone
+│       │   │   ├── speaking/             # Part 1 standalone (topic selector + chat)
 │       │   │   │   └── part2/            # Part 2 standalone
 │       │   │   │   └── session/          # Unified full session (Phase 2)
 │       │   │   ├── writing/              # Writing Task 2
+│       │   │   ├── reading/              # Reading module (Phase 3)
 │       │   │   ├── vocabulary/           # AWL browser
 │       │   │   └── history/              # Session history
+│       │   ├── actions/
+│       │   │   ├── exam.ts               # saveExam, saveFeedback server actions
+│       │   │   └── reading.ts            # savePassageToLibrary, pickRandomPassage
 │       │   └── api/                      # Backend API routes (BFF)
-│       │       ├── chat/                 # POST — examiner streaming (Part 1/2/3)
+│       │       ├── chat/                 # POST — examiner streaming (Part 1/2/3 + topic)
 │       │       ├── feedback/             # POST — post-session band scoring
+│       │       ├── reading/passage/      # POST — generate IELTS reading passage (JSON)
 │       │       ├── vocabulary/lookup/    # POST — informal→academic word swaps
 │       │       └── writing/             # POST — multi-pass auditor (6 routes)
 │       ├── components/                   # Shared React components
@@ -51,9 +56,12 @@ english-learning-app/
 │       │   └── feedback-view.tsx         # Per-criterion band score display
 │       ├── lib/
 │       │   ├── db/                       # PostgreSQL client & query helpers
+│       │   │   ├── reading.ts            # saveReadingPassage, getRandomPassageByDomain, getLibraryCounts
+│       │   │   └── speaking.ts           # getAllSpeakingTopics
 │       │   └── ielts/                    # Core domain logic (no Next.js imports)
-│       │       ├── examiner/             # Part 1, Part 2, Part 3 prompts + feedback
+│       │       ├── examiner/             # Part 1 (fn+topic), Part 2, Part 3 prompts + feedback
 │       │       ├── feedback/             # filler-detector.ts (Phase 2)
+│       │       ├── reading/              # prompts.ts — passage prompt, scoreReading, estimateBand
 │       │       ├── timer/               # use-timer.ts, use-speech-input.ts (Phase 2)
 │       │       └── vocabulary/          # AWL prompts, DB queries
 │       └── types/                        # App-local TypeScript types
@@ -73,14 +81,24 @@ pnpm install                          # install all workspaces
 
 # From apps/web/
 pnpm dev                              # next dev --turbo (configured in apps/web/package.json)
+pnpm dev:clean                        # rm -rf .next && next dev --turbo  ← use when cache is stale
 pnpm build                            # production build
 pnpm lint                             # ESLint
 
-# Docker (PostgreSQL)
+# Schema
+pnpm db:push                          # push schema changes to ielts_dev
+
+# Seeds
+pnpm db:seed:domains                  # writing_domains (50 rows)
+pnpm db:seed:vocabulary               # vocabulary_words
+pnpm db:seed:speaking-topics          # speaking_topics (10 rows)
+
+# Docker (PostgreSQL — not used; app uses local Homebrew instance)
 docker compose -f docker/docker-compose.yml up -d
 ```
 
 > `next dev` without `--turbo` must not be used for local development (M1 memory constraint).
+> If you see "Internal Server Error" on first page load, run `pnpm dev:clean` to clear the stale `.next` cache.
 
 ## Architecture
 
@@ -89,15 +107,26 @@ docker compose -f docker/docker-compose.yml up -d
 **IELTS Evaluation Engine** (`IELTS_Examiner` system prompt)
 - Acts as a strict examiner (no helping the user, enforces transitions)
 - Grades against four criteria; targets "controlled complexity" at Band 6.5 (encourages complex structures even with minor errors)
-- Prompts: `IELTS_PART1_EXAMINER_PROMPT`, `IELTS_PART2_EXAMINER_PROMPT(cueCard)`, `IELTS_PART3_EXAMINER_PROMPT(cueCard)` — all in `lib/ielts/examiner/`
+- Prompts: `IELTS_PART1_EXAMINER_PROMPT(topic?)`, `IELTS_PART2_EXAMINER_PROMPT(cueCard)`, `IELTS_PART3_EXAMINER_PROMPT(cueCard)` — all in `lib/ielts/examiner/`
+- `IELTS_PART1_EXAMINER_PROMPT` is a function; optional `topic` arg focuses the examiner on a specific subject with example questions; no arg = mixed topics
 - `TargetProfile` schema supports switching between `IELTS_6.5`, `IELTS_7.5`, `Business_Fluent` (Phase 3)
 
-**Speaking Simulator** (Phase 1 + 2 complete)
+**Speaking Simulator** (Phase 1 + 2 complete; Phase 3 topic selector added)
 - Unified session at `/speaking/session`: state machine `idle → part1 → part2_generating → part2_prep → part2_speaking → part3 → ended`
 - STT via Chrome Web Speech API (`useSpeechInput` hook) — no API key required
 - Filler detection (`filler-detector.ts`): regex scan post-session, shown as amber badges with discourse marker tips
-- Standalone routes `/speaking` (Part 1) and `/speaking/part2` (Part 2) preserved for focused practice
+- Standalone `/speaking` (Part 1) shows a topic selector grid before session start; 10 topics from `speaking_topics` DB table ordered by rank; toggle-select (deselect = mixed session); preview shows example questions; topic passed via `useChat body` → server prompt rebuilt per request
+- Standalone `/speaking/part2` preserved for focused Part 2 practice
 - Evaluation: Fluency & Coherence, Lexical Resource, Grammatical Range & Accuracy, Pronunciation
+
+**Reading Module** (Phase 3 complete)
+- Route `/reading`; API `POST /api/reading/passage` (uses `generateText`, not streaming — needs full JSON)
+- Stage machine: `select → options → generating/loading → reading → submitted`
+- Domain selection → two options: "Pick from Library" (random from `reading_passages` table) or "Generate New" (auto-saves to library)
+- `reading_passages` table: `id`, `title`, `domain`, `passage`, `questions` (jsonb `ReadingQuestionRow[]`); `getLibraryCounts()` returns count per domain for badge display
+- Side-by-side layout: passage left (flex-55), questions right (flex-45), full viewport height
+- Highlight system: passage uses global char offsets; questions use per-question local offsets; `PassageParagraphs` renders `\n\n`-separated paragraphs as `<p>` elements with hidden zero-size separator spans to preserve `document.createRange()` offset accuracy
+- 6 T/F/NG + 4 short-answer questions; auto-scored; band estimated; saved as `skill: 'reading'`
 
 **Writing Evaluator** (multi-pass grading, Phase 1.5 complete)
 - Pass 1: `POST /api/writing/audit` — structural check (`AuditResult`)
@@ -130,7 +159,7 @@ docker compose -f docker/docker-compose.yml up -d
 | 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
-| 3 | 6–10 | Pending | Target Switcher, Reading/Listening, Progress Analytics |
+| 3 | 6–10 | 🔄 In progress | Reading Module ✅ · Speaking Topic Selector ✅ · Target Switcher ⬜ · Analytics ⬜ · Listening ⬜ |
 | 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.

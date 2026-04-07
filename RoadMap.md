@@ -45,6 +45,17 @@
 - 20-minute `useTimer`; results shown per-question (✓/✗ + correct answer on miss)
 - `FeedbackResult` built from score and saved via `saveFeedback`; rendered with `FeedbackView`
 - Saved to history as `skill: 'reading'`
+- **Reading Library** (extended): `reading_passages` DB table; domain selector → two options ("Pick from Library" random, "Generate New" auto-saves); `libraryCounts` badge on library card; server actions `savePassageToLibrary` / `pickRandomPassage`
+- **Passage formatting**: `PassageParagraphs` component splits on `\n\n` → proper `<p>` elements with spacing; hidden zero-size separator spans preserve char offsets for highlight range calculations; `HighlightedText` handles inline `\n` as `<br>`
+- **Highlight system**: passage (global offsets) + questions (per-question local offsets); yellow `<mark>` click-to-remove; single toggle applies to both panels; "Clear (N)" button
+
+### Task 3.3b — Speaking Part 1 Topic Selector ✅
+- `speaking_topics` DB table: `id`, `rank` (unique), `name`, `description`, `exampleQuestions` (jsonb `string[]`)
+- 10 seeded topics ordered by IELTS frequency; seed script at `lib/db/seeds/speaking-topics.ts` (`pnpm db:seed:speaking-topics`)
+- `IELTS_PART1_EXAMINER_PROMPT` refactored from constant → function accepting optional `{ name, description, exampleQuestions }` topic; without topic the examiner covers a mixed set
+- `/api/chat` route extracts `topic` from request body and passes to prompt function
+- `SpeakingChat` topic grid: 2–4 column responsive; toggle-select (click again to deselect = mixed session); preview panel shows 4 example questions for selected topic; hidden when resuming a saved session
+- `useChat body` carries `{ topic }` on every request so the system prompt is always rebuilt server-side with the correct focus
 
 ### Task 3.4 — Listening Simulator
 - New route `/listening`
