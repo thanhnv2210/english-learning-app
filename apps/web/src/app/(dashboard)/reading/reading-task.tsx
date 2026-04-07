@@ -3,6 +3,7 @@
 import { useState, useRef, useTransition, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveExam, saveFeedback } from '@/app/actions/exam'
+import { savePassageToLibrary, pickRandomPassage } from '@/app/actions/reading'
 import { TimerControl } from '@/components/timer-control'
 import { FeedbackView } from '@/components/feedback-view'
 import { useTimer } from '@/lib/ielts/timer/use-timer'
@@ -77,12 +78,12 @@ function HighlightedText({
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 type Domain = { id: number; name: string; description: string }
-type Props = { domains: Domain[]; targetBand?: number }
-type Stage = 'select' | 'generating' | 'reading' | 'submitted'
+type Props = { domains: Domain[]; targetBand?: number; libraryCounts?: Record<string, number> }
+type Stage = 'select' | 'options' | 'generating' | 'loading' | 'reading' | 'submitted'
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export function ReadingTask({ domains, targetBand = 6.5 }: Props) {
+export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: Props) {
   const router = useRouter()
   const timer = useTimer(20 * 60)
 
@@ -107,7 +108,7 @@ export function ReadingTask({ domains, targetBand = 6.5 }: Props) {
 
   const totalHighlights = passageHighlights.length + questionHighlights.length
 
-  // ── Generate ───────────────────────────────────────────────────────────────
+  // ── Generate (new passage → auto-save to library) ──────────────────────────
 
   async function handleGenerate() {
     if (!selectedDomain) return
@@ -118,9 +119,33 @@ export function ReadingTask({ domains, targetBand = 6.5 }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ domain: selectedDomain.name }),
     })
-    if (!res.ok) { setError('Failed to generate passage. Please try again.'); setStage('select'); return }
+    if (!res.ok) { setError('Failed to generate passage. Please try again.'); setStage('options'); return }
     const data: ReadingPassage = await res.json()
+    // Auto-save to library
+    await savePassageToLibrary({
+      title: data.title,
+      domain: selectedDomain.name,
+      passage: data.passage,
+      questions: data.questions.map((q) => ({ id: q.id, type: q.type, question: q.question, answer: q.answer })),
+    })
     setPassage(data)
+    setStage('reading')
+    timer.start()
+  }
+
+  // ── Pick random from library ────────────────────────────────────────────────
+
+  async function handlePickRandom() {
+    if (!selectedDomain) return
+    setStage('loading')
+    setError(null)
+    const found = await pickRandomPassage(selectedDomain.name)
+    if (!found) {
+      setError('No passages in the library for this domain yet. Generate one first.')
+      setStage('options')
+      return
+    }
+    setPassage({ title: found.title, passage: found.passage, questions: found.questions as ReadingQuestion[] })
     setStage('reading')
     timer.start()
   }
@@ -202,17 +227,22 @@ export function ReadingTask({ domains, targetBand = 6.5 }: Props) {
     })
   }
 
-  // ── Domain selector & generating ──────────────────────────────────────────
+  // ── Domain selector, options, generating, loading ─────────────────────────
 
-  if (stage === 'select' || stage === 'generating') {
+  if (stage === 'select' || stage === 'options' || stage === 'generating' || stage === 'loading') {
     return (
       <div className="mx-auto flex max-w-2xl flex-col gap-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Reading</h1>
           <p className="mt-1 text-sm text-gray-500">
-            {stage === 'select' ? 'Choose a domain to generate a passage.' : 'Generating passage and questions…'}
+            {stage === 'select' && 'Choose a domain to get started.'}
+            {stage === 'options' && `Domain: ${selectedDomain?.name} — how would you like to practice?`}
+            {stage === 'generating' && 'Generating a new passage and questions…'}
+            {stage === 'loading' && 'Loading a passage from the library…'}
           </p>
         </div>
+
+        {/* Step 1 — domain picker */}
         {stage === 'select' && (
           <div className="flex flex-col gap-4">
             {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
@@ -232,17 +262,68 @@ export function ReadingTask({ domains, targetBand = 6.5 }: Props) {
               ))}
             </div>
             <button
-              onClick={handleGenerate}
+              onClick={() => { if (selectedDomain) { setError(null); setStage('options') } }}
               disabled={!selectedDomain}
               className="self-start rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold hover:bg-blue-700 disabled:opacity-40 transition-colors"
             >
-              Generate Passage
+              Next →
             </button>
           </div>
         )}
-        {stage === 'generating' && (
+
+        {/* Step 2 — library vs generate */}
+        {stage === 'options' && (
+          <div className="flex flex-col gap-4">
+            {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {/* Pick from library */}
+              <button
+                onClick={handlePickRandom}
+                className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-5 text-left hover:border-blue-400 hover:shadow-sm transition-all group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl">📚</span>
+                  {(() => {
+                    const count = libraryCounts[selectedDomain?.name ?? ''] ?? 0
+                    return count > 0 ? (
+                      <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                        {count} passage{count !== 1 ? 's' : ''}
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-400">Empty</span>
+                    )
+                  })()}
+                </div>
+                <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-700">Pick from Library</p>
+                <p className="text-xs text-gray-500">Practice with a previously saved passage in this domain.</p>
+              </button>
+
+              {/* Generate new */}
+              <button
+                onClick={handleGenerate}
+                className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-5 text-left hover:border-green-400 hover:shadow-sm transition-all group"
+              >
+                <span className="text-2xl">✨</span>
+                <p className="text-sm font-semibold text-gray-900 group-hover:text-green-700">Generate New</p>
+                <p className="text-xs text-gray-500">Create a fresh passage with AI and save it to the library.</p>
+              </button>
+            </div>
+
+            <button
+              onClick={() => setStage('select')}
+              className="self-start text-xs text-gray-400 hover:text-gray-600 underline transition-colors"
+            >
+              ← Change domain
+            </button>
+          </div>
+        )}
+
+        {/* Spinner for generating / loading */}
+        {(stage === 'generating' || stage === 'loading') && (
           <div className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-16">
-            <p className="text-sm text-gray-400 animate-pulse">Generating passage and questions…</p>
+            <p className="text-sm text-gray-400 animate-pulse">
+              {stage === 'generating' ? 'Generating passage and questions…' : 'Loading from library…'}
+            </p>
           </div>
         )}
       </div>
