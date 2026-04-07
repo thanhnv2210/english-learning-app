@@ -142,6 +142,25 @@ export const vocabularyWordDomains = pgTable(
   (t) => [primaryKey({ columns: [t.wordId, t.domainId] })]
 )
 
+// ─── Reading passage library ──────────────────────────────────────────────────
+
+// Inline type — keeps schema.ts free of lib/ielts imports
+export type ReadingQuestionRow = {
+  id: number
+  type: 'tfng' | 'short_answer'
+  question: string
+  answer: string
+}
+
+export const readingPassages = pgTable('reading_passages', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  domain: text('domain').notNull(),
+  passage: text('passage').notNull(),
+  questions: jsonb('questions').notNull().$type<ReadingQuestionRow[]>(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ─── Writing domain catalogue ─────────────────────────────────────────────────
 
 export const writingDomains = pgTable('writing_domains', {
