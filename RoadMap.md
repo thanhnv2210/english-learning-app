@@ -8,10 +8,10 @@
 
 ## Phase 2: Speaking & Fluency (Weeks 3-5)
 *Goal: Voice-first practice with filler detection and vocabulary coaching.*
-- [ ] **Voice Input (STT)**: Browser MediaRecorder → audio blob → `POST /api/stt` → Whisper transcription; replaces typed input in speaking sessions
-- [ ] **Hesitation Filler Detection**: Post-transcription scan for `um`, `ah`, `uh`, `like`, `you know`; count + flag per response in session summary
-- [ ] **Unified Speaking Flow**: Single session covering Part 1 → Part 2 (prep + speak) → Part 3; timer-driven transitions replace separate routes
-- [ ] **Vocabulary Builder**: AWL-based sidebar that detects informal/slang words in the user's typed or transcribed response and suggests academic alternatives in real time
+- [x] **Voice Input (STT)**: Web Speech API (`useSpeechInput` hook) — mic button in speaking sessions; real-time interim transcript preview; Chrome-native, no API key required
+- [x] **Hesitation Filler Detection**: Post-transcription regex scan for `um`, `ah`, `uh`, `er`, `like`, `you know`, `basically`, `literally`, `right`; counts per word shown as amber badges in session-end summary with discourse marker tips
+- [x] **Unified Speaking Flow**: `/speaking/session` — single state machine (`idle → part1 → part2_generating → part2_prep → part2_speaking → part3 → ended`); Part 3 examiner prompt added; existing `/speaking` and `/speaking/part2` routes retained as standalone entry points
+- [x] **Vocabulary Builder**: AWL-based `VocabularyDrawer` integrated into all speaking sessions; post-session panel surfaces informal→academic word swaps
 
 ## Phase 3: The "Target Switcher" (Weeks 6-10)
 *Goal: Add flexibility for different goals (IELTS 7.5, TOEFL, etc.).*
@@ -36,7 +36,7 @@
 - [x] **Multi-pass pipeline**: 3 sequential routes replace single evaluate call; UI shows pass-level progress indicators before rendering final `FeedbackResult`
 
 ## Phase 2 Sprint Tasks
-- [ ] **Task 2.1 — STT Integration**: Browser audio capture (MediaRecorder API, WebM/opus) → `POST /api/stt` → Whisper transcription → returned as text; speaking input switches from keyboard to microphone
-- [ ] **Task 2.2 — Filler Detector**: Post-transcription scan using regex; count per response; display in per-turn annotation and session summary; flag discourse marker opportunities
-- [ ] **Task 2.3 — Unified Speaking Session**: Merge Part 1, Part 2, Part 3 into one continuous session flow; `SpeakingSession` state machine drives transitions; separate `/speaking/part1`, `/speaking/part2` routes remain as entry points that resume mid-session
-- [ ] **Task 2.4 — Vocabulary Builder**: Embedded AWL lookup; after each response surface 2–3 words the user used that have a stronger academic equivalent; shown in a non-blocking panel (does not interrupt examiner flow)
+- [x] **Task 2.1 — STT Integration**: `useSpeechInput` hook (Web Speech API); `MicInput` component with mic toggle + interim text display; integrated into Part 1, Part 2, and unified session
+- [x] **Task 2.2 — Filler Detector**: `lib/ielts/feedback/filler-detector.ts` — regex scan, per-word counts, total; amber panel with filler badges and discourse marker suggestions shown at session end
+- [x] **Task 2.3 — Unified Speaking Session**: `SpeakingSession` state machine at `/speaking/session`; Part 3 examiner prompt (`IELTS_PART3_EXAMINER_PROMPT`) added; `/api/chat` updated to support `mode=part3`; filler summary + vocabulary drawer integrated into ended stage
+- [x] **Task 2.4 — Vocabulary Builder**: `VocabularyDrawer` integrated post-session in all three speaking routes; real-time word swap suggestions via `/api/vocabulary/lookup`

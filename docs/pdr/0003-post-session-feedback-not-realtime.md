@@ -15,7 +15,7 @@ Option A provides faster iteration but breaks the examination context entirely. 
 
 ## Decision
 
-Use **Option B (post-session)**. The `FeedbackGenerator` (`POST /api/feedback`) is called only when the user deliberately ends the session and requests it. The feedback modal (in `history-view.tsx`) and the inline panel (in `speaking-chat.tsx` / `part2-chat.tsx` / `writing-task.tsx`) are the only surfaces where feedback is displayed.
+Use **Option B (post-session)**. The `FeedbackGenerator` (`POST /api/feedback`) is called only when the user deliberately ends the session and requests it. The feedback modal (in `history-view.tsx`) and the inline panel (in `speaking-chat.tsx` / `part2-chat.tsx` / `speaking-session.tsx` / `writing-task.tsx`) are the only surfaces where feedback is displayed.
 
 The feedback shape is a structured `FeedbackResult`:
 

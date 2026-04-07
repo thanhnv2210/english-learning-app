@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Next.js 15 scaffolded in `apps/web/`; ready for Phase 1 feature work. See `Discussion.md` for the full project vision and IELTS 6.5 objective. See `RoadMap.md` for the sprint breakdown and `docs/adr/` for architecture decision records.
+Phase 1 and Phase 2 complete. Phase 3 (Target Switcher, Reading/Listening, Analytics) is next. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, and `docs/adr/` for architecture decision records.
 
 ## Tech Stack
 
@@ -30,24 +30,35 @@ english-learning-app/
 ├── apps/
 │   └── web/src/
 │       ├── app/
-│       │   ├── (auth)/              # Sign-in / sign-up pages
-│       │   ├── (dashboard)/         # writing/, speaking/, vocabulary/
-│       │   └── api/                 # Backend API routes (BFF)
-│       │       ├── evaluate/        # POST — writing scorer
-│       │       ├── speaking/        # POST — speaking session
-│       │       └── writing/         # POST — multi-pass auditor
-│       ├── components/              # Shared React components
+│       │   ├── (auth)/                   # Sign-in / sign-up pages
+│       │   ├── (dashboard)/
+│       │   │   ├── speaking/             # Part 1 standalone
+│       │   │   │   └── part2/            # Part 2 standalone
+│       │   │   │   └── session/          # Unified full session (Phase 2)
+│       │   │   ├── writing/              # Writing Task 2
+│       │   │   ├── vocabulary/           # AWL browser
+│       │   │   └── history/              # Session history
+│       │   └── api/                      # Backend API routes (BFF)
+│       │       ├── chat/                 # POST — examiner streaming (Part 1/2/3)
+│       │       ├── feedback/             # POST — post-session band scoring
+│       │       ├── vocabulary/lookup/    # POST — informal→academic word swaps
+│       │       └── writing/             # POST — multi-pass auditor (6 routes)
+│       ├── components/                   # Shared React components
+│       │   ├── mic-input.tsx             # Mic button + interim transcript (Phase 2)
+│       │   ├── vocabulary-drawer.tsx     # AWL word-swap sidebar
+│       │   ├── timer-control.tsx         # Live countdown + toggle
+│       │   ├── timer-alert-modal.tsx     # Fires at timer=0
+│       │   └── feedback-view.tsx         # Per-criterion band score display
 │       ├── lib/
-│       │   ├── ai/                  # AI SDK client & prompt templates
-│       │   ├── db/                  # PostgreSQL client & query helpers
-│       │   └── ielts/               # Core domain logic (no Next.js imports)
-│       │       ├── examiner/        # IELTS_Examiner prompt & protocol
-│       │       ├── feedback/        # FeedbackGenerator, gap analysis
-│       │       ├── timer/           # TimerService, part transitions
-│       │       └── vocabulary/      # AWL matcher, Vocabulary Replacer
-│       └── types/                   # App-local TypeScript types
+│       │   ├── db/                       # PostgreSQL client & query helpers
+│       │   └── ielts/                    # Core domain logic (no Next.js imports)
+│       │       ├── examiner/             # Part 1, Part 2, Part 3 prompts + feedback
+│       │       ├── feedback/             # filler-detector.ts (Phase 2)
+│       │       ├── timer/               # use-timer.ts, use-speech-input.ts (Phase 2)
+│       │       └── vocabulary/          # AWL prompts, DB queries
+│       └── types/                        # App-local TypeScript types
 ├── packages/
-│   └── shared/src/types/            # TargetProfile, FeedbackSchema (cross-workspace)
+│   └── shared/src/types/                 # TargetProfile, FeedbackSchema (cross-workspace)
 ├── docs/adr/
 └── docker/docker-compose.yml
 ```
@@ -71,48 +82,55 @@ docker compose -f docker/docker-compose.yml up -d
 
 > `next dev` without `--turbo` must not be used for local development (M1 memory constraint).
 
-## Planned Architecture
+## Architecture
 
 ### Core Modules
 
 **IELTS Evaluation Engine** (`IELTS_Examiner` system prompt)
 - Acts as a strict examiner (no helping the user, enforces transitions)
 - Grades against four criteria; targets "controlled complexity" at Band 6.5 (encourages complex structures even with minor errors)
-- `TargetProfile` schema must support switching between `IELTS_6.5`, `IELTS_7.5`, `Business_Fluent`
+- Prompts: `IELTS_PART1_EXAMINER_PROMPT`, `IELTS_PART2_EXAMINER_PROMPT(cueCard)`, `IELTS_PART3_EXAMINER_PROMPT(cueCard)` — all in `lib/ielts/examiner/`
+- `TargetProfile` schema supports switching between `IELTS_6.5`, `IELTS_7.5`, `Business_Fluent` (Phase 3)
 
-**Speaking Simulator**
-- State machine: `PART_1` → `PART_2_PREP` → `PART_2_SPEAK` → `PART_3`
-- Latency target: < 500ms for Parts 1 & 3
-- STT via Whisper for hesitation filler detection (`um`, `ah`)
-- Evaluation: Fluency (FC), Lexical Resource (LR), Grammatical Range (GRA), Pronunciation (P)
+**Speaking Simulator** (Phase 1 + 2 complete)
+- Unified session at `/speaking/session`: state machine `idle → part1 → part2_generating → part2_prep → part2_speaking → part3 → ended`
+- STT via Chrome Web Speech API (`useSpeechInput` hook) — no API key required
+- Filler detection (`filler-detector.ts`): regex scan post-session, shown as amber badges with discourse marker tips
+- Standalone routes `/speaking` (Part 1) and `/speaking/part2` (Part 2) preserved for focused practice
+- Evaluation: Fluency & Coherence, Lexical Resource, Grammatical Range & Accuracy, Pronunciation
 
-**Writing Evaluator** (multi-pass grading)
-- Pass 1: Structural Audit — word count, paragraph count, task fulfillment
-- Pass 2: Linguistic Analysis — flag simple vocabulary, suggest academic alternatives
-- Pass 3: Scoring & Gap Analysis — assign per-criterion band scores
-- Output: strict JSON schema, e.g. `{ "criterion": "Lexical Resource", "score": 6.5, "suggestions": [...] }`
+**Writing Evaluator** (multi-pass grading, Phase 1.5 complete)
+- Pass 1: `POST /api/writing/audit` — structural check (`AuditResult`)
+- Pass 2: `POST /api/writing/vocabulary` — informal word detection (`VocabResult`)
+- Pass 3: `POST /api/writing/score` — band scoring (streaming `FeedbackResult`)
+- On-demand: `POST /api/writing/gap` — Band 6.5 vs 7.0 gap analysis
+- Drafting Mode: `POST /api/writing/outline` — AI critiques outline before essay unlocks
 
-**Vocabulary Builder**
-- Academic Word List (AWL) focus, not tech slang
-- Real-time suggestions during technical chat sessions
+**Vocabulary Builder** (Phase 2 complete)
+- `VocabularyDrawer` component — post-session collapsible panel, never blocks examiner flow
+- `POST /api/vocabulary/lookup` — two-pass: detect informal words → fetch/generate academic cards
+- AWL browser at `/vocabulary` — searchable, filterable by domain
 
 **Target Profile System**
-- `user_config.json` stores current goal (hardcoded to `IELTS_6.5` initially)
-- Refactored in Phase 3 to load different prompt templates per target
+- `users.targetProfile` stored in DB; `parseTargetBand()` parses `IELTS_6.5` → `6.5`
+- `targetBand` flows into all feedback prompts
+- Refactored to load different prompt templates per target in Phase 3
 
-### Key Design Decisions (from Discussion.md)
+### Key Design Decisions
 - Use "Band 6.5 vs 7.0 gap analysis" framing in all feedback (not just scores)
-- Writing feedback must include a "Drafting Mode" (outline critique before full essay)
+- Writing feedback includes "Drafting Mode" (outline critique before full essay)
 - Vocabulary Replacer identifies dev-slang and suggests formal IELTS-appropriate equivalents
 - `FeedbackGenerator` runs *after* a session, not during, to maintain examiner strictness
+- Web Speech API (not Whisper) chosen for STT: zero setup, free, native in Chrome
 
 ## Roadmap Summary
 
-| Phase | Weeks | Focus |
-|-------|-------|-------|
-| 1 | 1–2 | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
-| 2 | 3–5 | Speaking simulator, Whisper STT, Vocabulary Builder |
-| 3 | 6–10 | Target Switcher, Reading/Listening, Progress Analytics |
-| 4 | TBD | Peer Review, Official Mock Integration |
+| Phase | Weeks | Status | Focus |
+|-------|-------|--------|-------|
+| 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
+| 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
+| 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
+| 3 | 6–10 | Pending | Target Switcher, Reading/Listening, Progress Analytics |
+| 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
-Phase 1 sprint tasks are detailed in `RoadMap.md` (Tasks 1.1–1.7).
+Full sprint task details in `RoadMap.md` and `TODO.md`.
