@@ -12,7 +12,7 @@ export type WritingDomain = (typeof WRITING_DOMAINS)[number]
 // ─── Topic generation ─────────────────────────────────────────────────────────
 
 export function TOPIC_GENERATION_PROMPT(domain: string): string {
-  return `You are an IELTS Writing Task 2 examiner. Generate one IELTS Task 2 essay question on the topic of "${domain}".
+  return `You are an IELTS Academic Writing Task 2 examiner. Generate one IELTS Academic Task 2 essay question on the topic of "${domain}".
 
 The question must:
 - Be 2–4 sentences long
@@ -40,7 +40,7 @@ Be concise and direct. Flag any logical gaps or IELTS pitfalls (e.g. agreeing th
 
 // ─── Pass 1 — Structural Audit ────────────────────────────────────────────────
 
-export const AUDIT_PROMPT = `You are an IELTS examiner performing a structural audit of a Writing Task 2 essay.
+export const AUDIT_PROMPT = `You are an IELTS Academic examiner performing a structural audit of a Writing Task 2 essay.
 
 Return ONLY valid JSON — no markdown, no explanation:
 {
@@ -54,7 +54,7 @@ Return ONLY valid JSON — no markdown, no explanation:
 
 // ─── Pass 2 — Vocabulary Analysis ────────────────────────────────────────────
 
-export const VOCABULARY_PROMPT = `You are an IELTS examiner analysing vocabulary in a Writing Task 2 essay.
+export const VOCABULARY_PROMPT = `You are an IELTS Academic examiner analysing vocabulary in a Writing Task 2 essay.
 Identify informal words, dev-slang, or basic vocabulary that should be replaced with Academic Word List (AWL) equivalents to improve the Lexical Resource band score.
 
 Return ONLY valid JSON — no markdown, no explanation:
@@ -74,7 +74,7 @@ Limit to the 5 most impactful replacements.`
 // ─── Pass 3 — Scoring ─────────────────────────────────────────────────────────
 
 export function SCORING_PROMPT(targetBand: number): string {
-  return `You are a certified IELTS examiner scoring a Writing Task 2 essay. You have already reviewed its structure and vocabulary in earlier passes.
+  return `You are a certified IELTS Academic examiner scoring a Writing Task 2 essay using official IELTS Academic band descriptors. You have already reviewed its structure and vocabulary in earlier passes.
 
 Target band: ${targetBand}
 
@@ -84,7 +84,7 @@ Return ONLY valid JSON — no markdown, no explanation:
   "targetBand": ${targetBand},
   "criteria": [
     {
-      "criterion": "Task Achievement",
+      "criterion": "Task Response",
       "score": <number>,
       "targetScore": ${targetBand},
       "keyPoints": ["<specific, evidence-based observation>"]
@@ -114,7 +114,7 @@ Return ONLY valid JSON — no markdown, no explanation:
 // ─── Gap Analysis (on-demand) ─────────────────────────────────────────────────
 
 export function GAP_ANALYSIS_PROMPT(targetBand: number): string {
-  return `You are an IELTS examiner explaining exactly what a candidate must change to reach Band ${targetBand}.
+  return `You are an IELTS Academic examiner explaining exactly what a candidate must change to reach Band ${targetBand} on the IELTS Academic test.
 
 You will receive the essay and its current band scores per criterion. For each criterion where the score is below the target, state the precise changes needed — not generic advice.
 

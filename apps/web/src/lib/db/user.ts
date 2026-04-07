@@ -11,7 +11,7 @@ export async function getDefaultUser() {
 
   const [created] = await db
     .insert(users)
-    .values({ email: DEFAULT_EMAIL, targetProfile: 'IELTS_6.5' })
+    .values({ email: DEFAULT_EMAIL, targetProfile: 'IELTS_Academic_6.5' })
     .returning()
 
   await seedDefaultDomains(created.id)

@@ -27,7 +27,7 @@ export type ReadingPassage = {
 
 export function READING_PASSAGE_PROMPT(domain: string): string {
   return `\
-You are an IELTS Reading test setter. Generate a reading passage and questions for a senior software engineer.
+You are an IELTS Academic Reading test setter. Generate a reading passage and questions in the style of the IELTS Academic Reading test, for a senior software engineer.
 
 Domain: ${domain}
 
