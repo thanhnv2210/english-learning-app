@@ -10,20 +10,27 @@ import { VocabularyDrawer } from '@/components/vocabulary-drawer'
 import { MicInput } from '@/components/mic-input'
 import { useTimer } from '@/lib/ielts/timer/use-timer'
 import type { TranscriptMessage, FeedbackResult } from '@/lib/db/schema'
+import type { SpeakingTopic } from '@/lib/db/speaking'
 import type { Message } from 'ai'
 
 type Props = {
   initialMessages?: TranscriptMessage[]
   resumeExamId?: number
   targetBand?: number
+  topics?: SpeakingTopic[]
 }
 
-export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5 }: Props) {
+export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, topics = [] }: Props) {
   const router = useRouter()
   const timer = useTimer(5 * 60) // 5-min session guideline for Part 1
 
+  const [selectedTopic, setSelectedTopic] = useState<SpeakingTopic | null>(null)
+
   const { messages, input, handleInputChange, handleSubmit, isLoading, append } = useChat({
     api: '/api/chat',
+    body: selectedTopic
+      ? { topic: { name: selectedTopic.name, description: selectedTopic.description, exampleQuestions: selectedTopic.exampleQuestions } }
+      : {},
     initialMessages: initialMessages as Message[] | undefined,
   })
 
@@ -100,17 +107,65 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5 }
       </div>
 
       {!started ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-gray-200 bg-white p-10">
-          <p className="text-sm text-gray-500 text-center max-w-sm">
-            The examiner will ask 4–5 questions on everyday and tech topics.
-          </p>
-          <button
-            data-testid="start-btn"
-            onClick={startSession}
-            className="rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold hover:bg-blue-700 active:scale-95 transition-all"
-          >
-            {resumeExamId ? 'Resume Session' : 'Start Session'}
-          </button>
+        <div className="flex flex-col gap-5">
+          {/* Topic selector — skip when resuming a saved session */}
+          {!resumeExamId && topics.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <div>
+                <p className="text-sm font-semibold text-gray-700">Choose a topic</p>
+                <p className="text-xs text-gray-400 mt-0.5">The examiner will focus on this topic. Leave unselected for a mixed session.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                {topics.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setSelectedTopic((prev) => prev?.id === t.id ? null : t)}
+                    className={`rounded-lg border px-3 py-2.5 text-left transition-colors ${
+                      selectedTopic?.id === t.id
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <p className={`text-xs font-semibold leading-snug ${selectedTopic?.id === t.id ? 'text-blue-700' : 'text-gray-800'}`}>
+                      {t.name}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5 line-clamp-2 leading-tight">{t.description}</p>
+                  </button>
+                ))}
+              </div>
+
+              {/* Selected topic preview */}
+              {selectedTopic && (
+                <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
+                  <p className="text-xs font-semibold text-blue-700 mb-1.5">Example questions — {selectedTopic.name}</p>
+                  <ul className="flex flex-col gap-1">
+                    {selectedTopic.exampleQuestions.map((q, i) => (
+                      <li key={i} className="text-xs text-blue-600 flex gap-1.5">
+                        <span className="shrink-0 text-blue-300">·</span>{q}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-gray-200 bg-white p-8">
+            <p className="text-sm text-gray-500 text-center max-w-sm">
+              {selectedTopic
+                ? `The examiner will ask 4–5 questions about "${selectedTopic.name}".`
+                : resumeExamId
+                  ? `Resuming session #${resumeExamId}.`
+                  : 'The examiner will ask 4–5 questions on mixed Part 1 topics.'}
+            </p>
+            <button
+              data-testid="start-btn"
+              onClick={startSession}
+              className="rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold hover:bg-blue-700 active:scale-95 transition-all"
+            >
+              {resumeExamId ? 'Resume Session' : 'Start Session'}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
