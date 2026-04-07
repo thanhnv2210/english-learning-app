@@ -24,6 +24,7 @@ The `IELTS_Examiner` system prompt (`src/lib/ielts/examiner/prompt.ts`) enforces
 3. **No affirmation**: The examiner uses only neutral acknowledgements.
 4. **Strict transitions**: After 4–5 questions (Part 1) or when the timer fires (Part 2), the examiner ends the part with the scripted phrase and does not extend the conversation.
 5. **No topic deviation**: The examiner stays on the cue card topic for Part 2; it does not allow the candidate to redirect.
+6. **Part 3 is analytical, not personal**: `IELTS_PART3_EXAMINER_PROMPT` (`src/lib/ielts/examiner/part2-prompt.ts`) asks society-level questions derived from the Part 2 cue card topic. The examiner conducts 3–4 exchanges then closes with the scripted end phrase. The same no-help, no-correction rules apply.
 
 The `FeedbackGenerator` is the correct place for corrections and suggestions — it runs *after* the session ends, never during.
 

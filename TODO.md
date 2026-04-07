@@ -52,10 +52,10 @@
 
 *Goal: Voice-first practice loop — speak instead of type, detect fillers, surface academic vocabulary alternatives.*
 
-- [ ] **2.1 — STT (Whisper)**: `POST /api/stt` — receives audio blob, runs Whisper transcription, returns `{ text: string }`; browser uses MediaRecorder (WebM/opus); speaking UI swaps keyboard input for a mic button + waveform indicator
-- [ ] **2.2 — Filler Detector**: Post-transcription regex scan for `um`, `ah`, `uh`, `like`, `you know`; annotate each turn with filler count; surface in per-turn badge + session-end summary ("3 fillers detected — try 'In addition' or 'What I mean is'")
-- [ ] **2.3 — Unified Speaking Session**: Single `SpeakingSession` state machine (`PART_1` → `PART_2_PREP` → `PART_2_SPEAK` → `PART_3` → `ENDED`); timer fires trigger automatic transitions; existing Part 1 + Part 2 routes become entry points into the unified flow
-- [ ] **2.4 — Vocabulary Builder**: Embedded AWL wordlist (`src/lib/ielts/vocabulary/awl.ts`); after each transcribed response, diff against AWL to find informal words and suggest 2–3 academic replacements; shown in a collapsible sidebar panel — never blocks the examiner response
+- [x] **2.1 — STT (Web Speech API)**: `useSpeechInput` hook (`lib/ielts/timer/use-speech-input.ts`) wraps Chrome's native Web Speech API; `MicInput` component (mic toggle + interim transcript preview) replaces plain text input in Part 1, Part 2, and unified session
+- [x] **2.2 — Filler Detector**: `lib/ielts/feedback/filler-detector.ts` — regex scan for `um`, `uh`, `ah`, `er`, `like`, `you know`, `basically`, `literally`, `right`; `detectFillers()` returns per-word counts; shown as amber badge panel with discourse marker suggestions at session end
+- [x] **2.3 — Unified Speaking Session**: `SpeakingSession` state machine at `/speaking/session` (`idle → part1 → part2_generating → part2_prep → part2_speaking → part3 → ended`); `IELTS_PART3_EXAMINER_PROMPT` added; `/api/chat` handles `mode=part3`; nav updated with "Speaking (Full)" link; existing `/speaking` and `/speaking/part2` routes preserved
+- [x] **2.4 — Vocabulary Builder**: `VocabularyDrawer` integrated post-session in all speaking routes; `/api/vocabulary/lookup` surfaces informal→academic word swaps; non-blocking collapsible panel
 
 ---
 
