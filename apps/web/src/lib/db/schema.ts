@@ -161,6 +161,16 @@ export const readingPassages = pgTable('reading_passages', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
+// ─── Speaking Part 1 topic catalogue ─────────────────────────────────────────
+
+export const speakingTopics = pgTable('speaking_topics', {
+  id: serial('id').primaryKey(),
+  rank: integer('rank').notNull().unique(),
+  name: text('name').notNull().unique(),
+  description: text('description').notNull(),
+  exampleQuestions: jsonb('example_questions').notNull().$type<string[]>(),
+})
+
 // ─── Writing domain catalogue ─────────────────────────────────────────────────
 
 export const writingDomains = pgTable('writing_domains', {

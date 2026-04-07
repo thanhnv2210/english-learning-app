@@ -42,7 +42,8 @@
       "Bash(curl -s -o /dev/null -w \"speaking/part2: %{http_code}\\\\n\" http://localhost:3000/speaking/part2)",
       "Bash(curl -s -o /dev/null -w \"vocabulary: %{http_code}\\\\n\" http://localhost:3000/vocabulary)",
       "Bash(curl -s -o /dev/null -w \"history: %{http_code}\\\\n\" http://localhost:3000/history)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(dotenv:*)"
     ]
   }
 }

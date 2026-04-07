@@ -213,7 +213,7 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
       setStage('options')
       return
     }
-    setPassage({ title: found.title, passage: found.passage, questions: found.questions as ReadingQuestion[] })
+    setPassage({ title: found.title, domain: found.domain, passage: found.passage, questions: found.questions as ReadingQuestion[] })
     setStage('reading')
     timer.start()
   }
@@ -666,7 +666,7 @@ function ShortAnswerRow({ q, value, onChange, result, correctAnswer, disabled, h
         className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-blue-500 disabled:bg-white disabled:text-gray-600 select-none"
       />
       {correctAnswer && result === false && (
-        <p className="text-xs text-red-600 font-medium select-none">Correct: "{correctAnswer}"</p>
+        <p className="text-xs text-red-600 font-medium select-none">Correct: &ldquo;{correctAnswer}&rdquo;</p>
       )}
     </div>
   )

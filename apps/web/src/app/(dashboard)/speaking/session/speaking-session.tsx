@@ -305,12 +305,12 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
               <div className="flex flex-wrap gap-2">
                 {fillers.map((f) => (
                   <span key={f.word} className="rounded-full bg-amber-100 px-3 py-1 text-xs text-amber-700 font-medium">
-                    "{f.word}" ×{f.count}
+                    &ldquo;{f.word}&rdquo; ×{f.count}
                   </span>
                 ))}
               </div>
               <p className="mt-2 text-xs text-amber-600">
-                Tip: Replace fillers with discourse markers like "Furthermore,", "In addition,", or a brief pause.
+                Tip: Replace fillers with discourse markers like &ldquo;Furthermore,&rdquo; &ldquo;In addition,&rdquo; or a brief pause.
               </p>
             </div>
           )}
