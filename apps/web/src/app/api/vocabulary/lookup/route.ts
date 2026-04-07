@@ -1,0 +1,79 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { generateText } from 'ai'
+import { createOllama } from 'ollama-ai-provider'
+import { findWords } from '@/lib/db/vocabulary'
+import { VOCAB_DETECTION_PROMPT, VOCAB_CARD_PROMPT } from '@/lib/ielts/vocabulary/prompts'
+import type { VocabularyCard } from '@/lib/db/vocabulary'
+
+const ollama = createOllama({ baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434' })
+const MODEL = process.env.OLLAMA_MODEL ?? 'qwen2.5-coder:7b'
+
+type DetectedWord = { original: string; academic: string }
+
+export async function POST(req: NextRequest) {
+  const { text } = await req.json()
+  if (!text || typeof text !== 'string' || !text.trim()) {
+    return NextResponse.json({ words: [] })
+  }
+
+  // ── Step 1: AI detects improvable words ──────────────────────────────────────
+  let detected: DetectedWord[] = []
+  try {
+    const { text: raw } = await generateText({
+      model: ollama(MODEL),
+      prompt: VOCAB_DETECTION_PROMPT(text),
+    })
+    const match = raw.match(/\{[\s\S]*\}/)
+    if (match) {
+      const parsed = JSON.parse(match[0]) as { words: DetectedWord[] }
+      detected = parsed.words ?? []
+    }
+  } catch {
+    return NextResponse.json({ words: [] })
+  }
+
+  if (detected.length === 0) return NextResponse.json({ words: [] })
+
+  // ── Step 2: DB lookup for all academic words ──────────────────────────────────
+  const academicWords = detected.map((d) => d.academic)
+  const dbHits = await findWords(academicWords)
+
+  // ── Step 3: AI fallback for DB misses ────────────────────────────────────────
+  const cards: VocabularyCard[] = []
+
+  for (const { original, academic } of detected) {
+    const dbCard = dbHits.get(academic.toLowerCase())
+
+    if (dbCard) {
+      cards.push({ ...dbCard, originalWord: original })
+      continue
+    }
+
+    // AI-generate a card for words not in DB
+    try {
+      const { text: raw } = await generateText({
+        model: ollama(MODEL),
+        prompt: VOCAB_CARD_PROMPT(academic, original),
+      })
+      const match = raw.match(/\{[\s\S]*\}/)
+      if (match) {
+        const parsed = JSON.parse(match[0])
+        cards.push({
+          originalWord: original,
+          word: parsed.word ?? academic,
+          definition: parsed.definition ?? '',
+          familyWords: parsed.familyWords ?? {},
+          synonyms: parsed.synonyms ?? [],
+          collocations: parsed.collocations ?? [],
+          examples: parsed.examples ?? { speaking: '', writing: ['', ''] },
+          domains: [],
+          source: 'ai',
+        })
+      }
+    } catch {
+      // Skip words where AI card generation fails
+    }
+  }
+
+  return NextResponse.json({ words: cards })
+}
