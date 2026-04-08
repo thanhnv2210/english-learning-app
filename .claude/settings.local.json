@@ -43,7 +43,11 @@
       "Bash(curl -s -o /dev/null -w \"vocabulary: %{http_code}\\\\n\" http://localhost:3000/vocabulary)",
       "Bash(curl -s -o /dev/null -w \"history: %{http_code}\\\\n\" http://localhost:3000/history)",
       "Bash(curl:*)",
-      "Bash(dotenv:*)"
+      "Bash(dotenv:*)",
+      "Bash(lsof -ti:3000 -ti:3001 -ti:3002)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(''''inLibrary:'''', d[''''inLibrary'''']\\); print\\(''''word:'''', d[''''card''''][''''word'''']\\); print\\(''''domains:'''', d[''''card''''][''''domains'''']\\); print\\(''''source:'''', d[''''card''''][''''source'''']\\)\" __NEW_LINE_a6cf5cff5f681f36__ echo \"---\" __NEW_LINE_a6cf5cff5f681f36__ curl -s -X POST http://localhost:3000/api/vocabulary/search -H \"Content-Type: application/json\" -d '{\"\"\"\"word\"\"\"\":\"\"\"\"proliferate\"\"\"\"}')",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(''''inLibrary:'''', d[''''inLibrary'''']\\); print\\(''''word:'''', d[''''card''''][''''word'''']\\); print\\(''''domains:'''', d[''''card''''][''''domains'''']\\); print\\(''''source:'''', d[''''card''''][''''source'''']\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(''''inLibrary:'''', d[''''inLibrary'''']\\); print\\(''''word:'''', d[''''card''''][''''word'''']\\); print\\(''''domains:'''', d[''''card''''][''''domains'''']\\); print\\(''''source:'''', d[''''card''''][''''source'''']\\); print\\(''''definition:'''', d[''''card''''][''''definition''''][:80]\\)\")"
     ]
   }
 }
