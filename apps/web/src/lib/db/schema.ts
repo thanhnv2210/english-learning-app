@@ -161,6 +161,28 @@ export const readingPassages = pgTable('reading_passages', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
+// ─── Listening script library ─────────────────────────────────────────────────
+
+export type ListeningTurn = {
+  speaker: 'A' | 'B'
+  text: string
+}
+
+export type ListeningQuestion = {
+  id: number
+  sentence: string  // e.g. "The team chose ___ as the primary database."
+  answer: string    // 1–3 exact words from the transcript
+}
+
+export const listeningScripts = pgTable('listening_scripts', {
+  id: serial('id').primaryKey(),
+  domain: text('domain').notNull(),
+  title: text('title').notNull(),
+  transcript: jsonb('transcript').notNull().$type<ListeningTurn[]>(),
+  questions: jsonb('questions').notNull().$type<ListeningQuestion[]>(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ─── Speaking Part 1 topic catalogue ─────────────────────────────────────────
 
 export const speakingTopics = pgTable('speaking_topics', {
