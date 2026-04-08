@@ -1,5 +1,6 @@
 import { getAllVocabularyWords } from '@/lib/db/vocabulary'
 import { VocabularyList } from './vocabulary-list'
+import { VocabSearch } from './vocab-search'
 
 export default async function VocabularyPage() {
   const words = await getAllVocabularyWords()
@@ -14,14 +15,16 @@ export default async function VocabularyPage() {
   const generalCount = words.filter((w) => w.domains.length === 0).length
 
   return (
-    <div className="mx-auto max-w-5xl">
-      <div className="mb-6">
+    <div className="mx-auto max-w-5xl flex flex-col gap-8">
+      <div>
         <h1 className="text-2xl font-bold text-gray-900">Academic Word List</h1>
         <p className="mt-1 text-sm text-gray-500">
           {words.length} IELTS Band 6.5 words ·{' '}
           {words.length - generalCount} domain-tagged · {generalCount} general
         </p>
       </div>
+
+      <VocabSearch />
 
       <VocabularyList words={words} domains={domains} />
     </div>

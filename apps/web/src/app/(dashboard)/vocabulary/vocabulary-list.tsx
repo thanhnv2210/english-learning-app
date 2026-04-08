@@ -111,7 +111,7 @@ function FilterChip({
   )
 }
 
-function WordCard({ word }: { word: VocabularyCard }) {
+export function WordCard({ word }: { word: VocabularyCard }) {
   const [expanded, setExpanded] = useState(false)
 
   const synonyms = word.synonyms.filter((s) => s.type === 'synonym').slice(0, 3)

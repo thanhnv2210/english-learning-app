@@ -68,6 +68,49 @@ export async function findWords(words: string[]): Promise<Map<string, Vocabulary
   return result
 }
 
+/** Save a new word to the global library. Returns null if the word already exists. */
+export async function saveVocabularyWord(data: {
+  word: string
+  definition: string
+  familyWords: VocabWordFamily
+  synonyms: VocabSynonym[]
+  collocations: string[]
+  examples: VocabExamples
+  domainNames: string[]
+}): Promise<VocabularyCard | null> {
+  const [row] = await db
+    .insert(vocabularyWords)
+    .values({
+      word: data.word,
+      definition: data.definition,
+      familyWords: data.familyWords,
+      synonyms: data.synonyms,
+      collocations: data.collocations,
+      examples: data.examples,
+    })
+    .onConflictDoNothing()
+    .returning()
+
+  if (!row) return null // word already existed
+
+  // Link to domains (ignore unknown domain names)
+  if (data.domainNames.length > 0) {
+    const domainRows = await db
+      .select({ id: writingDomains.id, name: writingDomains.name })
+      .from(writingDomains)
+      .where(inArray(sql`lower(${writingDomains.name})`, data.domainNames.map((d) => d.toLowerCase())))
+
+    if (domainRows.length > 0) {
+      await db
+        .insert(vocabularyWordDomains)
+        .values(domainRows.map((d) => ({ wordId: row.id, domainId: d.id })))
+        .onConflictDoNothing()
+    }
+  }
+
+  return toCard(row, row.word, data.domainNames, 'db')
+}
+
 async function getDomainsForWord(wordId: number): Promise<string[]> {
   const rows = await db
     .select({ name: writingDomains.name })

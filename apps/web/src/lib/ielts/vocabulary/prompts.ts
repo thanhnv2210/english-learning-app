@@ -30,6 +30,56 @@ Rules:
 }
 
 /**
+ * Generates a full vocabulary card for a user-searched word, including
+ * auto-detected domain tags from the provided list.
+ *
+ * Returns a JSON object matching the VocabularyCard schema + suggestedDomains.
+ */
+export function VOCAB_SEARCH_PROMPT(word: string, availableDomains: string[]): string {
+  return `You are an IELTS Academic vocabulary expert. Generate a comprehensive vocabulary card for the word "${word}" as used in IELTS Academic Writing and Speaking.
+
+Also pick 0–3 domains from the list below that this word is most relevant to. Choose only domains where the word is genuinely useful; use an empty array for general academic vocabulary.
+
+Available domains:
+${availableDomains.map((d) => `  - ${d}`).join('\n')}
+
+Return ONLY valid JSON — no markdown, no explanation:
+{
+  "word": "${word}",
+  "definition": "<one clear, simple definition suitable for a non-native speaker>",
+  "familyWords": {
+    "noun": "<noun form or null>",
+    "verb": "<verb form or null>",
+    "adjective": "<adjective form or null>",
+    "adverb": "<adverb form or null>"
+  },
+  "synonyms": [
+    { "word": "<synonym 1>", "type": "synonym" },
+    { "word": "<synonym 2>", "type": "synonym" },
+    { "word": "<synonym 3>", "type": "synonym" },
+    { "word": "<antonym>", "type": "antonym" }
+  ],
+  "collocations": [
+    "<collocation 1>",
+    "<collocation 2>",
+    "<collocation 3>",
+    "<collocation 4>",
+    "<collocation 5>"
+  ],
+  "examples": {
+    "speaking": "<one natural conversational sentence an IELTS candidate might say>",
+    "writing": [
+      "<formal IELTS Writing Task 2 sentence>",
+      "<another formal IELTS Writing Task 2 sentence>"
+    ]
+  },
+  "suggestedDomains": ["<domain name from the list above>"]
+}
+
+Ensure all examples are realistic for IELTS Band 6–7 level.`
+}
+
+/**
  * Generates a full vocabulary card for a word that is not in the database.
  *
  * Returns a JSON object matching the VocabularyCard schema.
