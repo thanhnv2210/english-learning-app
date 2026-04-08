@@ -69,7 +69,13 @@
   - [x] **Reading Library**: `reading_passages` table; domain selector → "Pick from Library" (random, count badge) or "Generate New" (auto-saves); server actions in `app/actions/reading.ts`; `lib/db/reading.ts` helpers
   - [x] **Passage formatting**: `PassageParagraphs` renders `\n\n`-separated paragraphs as styled `<p>` elements; hidden separator spans preserve highlight char offsets; inline `\n` rendered as `<br>` in `HighlightedText`
 - [x] **3.3b — Speaking Part 1 Topic Selector**: `speaking_topics` table (rank, name, description, exampleQuestions jsonb); 10 topics seeded (`pnpm db:seed:speaking-topics`); `IELTS_PART1_EXAMINER_PROMPT` → function accepting optional topic; topic grid in `SpeakingChat` (toggle-select; preview panel; mixed session when none selected); topic sent in `useChat body` on every request
-- [ ] **3.4 — Listening Simulator**: `/listening` + `POST /api/listening/script` — AI generates 2-person tech conversation with 8–10 note-completion gaps; browser TTS (`SpeechSynthesis`, 2 voices) reads it aloud; play/pause/replay (2 plays max); user fills blanks; auto-score; save as `skill: 'listening'`
+- [x] **3.4 — Listening Simulator**: `/listening` + `POST /api/listening/script` — AI generates 2-person tech conversation with 8 note-completion gaps; browser TTS (`SpeechSynthesis`, 2 voices) reads it aloud; play/pause/replay (2 plays max, matching IELTS rules); note-completion answered during or after playback; auto-score; save as `skill: 'listening'`
+  - [x] `listening_scripts` DB table + `lib/db/listening.ts` helpers + `app/actions/listening.ts` server actions
+  - [x] `lib/ielts/listening/prompts.ts`: `LISTENING_SCRIPT_PROMPT`, `scoreListening`, `estimateBand`
+  - [x] `POST /api/listening/script` route (thin handler — validates → calls prompt → parses → returns)
+  - [x] `listening-task.tsx`: full stage machine (`select → options → generating|loading → listening → submitted`)
+  - [x] Nav sidebar: Listening link (🎧) added after Reading
+  - See [PDR-0008](./docs/pdr/0008-listening-simulator-design.md)
 
 ---
 

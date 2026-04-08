@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Phase 1, 2, and partial Phase 3 complete. Done so far in Phase 3: Reading Module (with library, highlight system, paragraph formatting) and Speaking Part 1 topic selector. Still pending: Target Switcher UI, Progress Analytics, Listening Simulator. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, and `docs/adr/` for architecture decision records.
+Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module (library, highlight system, paragraph formatting), Speaking Part 1 topic selector, Listening Simulator, and Vocabulary Search. Still pending: Target Switcher UI, Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
 
 ## Tech Stack
 
@@ -41,12 +41,16 @@ english-learning-app/
 │       │   │   └── history/              # Session history
 │       │   ├── actions/
 │       │   │   ├── exam.ts               # saveExam, saveFeedback server actions
-│       │   │   └── reading.ts            # savePassageToLibrary, pickRandomPassage
+│       │   │   ├── reading.ts            # savePassageToLibrary, pickRandomPassage
+│       │   │   ├── listening.ts          # saveScriptToLibrary, pickRandomScript
+│       │   │   └── vocabulary.ts         # addWordToLibrary
 │       │   └── api/                      # Backend API routes (BFF)
 │       │       ├── chat/                 # POST — examiner streaming (Part 1/2/3 + topic)
 │       │       ├── feedback/             # POST — post-session band scoring
 │       │       ├── reading/passage/      # POST — generate IELTS reading passage (JSON)
+│       │       ├── listening/script/     # POST — generate listening transcript + questions (JSON)
 │       │       ├── vocabulary/lookup/    # POST — informal→academic word swaps
+│       │       ├── vocabulary/search/    # POST — search/generate full vocabulary card
 │       │       └── writing/             # POST — multi-pass auditor (6 routes)
 │       ├── components/                   # Shared React components
 │       │   ├── mic-input.tsx             # Mic button + interim transcript (Phase 2)
@@ -57,13 +61,16 @@ english-learning-app/
 │       ├── lib/
 │       │   ├── db/                       # PostgreSQL client & query helpers
 │       │   │   ├── reading.ts            # saveReadingPassage, getRandomPassageByDomain, getLibraryCounts
-│       │   │   └── speaking.ts           # getAllSpeakingTopics
+│       │   │   ├── listening.ts          # saveListeningScript, getRandomScriptByDomain, getListeningLibraryCounts
+│       │   │   ├── speaking.ts           # getAllSpeakingTopics
+│       │   │   └── vocabulary.ts         # findWord, saveVocabularyWord
 │       │   └── ielts/                    # Core domain logic (no Next.js imports)
 │       │       ├── examiner/             # Part 1 (fn+topic), Part 2, Part 3 prompts + feedback
 │       │       ├── feedback/             # filler-detector.ts (Phase 2)
 │       │       ├── reading/              # prompts.ts — passage prompt, scoreReading, estimateBand
+│       │       ├── listening/            # prompts.ts — LISTENING_SCRIPT_PROMPT, scoreListening, estimateBand
 │       │       ├── timer/               # use-timer.ts, use-speech-input.ts (Phase 2)
-│       │       └── vocabulary/          # AWL prompts, DB queries
+│       │       └── vocabulary/          # AWL prompts, DB queries, VOCAB_SEARCH_PROMPT
 │       └── types/                        # App-local TypeScript types
 ├── packages/
 │   └── shared/src/types/                 # TargetProfile, FeedbackSchema (cross-workspace)
@@ -135,10 +142,23 @@ docker compose -f docker/docker-compose.yml up -d
 - On-demand: `POST /api/writing/gap` — Band 6.5 vs 7.0 gap analysis
 - Drafting Mode: `POST /api/writing/outline` — AI critiques outline before essay unlocks
 
-**Vocabulary Builder** (Phase 2 complete)
+**Listening Simulator** (Phase 3 complete)
+- Route `/listening`; API `POST /api/listening/script` (uses `generateText` — needs full JSON)
+- Stage machine: `select → options → generating | loading → listening → submitted`
+- Domain selection → "Pick from Library" or "Generate New" (auto-saves to `listening_scripts` table)
+- `listening_scripts` table: `id`, `domain`, `title`, `transcript` (jsonb `ListeningTurn[]`), `questions` (jsonb `ListeningQuestion[]`)
+- `ListeningTurn`: `{ speaker: 'A' | 'B', text: string }`; `ListeningQuestion`: `{ id, sentence, answer }` (sentence has `___` gap)
+- Browser TTS: `window.speechSynthesis`; 2 English voices selected per-speaker; pitch fallback if only 1 voice available; max 2 plays (real IELTS rule)
+- Note-completion form: each question split on `___` → `<span>before</span><input/><span>after</span>`
+- Answers accepted during or after playback; submit scores case-insensitive trimmed comparison
+- `scoreListening` + `estimateBand` in `lib/ielts/listening/prompts.ts`; saved as `skill: 'listening'`
+- See [PDR-0008](./docs/pdr/0008-listening-simulator-design.md) for design rationale
+
+**Vocabulary Builder** (Phase 2 + Phase 3 extensions complete)
 - `VocabularyDrawer` component — post-session collapsible panel, never blocks examiner flow
 - `POST /api/vocabulary/lookup` — two-pass: detect informal words → fetch/generate academic cards
 - AWL browser at `/vocabulary` — searchable, filterable by domain
+- **Vocabulary Search** (Phase 3): `VocabSearch` component + `POST /api/vocabulary/search`; checks DB first (`findWord`), falls back to AI generation (`VOCAB_SEARCH_PROMPT`); auto-detects domains from known list; "Add to Library" button for AI-generated cards; already-saved words show read-only
 
 **Target Profile System**
 - `users.targetProfile` stored in DB; `parseTargetBand()` parses `IELTS_6.5` → `6.5`
@@ -159,7 +179,7 @@ docker compose -f docker/docker-compose.yml up -d
 | 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
-| 3 | 6–10 | 🔄 In progress | Reading Module ✅ · Speaking Topic Selector ✅ · Target Switcher ⬜ · Analytics ⬜ · Listening ⬜ |
+| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Target Switcher ⬜ · Analytics ⬜ |
 | 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.

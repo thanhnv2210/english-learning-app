@@ -18,7 +18,7 @@
 - [ ] **Progress Analytics**: `/analytics` dashboard — rolling band average per skill per criterion, trend over time, "Distance to target" summary
 - [ ] **Target Switcher UI**: `/settings` page — profile selector (`IELTS_6.5`, `IELTS_7.5`, `Business_Fluent`); update `users.targetProfile` via server action; load different prompt templates per profile
 - [x] **Reading Module**: AI-generated tech-themed IELTS passages (~750 words) with 10–13 questions (T/F/NG, matching headings, short answer); 20-min timer; auto-scoring; saved to history as `skill: 'reading'`
-- [ ] **Listening Simulator**: AI-generated tech conversation transcript; browser TTS (`SpeechSynthesis`) reads it aloud; user completes note-completion blanks during/after playback; auto-scored; saved to history as `skill: 'listening'`
+- [x] **Listening Simulator**: AI-generated tech conversation transcript; browser TTS (`SpeechSynthesis`) reads it aloud; user completes note-completion blanks during/after playback; auto-scored; saved to history as `skill: 'listening'`
 
 ## Phase 3 Sprint Tasks
 
@@ -57,14 +57,16 @@
 - `SpeakingChat` topic grid: 2–4 column responsive; toggle-select (click again to deselect = mixed session); preview panel shows 4 example questions for selected topic; hidden when resuming a saved session
 - `useChat body` carries `{ topic }` on every request so the system prompt is always rebuilt server-side with the correct focus
 
-### Task 3.4 — Listening Simulator
-- New route `/listening`
-- `POST /api/listening/script` — AI generates a 2-person tech conversation (e.g., engineer explaining a system to a PM) as a structured transcript with 8–10 note-completion gaps marked
-- Browser TTS (`window.speechSynthesis`) reads the transcript aloud — two voices (voice 0 = Speaker A, voice 1 = Speaker B) using `SpeechSynthesisUtterance`; no external API required
-- UI: note-completion form with blank fields; user fills in during or after playback
-- Playback controls: Play / Pause / Replay (the full transcript can be played twice, matching real IELTS rules)
-- On submit: compare user answers against gap key (case-insensitive, trim); score + band estimate
-- Save to history as `skill: 'listening'`
+### Task 3.4 — Listening Simulator ✅
+- Route `/listening`; API `POST /api/listening/script`
+- AI generates a Section 3-style 2-person tech conversation: Speaker A (engineer) + Speaker B (PM); 10–14 turns, 250–350 words; 8 note-completion questions with exact 1–3 word answers verbatim from the transcript
+- **Library pattern** (mirrors Reading): `listening_scripts` DB table; domain selector → "Pick from Library" (random, count badge) or "Generate New" (auto-saves); server actions in `app/actions/listening.ts`; `lib/db/listening.ts` helpers
+- **Browser TTS** (`window.speechSynthesis`): `pickVoices()` selects 2 English voices for A/B; pitch variation fallback if only 1 voice found; utterances queued per turn; `cancelledRef` used for clean mid-speech cancellation; 2-play max enforced client-side
+- **Note-completion UI**: each question's sentence split on `___` → rendered as `<span>before</span><input/><span>after</span>`; answers accepted during or after playback; submit enabled after ≥ 1 play
+- `scoreListening(questions, userAnswers)`: case-insensitive trimmed string comparison; `estimateBand(correct, total)`: 90%→7.5, 80%→7.0, 70%→6.5, 60%→6.0, 50%→5.5, else 5.0
+- Results: per-question correct/incorrect indicators; transcript revealed post-submit; saved as `skill: 'listening'` via `saveFeedback`
+- Nav sidebar updated: Listening link (🎧) added after Reading
+- See [PDR-0008](./docs/pdr/0008-listening-simulator-design.md) for design rationale
 
 ## Phase 4: Release & Community
 - [ ] **Peer Review Mode**: Let other "Tech Guys" review each other's practice essays.
