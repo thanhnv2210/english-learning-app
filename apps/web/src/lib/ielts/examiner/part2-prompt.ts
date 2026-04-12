@@ -19,9 +19,20 @@ Rules:
 5. Never offer corrections, suggestions, or feedback during the session.`
 }
 
-export const CUE_CARD_GENERATION_PROMPT = `\
+export function CUE_CARD_GENERATION_PROMPT(topic?: {
+  name: string
+  description: string
+  examplePrompts: string[]
+}): string {
+  const topicInstruction = topic
+    ? `The cue card must fall within this topic category: "${topic.name}" (${topic.description}).
+Here are example cue card prompts in this category for reference — do NOT copy them verbatim, generate a fresh one:
+${topic.examplePrompts.map((p, i) => `Example ${i + 1}:\n${p}`).join('\n\n')}`
+    : 'The topic must be tech-adjacent: system design decisions, debugging challenges, remote work, AI tools, open-source contributions, or mentoring experiences.'
+
+  return `\
 Generate one IELTS Part 2 speaking cue card for a senior software engineer.
-The topic must be tech-adjacent: system design decisions, debugging challenges, remote work, AI tools, open-source contributions, or mentoring experiences.
+${topicInstruction}
 
 Return ONLY the cue card text using this exact format (no extra text, no markdown):
 
@@ -31,6 +42,7 @@ You should say:
   - [bullet point 2]
   - [bullet point 3]
 And explain [final reflective point about impact or lessons learned].`
+}
 
 export function IELTS_PART3_EXAMINER_PROMPT(cueCardTopic: string) {
   return `\

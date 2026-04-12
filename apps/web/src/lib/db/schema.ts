@@ -193,6 +193,21 @@ export const speakingTopics = pgTable('speaking_topics', {
   exampleQuestions: jsonb('example_questions').notNull().$type<string[]>(),
 })
 
+// ─── Speaking Part 2 topic catalogue ─────────────────────────────────────────
+// Seed-managed via: pnpm db:seed:speaking-part2-topics
+// TODO: Replace seed-based management with an Admin UI once user/role-based
+//       access control is implemented (Phase 4+). The admin panel should allow
+//       authorised users to reorder, edit, and add Part 2 topic categories
+//       without a code deploy.
+
+export const speakingPart2Topics = pgTable('speaking_part2_topics', {
+  id: serial('id').primaryKey(),
+  rank: integer('rank').notNull().unique(),
+  name: text('name').notNull().unique(),
+  description: text('description').notNull(),
+  examplePrompts: jsonb('example_prompts').notNull().$type<string[]>(),
+})
+
 // ─── Writing domain catalogue ─────────────────────────────────────────────────
 
 export const writingDomains = pgTable('writing_domains', {

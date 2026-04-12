@@ -13,7 +13,8 @@
     "db:generate": "dotenv -e .env.local -- drizzle-kit generate",
     "db:seed:domains": "dotenv -e .env.local -- tsx src/lib/db/seeds/writing-domains.ts",
     "db:seed:vocabulary": "dotenv -e .env.local -- tsx src/lib/db/seeds/vocabulary-words.ts",
-    "db:seed:speaking-topics": "dotenv -e .env.local -- tsx src/lib/db/seeds/speaking-topics.ts"
+    "db:seed:speaking-topics": "dotenv -e .env.local -- tsx src/lib/db/seeds/speaking-topics.ts",
+    "db:seed:speaking-part2-topics": "dotenv -e .env.local -- tsx src/lib/db/seeds/speaking-part2-topics.ts"
   },
   "dependencies": {
     "ai": "^4",

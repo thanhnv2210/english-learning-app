@@ -5,6 +5,7 @@ import { useRef, useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveExam, updateExamTranscript, saveFeedback } from '@/app/actions/exam'
 import { generateAndSaveCueCard } from '@/app/actions/cue-card'
+import type { SpeakingPart2Topic } from '@/lib/db/speaking'
 import { TimerControl } from '@/components/timer-control'
 import { TimerAlertModal } from '@/components/timer-alert-modal'
 import { FeedbackView } from '@/components/feedback-view'
@@ -21,16 +22,18 @@ type Props = {
   resumeExamId?: number
   initialCueCard?: CueCard
   targetBand?: number
+  topics?: SpeakingPart2Topic[]
 }
 
-type Stage = 'idle' | 'generating' | 'prep' | 'speaking' | 'ended'
+type Stage = 'idle' | 'topic-select' | 'generating' | 'prep' | 'speaking' | 'ended'
 
-export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targetBand = 6.5 }: Props) {
+export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targetBand = 6.5, topics = [] }: Props) {
   const router = useRouter()
   const prepTimer = useTimer(60)    // 1-minute prep
   const speakTimer = useTimer(120)  // 2-minute speak
 
   const [stage, setStage] = useState<Stage>(resumeExamId ? 'speaking' : 'idle')
+  const [selectedTopic, setSelectedTopic] = useState<SpeakingPart2Topic | null>(null)
   const [cueCard, setCueCard] = useState<CueCard | undefined>(initialCueCard)
   const [examId, setExamId] = useState<number | undefined>(resumeExamId)
   const [feedback, setFeedback] = useState<FeedbackResult | null>(null)
@@ -48,9 +51,13 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  function handleOpenTopicSelect() {
+    setStage('topic-select')
+  }
+
   async function handleStart() {
     setStage('generating')
-    const card = await generateAndSaveCueCard()
+    const card = await generateAndSaveCueCard(selectedTopic ?? undefined)
     setCueCard(card)
     setStage('prep')
     prepTimer.start()
@@ -136,12 +143,85 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
           <p className="text-sm text-gray-500 text-center max-w-sm">
             The AI will generate a tech-themed cue card. You get 1 minute to prepare, then 2 minutes to speak.
           </p>
-          <button
-            onClick={handleStart}
-            className="rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold hover:bg-blue-700 active:scale-95 transition-all"
-          >
-            Start Part 2
-          </button>
+          <div className="flex gap-3">
+            {topics.length > 0 && (
+              <button
+                onClick={handleOpenTopicSelect}
+                className="rounded-lg border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 active:scale-95 transition-all"
+              >
+                Choose Topic
+              </button>
+            )}
+            <button
+              onClick={handleStart}
+              className="rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold hover:bg-blue-700 active:scale-95 transition-all"
+            >
+              Start Part 2
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Topic selector ── */}
+      {stage === 'topic-select' && (
+        <div className="flex flex-col gap-5">
+          <div>
+            <p className="text-sm font-semibold text-gray-700">Choose a topic category</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              The AI will generate a cue card within this theme. Leave unselected for a random tech topic.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+            {topics.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setSelectedTopic((prev) => prev?.id === t.id ? null : t)}
+                className={`rounded-lg border px-3 py-2.5 text-left transition-colors ${
+                  selectedTopic?.id === t.id
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <p className={`text-xs font-semibold leading-snug ${selectedTopic?.id === t.id ? 'text-blue-700' : 'text-gray-800'}`}>
+                  {t.name}
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5 line-clamp-2 leading-tight">{t.description}</p>
+              </button>
+            ))}
+          </div>
+
+          {/* Selected topic preview */}
+          {selectedTopic && (
+            <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
+              <p className="text-xs font-semibold text-blue-700 mb-1.5">Example cue card — {selectedTopic.name}</p>
+              <p className="text-xs text-blue-600 leading-relaxed whitespace-pre-line">
+                {selectedTopic.examplePrompts[0]}
+              </p>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-6">
+            <p className="text-sm text-gray-500 max-w-xs">
+              {selectedTopic
+                ? `A cue card about "${selectedTopic.name}" will be generated.`
+                : 'No topic selected — a random tech cue card will be generated.'}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setSelectedTopic(null); setStage('idle') }}
+                className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleStart}
+                className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm text-white font-semibold hover:bg-blue-700 active:scale-95 transition-all"
+              >
+                {selectedTopic ? `Start with "${selectedTopic.name}"` : 'Start Part 2'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

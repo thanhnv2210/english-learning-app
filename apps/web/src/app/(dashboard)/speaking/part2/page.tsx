@@ -3,6 +3,7 @@ import { mockExams } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { Part2Chat } from './part2-chat'
 import { getDefaultUser, parseTargetBand } from '@/lib/db/user'
+import { getAllPart2Topics } from '@/lib/db/speaking'
 import type { TranscriptMessage } from '@/lib/db/schema'
 
 export default async function SpeakingPart2Page({
@@ -32,6 +33,7 @@ export default async function SpeakingPart2Page({
 
   const user = await getDefaultUser()
   const targetBand = parseTargetBand(user.targetProfile)
+  const topics = await getAllPart2Topics()
 
   return (
     <Part2Chat
@@ -39,6 +41,7 @@ export default async function SpeakingPart2Page({
       resumeExamId={resumeExamId}
       initialCueCard={initialCueCard}
       targetBand={targetBand}
+      topics={topics}
     />
   )
 }
