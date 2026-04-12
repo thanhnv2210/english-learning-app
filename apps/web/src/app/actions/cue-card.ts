@@ -10,10 +10,14 @@ const ollama = createOllama({
   baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/api',
 })
 
-export async function generateAndSaveCueCard(): Promise<{ id: number; prompt: string }> {
+export async function generateAndSaveCueCard(topic?: {
+  name: string
+  description: string
+  examplePrompts: string[]
+}): Promise<{ id: number; prompt: string }> {
   const { text } = await generateText({
     model: ollama(process.env.OLLAMA_MODEL ?? 'mistral:latest'),
-    prompt: CUE_CARD_GENERATION_PROMPT,
+    prompt: CUE_CARD_GENERATION_PROMPT(topic),
   })
 
   const [cueCard] = await db
