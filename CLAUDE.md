@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module (library, highlight system, paragraph formatting), Speaking Part 1 topic selector, Listening Simulator, and Vocabulary Search. Still pending: Target Switcher UI, Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
+Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module (library, highlight system, paragraph formatting), Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, and Writing Topic Library. Still pending: Target Switcher UI, Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
 
 ## Tech Stack
 
@@ -43,6 +43,7 @@ english-learning-app/
 │       │   │   ├── exam.ts               # saveExam, saveFeedback server actions
 │       │   │   ├── reading.ts            # savePassageToLibrary, pickRandomPassage
 │       │   │   ├── listening.ts          # saveScriptToLibrary, pickRandomScript
+│       │   │   ├── writing.ts            # saveTopicToLibrary, pickRandomTopic, listTopicsByDomain
 │       │   │   └── vocabulary.ts         # addWordToLibrary
 │       │   └── api/                      # Backend API routes (BFF)
 │       │       ├── chat/                 # POST — examiner streaming (Part 1/2/3 + topic)
@@ -51,7 +52,7 @@ english-learning-app/
 │       │       ├── listening/script/     # POST — generate listening transcript + questions (JSON)
 │       │       ├── vocabulary/lookup/    # POST — informal→academic word swaps
 │       │       ├── vocabulary/search/    # POST — search/generate full vocabulary card
-│       │       └── writing/             # POST — multi-pass auditor (6 routes)
+│       │       └── writing/             # POST — multi-pass auditor (6 routes) + topic generation
 │       ├── components/                   # Shared React components
 │       │   ├── mic-input.tsx             # Mic button + interim transcript (Phase 2)
 │       │   ├── vocabulary-drawer.tsx     # AWL word-swap sidebar
@@ -62,6 +63,7 @@ english-learning-app/
 │       │   ├── db/                       # PostgreSQL client & query helpers
 │       │   │   ├── reading.ts            # saveReadingPassage, getRandomPassageByDomain, getLibraryCounts
 │       │   │   ├── listening.ts          # saveListeningScript, getRandomScriptByDomain, getListeningLibraryCounts
+│       │   │   ├── writing.ts            # saveWritingTopic, getRandomTopicByDomain, getTopicsByDomain, getWritingTopicLibraryCounts
 │       │   │   ├── speaking.ts           # getAllSpeakingTopics
 │       │   │   └── vocabulary.ts         # findWord, saveVocabularyWord
 │       │   └── ielts/                    # Core domain logic (no Next.js imports)
@@ -130,23 +132,29 @@ docker compose -f docker/docker-compose.yml up -d
 - Route `/reading`; API `POST /api/reading/passage` (uses `generateText`, not streaming — needs full JSON)
 - Stage machine: `select → options → generating/loading → reading → submitted`
 - Domain selection → two options: "Pick from Library" (random from `reading_passages` table) or "Generate New" (auto-saves to library)
-- `reading_passages` table: `id`, `title`, `domain`, `passage`, `questions` (jsonb `ReadingQuestionRow[]`); `getLibraryCounts()` returns count per domain for badge display
+- `reading_passages` table: `id`, `title`, `domain`, `passage`, `questions` (jsonb `ReadingQuestionRow[]`), `rank`; `getLibraryCounts()` returns count per domain for badge display
 - Side-by-side layout: passage left (flex-55), questions right (flex-45), full viewport height
 - Highlight system: passage uses global char offsets; questions use per-question local offsets; `PassageParagraphs` renders `\n\n`-separated paragraphs as `<p>` elements with hidden zero-size separator spans to preserve `document.createRange()` offset accuracy
 - 6 T/F/NG + 4 short-answer questions; auto-scored; band estimated; saved as `skill: 'reading'`
 
-**Writing Evaluator** (multi-pass grading, Phase 1.5 complete)
+**Writing Evaluator** (multi-pass grading, Phase 1.5 complete; topic library added Phase 3)
+- **Topic Library**: `writing_topics` table — `id`, `domain`, `prompt`, `taskType`, `rank`, `createdAt`; stage machine `select → options → (library | generating | loading) → (drafting | writing) → ...`
+- Topic source: "Pick from Library" (browse by domain, select specific topic) or "Generate New" (`POST /api/writing/topic` — auto-saves, returns `{ prompt, taskType }`)
+- Topic variety: `TOPIC_GENERATION_PROMPT` randomly picks task type + domain-specific angle at call time to prevent repeated outputs
+- `task_type` values: `opinion | discussion | problem_solution | two_part`; displayed as badge on topic card throughout session
+- Back navigation available from `options` → `select`, `library` → `options`, `writing`/`drafting` → `options`
 - Pass 1: `POST /api/writing/audit` — structural check (`AuditResult`)
 - Pass 2: `POST /api/writing/vocabulary` — informal word detection (`VocabResult`)
 - Pass 3: `POST /api/writing/score` — band scoring (streaming `FeedbackResult`)
 - On-demand: `POST /api/writing/gap` — Band 6.5 vs 7.0 gap analysis
 - Drafting Mode: `POST /api/writing/outline` — AI critiques outline before essay unlocks
+- See [PDR-0009](./docs/pdr/0009-writing-topic-library-design.md) for design rationale
 
 **Listening Simulator** (Phase 3 complete)
 - Route `/listening`; API `POST /api/listening/script` (uses `generateText` — needs full JSON)
 - Stage machine: `select → options → generating | loading → listening → submitted`
 - Domain selection → "Pick from Library" or "Generate New" (auto-saves to `listening_scripts` table)
-- `listening_scripts` table: `id`, `domain`, `title`, `transcript` (jsonb `ListeningTurn[]`), `questions` (jsonb `ListeningQuestion[]`)
+- `listening_scripts` table: `id`, `domain`, `title`, `transcript` (jsonb `ListeningTurn[]`), `questions` (jsonb `ListeningQuestion[]`), `rank`
 - `ListeningTurn`: `{ speaker: 'A' | 'B', text: string }`; `ListeningQuestion`: `{ id, sentence, answer }` (sentence has `___` gap)
 - Browser TTS: `window.speechSynthesis`; 2 English voices selected per-speaker; pitch fallback if only 1 voice available; max 2 plays (real IELTS rule)
 - Note-completion form: each question split on `___` → `<span>before</span><input/><span>after</span>`
@@ -171,6 +179,7 @@ docker compose -f docker/docker-compose.yml up -d
 - Vocabulary Replacer identifies dev-slang and suggests formal IELTS-appropriate equivalents
 - `FeedbackGenerator` runs *after* a session, not during, to maintain examiner strictness
 - Web Speech API (not Whisper) chosen for STT: zero setup, free, native in Chrome
+- All three content library tables (`reading_passages`, `listening_scripts`, `writing_topics`) share a `rank` column (1–5, default 1, DB-enforced CHECK constraint); sort order is `rank DESC, createdAt DESC` — see [PDR-0010](./docs/pdr/0010-library-rank-ordering.md)
 
 ## Roadmap Summary
 
@@ -179,7 +188,7 @@ docker compose -f docker/docker-compose.yml up -d
 | 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
-| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Target Switcher ⬜ · Analytics ⬜ |
+| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · Target Switcher ⬜ · Analytics ⬜ |
 | 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.
