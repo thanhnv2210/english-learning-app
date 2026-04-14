@@ -8,8 +8,9 @@ import {
   jsonb,
   boolean,
   primaryKey,
+  check,
 } from 'drizzle-orm/pg-core'
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 
 // ─── Existing tables ──────────────────────────────────────────────────────────
 
@@ -158,8 +159,11 @@ export const readingPassages = pgTable('reading_passages', {
   domain: text('domain').notNull(),
   passage: text('passage').notNull(),
   questions: jsonb('questions').notNull().$type<ReadingQuestionRow[]>(),
+  rank: integer('rank').notNull().default(1),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-})
+}, (t) => [
+  check('reading_passages_rank_check', sql`${t.rank} between 1 and 5`),
+])
 
 // ─── Listening script library ─────────────────────────────────────────────────
 
@@ -180,8 +184,11 @@ export const listeningScripts = pgTable('listening_scripts', {
   title: text('title').notNull(),
   transcript: jsonb('transcript').notNull().$type<ListeningTurn[]>(),
   questions: jsonb('questions').notNull().$type<ListeningQuestion[]>(),
+  rank: integer('rank').notNull().default(1),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-})
+}, (t) => [
+  check('listening_scripts_rank_check', sql`${t.rank} between 1 and 5`),
+])
 
 // ─── Speaking Part 1 topic catalogue ─────────────────────────────────────────
 
@@ -215,8 +222,11 @@ export const writingTopics = pgTable('writing_topics', {
   domain: text('domain').notNull(),
   prompt: text('prompt').notNull(),
   taskType: text('task_type').notNull(), // 'opinion' | 'discussion' | 'problem_solution' | 'two_part'
+  rank: integer('rank').notNull().default(1),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-})
+}, (t) => [
+  check('writing_topics_rank_check', sql`${t.rank} between 1 and 5`),
+])
 
 // ─── Writing domain catalogue ─────────────────────────────────────────────────
 

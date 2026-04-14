@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { readingPassages, type ReadingQuestionRow } from '@/lib/db/schema'
-import { eq, sql } from 'drizzle-orm'
+import { eq, sql, desc } from 'drizzle-orm'
 
 export type LibraryPassage = {
   id: number
@@ -27,7 +27,7 @@ export async function getRandomPassageByDomain(domain: string): Promise<LibraryP
     .select()
     .from(readingPassages)
     .where(eq(readingPassages.domain, domain))
-    .orderBy(sql`RANDOM()`)
+    .orderBy(desc(readingPassages.rank), desc(readingPassages.createdAt), sql`RANDOM()`)
     .limit(1)
   return rows[0] ?? null
 }

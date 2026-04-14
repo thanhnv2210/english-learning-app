@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { writingTopics } from '@/lib/db/schema'
-import { eq, sql } from 'drizzle-orm'
+import { eq, sql, desc } from 'drizzle-orm'
 
 export type LibraryTopic = {
   id: number
@@ -33,7 +33,7 @@ export async function getTopicsByDomain(domain: string): Promise<LibraryTopic[]>
     .select()
     .from(writingTopics)
     .where(eq(writingTopics.domain, domain))
-    .orderBy(writingTopics.createdAt)
+    .orderBy(desc(writingTopics.rank), desc(writingTopics.createdAt))
 }
 
 export async function getWritingTopicLibraryCounts(): Promise<Record<string, number>> {
