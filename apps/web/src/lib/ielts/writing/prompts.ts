@@ -11,15 +11,83 @@ export type WritingDomain = (typeof WRITING_DOMAINS)[number]
 
 // ─── Topic generation ─────────────────────────────────────────────────────────
 
+export type WritingTaskType = 'opinion' | 'discussion' | 'problem_solution' | 'two_part'
+
+const TASK_TYPE_CONFIGS: Record<WritingTaskType, { instruction: string; ending: string }> = {
+  opinion: {
+    instruction: 'Present a debatable claim about ${domain} that engineers or tech workers might disagree on.',
+    ending: 'To what extent do you agree or disagree?',
+  },
+  discussion: {
+    instruction: 'Present two opposing perspectives on a ${domain} issue without favouring either side.',
+    ending: 'Discuss both views and give your own opinion.',
+  },
+  problem_solution: {
+    instruction: 'Describe a real problem caused by ${domain} trends in the tech industry.',
+    ending: 'What are the causes of this problem and what measures could be taken to address it?',
+  },
+  two_part: {
+    instruction: 'Make a statement about how ${domain} is changing the way software engineers or organisations work.',
+    ending: 'Do you think this is a positive or negative development? What can individuals do to adapt?',
+  },
+}
+
+const TASK_TYPES = Object.keys(TASK_TYPE_CONFIGS) as WritingTaskType[]
+
+const ANGLES: Record<WritingDomain, string[]> = {
+  'AI & Automation': [
+    'AI replacing junior developers', 'automated code review tools', 'AI-generated documentation',
+    'LLMs in production systems', 'bias in AI hiring tools', 'AI pair programming',
+  ],
+  'Remote Work': [
+    'asynchronous communication norms', 'remote team trust and monitoring', 'home-office productivity',
+    'global hiring and time-zone coordination', 'virtual onboarding', 'remote work and career progression',
+  ],
+  'Cybersecurity': [
+    'zero-trust architecture adoption', 'developer responsibility for security', 'open-source dependency risks',
+    'ransomware targeting tech companies', 'password-less authentication', 'security vs usability trade-offs',
+  ],
+  'System Design': [
+    'microservices vs monoliths', 'event-driven architecture complexity', 'database per service pattern',
+    'API versioning strategies', 'over-engineering in startups', 'distributed system observability',
+  ],
+  'Open Source': [
+    'corporate sponsorship of open-source projects', 'maintainer burnout', 'open-source licensing conflicts',
+    'open-source in safety-critical systems', 'contribution inequality', 'forking as a community conflict tool',
+  ],
+  'Climate Tech': [
+    'the energy cost of large AI models', 'cloud computing carbon footprints', 'software engineers\' role in sustainability',
+    'green coding practices', 'tech industry net-zero pledges', 'remote work reducing commute emissions',
+  ],
+}
+
 export function TOPIC_GENERATION_PROMPT(domain: string): string {
-  return `You are an IELTS Academic Writing Task 2 examiner. Generate one IELTS Academic Task 2 essay question on the topic of "${domain}".
+  const taskType = TASK_TYPES[Math.floor(Math.random() * TASK_TYPES.length)]
+  const config = TASK_TYPE_CONFIGS[taskType]
+  const domainAngles = ANGLES[domain as WritingDomain] ?? []
+  const angle = domainAngles.length > 0
+    ? domainAngles[Math.floor(Math.random() * domainAngles.length)]
+    : domain
 
-The question must:
-- Be 2–4 sentences long
-- Present a statement or issue related to ${domain} in the context of modern technology or software engineering
-- End with a clear instruction such as "Discuss both views and give your own opinion." or "To what extent do you agree or disagree?"
+  const instruction = config.instruction.replace('${domain}', domain)
 
-Output ONLY the essay question. No preamble, no labels.`
+  return `You are an IELTS Academic Writing Task 2 examiner. Generate one IELTS Academic Task 2 essay question.
+
+Task type: ${taskType}
+Domain: ${domain}
+Specific angle to focus on: "${angle}"
+
+Instructions:
+- ${instruction}
+- The question must be 2–4 sentences: open with a factual or debatable statement about "${angle}", then end with exactly this instruction: "${config.ending}"
+- Write in formal academic English. Do not use the word "delve". Do not repeat the angle word-for-word in the closing instruction.
+- Do NOT produce a generic question — make it specific to "${angle}".
+
+Return ONLY valid JSON — no markdown, no explanation:
+{
+  "prompt": "<the full essay question>",
+  "taskType": "${taskType}"
+}`
 }
 
 // ─── Drafting Mode ────────────────────────────────────────────────────────────
