@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { listeningScripts } from '@/lib/db/schema'
-import { eq, sql } from 'drizzle-orm'
+import { eq, sql, desc } from 'drizzle-orm'
 import type { ListeningTurn, ListeningQuestion } from '@/lib/db/schema'
 
 export type LibraryScript = {
@@ -26,7 +26,7 @@ export async function getRandomScriptByDomain(domain: string): Promise<LibrarySc
     .select()
     .from(listeningScripts)
     .where(eq(listeningScripts.domain, domain))
-    .orderBy(sql`RANDOM()`)
+    .orderBy(desc(listeningScripts.rank), desc(listeningScripts.createdAt), sql`RANDOM()`)
     .limit(1)
   return rows[0] ?? null
 }
