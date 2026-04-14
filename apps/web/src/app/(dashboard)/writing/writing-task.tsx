@@ -48,6 +48,7 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
 
   // ── Flow state ──
   const [stage, setStage] = useState<Stage>('select')
+  const [localCounts, setLocalCounts] = useState<Record<string, number>>(libraryCounts)
   const [draftingMode, setDraftingMode] = useState(false)
   const [domain, setDomain] = useState('')
   const [topic, setTopic] = useState('')
@@ -110,6 +111,7 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
     const data: GeneratedTopic = await res.json()
     setTopic(data.prompt)
     setTaskType(data.taskType)
+    setLocalCounts((prev) => ({ ...prev, [domain]: (prev[domain] ?? 0) + 1 }))
     setStage(draftingMode ? 'drafting' : 'writing')
   }
 
@@ -240,7 +242,7 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
 
   const wordCount = essay.trim() ? essay.trim().split(/\s+/).length : 0
   const outlineFilled = Object.values(outline).every((v) => v.trim())
-  const domainCount = libraryCounts[domain] ?? 0
+  const domainCount = localCounts[domain] ?? 0
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -268,9 +270,9 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
                 }`}
               >
                 {d.name}
-                {(libraryCounts[d.name] ?? 0) > 0 && (
+                {(localCounts[d.name] ?? 0) > 0 && (
                   <span className="absolute right-2 top-2 rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-600">
-                    {libraryCounts[d.name]}
+                    {localCounts[d.name]}
                   </span>
                 )}
               </button>
