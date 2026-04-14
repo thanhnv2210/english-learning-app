@@ -2,16 +2,21 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { generateWritingTopic } from '@/app/actions/writing'
+import { listTopicsByDomain } from '@/app/actions/writing'
+import type { LibraryTopic } from '@/lib/db/writing'
 import { saveExam, saveFeedback } from '@/app/actions/exam'
 import { FeedbackView } from '@/components/feedback-view'
 import { VocabularyDrawer } from '@/components/vocabulary-drawer'
 import type { FeedbackResult } from '@/lib/db/schema'
 import type { AuditResult } from '@/app/api/writing/audit/route'
+import type { GeneratedTopic } from '@/app/api/writing/topic/route'
 
 type Stage =
   | 'select'
+  | 'options'
+  | 'library'
   | 'generating'
+  | 'loading'
   | 'drafting'
   | 'critiquing'
   | 'writing'
@@ -28,9 +33,16 @@ type GapCriterion = {
 
 type Domain = { id: number; rank: number; name: string; description: string; category: string }
 
-type Props = { targetBand?: number; domains: Domain[] }
+type Props = { targetBand?: number; domains: Domain[]; libraryCounts: Record<string, number> }
 
-export function WritingTask({ targetBand = 6.5, domains }: Props) {
+const TASK_TYPE_LABELS: Record<string, string> = {
+  opinion: 'Opinion',
+  discussion: 'Discussion',
+  problem_solution: 'Problem & Solution',
+  two_part: 'Two-Part Question',
+}
+
+export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props) {
   const router = useRouter()
   const [, startTransition] = useTransition()
 
@@ -39,7 +51,9 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
   const [draftingMode, setDraftingMode] = useState(false)
   const [domain, setDomain] = useState('')
   const [topic, setTopic] = useState('')
+  const [taskType, setTaskType] = useState('')
   const [essay, setEssay] = useState('')
+  const [libraryTopics, setLibraryTopics] = useState<LibraryTopic[]>([])
 
   // ── Outline (drafting mode) ──
   const [outline, setOutline] = useState({ introduction: '', body1: '', body2: '', conclusion: '' })
@@ -79,12 +93,42 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
     return full
   }
 
-  // ── Topic generation ──
-  async function handleGenerateTopic() {
+  // ── Domain selected → show options ──
+  function handleNext() {
     if (!domain) return
+    setStage('options')
+  }
+
+  // ── Generate new topic (API route — auto-saves to library) ──
+  async function handleGenerateTopic() {
     setStage('generating')
-    const generated = await generateWritingTopic(domain)
-    setTopic(generated)
+    const res = await fetch('/api/writing/topic', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domain }),
+    })
+    const data: GeneratedTopic = await res.json()
+    setTopic(data.prompt)
+    setTaskType(data.taskType)
+    setStage(draftingMode ? 'drafting' : 'writing')
+  }
+
+  // ── Browse library ──
+  async function handleOpenLibrary() {
+    setStage('loading')
+    const topics = await listTopicsByDomain(domain)
+    if (topics.length === 0) {
+      // Library unexpectedly empty — fall back to generate
+      await handleGenerateTopic()
+      return
+    }
+    setLibraryTopics(topics)
+    setStage('library')
+  }
+
+  function handleSelectLibraryTopic(selected: LibraryTopic) {
+    setTopic(selected.prompt)
+    setTaskType(selected.taskType)
     setStage(draftingMode ? 'drafting' : 'writing')
   }
 
@@ -99,7 +143,6 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
       { topic, outline },
       setOutlineCritique,
     )
-    // Critique done — user reads and then proceeds to write
   }
 
   // ── Essay evaluation (3 passes) ──
@@ -108,7 +151,6 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
 
     const transcript = [
       { id: 'topic', role: 'assistant' as const, content: topic },
-      // Outline entries — only present when drafting mode was used
       ...(draftingMode && outlineCritique
         ? [
             { id: 'outline_introduction', role: 'user' as const, content: outline.introduction },
@@ -184,6 +226,7 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
     setStage('select')
     setDomain('')
     setTopic('')
+    setTaskType('')
     setEssay('')
     setOutline({ introduction: '', body1: '', body2: '', conclusion: '' })
     setOutlineCritique('')
@@ -192,10 +235,12 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
     setFeedback(null)
     setGapStream('')
     setGapResult(null)
+    setLibraryTopics([])
   }
 
   const wordCount = essay.trim() ? essay.trim().split(/\s+/).length : 0
   const outlineFilled = Object.values(outline).every((v) => v.trim())
+  const domainCount = libraryCounts[domain] ?? 0
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -216,13 +261,18 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
                 key={d.id}
                 onClick={() => setDomain(d.name)}
                 title={d.description}
-                className={`rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
+                className={`relative rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
                   domain === d.name
                     ? 'border-blue-500 bg-blue-50 font-medium text-blue-700'
                     : 'border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
                 }`}
               >
                 {d.name}
+                {(libraryCounts[d.name] ?? 0) > 0 && (
+                  <span className="absolute right-2 top-2 rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-600">
+                    {libraryCounts[d.name]}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -244,12 +294,52 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
           </label>
 
           <button
-            onClick={handleGenerateTopic}
+            onClick={handleNext}
             disabled={!domain}
             className="mt-1 self-end rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-40"
           >
-            Generate Topic →
+            Next →
           </button>
+        </div>
+      )}
+
+      {/* ── Options: Pick from Library / Generate New ── */}
+      {stage === 'options' && (
+        <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-6">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-gray-700">
+              Topic source — <span className="text-blue-600">{domain}</span>
+            </p>
+            <button
+              onClick={() => setStage('select')}
+              className="text-xs text-gray-400 hover:text-gray-600"
+            >
+              ← Back
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <button
+              onClick={handleOpenLibrary}
+              disabled={domainCount === 0}
+              className="flex flex-col gap-1 rounded-xl border-2 border-gray-200 px-5 py-4 text-left transition-colors hover:border-blue-400 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <span className="text-sm font-semibold text-gray-800">Pick from Library</span>
+              <span className="text-xs text-gray-400">
+                {domainCount > 0
+                  ? `${domainCount} saved topic${domainCount !== 1 ? 's' : ''} available`
+                  : 'No topics saved yet'}
+              </span>
+            </button>
+
+            <button
+              onClick={handleGenerateTopic}
+              className="flex flex-col gap-1 rounded-xl border-2 border-gray-200 px-5 py-4 text-left transition-colors hover:border-blue-400 hover:bg-blue-50"
+            >
+              <span className="text-sm font-semibold text-gray-800">Generate New</span>
+              <span className="text-xs text-gray-400">AI creates a fresh topic and saves it</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -260,10 +350,57 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
         </div>
       )}
 
+      {/* ── Loading from library ── */}
+      {stage === 'loading' && (
+        <div className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-10">
+          <p className="animate-pulse text-sm text-gray-400">Loading topics from library…</p>
+        </div>
+      )}
+
+      {/* ── Library browser ── */}
+      {stage === 'library' && (
+        <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-6">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-gray-700">
+              Library — <span className="text-blue-600">{domain}</span>
+              <span className="ml-2 text-xs text-gray-400">{libraryTopics.length} topic{libraryTopics.length !== 1 ? 's' : ''}</span>
+            </p>
+            <button
+              onClick={() => setStage('options')}
+              className="text-xs text-gray-400 hover:text-gray-600"
+            >
+              ← Back
+            </button>
+          </div>
+          <div className="flex flex-col gap-2">
+            {libraryTopics.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => handleSelectLibraryTopic(t)}
+                className="flex flex-col gap-1.5 rounded-lg border border-gray-200 px-4 py-3 text-left transition-colors hover:border-blue-400 hover:bg-blue-50"
+              >
+                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500 self-start">
+                  {TASK_TYPE_LABELS[t.taskType] ?? t.taskType}
+                </span>
+                <span className="text-sm leading-relaxed text-gray-800">{t.prompt}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Drafting Mode: outline fields ── */}
       {(stage === 'drafting' || stage === 'critiquing') && (
         <div className="flex flex-col gap-4">
-          <TopicCard topic={topic} />
+          <div className="flex items-center justify-between">
+            <TopicCard topic={topic} taskType={taskType} />
+            <button
+              onClick={() => { setTopic(''); setTaskType(''); setStage('options') }}
+              className="ml-3 shrink-0 text-xs text-gray-400 hover:text-gray-600"
+            >
+              ← Back
+            </button>
+          </div>
           <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-5">
             <p className="text-sm font-semibold text-gray-800">Your Outline</p>
             {(
@@ -325,7 +462,15 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
       {/* ── Essay writing ── */}
       {stage === 'writing' && (
         <div className="flex flex-col gap-4">
-          <TopicCard topic={topic} />
+          <div className="flex items-center justify-between">
+            <TopicCard topic={topic} taskType={taskType} />
+            <button
+              onClick={() => { setTopic(''); setTaskType(''); setEssay(''); setStage('options') }}
+              className="ml-3 shrink-0 text-xs text-gray-400 hover:text-gray-600"
+            >
+              ← Back
+            </button>
+          </div>
           {draftingMode && outlineCritique && (
             <details className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-500">
               <summary className="cursor-pointer font-medium">View outline critique</summary>
@@ -384,7 +529,7 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
       {/* ── Done: full results ── */}
       {stage === 'done' && (
         <div className="flex flex-col gap-6">
-          <TopicCard topic={topic} />
+          <TopicCard topic={topic} taskType={taskType} />
 
           {/* Pass 1 summary */}
           {audit && <AuditPanel audit={audit} />}
@@ -437,10 +582,17 @@ export function WritingTask({ targetBand = 6.5, domains }: Props) {
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
-function TopicCard({ topic }: { topic: string }) {
+function TopicCard({ topic, taskType }: { topic: string; taskType: string }) {
   return (
-    <div className="rounded-xl border-2 border-blue-200 bg-blue-50 p-5">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-500">Essay Topic</p>
+    <div className="flex-1 rounded-xl border-2 border-blue-200 bg-blue-50 p-5">
+      <div className="mb-2 flex items-center gap-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-blue-500">Essay Topic</p>
+        {taskType && (
+          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-600">
+            {TASK_TYPE_LABELS[taskType] ?? taskType}
+          </span>
+        )}
+      </div>
       <p className="text-sm leading-relaxed text-gray-800">{topic}</p>
     </div>
   )

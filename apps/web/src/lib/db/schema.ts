@@ -208,6 +208,16 @@ export const speakingPart2Topics = pgTable('speaking_part2_topics', {
   examplePrompts: jsonb('example_prompts').notNull().$type<string[]>(),
 })
 
+// ─── Writing topic library ────────────────────────────────────────────────────
+
+export const writingTopics = pgTable('writing_topics', {
+  id: serial('id').primaryKey(),
+  domain: text('domain').notNull(),
+  prompt: text('prompt').notNull(),
+  taskType: text('task_type').notNull(), // 'opinion' | 'discussion' | 'problem_solution' | 'two_part'
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ─── Writing domain catalogue ─────────────────────────────────────────────────
 
 export const writingDomains = pgTable('writing_domains', {

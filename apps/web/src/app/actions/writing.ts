@@ -1,17 +1,19 @@
 'use server'
 
-import { generateText } from 'ai'
-import { createOllama } from 'ollama-ai-provider'
-import { TOPIC_GENERATION_PROMPT } from '@/lib/ielts/writing/prompts'
+import { saveWritingTopic, getRandomTopicByDomain, getTopicsByDomain, type LibraryTopic } from '@/lib/db/writing'
 
-const ollama = createOllama({
-  baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/api',
-})
+export async function saveTopicToLibrary(data: {
+  domain: string
+  prompt: string
+  taskType: string
+}): Promise<number> {
+  return saveWritingTopic(data)
+}
 
-export async function generateWritingTopic(domain: string): Promise<string> {
-  const { text } = await generateText({
-    model: ollama(process.env.OLLAMA_MODEL ?? 'qwen2.5-coder:7b'),
-    prompt: TOPIC_GENERATION_PROMPT(domain),
-  })
-  return text.trim()
+export async function pickRandomTopic(domain: string): Promise<LibraryTopic | null> {
+  return getRandomTopicByDomain(domain)
+}
+
+export async function listTopicsByDomain(domain: string): Promise<LibraryTopic[]> {
+  return getTopicsByDomain(domain)
 }
