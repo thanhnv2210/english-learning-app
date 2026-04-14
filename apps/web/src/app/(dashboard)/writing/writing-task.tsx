@@ -10,6 +10,7 @@ import { VocabularyDrawer } from '@/components/vocabulary-drawer'
 import type { FeedbackResult } from '@/lib/db/schema'
 import type { AuditResult } from '@/app/api/writing/audit/route'
 import type { GeneratedTopic } from '@/app/api/writing/topic/route'
+import type { SampleResponse } from '@/app/api/writing/sample/route'
 
 type Stage =
   | 'select'
@@ -69,6 +70,12 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
   const [gapStream, setGapStream] = useState('')
   const [gapResult, setGapResult] = useState<GapCriterion[] | null>(null)
   const [isLoadingGap, setIsLoadingGap] = useState(false)
+
+  // ── Sample response (on-demand) ──
+  const [sampleStream, setSampleStream] = useState('')
+  const [sampleResult, setSampleResult] = useState<SampleResponse | null>(null)
+  const [isLoadingSample, setIsLoadingSample] = useState(false)
+  const [showSampleEssay, setShowSampleEssay] = useState(false)
 
   // ── Helpers ──
   async function streamToState(
@@ -224,6 +231,29 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
     setIsLoadingGap(false)
   }
 
+  // ── Sample response ──
+  async function handleSampleResponse() {
+    if (isLoadingSample || sampleResult) return
+    setIsLoadingSample(true)
+    setSampleStream('')
+
+    const full = await streamToState(
+      '/api/writing/sample',
+      { topic, targetBand },
+      setSampleStream,
+    )
+
+    const jsonMatch = full.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      try {
+        setSampleResult(JSON.parse(jsonMatch[0]))
+      } catch {
+        // sampleStream stays visible as fallback
+      }
+    }
+    setIsLoadingSample(false)
+  }
+
   function handleReset() {
     setStage('select')
     setDomain('')
@@ -237,6 +267,9 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
     setFeedback(null)
     setGapStream('')
     setGapResult(null)
+    setSampleStream('')
+    setSampleResult(null)
+    setShowSampleEssay(false)
     setLibraryTopics([])
   }
 
@@ -397,7 +430,7 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
           <div className="flex items-center justify-between">
             <TopicCard topic={topic} taskType={taskType} />
             <button
-              onClick={() => { setTopic(''); setTaskType(''); setStage('options') }}
+              onClick={() => { setTopic(''); setTaskType(''); setSampleStream(''); setSampleResult(null); setShowSampleEssay(false); setStage('options') }}
               className="ml-3 shrink-0 text-xs text-gray-400 hover:text-gray-600"
             >
               ← Back
@@ -467,7 +500,7 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
           <div className="flex items-center justify-between">
             <TopicCard topic={topic} taskType={taskType} />
             <button
-              onClick={() => { setTopic(''); setTaskType(''); setEssay(''); setStage('options') }}
+              onClick={() => { setTopic(''); setTaskType(''); setEssay(''); setSampleStream(''); setSampleResult(null); setShowSampleEssay(false); setStage('options') }}
               className="ml-3 shrink-0 text-xs text-gray-400 hover:text-gray-600"
             >
               ← Back
@@ -479,6 +512,15 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
               <p className="mt-2 whitespace-pre-wrap leading-relaxed">{outlineCritique}</p>
             </details>
           )}
+          <SamplePanel
+            mode="reference"
+            isLoading={isLoadingSample}
+            stream={sampleStream}
+            result={sampleResult}
+            showEssay={showSampleEssay}
+            onRequest={handleSampleResponse}
+            onToggleEssay={() => setShowSampleEssay((v) => !v)}
+          />
           <div className="flex flex-col gap-2">
             <textarea
               value={essay}
@@ -558,6 +600,16 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
               targetBand={targetBand}
             />
           )}
+
+          <SamplePanel
+            mode="full"
+            isLoading={isLoadingSample}
+            stream={sampleStream}
+            result={sampleResult}
+            showEssay={showSampleEssay}
+            onRequest={handleSampleResponse}
+            onToggleEssay={() => setShowSampleEssay((v) => !v)}
+          />
 
           <div className="flex items-center justify-between">
             <VocabularyDrawer text={essay} />
@@ -733,6 +785,119 @@ function GapPanel({
           )}
         </>
       )}
+    </div>
+  )
+}
+
+// ─── SamplePanel ──────────────────────────────────────────────────────────────
+
+function SamplePanel({
+  mode,
+  isLoading,
+  stream,
+  result,
+  showEssay,
+  onRequest,
+  onToggleEssay,
+}: {
+  mode: 'reference' | 'full'
+  isLoading: boolean
+  stream: string
+  result: SampleResponse | null
+  showEssay: boolean
+  onRequest: () => void
+  onToggleEssay: () => void
+}) {
+  // Not yet requested
+  if (!result && !stream && !isLoading) {
+    return (
+      <div className="flex items-center justify-between rounded-xl border border-dashed border-gray-300 bg-white p-4">
+        <div>
+          <p className="text-sm font-medium text-gray-700">
+            {mode === 'reference' ? 'Ideas & Collocations' : 'Model Answer'}
+          </p>
+          <p className="text-xs text-gray-400">
+            {mode === 'reference'
+              ? 'See key arguments and reusable phrases for this topic'
+              : 'Study a model essay, main ideas, and reusable collocations'}
+          </p>
+        </div>
+        <button
+          onClick={onRequest}
+          className="rounded-lg border border-green-200 px-4 py-2 text-xs font-semibold text-green-700 transition-colors hover:bg-green-50"
+        >
+          Generate
+        </button>
+      </div>
+    )
+  }
+
+  // Loading / streaming
+  if (isLoading && !result) {
+    return (
+      <div className="rounded-xl border border-green-200 bg-green-50 p-5">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-green-600">
+          {mode === 'reference' ? 'Ideas & Collocations' : 'Model Answer'}
+        </p>
+        {stream ? (
+          <pre className="max-h-48 overflow-y-auto rounded-lg bg-white p-3 font-mono text-xs text-gray-600 whitespace-pre-wrap">
+            {stream}
+          </pre>
+        ) : (
+          <p className="animate-pulse text-sm text-green-400">Generating…</p>
+        )}
+      </div>
+    )
+  }
+
+  if (!result) return null
+
+  return (
+    <div className="flex flex-col gap-4 rounded-xl border border-green-200 bg-green-50 p-5">
+      <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
+        {mode === 'reference' ? 'Ideas & Collocations' : 'Model Answer'}
+      </p>
+
+      {/* Main ideas */}
+      <div>
+        <p className="mb-2 text-xs font-semibold text-gray-600">Main Ideas</p>
+        <ol className="flex flex-col gap-1.5 pl-1">
+          {result.mainIdeas.map((idea, i) => (
+            <li key={i} className="flex gap-2 text-sm leading-relaxed text-gray-700">
+              <span className="mt-0.5 shrink-0 text-xs font-bold text-green-500">{i + 1}.</span>
+              {idea}
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      {/* Collocations */}
+      <div>
+        <p className="mb-2 text-xs font-semibold text-gray-600">Reusable Collocations</p>
+        <div className="flex flex-col gap-2">
+          {result.collocations.map(({ phrase, usage }, i) => (
+            <div key={i} className="rounded-lg border border-green-100 bg-white px-3 py-2">
+              <p className="text-xs font-semibold text-green-700">{phrase}</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-gray-500 italic">"{usage}"</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Model essay — hidden in reference mode until revealed; always visible in full mode */}
+      <div>
+        <button
+          onClick={onToggleEssay}
+          className="mb-2 text-xs font-semibold text-green-700 hover:underline"
+        >
+          {showEssay ? 'Hide model essay ▲' : 'Reveal model essay ▼'}
+        </button>
+        {showEssay && (
+          <p className="whitespace-pre-wrap rounded-lg border border-green-100 bg-white px-4 py-3 text-sm leading-relaxed text-gray-800">
+            {result.essay}
+          </p>
+        )}
+      </div>
     </div>
   )
 }

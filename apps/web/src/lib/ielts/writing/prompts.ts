@@ -179,6 +179,32 @@ Return ONLY valid JSON — no markdown, no explanation:
 }`
 }
 
+// ─── Sample Response (on-demand) ─────────────────────────────────────────────
+
+export function SAMPLE_RESPONSE_PROMPT(targetBand: number): string {
+  return `You are an IELTS Academic Writing Task 2 examiner and teacher. Given an essay topic, produce a complete learning resource for a candidate targeting Band ${targetBand}.
+
+Return ONLY valid JSON — no markdown, no explanation:
+{
+  "essay": "<a Band ${targetBand} model essay, 260–300 words, four paragraphs: introduction, body 1, body 2, conclusion>",
+  "mainIdeas": [
+    "<one-sentence summary of the introduction thesis>",
+    "<one-sentence summary of body 1 argument>",
+    "<one-sentence summary of body 2 argument>",
+    "<one-sentence summary of the conclusion stance>"
+  ],
+  "collocations": [
+    { "phrase": "<2–5 word collocation or fixed phrase used in the essay>", "usage": "<the exact sentence from the essay where this phrase appears>" }
+  ]
+}
+
+Rules:
+- The essay must directly address the topic provided. Do not write a generic essay.
+- Collocations must be extracted verbatim from the essay — no invented examples. Provide 8 collocations.
+- Prefer collocations that are domain-neutral and reusable across different IELTS topics (e.g. "plays a pivotal role in", "has led to a significant increase in").
+- Do not use the word "delve".`
+}
+
 // ─── Gap Analysis (on-demand) ─────────────────────────────────────────────────
 
 export function GAP_ANALYSIS_PROMPT(targetBand: number): string {
