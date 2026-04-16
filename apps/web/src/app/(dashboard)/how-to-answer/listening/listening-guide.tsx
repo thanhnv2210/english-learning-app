@@ -3,11 +3,83 @@
 import { useState } from 'react'
 import type { QuestionTypeGuide } from '@/lib/guides/listening'
 
+const PRE_LISTENING_STEPS = [
+  {
+    heading: 'Use every second of reading time',
+    body: 'The examiner will say "You now have X seconds to look at the questions." This is your only chance. Start reading immediately — do not wait.',
+  },
+  {
+    heading: 'Read the question stem first, not the options or gaps',
+    body: 'The stem tells you the topic and what to listen for. Options and gaps give detail, but the stem gives direction. One second on the stem is worth three seconds on the options.',
+  },
+  {
+    heading: 'You cannot mark the screen — use your scratch paper',
+    body: 'On a computer-based test you cannot underline or annotate the questions on screen. Instead, use the scratch paper provided. For each question, jot one keyword only — a name, a number, an action, a place. One strong keyword is enough to trigger your attention when the speaker reaches that point.',
+  },
+  {
+    heading: 'Use shorthand symbols on your scratch paper',
+    body: 'Speed up your note-taking with symbols: → (leads to / causes), ↑↓ (increase/decrease), ? (problem/question), # (number/quantity), @ (location/place). This frees up 1–2 seconds per question that you can spend reading ahead on screen.',
+  },
+  {
+    heading: 'If the recording starts before you finish reading — do not panic',
+    body: 'The first 5–10 seconds of every section are always scene-setting: the speakers introduce themselves and state the context. No answers appear yet. Use those seconds to finish reading the remaining questions on screen. You will not miss anything.',
+  },
+  {
+    heading: 'Read one question ahead at all times',
+    body: "Once you have typed an answer, immediately scroll to and read the next question on screen. Never be caught reading a question while the speaker has already moved past it. Being one question ahead is the single most effective habit to build for computer-based testing.",
+  },
+  {
+    heading: 'Accept that you will sometimes miss an answer — type a guess and move on',
+    body: "If you miss an answer, type your best guess into the field and move on immediately. On a computer you can flag the question if the interface allows it and return during review time. Dwelling on a missed question causes you to miss the next one too — a cascade failure. One blank is recoverable; three blanks from dwelling is not.",
+  },
+]
+
 export function ListeningGuide({ guides }: { guides: QuestionTypeGuide[] }) {
   const [openId, setOpenId] = useState<string>(guides[0]?.id ?? '')
+  const [preOpen, setPreOpen] = useState(true)
 
   return (
     <div className="flex flex-col gap-2">
+      {/* ── Special tip: reading before the recording ── */}
+      <div className="rounded-xl border-2 border-orange-200 bg-orange-50">
+        <button
+          onClick={() => setPreOpen((v) => !v)}
+          className="flex w-full items-center justify-between px-5 py-4 text-left"
+        >
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold text-white">
+              CRITICAL SKILL
+            </span>
+            <span className="text-sm font-semibold text-orange-900">
+              Reading the Questions Before the Recording Starts
+            </span>
+          </div>
+          <span className={`ml-4 shrink-0 text-xs transition-transform ${preOpen ? 'rotate-180' : ''} text-orange-400`}>
+            ▼
+          </span>
+        </button>
+
+        {preOpen && (
+          <div className="border-t border-orange-200 px-5 pb-6 pt-5">
+            <p className="mb-4 text-sm leading-relaxed text-orange-900">
+              The most common reason candidates lose marks is not vocabulary or grammar — it is running out of time to read the questions before the recording starts. By the time they find their place, the speaker has already given the answer. This skill is trainable. Apply these steps every time you practise.
+            </p>
+            <ol className="flex flex-col gap-4">
+              {PRE_LISTENING_STEPS.map((step, i) => (
+                <li key={i} className="flex gap-3">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-orange-900">{step.heading}</p>
+                    <p className="mt-0.5 text-sm leading-relaxed text-orange-800">{step.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </div>
       {guides.map((guide) => {
         const isOpen = openId === guide.id
         return (
