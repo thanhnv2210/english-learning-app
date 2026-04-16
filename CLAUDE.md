@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module (library, highlight system, paragraph formatting), Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, and Writing Topic Library. Still pending: Target Switcher UI, Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
+Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module (library, highlight system, paragraph formatting), Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, and How to Answer guide. Still pending: Target Switcher UI, Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
 
 ## Tech Stack
 
@@ -38,7 +38,9 @@ english-learning-app/
 │       │   │   ├── writing/              # Writing Task 2
 │       │   │   ├── reading/              # Reading module (Phase 3)
 │       │   │   ├── vocabulary/           # AWL browser
-│       │   │   └── history/              # Session history
+│       │   │   ├── history/              # Session history
+│       │   │   └── how-to-answer/        # Static exam guides (skill landing + per-skill pages)
+│       │   │       └── listening/        # Listening guide — 7 IELTS question types
 │       │   ├── actions/
 │       │   │   ├── exam.ts               # saveExam, saveFeedback server actions
 │       │   │   ├── reading.ts            # savePassageToLibrary, pickRandomPassage
@@ -66,6 +68,8 @@ english-learning-app/
 │       │   │   ├── writing.ts            # saveWritingTopic, getRandomTopicByDomain, getTopicsByDomain, getWritingTopicLibraryCounts
 │       │   │   ├── speaking.ts           # getAllSpeakingTopics
 │       │   │   └── vocabulary.ts         # findWord, saveVocabularyWord
+│       │   ├── guides/                   # Static content for How to Answer (no DB, no AI)
+│       │   │   └── listening.ts          # LISTENING_GUIDES — 7 question types, steps/strategies/mistakes
 │       │   └── ielts/                    # Core domain logic (no Next.js imports)
 │       │       ├── examiner/             # Part 1 (fn+topic), Part 2, Part 3 prompts + feedback
 │       │       ├── feedback/             # filler-detector.ts (Phase 2)
@@ -168,6 +172,15 @@ docker compose -f docker/docker-compose.yml up -d
 - AWL browser at `/vocabulary` — searchable, filterable by domain
 - **Vocabulary Search** (Phase 3): `VocabSearch` component + `POST /api/vocabulary/search`; checks DB first (`findWord`), falls back to AI generation (`VOCAB_SEARCH_PROMPT`); auto-detects domains from known list; "Add to Library" button for AI-generated cards; already-saved words show read-only
 
+**How to Answer Guide** (Phase 3)
+- Route `/how-to-answer` — skill landing page; Listening available, Reading/Writing/Speaking marked "Coming soon"
+- Route `/how-to-answer/listening` — accordion guide covering all 7 real IELTS Listening question types
+- Content is fully static (no DB, no AI); lives in `lib/guides/listening.ts` as `LISTENING_GUIDES: QuestionTypeGuide[]`
+- Each question type includes: description, word limit callout, step-by-step approach, key strategies, common mistakes
+- A "CRITICAL SKILL" callout at the top covers reading questions before the recording starts; all advice is computer-based test (CBT) specific — scratch paper for notes, typing answers, on-screen navigation, flagging questions
+- Future skills (Reading, Writing, Speaking) follow the same pattern: add `lib/guides/<skill>.ts` + `how-to-answer/<skill>/page.tsx` + a client `<skill>-guide.tsx`
+- See [PDR-0011](./docs/pdr/0011-how-to-answer-guide.md) for design rationale
+
 **Target Profile System**
 - `users.targetProfile` stored in DB; `parseTargetBand()` parses `IELTS_6.5` → `6.5`
 - `targetBand` flows into all feedback prompts
@@ -188,7 +201,7 @@ docker compose -f docker/docker-compose.yml up -d
 | 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
-| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · Target Switcher ⬜ · Analytics ⬜ |
+| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (Listening) ✅ · Target Switcher ⬜ · Analytics ⬜ |
 | 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.
