@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: '/listening', label: 'Listening', icon: '🎧' },
   { href: '/vocabulary', label: 'Vocabulary', icon: '📚' },
   { href: '/history', label: 'History', icon: '🕐' },
+  { href: '/how-to-answer', label: 'How to Answer', icon: '💡' },
 ]
 
 export function NavSidebar() {
