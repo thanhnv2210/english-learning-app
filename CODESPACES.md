@@ -170,6 +170,18 @@ The amber banner disappears and all AI features become available.
 
 ## Troubleshooting
 
+### Container creation failed (Docker-in-Docker error)
+
+If the Codespace fails to build with an error like:
+```
+Feature "Docker (Docker-in-Docker)" failed to install!
+The 'moby' option is not supported on Debian 'trixie'
+```
+
+This is fixed in the current `devcontainer.json` (`"moby": false`). If you still see it, delete the Codespace and create a new one — the fix only takes effect on a fresh container build.
+
+---
+
 ### "Cannot connect to database"
 
 The PostgreSQL container may not have started yet. Check:
