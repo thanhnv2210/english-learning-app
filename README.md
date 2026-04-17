@@ -32,6 +32,9 @@ DATABASE_URL=postgresql://YOUR_USERNAME@localhost:5432/ielts_dev
 OLLAMA_BASE_URL=http://localhost:11434/api
 OLLAMA_MODEL=qwen2.5-coder:7b
 
+# Set to 'false' to disable AI features (e.g. in GitHub Codespaces without local Ollama)
+NEXT_PUBLIC_OLLAMA_ENABLED=true
+
 # Optional — Claude API (not used in Phase 1/2, kept for future phases)
 ANTHROPIC_API_KEY=sk-ant-...
 ```
@@ -183,7 +186,52 @@ Full architecture: [CLAUDE.md](./CLAUDE.md) · Design decisions: [docs/adr/](./d
 
 ---
 
-## 9. Troubleshooting
+## 9. GitHub Codespaces
+
+The project ships with a `.devcontainer/` configuration for GitHub Codespaces. PostgreSQL starts automatically via Docker-in-Docker; no local install is needed.
+
+### What works out of the box
+
+| Feature | Status |
+|---------|--------|
+| Next.js app on port 3000 | Auto-forwarded, opens in browser |
+| PostgreSQL (Docker-in-Docker) | Starts automatically on port 5432 |
+| Schema push (`pnpm db:push`) | Runs automatically on container start |
+| Static pages (How to Answer, Topic Ideas) | Full functionality |
+| AI features (Speaking, Writing, Reading, Listening) | Disabled by default |
+
+### Enabling AI features via ngrok
+
+Ollama cannot run inside a Codespace. To re-enable AI, point the app at an Ollama instance on your local machine:
+
+**Step 1 — on your local machine:**
+
+```bash
+ollama serve
+ollama pull qwen2.5-coder:7b
+ngrok http 11434          # copy the HTTPS forwarding URL
+```
+
+**Step 2 — in your Codespace terminal:**
+
+```bash
+# Create or edit apps/web/.env.local
+echo "OLLAMA_BASE_URL=https://<your-ngrok-id>.ngrok-free.app/api" >> apps/web/.env.local
+echo "NEXT_PUBLIC_OLLAMA_ENABLED=true" >> apps/web/.env.local
+
+# Restart with a clean cache to pick up the new env vars
+cd apps/web && pnpm dev:clean
+```
+
+The amber "AI features are disabled" banner disappears once `NEXT_PUBLIC_OLLAMA_ENABLED=true` is set and the server restarts.
+
+> **Note:** The ngrok URL changes every session on the free plan. Update `OLLAMA_BASE_URL` in `.env.local` each time.
+
+Full setup details: [`.devcontainer/README.md`](./.devcontainer/README.md)
+
+---
+
+## 10. Troubleshooting
 
 **Ollama not responding**
 ```bash

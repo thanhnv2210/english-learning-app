@@ -62,6 +62,7 @@ english-learning-app/
 │       │   ├── timer-alert-modal.tsx     # Fires at timer=0
 │       │   └── feedback-view.tsx         # Per-criterion band score display
 │       ├── lib/
+│       │   ├── ai-client.ts              # Centralised Ollama client — OLLAMA_ENABLED, ollamaModel(), ollamaDisabledResponse()
 │       │   ├── db/                       # PostgreSQL client & query helpers
 │       │   │   ├── reading.ts            # saveReadingPassage, getRandomPassageByDomain, getLibraryCounts
 │       │   │   ├── listening.ts          # saveListeningScript, getRandomScriptByDomain, getListeningLibraryCounts
@@ -89,6 +90,8 @@ english-learning-app/
 
 **Key rule:** `app/api/` route handlers must be thin — validate input → call `lib/ielts/` → return response. No business logic inside route files.
 
+**AI client rule:** Never import `createOllama` directly in route files or server actions. Always import from `@/lib/ai-client` and guard with `if (!OLLAMA_ENABLED) return ollamaDisabledResponse()` (route handlers) or `if (!OLLAMA_ENABLED) throw new Error(...)` (server actions).
+
 ## Commands
 
 ```bash
@@ -109,12 +112,31 @@ pnpm db:seed:domains                  # writing_domains (50 rows)
 pnpm db:seed:vocabulary               # vocabulary_words
 pnpm db:seed:speaking-topics          # speaking_topics (10 rows)
 
-# Docker (PostgreSQL — not used; app uses local Homebrew instance)
+# Docker (PostgreSQL — not used locally; auto-used in GitHub Codespaces via Docker-in-Docker)
 docker compose -f docker/docker-compose.yml up -d
 ```
 
 > `next dev` without `--turbo` must not be used for local development (M1 memory constraint).
 > If you see "Internal Server Error" on first page load, run `pnpm dev:clean` to clear the stale `.next` cache.
+
+### Environment variables (key ones)
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `OLLAMA_BASE_URL` | `http://localhost:11434/api` | Ollama API endpoint — use ngrok URL in Codespaces |
+| `OLLAMA_MODEL` | `qwen2.5-coder:7b` | Model name passed to Ollama |
+| `NEXT_PUBLIC_OLLAMA_ENABLED` | `true` | Set to `false` to disable all AI routes; shows amber banner in UI |
+| `DATABASE_URL` | — | PostgreSQL connection string |
+
+### GitHub Codespaces
+
+A `.devcontainer/` config is provided. PostgreSQL starts automatically; AI features are **disabled by default** (`NEXT_PUBLIC_OLLAMA_ENABLED=false`). To re-enable:
+
+1. On your local machine: `ollama serve` + `ngrok http 11434` (copy the HTTPS URL)
+2. In Codespace `apps/web/.env.local`: set `OLLAMA_BASE_URL=<ngrok-url>/api` and `NEXT_PUBLIC_OLLAMA_ENABLED=true`
+3. Restart: `pnpm dev:clean`
+
+See `.devcontainer/README.md` for full setup steps.
 
 ## Architecture
 
@@ -204,6 +226,8 @@ docker compose -f docker/docker-compose.yml up -d
 - `FeedbackGenerator` runs *after* a session, not during, to maintain examiner strictness
 - Web Speech API (not Whisper) chosen for STT: zero setup, free, native in Chrome
 - All three content library tables (`reading_passages`, `listening_scripts`, `writing_topics`) share a `rank` column (1–5, default 1, DB-enforced CHECK constraint); sort order is `rank DESC, createdAt DESC` — see [PDR-0010](./docs/pdr/0010-library-rank-ordering.md)
+- Centralised Ollama client (`src/lib/ai-client.ts`) — single source for `createOllama` config, `OLLAMA_ENABLED` flag, and disabled-response helper; all 15 API routes + 1 server action import from here
+- `NEXT_PUBLIC_OLLAMA_ENABLED=false` disables all AI routes and shows an amber banner in the dashboard layout; designed for GitHub Codespaces where Ollama cannot run in-container
 
 ## Roadmap Summary
 
