@@ -70,11 +70,13 @@ All advice is written specifically for IELTS on Computer (IoC), which is now the
 
 | Paper-based assumption | CBT replacement |
 |---|---|
-| Underline keywords on the question sheet | Jot one keyword per question on scratch paper provided at the test centre |
+| Underline keywords on the question sheet | Highlight on screen: left-click drag over text → right-click → "Highlight" (turns yellow). Available in Reading and Listening. |
 | Cross out / tick options on the page | Track confirmed (✓) and eliminated (✗) options on scratch paper; click on screen when confident |
 | Circle the letter for multiple choice | Click the option — no typing needed |
 | Write answers in gaps | Type answers into on-screen input fields |
 | Write a guess and move on | Type a guess, flag the question if the interface allows, return at review time |
+
+Scratch paper is still provided at the test centre and remains useful for tasks the highlight tool cannot handle: predicted word type, elimination tracking (✓/✗), rough diagram sketches for map/plan questions, and shorthand symbols. Highlighting and scratch paper are complementary.
 
 The "Before the Recording Starts" callout is displayed as a **"CRITICAL SKILL"** banner above the question-type accordions because time management during the reading phase is the most common cause of lost marks and applies to every question type equally. It opens by default so first-time visitors cannot miss it.
 

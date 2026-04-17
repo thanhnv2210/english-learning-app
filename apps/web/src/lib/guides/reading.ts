@@ -16,8 +16,8 @@ export const READING_GUIDES: ReadingGuide[] = [
       'Statements about factual information in the passage are given. You decide: True (the statement agrees with the passage), False (the statement contradicts the passage), or Not Given (the information is not in the passage).',
     answerFormat: 'Type T, F, or NG. In some interfaces, select from a dropdown.',
     steps: [
-      'Read the statement carefully and identify its key claim — the specific fact being asserted.',
-      'Scan the passage for the section that discusses the same topic. Use a keyword from the statement as your search anchor.',
+      'Read the statement carefully and identify its key claim — the specific fact being asserted. Highlight the key noun or verb in the statement (left-click drag → right-click → Highlight).',
+      'Scan the passage for the section that discusses the same topic. When you find the relevant sentence, highlight it in the passage so you can compare side by side.',
       'Compare the statement with what the passage actually says — word for word if needed.',
       'Decide: if the passage explicitly confirms the claim → True; if the passage explicitly contradicts it → False; if the passage simply does not address it → Not Given.',
       'Type your answer. If uncertain between False and Not Given, ask: does the passage actively say the opposite? If yes → False. If the passage just stays silent → Not Given.',
@@ -26,7 +26,7 @@ export const READING_GUIDES: ReadingGuide[] = [
       'Use only information in the passage. Your general knowledge is irrelevant — even if a statement is factually wrong in real life, mark it True if the passage says it.',
       'Not Given does not mean the statement is false — it means the passage neither confirms nor denies it.',
       'Statements follow the order of the passage. Once you find the relevant section, re-read that paragraph carefully rather than the whole text.',
-      'Qualifying words (always, never, only, mainly, some) are frequently the deciding factor. Check these words precisely against the passage.',
+      'Qualifying words (always, never, only, mainly, some) are frequently the deciding factor. Highlight these words in both the statement and the passage to compare them directly.',
     ],
     mistakes: [
       'Confusing Not Given with False — the passage must actively contradict the statement for it to be False.',
@@ -66,7 +66,7 @@ export const READING_GUIDES: ReadingGuide[] = [
     steps: [
       'Read all the headings first to understand the range of topics on offer.',
       'For each paragraph, read the first and last sentence — the topic sentence and the concluding idea often reveal the main point.',
-      'Identify the central idea of the paragraph in your own words, then find the heading that best matches that idea.',
+      'Identify the central idea of the paragraph in your own words. Highlight the sentence that best captures the main point — this helps you compare it against headings without re-reading.',
       'Eliminate headings that clearly do not match and focus your comparison on two or three candidates.',
       'Confirm your choice: the heading should cover the whole paragraph\'s main point, not just a detail mentioned in passing.',
     ],
@@ -90,8 +90,8 @@ export const READING_GUIDES: ReadingGuide[] = [
     answerFormat: 'Type or select the letter of the matching option (A, B, C… or a paragraph letter).',
     steps: [
       'Read the list of options first (e.g. the names of researchers or the paragraph letters). Understand what each option represents.',
-      'Read the first statement and identify its key content words. Scan the passage for that specific detail.',
-      'When you find the relevant section, confirm the match by reading the full sentence — not just the keyword.',
+      'Read the first statement and highlight its key content word on screen. Scan the passage for that specific detail.',
+      'When you find the relevant section, highlight it in the passage — this lets you confirm the match visually and return to it quickly if needed.',
       'Record your answer and move to the next statement. Answers do not necessarily follow the order of the passage for this question type.',
       'If options can be used more than once, do not assume an option is exhausted after you have used it.',
     ],
@@ -113,7 +113,7 @@ export const READING_GUIDES: ReadingGuide[] = [
       'A question is followed by three or four options (A, B, C, D). You choose the one correct answer, or — when specified — two or three correct answers. Questions may test understanding of detail, main idea, or the writer\'s purpose.',
     answerFormat: 'Click or type the letter of the correct option. For multiple answers, select the stated number.',
     steps: [
-      'Read the question stem and underline its key topic on your scratch paper. This tells you what section of the passage to find.',
+      'Read the question stem and highlight its key topic word on screen (left-click drag → right-click → Highlight). This marks what you are looking for in the passage.',
       'Read all options before looking at the passage. Note key differences between them — often one word distinguishes correct from incorrect.',
       'Locate the relevant section of the passage using keywords from the question stem.',
       'Read that section carefully and eliminate options that are contradicted or not supported by the passage.',
@@ -139,7 +139,7 @@ export const READING_GUIDES: ReadingGuide[] = [
     answerFormat: 'ONE, TWO, or THREE WORDS from the passage — always check the instruction.',
     steps: [
       'Read the whole summary, table, or flow-chart first to understand what section of the passage it covers.',
-      'Identify the keywords around each gap — these are your search anchors for the passage.',
+      'Identify the keywords around each gap. Highlight them on screen — these are your search anchors for finding the relevant section of the passage.',
       'Scan the passage to find the relevant section, then read it carefully to identify the exact words that fill the gap.',
       'Type the words exactly as they appear in the passage. Do not paraphrase.',
       'Re-read the completed sentence to confirm it is factually correct and within the word limit.',
@@ -164,7 +164,7 @@ export const READING_GUIDES: ReadingGuide[] = [
     steps: [
       'Read the incomplete sentence and identify its subject, verb, and what is missing (object, complement, modifier).',
       'Use the grammar of the sentence to predict the word type needed: a noun, adjective, verb form, etc.',
-      'Jot the key content word from the sentence on your scratch paper, then scan the passage for that section.',
+      'Highlight the key content word in the sentence on screen, then scan the passage for that section.',
       'Find the exact words in the passage that complete the sentence grammatically and factually.',
       'Confirm the completed sentence reads naturally and does not exceed the word limit.',
     ],
@@ -211,7 +211,7 @@ export const READING_GUIDES: ReadingGuide[] = [
     answerFormat: 'ONE, TWO, or THREE WORDS from the passage — check the instruction.',
     steps: [
       'Read the question and identify the question word: Who, What, Where, When, Why, How many, How much. This tells you exactly the type of information to find.',
-      'Jot the key content word from the question on your scratch paper as a search anchor.',
+      'Highlight the key content word from the question on screen (left-click drag → right-click → Highlight) — this is your search anchor for scanning the passage.',
       'Scan the passage for that anchor, then read the surrounding sentences carefully.',
       'Extract the exact words from the passage that answer the specific question. Do not paraphrase.',
       'Check: does your answer directly answer the question word? Check the word count.',
