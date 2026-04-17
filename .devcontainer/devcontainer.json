@@ -11,7 +11,7 @@
       "onAutoForward": "openBrowser"
     }
   },
-  "postCreateCommand": "npm install -g pnpm && pnpm install",
+  "postCreateCommand": "corepack enable && corepack prepare pnpm@latest --activate && pnpm install",
   "postStartCommand": "docker compose -f docker/docker-compose.yml up -d && sleep 3 && cd apps/web && pnpm db:push",
   "remoteEnv": {
     "NEXT_PUBLIC_OLLAMA_ENABLED": "false"
