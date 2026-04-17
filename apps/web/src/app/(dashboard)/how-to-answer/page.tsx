@@ -12,22 +12,22 @@ const SKILLS = [
     href: '/how-to-answer/reading',
     label: 'Reading',
     icon: '📖',
-    description: 'True/False/Not Given, matching headings, sentence completion, and more.',
-    available: false,
+    description: '9 question types — True/False/Not Given, matching headings, sentence completion, and more.',
+    available: true,
   },
   {
     href: '/how-to-answer/writing',
     label: 'Writing',
     icon: '✍️',
-    description: 'Opinion, discussion, problem/solution, and two-part question types.',
-    available: false,
+    description: 'Task 1 (6 chart types) + Task 2 (opinion, discussion, problem/solution, two-part).',
+    available: true,
   },
   {
     href: '/how-to-answer/speaking',
     label: 'Speaking',
     icon: '🎤',
-    description: 'Part 1 short answers, Part 2 long turn, Part 3 discussion strategies.',
-    available: false,
+    description: 'Part 1 short answers, Part 2 long turn, Part 3 discussion — real exam strategies.',
+    available: true,
   },
 ]
 

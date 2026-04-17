@@ -69,7 +69,10 @@ english-learning-app/
 │       │   │   ├── speaking.ts           # getAllSpeakingTopics
 │       │   │   └── vocabulary.ts         # findWord, saveVocabularyWord
 │       │   ├── guides/                   # Static content for How to Answer (no DB, no AI)
-│       │   │   └── listening.ts          # LISTENING_GUIDES — 7 question types, steps/strategies/mistakes
+│       │   │   ├── listening.ts          # LISTENING_GUIDES — 7 question types, steps/strategies/mistakes
+│       │   │   ├── reading.ts            # READING_GUIDES — 9 question types
+│       │   │   ├── writing.ts            # WRITING_TASK1_GUIDES (6 types) + WRITING_TASK2_GUIDES (4 types)
+│       │   │   └── speaking.ts           # SPEAKING_GUIDES — 3 parts (Part 1, Part 2, Part 3)
 │       │   └── ielts/                    # Core domain logic (no Next.js imports)
 │       │       ├── examiner/             # Part 1 (fn+topic), Part 2, Part 3 prompts + feedback
 │       │       ├── feedback/             # filler-detector.ts (Phase 2)
@@ -172,13 +175,13 @@ docker compose -f docker/docker-compose.yml up -d
 - AWL browser at `/vocabulary` — searchable, filterable by domain
 - **Vocabulary Search** (Phase 3): `VocabSearch` component + `POST /api/vocabulary/search`; checks DB first (`findWord`), falls back to AI generation (`VOCAB_SEARCH_PROMPT`); auto-detects domains from known list; "Add to Library" button for AI-generated cards; already-saved words show read-only
 
-**How to Answer Guide** (Phase 3)
-- Route `/how-to-answer` — skill landing page; Listening available, Reading/Writing/Speaking marked "Coming soon"
-- Route `/how-to-answer/listening` — accordion guide covering all 7 real IELTS Listening question types
-- Content is fully static (no DB, no AI); lives in `lib/guides/listening.ts` as `LISTENING_GUIDES: QuestionTypeGuide[]`
-- Each question type includes: description, word limit callout, step-by-step approach, key strategies, common mistakes
-- A "CRITICAL SKILL" callout at the top covers reading questions before the recording starts; all advice is computer-based test (CBT) specific — scratch paper for notes, typing answers, on-screen navigation, flagging questions
-- Future skills (Reading, Writing, Speaking) follow the same pattern: add `lib/guides/<skill>.ts` + `how-to-answer/<skill>/page.tsx` + a client `<skill>-guide.tsx`
+**How to Answer Guide** (Phase 3 — all 4 skills complete)
+- Route `/how-to-answer` — skill landing page linking to all four skill guides
+- Route `/how-to-answer/listening` — accordion guide covering all 7 real IELTS Listening question types; "CRITICAL SKILL" callout for CBT pre-recording reading; all advice is computer-based (scratch paper, typing, clicking, flagging)
+- Route `/how-to-answer/reading` — 9 question types (T/F/NG, Y/N/NG, Matching Headings, Matching Information, Multiple Choice, Completion, Sentence Completion, Diagram Labelling, Short Answer)
+- Route `/how-to-answer/writing` — two-section layout: Task 1 (6 chart types: Bar/Line, Pie, Table, Process, Map, Mixed) + Task 2 (4 essay types: Opinion, Discussion, Problem/Solution, Two-Part); uses blue accent for Task 1, purple for Task 2
+- Route `/how-to-answer/speaking` — 3 parts; Part 1 (green), Part 2 (blue), Part 3 (purple); real exam focus, not app-specific
+- Content is fully static (no DB, no AI); pattern: `lib/guides/<skill>.ts` → `how-to-answer/<skill>/page.tsx` (server) → `<skill>-guide.tsx` (client, accordion)
 - See [PDR-0011](./docs/pdr/0011-how-to-answer-guide.md) for design rationale
 
 **Target Profile System**
@@ -201,7 +204,7 @@ docker compose -f docker/docker-compose.yml up -d
 | 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
-| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (Listening) ✅ · Target Switcher ⬜ · Analytics ⬜ |
+| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Target Switcher ⬜ · Analytics ⬜ |
 | 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.
