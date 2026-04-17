@@ -1,13 +1,11 @@
 import { generateText } from 'ai'
-import { createOllama } from 'ollama-ai-provider'
 import { FEEDBACK_SYSTEM_PROMPT } from '@/lib/ielts/examiner/part2-prompt'
 import type { TranscriptMessage, FeedbackResult } from '@/lib/db/schema'
-
-const ollama = createOllama({
-  baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/api',
-})
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
 
 export async function POST(req: Request) {
+  if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
+
   const { transcript, skill, targetBand = 6.5 } = (await req.json()) as {
     transcript: TranscriptMessage[]
     skill: string
@@ -20,7 +18,7 @@ export async function POST(req: Request) {
     .join('\n\n')
 
   const { text } = await generateText({
-    model: ollama(process.env.OLLAMA_MODEL ?? 'mistral:latest'),
+    model: ollamaModel(),
     system: FEEDBACK_SYSTEM_PROMPT,
     prompt: `Target band: ${targetBand}\nSkill: ${skill}\n\nTranscript:\n${transcriptText}`,
   })

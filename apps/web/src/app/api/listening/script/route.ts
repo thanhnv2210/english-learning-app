@@ -1,11 +1,7 @@
 import { generateText } from 'ai'
-import { createOllama } from 'ollama-ai-provider'
 import { LISTENING_SCRIPT_PROMPT } from '@/lib/ielts/listening/prompts'
 import type { ListeningTurn, ListeningQuestion } from '@/lib/db/schema'
-
-const ollama = createOllama({
-  baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/api',
-})
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
 
 export type GeneratedScript = {
   title: string
@@ -14,12 +10,13 @@ export type GeneratedScript = {
 }
 
 export async function POST(req: Request) {
+  if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
+
   const { domain } = await req.json()
   if (!domain) return Response.json({ error: 'domain is required' }, { status: 400 })
 
-  const model = process.env.OLLAMA_MODEL ?? 'mistral:latest'
   const { text } = await generateText({
-    model: ollama(model),
+    model: ollamaModel(),
     prompt: LISTENING_SCRIPT_PROMPT(domain),
   })
 

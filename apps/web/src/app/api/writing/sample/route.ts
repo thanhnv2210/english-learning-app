@@ -1,10 +1,6 @@
 import { streamText } from 'ai'
-import { createOllama } from 'ollama-ai-provider'
 import { SAMPLE_RESPONSE_PROMPT } from '@/lib/ielts/writing/prompts'
-
-const ollama = createOllama({
-  baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/api',
-})
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
 
 export type SampleResponse = {
   essay: string
@@ -13,12 +9,13 @@ export type SampleResponse = {
 }
 
 export async function POST(req: Request) {
+  if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
+
   const { topic, targetBand } = await req.json()
   if (!topic) return Response.json({ error: 'topic is required' }, { status: 400 })
 
-  const model = process.env.OLLAMA_MODEL ?? 'qwen2.5-coder:7b'
   const result = streamText({
-    model: ollama(model),
+    model: ollamaModel(),
     system: SAMPLE_RESPONSE_PROMPT(targetBand ?? 6.5),
     prompt: `Essay topic: ${topic}`,
   })

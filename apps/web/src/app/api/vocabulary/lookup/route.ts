@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateText } from 'ai'
-import { createOllama } from 'ollama-ai-provider'
 import { findWords } from '@/lib/db/vocabulary'
 import { VOCAB_DETECTION_PROMPT, VOCAB_CARD_PROMPT } from '@/lib/ielts/vocabulary/prompts'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
-
-const ollama = createOllama({ baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434' })
-const MODEL = process.env.OLLAMA_MODEL ?? 'qwen2.5-coder:7b'
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
 
 type DetectedWord = { original: string; academic: string }
 
 export async function POST(req: NextRequest) {
+  if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
+
   const { text } = await req.json()
   if (!text || typeof text !== 'string' || !text.trim()) {
     return NextResponse.json({ words: [] })
@@ -20,7 +19,7 @@ export async function POST(req: NextRequest) {
   let detected: DetectedWord[] = []
   try {
     const { text: raw } = await generateText({
-      model: ollama(MODEL),
+      model: ollamaModel(),
       prompt: VOCAB_DETECTION_PROMPT(text),
     })
     const match = raw.match(/\{[\s\S]*\}/)
@@ -52,7 +51,7 @@ export async function POST(req: NextRequest) {
     // AI-generate a card for words not in DB
     try {
       const { text: raw } = await generateText({
-        model: ollama(MODEL),
+        model: ollamaModel(),
         prompt: VOCAB_CARD_PROMPT(academic, original),
       })
       const match = raw.match(/\{[\s\S]*\}/)

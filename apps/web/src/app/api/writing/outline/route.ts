@@ -1,12 +1,10 @@
 import { streamText } from 'ai'
-import { createOllama } from 'ollama-ai-provider'
 import { OUTLINE_CRITIQUE_PROMPT } from '@/lib/ielts/writing/prompts'
-
-const ollama = createOllama({
-  baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/api',
-})
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
 
 export async function POST(req: Request) {
+  if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
+
   const { topic, outline } = (await req.json()) as {
     topic: string
     outline: {
@@ -25,7 +23,7 @@ export async function POST(req: Request) {
   ].join('\n')
 
   const result = streamText({
-    model: ollama(process.env.OLLAMA_MODEL ?? 'qwen2.5-coder:7b'),
+    model: ollamaModel(),
     system: OUTLINE_CRITIQUE_PROMPT(topic),
     prompt: outlineText,
   })

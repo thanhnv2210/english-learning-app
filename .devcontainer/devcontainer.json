@@ -1,0 +1,28 @@
+{
+  "name": "IELTS Learning App",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [3000, 5432],
+  "portsAttributes": {
+    "3000": {
+      "label": "Next.js App",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postCreateCommand": "npm install -g pnpm && pnpm install",
+  "postStartCommand": "docker compose -f docker/docker-compose.yml up -d && sleep 3 && cd apps/web && pnpm db:push",
+  "remoteEnv": {
+    "NEXT_PUBLIC_OLLAMA_ENABLED": "false"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  }
+}
