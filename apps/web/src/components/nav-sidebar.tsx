@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: '/vocabulary', label: 'Vocabulary', icon: '📚' },
   { href: '/history', label: 'History', icon: '🕐' },
   { href: '/how-to-answer', label: 'How to Answer', icon: '💡' },
+  { href: '/topic-ideas', label: 'Topic Ideas', icon: '🗂️' },
 ]
 
 export function NavSidebar() {

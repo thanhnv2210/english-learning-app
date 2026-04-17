@@ -184,6 +184,15 @@ docker compose -f docker/docker-compose.yml up -d
 - Content is fully static (no DB, no AI); pattern: `lib/guides/<skill>.ts` → `how-to-answer/<skill>/page.tsx` (server) → `<skill>-guide.tsx` (client, accordion)
 - See [PDR-0011](./docs/pdr/0011-how-to-answer-guide.md) for design rationale
 
+**Topic Ideas** (Phase 3 — 2 topics live, 8 pending)
+- Route `/topic-ideas` — skill selector landing (Listening / Reading / Writing / Speaking)
+- Route `/topic-ideas/[skill]` — grid of topic cards for the selected skill
+- Route `/topic-ideas/[skill]/[topicId]` — framework selector (pill tabs) + full detail view
+- Framework detail shows: numbered steps with amber vocabulary pills + a skill-specific example (chat bubbles for Speaking/Listening, annotated passage for Reading, prompt + sample paragraph for Writing)
+- All content is fully static — `lib/topic-ideas/index.ts` holds `TOPICS: Topic[]` with `TopicFramework[]` per topic, each framework containing 4 skill-specific examples
+- 2 topics built: Health & Disease (3 frameworks: Disease Analysis, Healthcare System, Mental Health) · Education & Learning (3 frameworks: Education System Analysis, Learning Methods, Access & Equity)
+- 8 topics pending: Technology & Innovation, Environment & Climate, Economy & Work, Society & Culture, Media & Communication, Government & Policy, Science & Research, Urban Development
+
 **Target Profile System**
 - `users.targetProfile` stored in DB; `parseTargetBand()` parses `IELTS_6.5` → `6.5`
 - `targetBand` flows into all feedback prompts
@@ -204,7 +213,7 @@ docker compose -f docker/docker-compose.yml up -d
 | 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
-| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Target Switcher ⬜ · Analytics ⬜ |
+| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (2/10 topics) 🔄 · Target Switcher ⬜ · Analytics ⬜ |
 | 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.
