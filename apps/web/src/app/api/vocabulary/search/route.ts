@@ -1,16 +1,14 @@
 import { generateText } from 'ai'
-import { createOllama } from 'ollama-ai-provider'
 import { findWord } from '@/lib/db/vocabulary'
 import { getAllDomains } from '@/lib/db/domains'
 import { VOCAB_SEARCH_PROMPT } from '@/lib/ielts/vocabulary/prompts'
 import type { VocabWordFamily, VocabSynonym, VocabExamples } from '@/lib/db/schema'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
-
-const ollama = createOllama({
-  baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/api',
-})
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
 
 export async function POST(req: Request) {
+  if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
+
   const { word } = await req.json()
   if (!word || typeof word !== 'string') {
     return Response.json({ error: 'word is required' }, { status: 400 })
@@ -28,9 +26,8 @@ export async function POST(req: Request) {
   const allDomains = await getAllDomains()
   const domainNames = allDomains.map((d) => d.name)
 
-  const model = process.env.OLLAMA_MODEL ?? 'mistral:latest'
   const { text } = await generateText({
-    model: ollama(model),
+    model: ollamaModel(),
     prompt: VOCAB_SEARCH_PROMPT(trimmed, domainNames),
   })
 

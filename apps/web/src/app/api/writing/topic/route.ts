@@ -1,11 +1,7 @@
 import { generateText } from 'ai'
-import { createOllama } from 'ollama-ai-provider'
 import { TOPIC_GENERATION_PROMPT } from '@/lib/ielts/writing/prompts'
 import { saveWritingTopic } from '@/lib/db/writing'
-
-const ollama = createOllama({
-  baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/api',
-})
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
 
 export type GeneratedTopic = {
   prompt: string
@@ -13,12 +9,13 @@ export type GeneratedTopic = {
 }
 
 export async function POST(req: Request) {
+  if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
+
   const { domain } = await req.json()
   if (!domain) return Response.json({ error: 'domain is required' }, { status: 400 })
 
-  const model = process.env.OLLAMA_MODEL ?? 'qwen2.5-coder:7b'
   const { text } = await generateText({
-    model: ollama(model),
+    model: ollamaModel(),
     prompt: TOPIC_GENERATION_PROMPT(domain),
   })
 
