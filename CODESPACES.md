@@ -10,7 +10,8 @@ When the Codespace starts, the devcontainer runs these steps for you:
 
 | Step | What runs | When |
 |------|-----------|------|
-| Install pnpm + dependencies | `npm install -g pnpm && pnpm install` | On container create |
+| Install pnpm + dependencies | `sudo corepack enable && pnpm install` | On container create |
+| Create `.env.local` with DB connection | `printf ... > apps/web/.env.local` | On container create |
 | Start PostgreSQL (Docker-in-Docker) | `docker compose up -d` | On container start |
 | Push DB schema | `cd apps/web && pnpm db:push` | On container start |
 | Set AI flag | `NEXT_PUBLIC_OLLAMA_ENABLED=false` | Environment variable |
@@ -23,55 +24,44 @@ You only need to follow the steps below.
 
 1. Go to the repository on GitHub
 2. Click **Code → Codespaces → Create codespace on master**
-3. Wait for the container to build and all automatic steps to complete (~2–3 minutes)
+3. Wait for the container to build and all automatic steps to complete (~3–5 minutes)
 
-> You will see a terminal running `docker compose up -d` and `pnpm db:push` automatically. Wait for both to finish before continuing.
+> Watch the terminal — it will run `docker compose up -d` and `pnpm db:push` automatically. Wait for both to finish before continuing.
 
 ---
 
-## Step 2 — Verify pnpm is available
+## Step 2 — Verify the setup
 
 Open a terminal and run:
 
 ```bash
-pnpm --version
+pnpm --version          # should print e.g. 10.x.x
+cat apps/web/.env.local # should show DATABASE_URL and NEXT_PUBLIC_OLLAMA_ENABLED
+docker ps               # should show a running postgres:16-alpine container
 ```
 
-If you see a version number, skip ahead to Step 3 — Create the environment file.
-
-If you get `bash: pnpm: command not found`, run:
+If `pnpm` is not found (older Codespace created before this fix):
 
 ```bash
 sudo corepack enable && corepack prepare pnpm@latest --activate
 ```
 
-Then verify again:
+If `.env.local` is missing (older Codespace):
 
 ```bash
-pnpm --version   # should print e.g. 10.x.x
+printf 'DATABASE_URL=postgresql://postgres:postgres@localhost:5433/ielts_dev\nNEXT_PUBLIC_OLLAMA_ENABLED=false\n' > apps/web/.env.local
 ```
 
-> **Why this happens:** `corepack` is built into Node.js 22 and is the recommended way to install pnpm. If the Codespace was created before this fix was applied, run the two commands above once manually. New Codespaces run this automatically via `postCreateCommand`.
+If PostgreSQL is not running:
+
+```bash
+docker compose -f docker/docker-compose.yml up -d
+sleep 3 && cd apps/web && pnpm db:push
+```
 
 ---
 
-## Step 3 — Create the environment file
-
-
-Open a terminal in the Codespace and run:
-
-```bash
-cat > apps/web/.env.local << 'EOF'
-DATABASE_URL=postgresql://postgres:postgres@localhost:5433/ielts_dev
-NEXT_PUBLIC_OLLAMA_ENABLED=false
-EOF
-```
-
-> **Why port 5433?** The Docker-in-Docker PostgreSQL container maps its internal port 5432 to host port 5433. The app connects via the host port.
-
----
-
-## Step 4 — Seed the database
+## Step 3 — Seed the database
 
 Run the seed scripts to populate required data:
 
@@ -88,14 +78,14 @@ Verify the data was inserted:
 ```bash
 docker exec $(docker ps -q --filter ancestor=postgres:16-alpine) \
   psql -U postgres -d ielts_dev -c \
-  "SELECT 'writing_domains' AS table, count(*)::text FROM writing_domains
+  "SELECT 'writing_domains' AS tbl, count(*)::text FROM writing_domains
    UNION ALL SELECT 'vocabulary_words', count(*)::text FROM vocabulary_words
    UNION ALL SELECT 'speaking_topics', count(*)::text FROM speaking_topics;"
 ```
 
 Expected output:
 ```
-     table       | count
+      tbl        | count
 -----------------+-------
  writing_domains |    50
 vocabulary_words |   ...
@@ -104,7 +94,7 @@ vocabulary_words |   ...
 
 ---
 
-## Step 5 — Start the app
+## Step 4 — Start the app
 
 ```bash
 cd apps/web
@@ -123,9 +113,9 @@ Static pages work fully without AI:
 
 ---
 
-## Step 6 (optional) — Enable AI features via ngrok
+## Step 5 (optional) — Enable AI features via ngrok
 
-AI features (Speaking, Writing, Reading, Listening generation) require Ollama. Since Ollama cannot run inside a Codespace, you connect it from your local machine via ngrok.
+AI features (Speaking, Writing, Reading, Listening generation) require Ollama. Since Ollama cannot run inside a Codespace, connect it from your local machine via ngrok.
 
 ### On your local machine
 
@@ -147,15 +137,10 @@ Forwarding  https://abc123.ngrok-free.app -> http://localhost:11434
 
 ```bash
 # Replace the URL with your actual ngrok URL
-cat > apps/web/.env.local << 'EOF'
-DATABASE_URL=postgresql://postgres:postgres@localhost:5433/ielts_dev
-OLLAMA_BASE_URL=https://abc123.ngrok-free.app/api
-OLLAMA_MODEL=qwen2.5-coder:7b
-NEXT_PUBLIC_OLLAMA_ENABLED=true
-EOF
+printf 'DATABASE_URL=postgresql://postgres:postgres@localhost:5433/ielts_dev\nOLLAMA_BASE_URL=https://abc123.ngrok-free.app/api\nOLLAMA_MODEL=qwen2.5-coder:7b\nNEXT_PUBLIC_OLLAMA_ENABLED=true\n' > apps/web/.env.local
 ```
 
-Stop and restart the dev server to pick up the new env vars:
+Restart the dev server to pick up the new env vars:
 
 ```bash
 # Ctrl+C to stop pnpm dev, then:
@@ -170,56 +155,55 @@ The amber banner disappears and all AI features become available.
 
 ## Troubleshooting
 
-### Container creation failed (Docker-in-Docker error)
+### Container creation failed — Docker-in-Docker / moby error
 
-If the Codespace fails to build with an error like:
 ```
 Feature "Docker (Docker-in-Docker)" failed to install!
 The 'moby' option is not supported on Debian 'trixie'
 ```
 
-This is fixed in the current `devcontainer.json` (`"moby": false`). If you still see it, delete the Codespace and create a new one — the fix only takes effect on a fresh container build.
+Fixed in the current `devcontainer.json` (`"moby": false`). Delete the Codespace and create a new one.
 
 ---
 
-### "Cannot connect to database"
+### `db:push` fails — "connection url required"
 
-The PostgreSQL container may not have started yet. Check:
-
-```bash
-docker ps   # should show a postgres:16-alpine container
+```
+Error  Either connection "url" or "host", "database" are required
 ```
 
-If it's not running:
+`.env.local` was missing when `postStartCommand` ran. Create it now and re-push:
 
 ```bash
-docker compose -f docker/docker-compose.yml up -d
-sleep 3
+printf 'DATABASE_URL=postgresql://postgres:postgres@localhost:5433/ielts_dev\nNEXT_PUBLIC_OLLAMA_ENABLED=false\n' > apps/web/.env.local
 cd apps/web && pnpm db:push
 ```
 
-### "Internal Server Error" on first page load
+---
 
-The `.next` cache is stale. Clear it:
+### "Internal Server Error" on first page load
 
 ```bash
 cd apps/web && pnpm dev:clean
 ```
 
+---
+
 ### Port 3000 not forwarded
 
 Go to the **Ports** tab in VS Code (bottom panel), find port 3000, right-click → **Open in Browser**.
 
+---
+
 ### AI routes return 503
 
-Check that:
 1. `NEXT_PUBLIC_OLLAMA_ENABLED=true` is in `.env.local`
-2. `OLLAMA_BASE_URL` points to your current ngrok HTTPS URL (with `/api` suffix)
+2. `OLLAMA_BASE_URL` ends with `/api` and uses your current ngrok HTTPS URL
 3. Ollama is running locally (`ollama serve`)
 4. The model is installed (`ollama list` — should show `qwen2.5-coder:7b`)
-5. You restarted the dev server after editing `.env.local`
+5. Dev server was restarted after editing `.env.local`
 
-Test the Ollama connection directly from the Codespace:
+Test the Ollama connection directly:
 
 ```bash
 curl https://abc123.ngrok-free.app/api/tags   # replace with your ngrok URL
@@ -229,7 +213,7 @@ Should return a JSON list of installed models.
 
 ---
 
-## Quick reference — ports in use
+## Quick reference — ports
 
 | Port | Service |
 |------|---------|

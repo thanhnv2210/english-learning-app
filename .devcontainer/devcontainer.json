@@ -13,7 +13,7 @@
       "onAutoForward": "openBrowser"
     }
   },
-  "postCreateCommand": "sudo corepack enable && corepack prepare pnpm@latest --activate && pnpm install",
+  "postCreateCommand": "sudo corepack enable && corepack prepare pnpm@latest --activate && pnpm install && printf 'DATABASE_URL=postgresql://postgres:postgres@localhost:5433/ielts_dev\\nNEXT_PUBLIC_OLLAMA_ENABLED=false\\n' > apps/web/.env.local",
   "postStartCommand": "docker compose -f docker/docker-compose.yml up -d && sleep 3 && cd apps/web && pnpm db:push",
   "remoteEnv": {
     "NEXT_PUBLIC_OLLAMA_ENABLED": "false"
