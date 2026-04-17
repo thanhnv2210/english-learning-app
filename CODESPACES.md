@@ -42,7 +42,7 @@ If you see a version number, skip ahead to Step 3 — Create the environment fil
 If you get `bash: pnpm: command not found`, run:
 
 ```bash
-corepack enable && corepack prepare pnpm@latest --activate
+sudo corepack enable && corepack prepare pnpm@latest --activate
 ```
 
 Then verify again:
