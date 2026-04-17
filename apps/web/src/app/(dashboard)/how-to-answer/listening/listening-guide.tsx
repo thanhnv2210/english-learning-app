@@ -13,8 +13,8 @@ const PRE_LISTENING_STEPS = [
     body: 'The stem tells you the topic and what to listen for. Options and gaps give detail, but the stem gives direction. One second on the stem is worth three seconds on the options.',
   },
   {
-    heading: 'You cannot mark the screen — use your scratch paper',
-    body: 'On a computer-based test you cannot underline or annotate the questions on screen. Instead, use the scratch paper provided. For each question, jot one keyword only — a name, a number, an action, a place. One strong keyword is enough to trigger your attention when the speaker reaches that point.',
+    heading: 'Highlight keywords directly on screen — then use scratch paper for the rest',
+    body: 'The IELTS computer interface supports highlighting: left-click and drag over any text, then right-click and select "Highlight" to mark it yellow. Use this to mark the key noun or verb in each question before the recording starts. For notes that go beyond what you can highlight — predicted word type, shorthand symbols, a rough diagram sketch — use the scratch paper provided.',
   },
   {
     heading: 'Use shorthand symbols on your scratch paper',
