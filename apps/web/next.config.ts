@@ -12,7 +12,13 @@ console.log('[env]', {
 const allowedOrigins: string[] = []
 if (process.env.CODESPACE_NAME) {
   const domain = process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN ?? 'app.github.dev'
-  allowedOrigins.push(`${process.env.CODESPACE_NAME}-3000.${domain}`)
+  // Allow both access methods in Codespaces:
+  // - VS Code port forwarding → browser sees localhost:3000
+  // - Direct Codespaces browser URL → origin is the *.app.github.dev domain
+  allowedOrigins.push(
+    'localhost:3000',
+    `${process.env.CODESPACE_NAME}-3000.${domain}`
+  )
 }
 
 const nextConfig: NextConfig = {
