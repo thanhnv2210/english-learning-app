@@ -8,12 +8,15 @@ AI features (Ollama) are **disabled by default** in Codespaces because Ollama ca
 
 ### 1. On your local machine
 
-Install and start Ollama with the required model:
+Install the required model and start Ollama with all origins allowed:
 
 ```bash
-ollama serve
 ollama pull qwen2.5-coder:7b
+OLLAMA_ORIGINS='*' OLLAMA_HOST=0.0.0.0 ollama serve
 ```
+
+> `OLLAMA_ORIGINS='*'` — allows requests from the ngrok domain (Ollama blocks non-localhost origins by default).
+> `OLLAMA_HOST=0.0.0.0` — binds Ollama to all interfaces so ngrok can forward traffic to it.
 
 Expose Ollama via ngrok:
 

@@ -120,13 +120,15 @@ AI features (Speaking, Writing, Reading, Listening generation) require Ollama. S
 ### On your local machine
 
 ```bash
-# 1. Make sure Ollama is running with the required model
-ollama serve
+# 1. Install the required model and start Ollama with all origins allowed
 ollama pull qwen2.5-coder:7b
+OLLAMA_ORIGINS='*' OLLAMA_HOST=0.0.0.0 ollama serve
 
-# 2. Expose port 11434 via ngrok
+# 2. In a separate terminal, expose port 11434 via ngrok
 ngrok http 11434
 ```
+
+> **Why these flags?** By default Ollama only accepts localhost connections and rejects requests from other hosts (including ngrok domains) with a 403. `OLLAMA_ORIGINS='*'` removes the origin restriction; `OLLAMA_HOST=0.0.0.0` binds to all interfaces so ngrok can reach it.
 
 Copy the HTTPS forwarding URL from ngrok output, e.g.:
 ```
@@ -206,7 +208,7 @@ Go to the **Ports** tab in VS Code (bottom panel), find port 3000, right-click â
 Test the Ollama connection directly:
 
 ```bash
-curl https://abc123.ngrok-free.app/api/tags   # replace with your ngrok URL
+curl https://abc123.ngrok-free.app/api/tags
 ```
 
 Should return a JSON list of installed models.

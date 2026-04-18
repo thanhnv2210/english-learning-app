@@ -132,7 +132,7 @@ docker compose -f docker/docker-compose.yml up -d
 
 A `.devcontainer/` config is provided. PostgreSQL starts automatically; AI features are **disabled by default** (`NEXT_PUBLIC_OLLAMA_ENABLED=false`). To re-enable:
 
-1. On your local machine: `ollama serve` + `ngrok http 11434` (copy the HTTPS URL)
+1. On your local machine: `OLLAMA_ORIGINS='*' OLLAMA_HOST=0.0.0.0 ollama serve` + `ngrok http 11434` (copy the HTTPS URL)
 2. In Codespace `apps/web/.env.local`: set `OLLAMA_BASE_URL=<ngrok-url>/api` and `NEXT_PUBLIC_OLLAMA_ENABLED=true`
 3. Restart: `pnpm dev:clean`
 
