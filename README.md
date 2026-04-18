@@ -207,9 +207,9 @@ Ollama cannot run inside a Codespace. To re-enable AI, point the app at an Ollam
 **Step 1 — on your local machine:**
 
 ```bash
-ollama serve
 ollama pull qwen2.5-coder:7b
-ngrok http 11434          # copy the HTTPS forwarding URL
+OLLAMA_ORIGINS='*' OLLAMA_HOST=0.0.0.0 ollama serve
+ngrok http 11434          # in a separate terminal — copy the HTTPS forwarding URL
 ```
 
 **Step 2 — in your Codespace terminal:**
