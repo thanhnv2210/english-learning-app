@@ -83,6 +83,10 @@
 - [x] **3.9 — Connected Speech Analyser**: `/connected-speech`; `POST /api/connected-speech/analyse`; detects 7 phenomena; Full sentence / Phrase-by-phrase toggle; pronunciation tips panel; reference accordion; save/filter/delete history in `connected_speech_analyses` table
   - [x] `connected_speech_analyses` DB table + `lib/db/connected-speech.ts` helpers + `app/actions/connected-speech.ts` server actions
   - [x] `lib/ielts/connected-speech/prompts.ts`: `CONNECTED_SPEECH_PROMPT`, types, `PHENOMENON_META`, `getPhenomenonColor` safe getter
+- [x] **3.10 — Collocation Library**: `/collocations`; `POST /api/collocations/search`; two modes — "By Word" (up to 8 collocations) and "By Phrase" (single validation); AI suggests `Writing_1`/`Writing_2`/`Speaking` skill tags, user can toggle before/after save; library with skill filter + text search + inline skill editing + delete on hover
+  - [x] `collocation_entries` DB table + `lib/db/collocations.ts` helpers + `app/actions/collocations.ts` server actions
+  - [x] `lib/ielts/collocations/prompts.ts`: `COLLOCATION_BY_WORD_PROMPT`, `COLLOCATION_BY_PHRASE_PROMPT`, `CollocationResult` type
+- [x] **3.11 — Nav Sidebar Reorganisation**: flat list replaced with collapsible groups — **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech), **Guides** (How to Answer, Topic Ideas); Dashboard and History standalone; active group auto-opens on load
 
 ---
 

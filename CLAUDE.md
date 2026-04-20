@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), and Connected Speech Analyser. Still pending: Target Switcher UI, Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
+Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, and Collocation Library. Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides). Still pending: Target Switcher UI, Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
 
 ## Tech Stack
 
@@ -38,6 +38,7 @@ english-learning-app/
 │       │   │   ├── writing/              # Writing Task 2
 │       │   │   ├── reading/              # Reading module (Phase 3)
 │       │   │   ├── vocabulary/           # AWL browser
+│       │   │   ├── collocations/         # Collocation Library (search + saved)
 │       │   │   ├── history/              # Session history
 │       │   │   └── how-to-answer/        # Static exam guides (skill landing + per-skill pages)
 │       │   │       └── listening/        # Listening guide — 7 IELTS question types
@@ -48,7 +49,8 @@ english-learning-app/
 │       │   │   ├── listening.ts          # saveScriptToLibrary, pickRandomScript
 │       │   │   ├── writing.ts            # saveTopicToLibrary, pickRandomTopic, listTopicsByDomain
 │       │   │   ├── vocabulary.ts         # addWordToLibrary
-│       │   │   └── connected-speech.ts   # saveAnalysisAction, listRecentAnalyses, listByPhenomenon, deleteAnalysisAction
+│       │   │   ├── connected-speech.ts   # saveAnalysisAction, listRecentAnalyses, listByPhenomenon, deleteAnalysisAction
+│       │   │   └── collocations.ts       # saveCollocationAction, listCollocationAction, updateCollocationSkillsAction, deleteCollocationAction
 │       │   └── api/                      # Backend API routes (BFF)
 │       │       ├── chat/                 # POST — examiner streaming (Part 1/2/3 + topic)
 │       │       ├── feedback/             # POST — post-session band scoring
@@ -57,7 +59,8 @@ english-learning-app/
 │       │       ├── vocabulary/lookup/    # POST — informal→academic word swaps
 │       │       ├── vocabulary/search/    # POST — search/generate full vocabulary card
 │       │       ├── writing/             # POST — multi-pass auditor (6 routes) + topic generation
-│       │       └── connected-speech/analyse/ # POST — identify connected speech phenomena (JSON)
+│       │       ├── connected-speech/analyse/ # POST — identify connected speech phenomena (JSON)
+│       │       └── collocations/search/ # POST — search by word (array) or phrase (single card)
 │       ├── components/                   # Shared React components
 │       │   ├── mic-input.tsx             # Mic button + interim transcript (Phase 2)
 │       │   ├── vocabulary-drawer.tsx     # AWL word-swap sidebar
@@ -72,7 +75,8 @@ english-learning-app/
 │       │   │   ├── writing.ts            # saveWritingTopic, getRandomTopicByDomain, getTopicsByDomain, getWritingTopicLibraryCounts
 │       │   │   ├── speaking.ts           # getAllSpeakingTopics
 │       │   │   ├── vocabulary.ts         # findWord, saveVocabularyWord
-│       │   │   └── connected-speech.ts   # saveAnalysis, getRecentAnalyses, getTopByPhenomenon, deleteAnalysis
+│       │   │   ├── connected-speech.ts   # saveAnalysis, getRecentAnalyses, getTopByPhenomenon, deleteAnalysis
+│       │   │   └── collocations.ts       # findCollocation, saveCollocation, getAllCollocations, updateCollocationSkills, deleteCollocation
 │       │   ├── guides/                   # Static content for How to Answer (no DB, no AI)
 │       │   │   ├── listening.ts          # LISTENING_GUIDES — 7 question types, steps/strategies/mistakes
 │       │   │   ├── reading.ts            # READING_GUIDES — 9 question types
@@ -85,7 +89,8 @@ english-learning-app/
 │       │       ├── listening/            # prompts.ts — LISTENING_SCRIPT_PROMPT, scoreListening, estimateBand
 │       │       ├── timer/               # use-timer.ts, use-speech-input.ts (Phase 2)
 │       │       ├── vocabulary/          # AWL prompts, DB queries, VOCAB_SEARCH_PROMPT
-│       │       └── connected-speech/    # prompts.ts — CONNECTED_SPEECH_PROMPT, types, PHENOMENON_META, getPhenomenonColor
+│       │       ├── connected-speech/    # prompts.ts — CONNECTED_SPEECH_PROMPT, types, PHENOMENON_META, getPhenomenonColor
+│       │       └── collocations/        # prompts.ts — COLLOCATION_BY_WORD_PROMPT, COLLOCATION_BY_PHRASE_PROMPT, CollocationResult
 │       └── types/                        # App-local TypeScript types
 ├── packages/
 │   └── shared/src/types/                 # TargetProfile, FeedbackSchema (cross-workspace)
@@ -232,6 +237,17 @@ See `.devcontainer/README.md` for full setup steps.
 - `connected_speech_analyses` table: `id`, `originalText`, `transformedText`, `instances` (jsonb), `phenomena` (jsonb — deduplicated list for filtering), `createdAt`
 - Recommended model: `llama3.1:8b` or `gemma2:9b` (general-purpose); `qwen2.5-coder:7b` lacks phonetic knowledge
 
+**Collocation Library** (Phase 3 complete)
+- Route `/collocations` — standalone tool; no session required
+- Two search modes via `POST /api/collocations/search`: **By Word** (returns up to 8 collocations containing the word) and **By Phrase** (validates a specific phrase, or returns invalid reason)
+- Uses `generateText` (not streaming) — needs full JSON before rendering; strips markdown fences before `JSON.parse`
+- Each collocation card: `phrase`, `type` (e.g. `verb+noun`), `skills` (`Writing_1` | `Writing_2` | `Speaking`), `examples` (2–3 sentences)
+- AI suggests skills; user can toggle any skill on/off before saving
+- `collocation_entries` table: `id`, `phrase` (unique), `type`, `skills` (jsonb), `examples` (jsonb), `createdAt`
+- Library: search by phrase/type/example text; filter by skill chip; edit skills inline post-save; delete on hover
+- `CollocationSkill` type exported from `schema.ts`: `'Writing_1' | 'Writing_2' | 'Speaking'`
+- Two AI prompts: `COLLOCATION_BY_WORD_PROMPT(word)` → `{ collocations: CollocationResult[] }`, `COLLOCATION_BY_PHRASE_PROMPT(phrase)` → `{ valid, phrase, type, suggestedSkills, examples } | { valid: false, reason }`
+
 **Target Profile System**
 - `users.targetProfile` stored in DB; `parseTargetBand()` parses `IELTS_6.5` → `6.5`
 - `targetBand` flows into all feedback prompts
@@ -244,7 +260,8 @@ See `.devcontainer/README.md` for full setup steps.
 - `FeedbackGenerator` runs *after* a session, not during, to maintain examiner strictness
 - Web Speech API (not Whisper) chosen for STT: zero setup, free, native in Chrome
 - All three content library tables (`reading_passages`, `listening_scripts`, `writing_topics`) share a `rank` column (1–5, default 1, DB-enforced CHECK constraint); sort order is `rank DESC, createdAt DESC` — see [PDR-0010](./docs/pdr/0010-library-rank-ordering.md)
-- Centralised Ollama client (`src/lib/ai-client.ts`) — single source for `createOllama` config, `OLLAMA_ENABLED` flag, and disabled-response helper; all 15 API routes + 1 server action import from here
+- Centralised Ollama client (`src/lib/ai-client.ts`) — single source for `createOllama` config, `OLLAMA_ENABLED` flag, and disabled-response helper; all 16 API routes + 1 server action import from here
+- Nav sidebar (`components/nav-sidebar.tsx`) uses collapsible groups: **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech), **Guides** (How to Answer, Topic Ideas); Dashboard and History are standalone. Active group auto-opens on load; group header turns blue when it contains the active page.
 - `NEXT_PUBLIC_OLLAMA_ENABLED=false` disables all AI routes and shows an amber banner in the dashboard layout; designed for GitHub Codespaces where Ollama cannot run in-container
 - Safe colour getter pattern (`getPhenomenonColor(p)`) — always look up dynamic AI-returned strings through a getter with a fallback rather than direct object indexing; prevents crashes when the model returns an unexpected value
 
@@ -255,7 +272,7 @@ See `.devcontainer/README.md` for full setup steps.
 | 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
-| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Target Switcher ⬜ · Analytics ⬜ |
+| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Collocation Library ✅ · Nav reorganisation ✅ · Target Switcher ⬜ · Analytics ⬜ |
 | 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.
