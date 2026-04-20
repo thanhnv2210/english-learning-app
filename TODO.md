@@ -76,6 +76,13 @@
   - [x] `listening-task.tsx`: full stage machine (`select → options → generating|loading → listening → submitted`)
   - [x] Nav sidebar: Listening link (🎧) added after Reading
   - See [PDR-0008](./docs/pdr/0008-listening-simulator-design.md)
+- [x] **3.5 — Vocabulary Search**: `VocabSearch` component at `/vocabulary`; `POST /api/vocabulary/search`; DB-first lookup (`findWord`) with AI fallback (`VOCAB_SEARCH_PROMPT`); auto-detects domains; "Add to Library" for AI-generated cards
+- [x] **3.6 — Writing Topic Library**: `writing_topics` table; domain selector → "Pick from Library" or "Generate New" (`POST /api/writing/topic`); `taskType` badge throughout session; back navigation at each stage
+- [x] **3.7 — How to Answer Guide**: `/how-to-answer` + per-skill pages (Listening, Reading, Writing, Speaking); fully static; `lib/guides/<skill>.ts` → server page → client accordion
+- [x] **3.8 — Topic Ideas**: `/topic-ideas/[skill]/[topicId]` — 10 topics × ~2 frameworks; numbered steps with amber vocab pills; skill-specific examples; fully static
+- [x] **3.9 — Connected Speech Analyser**: `/connected-speech`; `POST /api/connected-speech/analyse`; detects 7 phenomena; Full sentence / Phrase-by-phrase toggle; pronunciation tips panel; reference accordion; save/filter/delete history in `connected_speech_analyses` table
+  - [x] `connected_speech_analyses` DB table + `lib/db/connected-speech.ts` helpers + `app/actions/connected-speech.ts` server actions
+  - [x] `lib/ielts/connected-speech/prompts.ts`: `CONNECTED_SPEECH_PROMPT`, types, `PHENOMENON_META`, `getPhenomenonColor` safe getter
 
 ---
 
