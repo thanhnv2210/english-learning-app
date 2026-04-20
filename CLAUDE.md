@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module (library, highlight system, paragraph formatting), Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, and How to Answer guide. Still pending: Target Switcher UI, Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
+Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), and Connected Speech Analyser. Still pending: Target Switcher UI, Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
 
 ## Tech Stack
 
@@ -41,12 +41,14 @@ english-learning-app/
 │       │   │   ├── history/              # Session history
 │       │   │   └── how-to-answer/        # Static exam guides (skill landing + per-skill pages)
 │       │   │       └── listening/        # Listening guide — 7 IELTS question types
+│       │   │   └── connected-speech/     # Connected Speech Analyser (standalone)
 │       │   ├── actions/
 │       │   │   ├── exam.ts               # saveExam, saveFeedback server actions
 │       │   │   ├── reading.ts            # savePassageToLibrary, pickRandomPassage
 │       │   │   ├── listening.ts          # saveScriptToLibrary, pickRandomScript
 │       │   │   ├── writing.ts            # saveTopicToLibrary, pickRandomTopic, listTopicsByDomain
-│       │   │   └── vocabulary.ts         # addWordToLibrary
+│       │   │   ├── vocabulary.ts         # addWordToLibrary
+│       │   │   └── connected-speech.ts   # saveAnalysisAction, listRecentAnalyses, listByPhenomenon, deleteAnalysisAction
 │       │   └── api/                      # Backend API routes (BFF)
 │       │       ├── chat/                 # POST — examiner streaming (Part 1/2/3 + topic)
 │       │       ├── feedback/             # POST — post-session band scoring
@@ -54,7 +56,8 @@ english-learning-app/
 │       │       ├── listening/script/     # POST — generate listening transcript + questions (JSON)
 │       │       ├── vocabulary/lookup/    # POST — informal→academic word swaps
 │       │       ├── vocabulary/search/    # POST — search/generate full vocabulary card
-│       │       └── writing/             # POST — multi-pass auditor (6 routes) + topic generation
+│       │       ├── writing/             # POST — multi-pass auditor (6 routes) + topic generation
+│       │       └── connected-speech/analyse/ # POST — identify connected speech phenomena (JSON)
 │       ├── components/                   # Shared React components
 │       │   ├── mic-input.tsx             # Mic button + interim transcript (Phase 2)
 │       │   ├── vocabulary-drawer.tsx     # AWL word-swap sidebar
@@ -68,7 +71,8 @@ english-learning-app/
 │       │   │   ├── listening.ts          # saveListeningScript, getRandomScriptByDomain, getListeningLibraryCounts
 │       │   │   ├── writing.ts            # saveWritingTopic, getRandomTopicByDomain, getTopicsByDomain, getWritingTopicLibraryCounts
 │       │   │   ├── speaking.ts           # getAllSpeakingTopics
-│       │   │   └── vocabulary.ts         # findWord, saveVocabularyWord
+│       │   │   ├── vocabulary.ts         # findWord, saveVocabularyWord
+│       │   │   └── connected-speech.ts   # saveAnalysis, getRecentAnalyses, getTopByPhenomenon, deleteAnalysis
 │       │   ├── guides/                   # Static content for How to Answer (no DB, no AI)
 │       │   │   ├── listening.ts          # LISTENING_GUIDES — 7 question types, steps/strategies/mistakes
 │       │   │   ├── reading.ts            # READING_GUIDES — 9 question types
@@ -80,7 +84,8 @@ english-learning-app/
 │       │       ├── reading/              # prompts.ts — passage prompt, scoreReading, estimateBand
 │       │       ├── listening/            # prompts.ts — LISTENING_SCRIPT_PROMPT, scoreListening, estimateBand
 │       │       ├── timer/               # use-timer.ts, use-speech-input.ts (Phase 2)
-│       │       └── vocabulary/          # AWL prompts, DB queries, VOCAB_SEARCH_PROMPT
+│       │       ├── vocabulary/          # AWL prompts, DB queries, VOCAB_SEARCH_PROMPT
+│       │       └── connected-speech/    # prompts.ts — CONNECTED_SPEECH_PROMPT, types, PHENOMENON_META, getPhenomenonColor
 │       └── types/                        # App-local TypeScript types
 ├── packages/
 │   └── shared/src/types/                 # TargetProfile, FeedbackSchema (cross-workspace)
@@ -214,6 +219,19 @@ See `.devcontainer/README.md` for full setup steps.
 - All content is fully static — `lib/topic-ideas/index.ts` holds `TOPICS: Topic[]` with `TopicFramework[]` per topic, each framework containing 4 skill-specific examples
 - 10 topics, ~20 frameworks total: Health & Disease · Education & Learning · Technology & Innovation · Environment & Climate · Economy & Work · Society & Culture · Media & Communication · Government & Policy · Science & Research · Urban Development
 
+**Connected Speech Analyser** (Phase 3 complete)
+- Route `/connected-speech` — standalone tool; no session required
+- Input: free-text textarea + "Use example text" button; AI analysis via `POST /api/connected-speech/analyse`
+- Uses `generateText` (not streaming) — needs full JSON before rendering; strips markdown fences before `JSON.parse`
+- Detects 7 phenomena: elision, assimilation, catenation, intrusion, weakening, contraction, gemination
+- Output Part 1 (sentence view): toggle between **Full sentence** (colour-highlighted spans) and **Phrase-by-phrase** (stacked cards per instance)
+- Output Part 2 (pronunciation tips): instances grouped by phenomenon with colour-coded badges
+- Reference accordion: static `PHENOMENON_META` — label, explanation, 2 examples each; collapsible, one section at a time
+- History panel: save analysis to `connected_speech_analyses` table; filter by phenomenon; delete on hover
+- `getPhenomenonColor(p)` — safe getter with gray fallback prevents crash when AI returns an unknown phenomenon string
+- `connected_speech_analyses` table: `id`, `originalText`, `transformedText`, `instances` (jsonb), `phenomena` (jsonb — deduplicated list for filtering), `createdAt`
+- Recommended model: `llama3.1:8b` or `gemma2:9b` (general-purpose); `qwen2.5-coder:7b` lacks phonetic knowledge
+
 **Target Profile System**
 - `users.targetProfile` stored in DB; `parseTargetBand()` parses `IELTS_6.5` → `6.5`
 - `targetBand` flows into all feedback prompts
@@ -228,6 +246,7 @@ See `.devcontainer/README.md` for full setup steps.
 - All three content library tables (`reading_passages`, `listening_scripts`, `writing_topics`) share a `rank` column (1–5, default 1, DB-enforced CHECK constraint); sort order is `rank DESC, createdAt DESC` — see [PDR-0010](./docs/pdr/0010-library-rank-ordering.md)
 - Centralised Ollama client (`src/lib/ai-client.ts`) — single source for `createOllama` config, `OLLAMA_ENABLED` flag, and disabled-response helper; all 15 API routes + 1 server action import from here
 - `NEXT_PUBLIC_OLLAMA_ENABLED=false` disables all AI routes and shows an amber banner in the dashboard layout; designed for GitHub Codespaces where Ollama cannot run in-container
+- Safe colour getter pattern (`getPhenomenonColor(p)`) — always look up dynamic AI-returned strings through a getter with a fallback rather than direct object indexing; prevents crashes when the model returns an unexpected value
 
 ## Roadmap Summary
 
@@ -236,7 +255,7 @@ See `.devcontainer/README.md` for full setup steps.
 | 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
-| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Target Switcher ⬜ · Analytics ⬜ |
+| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Target Switcher ⬜ · Analytics ⬜ |
 | 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.

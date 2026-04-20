@@ -110,6 +110,7 @@ Static pages work fully without AI:
 - `/how-to-answer` — exam guides for all 4 skills
 - `/topic-ideas` — topic frameworks for Speaking, Writing, Reading, Listening
 - `/vocabulary` — AWL browser (read-only, no generation)
+- `/connected-speech` — reference accordion works; analysis requires AI
 
 ---
 
@@ -121,6 +122,7 @@ AI features (Speaking, Writing, Reading, Listening generation) require Ollama. S
 
 ```bash
 # 1. Install the required model and start Ollama with all origins allowed
+# qwen2.5-coder:7b works for most features; for Connected Speech use llama3.1:8b or gemma2:9b
 ollama pull qwen2.5-coder:7b
 OLLAMA_ORIGINS='*' OLLAMA_HOST=0.0.0.0 ollama serve
 

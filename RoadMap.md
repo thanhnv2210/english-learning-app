@@ -68,6 +68,30 @@
 - Nav sidebar updated: Listening link (🎧) added after Reading
 - See [PDR-0008](./docs/pdr/0008-listening-simulator-design.md) for design rationale
 
+### Task 3.5 — Vocabulary Search ✅
+- `VocabSearch` component at `/vocabulary`; `POST /api/vocabulary/search` — checks DB first (`findWord`), falls back to AI generation (`VOCAB_SEARCH_PROMPT`); auto-detects domains; "Add to Library" for AI-generated cards; saved words show read-only
+
+### Task 3.6 — Writing Topic Library ✅
+- `writing_topics` table (`domain`, `prompt`, `taskType`, `rank`); domain selector → "Pick from Library" (browse by domain, select specific) or "Generate New" (`POST /api/writing/topic`); `task_type` badge shown throughout session
+- Back navigation: `options → select`, `library → options`, `writing/drafting → options`
+
+### Task 3.7 — How to Answer Guide ✅
+- Route `/how-to-answer` — skill landing; per-skill accordion pages for Listening (7 types), Reading (9 types), Writing (Task 1 + Task 2), Speaking (3 parts)
+- Fully static — `lib/guides/<skill>.ts` → server page → client accordion
+
+### Task 3.8 — Topic Ideas ✅
+- Route `/topic-ideas` — skill selector; `/topic-ideas/[skill]` — card grid; `/topic-ideas/[skill]/[topicId]` — framework tabs + detail
+- 10 topics × ~2 frameworks; fully static in `lib/topic-ideas/index.ts`
+
+### Task 3.9 — Connected Speech Analyser ✅
+- Route `/connected-speech`; `POST /api/connected-speech/analyse` — `generateText` (full JSON), strips markdown fences before `JSON.parse`
+- Detects 7 phenomena: elision, assimilation, catenation, intrusion, weakening, contraction, gemination
+- Part 1: Full sentence view (colour-highlighted spans) or Phrase-by-phrase toggle
+- Part 2: Pronunciation tips grouped by phenomenon with colour-coded badges
+- Reference accordion: static `PHENOMENON_META` with explanation + 2 examples per phenomenon
+- History: `connected_speech_analyses` table; filter by phenomenon; delete on hover
+- Recommended model: `llama3.1:8b` or `gemma2:9b` (general-purpose phonetics); `qwen2.5-coder:7b` lacks phonetic knowledge
+
 ## Phase 4: Release & Community
 - [ ] **Peer Review Mode**: Let other "Tech Guys" review each other's practice essays.
 - [ ] **Official Mock Integration**: Connect to official [IELTS by IDP](url) or [British Council](url) resources for final testing.
