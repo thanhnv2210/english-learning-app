@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { href: '/history', label: 'History', icon: '🕐' },
   { href: '/how-to-answer', label: 'How to Answer', icon: '💡' },
   { href: '/topic-ideas', label: 'Topic Ideas', icon: '🗂️' },
+  { href: '/connected-speech', label: 'Connected Speech', icon: '🔗' },
 ]
 
 export function NavSidebar() {
