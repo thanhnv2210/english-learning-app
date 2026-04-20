@@ -50,3 +50,9 @@ export async function getAnalysisById(id: number): Promise<SavedAnalysis | null>
     .limit(1)
   return (rows[0] as SavedAnalysis) ?? null
 }
+
+export async function deleteAnalysis(id: number): Promise<void> {
+  await db
+    .delete(connectedSpeechAnalyses)
+    .where(sql`${connectedSpeechAnalyses.id} = ${id}`)
+}

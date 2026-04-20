@@ -102,6 +102,16 @@ export const PHENOMENON_META: Record<Phenomenon, PhenomenonMeta> = {
   },
 }
 
+export const PHENOMENON_COLOR_FALLBACK = {
+  bg: 'bg-gray-100',
+  text: 'text-gray-600',
+  border: 'border-gray-300',
+}
+
+export function getPhenomenonColor(p: string): { bg: string; text: string; border: string } {
+  return PHENOMENON_COLORS[p as Phenomenon] ?? PHENOMENON_COLOR_FALLBACK
+}
+
 export const PHENOMENON_COLORS: Record<Phenomenon, { bg: string; text: string; border: string }> = {
   elision:      { bg: 'bg-red-100',    text: 'text-red-700',    border: 'border-red-300' },
   assimilation: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-300' },
