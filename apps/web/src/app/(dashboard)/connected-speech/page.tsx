@@ -5,6 +5,7 @@ import {
   PHENOMENON_LABELS,
   PHENOMENON_COLORS,
   PHENOMENON_META,
+  getPhenomenonColor,
   type AnalysisResult,
   type Phenomenon,
   type ConnectedSpeechInstance,
@@ -13,6 +14,7 @@ import {
   saveAnalysisAction,
   listRecentAnalyses,
   listByPhenomenon,
+  deleteAnalysisAction,
   type SavedAnalysis,
 } from '@/app/actions/connected-speech'
 
@@ -83,6 +85,12 @@ export default function ConnectedSpeechPage() {
     }
   }
 
+  async function handleDelete(id: number, e: React.MouseEvent) {
+    e.stopPropagation()
+    await deleteAnalysisAction(id)
+    setHistoryRecords((prev) => prev.filter((r) => r.id !== id))
+  }
+
   async function loadHistory(filter: HistoryFilter) {
     setHistoryLoading(true)
     setHistoryFilter(filter)
@@ -133,7 +141,7 @@ export default function ConnectedSpeechPage() {
       {/* Phenomenon legend */}
       <div className="flex flex-wrap gap-2">
         {(Object.keys(PHENOMENON_LABELS) as Phenomenon[]).map((p) => {
-          const c = PHENOMENON_COLORS[p]
+          const c = getPhenomenonColor(p)
           return (
             <span
               key={p}
@@ -283,7 +291,7 @@ export default function ConnectedSpeechPage() {
                   All (recent 20)
                 </button>
                 {(Object.keys(PHENOMENON_LABELS) as Phenomenon[]).map((p) => {
-                  const c = PHENOMENON_COLORS[p]
+                  const c = getPhenomenonColor(p)
                   const isActive = historyFilter === p
                   return (
                     <button
@@ -311,34 +319,45 @@ export default function ConnectedSpeechPage() {
               ) : (
                 <div className="space-y-2">
                   {historyRecords.map((record) => (
-                    <button
+                    <div
                       key={record.id}
-                      onClick={() => loadFromHistory(record)}
-                      className="w-full rounded-lg border border-gray-200 bg-white p-3 text-left hover:bg-gray-50 transition-colors"
+                      className="group relative rounded-lg border border-gray-200 bg-white p-3 hover:bg-gray-50 transition-colors"
                     >
-                      <p className="truncate text-sm font-medium text-gray-800">
-                        {record.originalText}
-                      </p>
-                      <div className="mt-1.5 flex items-center gap-2">
-                        <span className="text-xs text-gray-400">
-                          {new Date(record.createdAt).toLocaleDateString()} ·{' '}
-                          {record.instances.length} phenomena
-                        </span>
-                        <div className="flex gap-1">
-                          {(record.phenomena as Phenomenon[]).map((p) => {
-                            const c = PHENOMENON_COLORS[p]
-                            return (
-                              <span
-                                key={p}
-                                className={`rounded-full px-1.5 py-0.5 text-xs ${c.bg} ${c.text}`}
-                              >
-                                {PHENOMENON_LABELS[p]}
-                              </span>
-                            )
-                          })}
+                      <button
+                        onClick={() => loadFromHistory(record)}
+                        className="w-full text-left"
+                      >
+                        <p className="truncate pr-6 text-sm font-medium text-gray-800">
+                          {record.originalText}
+                        </p>
+                        <div className="mt-1.5 flex items-center gap-2">
+                          <span className="text-xs text-gray-400">
+                            {new Date(record.createdAt).toLocaleDateString()} ·{' '}
+                            {record.instances.length} phenomena
+                          </span>
+                          <div className="flex gap-1">
+                            {(record.phenomena as Phenomenon[]).map((p) => {
+                              const c = getPhenomenonColor(p)
+                              return (
+                                <span
+                                  key={p}
+                                  className={`rounded-full px-1.5 py-0.5 text-xs ${c.bg} ${c.text}`}
+                                >
+                                  {PHENOMENON_LABELS[p]}
+                                </span>
+                              )
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    </button>
+                      </button>
+                      <button
+                        onClick={(e) => handleDelete(record.id, e)}
+                        className="absolute right-2 top-2 hidden rounded p-1 text-gray-300 hover:bg-red-50 hover:text-red-500 group-hover:block"
+                        title="Delete"
+                      >
+                        ✕
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -356,7 +375,7 @@ function ReferenceSection() {
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState<Phenomenon>('elision')
   const meta = PHENOMENON_META[active]
-  const c = PHENOMENON_COLORS[active]
+  const c = getPhenomenonColor(active)
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white">
@@ -371,7 +390,7 @@ function ReferenceSection() {
         <div className="border-t border-gray-100 p-4">
           <div className="mb-4 flex flex-wrap gap-2">
             {(Object.keys(PHENOMENON_META) as Phenomenon[]).map((p) => {
-              const pc = PHENOMENON_COLORS[p]
+              const pc = getPhenomenonColor(p)
               const isActive = p === active
               return (
                 <button
@@ -446,7 +465,7 @@ function PhraseView({ instances }: { instances: ConnectedSpeechInstance[] }) {
   return (
     <div className="space-y-2">
       {instances.map((inst, i) => {
-        const c = PHENOMENON_COLORS[inst.phenomenon]
+        const c = getPhenomenonColor(inst.phenomenon)
         return (
           <div
             key={i}
@@ -485,7 +504,7 @@ function TipsView({ instances }: { instances: ConnectedSpeechInstance[] }) {
     <div className="space-y-3">
       {(Object.entries(grouped) as [Phenomenon, ConnectedSpeechInstance[]][]).map(
         ([phenomenon, insts]) => {
-          const c = PHENOMENON_COLORS[phenomenon]
+          const c = getPhenomenonColor(phenomenon)
           return (
             <div key={phenomenon} className={`rounded-lg border p-4 ${c.bg} ${c.border}`}>
               <div className="mb-3 flex items-center gap-2">
@@ -549,7 +568,7 @@ function HighlightedText({
   let pos = 0
   for (const range of ranges) {
     if (range.start > pos) parts.push(text.slice(pos, range.start))
-    const c = PHENOMENON_COLORS[range.phenomenon]
+    const c = getPhenomenonColor(range.phenomenon)
     parts.push(
       <mark
         key={range.start}

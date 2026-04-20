@@ -5,6 +5,7 @@ import {
   getRecentAnalyses,
   getTopByPhenomenon,
   getAnalysisById,
+  deleteAnalysis,
   type SavedAnalysis,
 } from '@/lib/db/connected-speech'
 import type { ConnectedSpeechInstance } from '@/lib/ielts/connected-speech/prompts'
@@ -27,4 +28,8 @@ export async function listByPhenomenon(phenomenon: string): Promise<SavedAnalysi
 
 export async function getAnalysis(id: number): Promise<SavedAnalysis | null> {
   return getAnalysisById(id)
+}
+
+export async function deleteAnalysisAction(id: number): Promise<void> {
+  return deleteAnalysis(id)
 }
