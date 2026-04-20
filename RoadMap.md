@@ -92,6 +92,22 @@
 - History: `connected_speech_analyses` table; filter by phenomenon; delete on hover
 - Recommended model: `llama3.1:8b` or `gemma2:9b` (general-purpose phonetics); `qwen2.5-coder:7b` lacks phonetic knowledge
 
+### Task 3.10 — Collocation Library ✅
+- Route `/collocations`; `POST /api/collocations/search` — `generateText` (full JSON), two modes: `word` (returns array) and `phrase` (validates single collocation)
+- `collocation_entries` table: `phrase` (unique), `type` (e.g. `verb+noun`), `skills` (jsonb `CollocationSkill[]`), `examples` (jsonb `string[]`)
+- `CollocationSkill` type: `'Writing_1' | 'Writing_2' | 'Speaking'` — AI-suggested, user-editable before and after save
+- Search UI: shared input + two buttons ("By Word" / "By Phrase"); "By Phrase" shows invalid reason if not a real collocation
+- Library: text search across phrase/type/examples; filter chip per skill; inline skill editing (toggle + "Done"); delete on hover
+- `lib/ielts/collocations/prompts.ts`: `COLLOCATION_BY_WORD_PROMPT` → `{ collocations: CollocationResult[] }`, `COLLOCATION_BY_PHRASE_PROMPT` → `{ valid, ...CollocationResult } | { valid: false, reason }`
+
+### Task 3.11 — Nav Sidebar Reorganisation ✅
+- Sidebar reorganised from a flat list into collapsible groups to reduce visual clutter
+- **Practice**: Speaking (Full), Speaking Pt 1, Speaking Pt 2, Writing, Reading, Listening
+- **Tools**: Vocabulary, Collocations, Connected Speech
+- **Guides**: How to Answer, Topic Ideas
+- Dashboard and History remain standalone (not grouped)
+- Group containing the active page auto-opens on load; group label turns blue when active; items indented inside open groups
+
 ## Phase 4: Release & Community
 - [ ] **Peer Review Mode**: Let other "Tech Guys" review each other's practice essays.
 - [ ] **Official Mock Integration**: Connect to official [IELTS by IDP](url) or [British Council](url) resources for final testing.
