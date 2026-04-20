@@ -264,6 +264,19 @@ export const connectedSpeechAnalyses = pgTable('connected_speech_analyses', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
+// ─── Collocation entry library ────────────────────────────────────────────────
+
+export type CollocationSkill = 'Writing_1' | 'Writing_2' | 'Speaking'
+
+export const collocationEntries = pgTable('collocation_entries', {
+  id: serial('id').primaryKey(),
+  phrase: text('phrase').notNull().unique(),
+  type: text('type').notNull(),
+  skills: jsonb('skills').notNull().$type<CollocationSkill[]>(),
+  examples: jsonb('examples').notNull().$type<string[]>(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const cueCardsRelations = relations(cueCards, ({ many }) => ({
