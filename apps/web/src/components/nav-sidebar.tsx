@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { href: '/how-to-answer', label: 'How to Answer', icon: '💡' },
   { href: '/topic-ideas', label: 'Topic Ideas', icon: '🗂️' },
   { href: '/connected-speech', label: 'Connected Speech', icon: '🔗' },
+  { href: '/collocations', label: 'Collocations', icon: '🧩' },
 ]
 
 export function NavSidebar() {
