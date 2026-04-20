@@ -253,6 +253,17 @@ export const userDomainPreferences = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.domainId] })]
 )
 
+// ─── Connected speech analysis history ───────────────────────────────────────
+
+export const connectedSpeechAnalyses = pgTable('connected_speech_analyses', {
+  id: serial('id').primaryKey(),
+  originalText: text('original_text').notNull(),
+  transformedText: text('transformed_text').notNull(),
+  instances: jsonb('instances').notNull().$type<import('@/lib/ielts/connected-speech/prompts').ConnectedSpeechInstance[]>(),
+  phenomena: jsonb('phenomena').notNull().$type<string[]>(), // deduplicated list for filtering
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const cueCardsRelations = relations(cueCards, ({ many }) => ({
