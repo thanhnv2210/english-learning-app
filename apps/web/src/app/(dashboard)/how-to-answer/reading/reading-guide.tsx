@@ -74,6 +74,19 @@ export function ReadingGuide({ guides }: { guides: ReadingGuide[] }) {
                   </ul>
                 </div>
 
+                {/* Long-text tip */}
+                {guide.tip && (
+                  <div className="flex gap-3 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3">
+                    <span className="mt-0.5 shrink-0 text-base leading-none">💡</span>
+                    <div>
+                      <p className="mb-1 text-xs font-bold uppercase tracking-wide text-teal-700">
+                        {guide.tip.label}
+                      </p>
+                      <p className="text-sm leading-relaxed text-teal-900">{guide.tip.text}</p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Common mistakes */}
                 <div>
                   <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">

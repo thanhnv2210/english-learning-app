@@ -12,6 +12,7 @@ import type { CollocationSkill } from '@/lib/db/schema'
 export async function saveCollocationAction(data: {
   phrase: string
   type: string
+  explanation?: string
   skills: CollocationSkill[]
   examples: string[]
 }): Promise<CollocationCard | null> {

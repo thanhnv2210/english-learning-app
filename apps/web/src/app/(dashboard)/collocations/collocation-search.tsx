@@ -189,6 +189,7 @@ function CollocationResultCard({
       await saveCollocationAction({
         phrase: card.phrase,
         type: card.type,
+        explanation: card.explanation,
         skills: card.savedSkills,
         examples: card.examples,
       })
@@ -223,6 +224,11 @@ function CollocationResultCard({
           )}
         </div>
       </div>
+
+      {/* Explanation */}
+      {card.explanation && (
+        <p className="text-sm leading-relaxed text-gray-600">{card.explanation}</p>
+      )}
 
       {/* Skill toggles */}
       <div className="flex flex-col gap-1">
