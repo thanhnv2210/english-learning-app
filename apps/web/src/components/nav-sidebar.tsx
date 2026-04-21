@@ -36,6 +36,7 @@ const GROUPS: NavGroup[] = [
     items: [
       { href: '/how-to-answer', label: 'How to Answer', icon: '💡' },
       { href: '/topic-ideas', label: 'Topic Ideas', icon: '🗂️' },
+      { href: '/exam-countdown', label: 'Exam Sprint', icon: '⏱️' },
     ],
   },
 ]
