@@ -93,7 +93,7 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
   const visibleMessages = messages.filter((m) => m.content !== '__START__')
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6 xl:max-w-3xl">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Speaking — Part 1</h1>

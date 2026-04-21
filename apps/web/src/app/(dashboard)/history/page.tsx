@@ -54,7 +54,7 @@ export default async function HistoryPage({
   const activeTag = filters.tag
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-2xl xl:max-w-3xl 2xl:max-w-4xl">
       <h1 className="text-2xl font-bold text-gray-900">History</h1>
       <p className="mt-1 text-sm text-gray-500">{exams.length} session{exams.length !== 1 ? 's' : ''}</p>
 

@@ -65,7 +65,7 @@ export function NavSidebar() {
   }
 
   return (
-    <aside className="flex h-screen w-52 shrink-0 flex-col border-r border-gray-200 bg-white px-3 py-6">
+    <aside className="flex h-screen w-52 shrink-0 flex-col border-r border-gray-200 bg-white px-3 py-6 2xl:w-64">
       <p className="mb-6 px-2 text-xs font-semibold uppercase tracking-widest text-gray-400">
         IELTS 6.5
       </p>

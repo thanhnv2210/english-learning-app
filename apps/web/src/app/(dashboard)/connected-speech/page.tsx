@@ -121,7 +121,7 @@ export default function ConnectedSpeechPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6 xl:max-w-6xl 2xl:max-w-7xl">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Connected Speech Analyser</h1>

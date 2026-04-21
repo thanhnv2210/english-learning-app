@@ -17,7 +17,7 @@ export default async function TopicIdeasSkillPage({ params }: Props) {
   const skillLabel = SKILL_LABELS[validSkill]
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl xl:max-w-4xl 2xl:max-w-5xl">
       <div className="mb-6">
         <Link
           href="/topic-ideas"

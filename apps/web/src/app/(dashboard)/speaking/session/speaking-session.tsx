@@ -172,7 +172,7 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6 xl:max-w-3xl">
       {/* Part 2 speak timer alert → moves to Part 3 */}
       <TimerAlertModal timer={speakTimer} partLabel="Part 3" onMoveOn={startPart3} />
 

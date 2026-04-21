@@ -46,7 +46,7 @@ export function TopicDetail({ topic, skill }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl xl:max-w-4xl 2xl:max-w-5xl">
       {/* Back link */}
       <div className="mb-6">
         <Link
