@@ -120,7 +120,7 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
   const visibleMessages = messages.filter((m) => m.content !== '__START__')
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6 xl:max-w-3xl">
       {/* Timer alert modal */}
       <TimerAlertModal timer={speakTimer} partLabel="Part 3" onMoveOn={handleMoveOn} />
 

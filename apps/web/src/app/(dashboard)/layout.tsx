@@ -7,7 +7,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <NavSidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         {process.env.NEXT_PUBLIC_OLLAMA_ENABLED === 'false' && <OllamaDisabledBanner />}
-        <main className="flex-1 overflow-y-auto p-8">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 2xl:p-12">{children}</main>
       </div>
     </div>
   )

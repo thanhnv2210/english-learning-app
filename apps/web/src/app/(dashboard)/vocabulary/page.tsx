@@ -15,7 +15,7 @@ export default async function VocabularyPage() {
   const generalCount = words.filter((w) => w.domains.length === 0).length
 
   return (
-    <div className="mx-auto max-w-5xl flex flex-col gap-8">
+    <div className="mx-auto max-w-5xl flex flex-col gap-8 xl:max-w-6xl 2xl:max-w-7xl">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Academic Word List</h1>
         <p className="mt-1 text-sm text-gray-500">
