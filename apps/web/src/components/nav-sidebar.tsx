@@ -45,8 +45,11 @@ const STANDALONE_BOTTOM: NavItem[] = [
   { href: '/history', label: 'History', icon: '🕐' },
 ]
 
-// 5 font-size levels as % of browser default (16px)
-const FONT_LEVELS = [100, 125, 155]
+const FONT_LEVELS = [100, 125, 155] as const
+type FontLevel = 0 | 1 | 2
+
+const FONT_LEVEL_LABELS = ['A', 'A', 'A']
+const FONT_LEVEL_SIZES  = ['text-xs', 'text-sm', 'text-base']
 const FONT_STORAGE = 'ielts-font-scale'
 const COLLAPSE_STORAGE = 'ielts-sidebar-collapsed'
 
@@ -78,9 +81,11 @@ export function NavSidebar() {
 
     const fontStored = localStorage.getItem(FONT_STORAGE)
     if (fontStored !== null) {
-      const level = Number(fontStored)
-      setFontLevel(level)
-      document.documentElement.style.fontSize = `${FONT_LEVELS[level]}%`
+      const level = Number(fontStored) as FontLevel
+      if (level >= 0 && level < FONT_LEVELS.length) {
+        setFontLevel(level)
+        document.documentElement.style.fontSize = `${FONT_LEVELS[level]}%`
+      }
     }
 
     // Auto-collapse below lg (1024px) — covers 200%+ browser zoom
@@ -105,10 +110,10 @@ export function NavSidebar() {
     })
   }
 
-  function setFontLevelDirect(i: number) {
-    setFontLevel(i)
-    localStorage.setItem(FONT_STORAGE, String(i))
-    document.documentElement.style.fontSize = `${FONT_LEVELS[i]}%`
+  function setFont(level: FontLevel) {
+    setFontLevel(level)
+    localStorage.setItem(FONT_STORAGE, String(level))
+    document.documentElement.style.fontSize = `${FONT_LEVELS[level]}%`
   }
 
   // ── Collapsed: icon-only rail ────────────────────────────────────────────────
@@ -151,18 +156,17 @@ export function NavSidebar() {
         })}
 
         {/* Font size controls */}
-        <div className="mt-auto flex flex-col items-center gap-1 pb-2">
-          {FONT_LEVELS.map((level, i) => (
+        <div className="mt-auto flex flex-col items-center gap-0.5 pb-2">
+          {([0, 1, 2] as FontLevel[]).map((lvl) => (
             <button
-              key={level}
-              onClick={() => setFontLevelDirect(i)}
-              title={`Text size ${level}%`}
-              className={`flex h-7 w-7 items-center justify-center rounded font-bold transition-colors ${
-                fontLevel === i
-                  ? 'bg-blue-100 text-blue-700'
+              key={lvl}
+              onClick={() => setFont(lvl)}
+              title={`Text ${FONT_LEVELS[lvl]}%`}
+              className={`flex h-7 w-7 items-center justify-center rounded font-bold transition-colors ${FONT_LEVEL_SIZES[lvl]} ${
+                fontLevel === lvl
+                  ? 'bg-blue-50 text-blue-600'
                   : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700'
               }`}
-              style={{ fontSize: i === 0 ? '10px' : i === 1 ? '12px' : '15px' }}
             >
               A
             </button>
@@ -250,17 +254,16 @@ export function NavSidebar() {
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-400">Text size</span>
           <div className="flex items-center gap-1">
-            {FONT_LEVELS.map((level, i) => (
+            {([0, 1, 2] as FontLevel[]).map((lvl) => (
               <button
-                key={level}
-                onClick={() => setFontLevelDirect(i)}
-                title={`${level}%`}
-                className={`flex h-6 w-7 items-center justify-center rounded border font-bold transition-colors ${
-                  fontLevel === i
-                    ? 'border-blue-300 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-100'
+                key={lvl}
+                onClick={() => setFont(lvl)}
+                title={`${FONT_LEVELS[lvl]}%`}
+                className={`flex h-6 w-6 items-center justify-center rounded font-bold transition-colors ${FONT_LEVEL_SIZES[lvl]} ${
+                  fontLevel === lvl
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700'
                 }`}
-                style={{ fontSize: i === 0 ? '9px' : i === 1 ? '11px' : '13px' }}
               >
                 A
               </button>
