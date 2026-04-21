@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { saveCollocationAction } from '@/app/actions/collocations'
 import type { CollocationSkill } from '@/lib/db/schema'
 import type { CollocationResult } from '@/lib/ielts/collocations/prompts'
@@ -25,6 +26,7 @@ type CardState = CollocationResult & { inLibrary: boolean; savedSkills: Collocat
 type Status = 'idle' | 'searching' | 'done' | 'invalid' | 'error'
 
 export function CollocationSearch() {
+  const router = useRouter()
   const [query, setQuery] = useState('')
   const [mode, setMode] = useState<'word' | 'phrase'>('word')
   const [status, setStatus] = useState<Status>('idle')
@@ -93,6 +95,7 @@ export function CollocationSearch() {
     setCards((prev) =>
       prev.map((c, i) => (i === cardIndex ? { ...c, inLibrary: true } : c)),
     )
+    router.refresh()
   }
 
   return (
