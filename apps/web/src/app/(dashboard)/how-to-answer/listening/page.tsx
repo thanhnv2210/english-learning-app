@@ -4,7 +4,7 @@ import { ListeningGuide } from './listening-guide'
 
 export default function ListeningHowToAnswerPage() {
   return (
-    <div className="mx-auto max-w-2xl xl:max-w-3xl 2xl:max-w-4xl">
+    <div className="mx-auto max-w-2xl xl:max-w-3xl 2xl:max-w-6xl">
       <div className="mb-6">
         <Link href="/how-to-answer" className="text-xs text-gray-400 hover:text-gray-600">
           ← How to Answer

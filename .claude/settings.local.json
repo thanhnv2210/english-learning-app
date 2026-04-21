@@ -62,7 +62,10 @@
       "Bash(sed -i '' 's/className=\"\"mx-auto max-w-3xl\"\"/className=\"\"mx-auto max-w-3xl xl:max-w-4xl 2xl:max-w-5xl\"\"/g' \"/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/topic-ideas/[skill]/page.tsx\")",
       "Bash(__NEW_LINE_40e097a0e028eec8__ sed:*)",
       "Bash(sed -i '' 's/className=\"\"mx-auto max-w-5xl flex flex-col gap-8\"\"/className=\"\"mx-auto max-w-5xl flex flex-col gap-8 xl:max-w-6xl 2xl:max-w-7xl\"\"/g' \"/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/vocabulary/page.tsx\" \"/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/collocations/page.tsx\")",
-      "Bash(__NEW_LINE_22371314194a6470__ sed:*)"
+      "Bash(__NEW_LINE_22371314194a6470__ sed:*)",
+      "Bash(sed -i '' 's/2xl:max-w-4xl/2xl:max-w-6xl/g' \"/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/how-to-answer/reading/page.tsx\" \"/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/how-to-answer/listening/page.tsx\" \"/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/how-to-answer/speaking/page.tsx\" \"/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/how-to-answer/page.tsx\" \"/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/how-to-answer/writing/page.tsx\" \"/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/topic-ideas/page.tsx\" \"/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/history/page.tsx\" \"/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\(dashboard\\)/page.tsx\")",
+      "Bash(__NEW_LINE_6f019d1ce685e759__ sed:*)",
+      "Bash(sort -t: -k3)"
     ]
   }
 }

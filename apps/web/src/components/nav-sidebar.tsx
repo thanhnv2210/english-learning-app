@@ -46,7 +46,7 @@ const STANDALONE_BOTTOM: NavItem[] = [
 ]
 
 // 5 font-size levels as % of browser default (16px)
-const FONT_LEVELS = [88, 94, 100, 106, 112]
+const FONT_LEVELS = [100, 125, 155]
 const FONT_STORAGE = 'ielts-font-scale'
 const COLLAPSE_STORAGE = 'ielts-sidebar-collapsed'
 
@@ -67,7 +67,7 @@ export function NavSidebar() {
   // userCollapsed: manual preference; isNarrow: forced by viewport width
   const [userCollapsed, setUserCollapsed] = useState(false)
   const [isNarrow, setIsNarrow] = useState(false)
-  const [fontLevel, setFontLevel] = useState(2) // index 2 = 100%
+  const [fontLevel, setFontLevel] = useState(0) // index 0 = 100%
 
   const isCollapsed = isNarrow || userCollapsed
 
@@ -105,13 +105,10 @@ export function NavSidebar() {
     })
   }
 
-  function changeFontSize(delta: number) {
-    setFontLevel((prev) => {
-      const next = Math.max(0, Math.min(FONT_LEVELS.length - 1, prev + delta))
-      localStorage.setItem(FONT_STORAGE, String(next))
-      document.documentElement.style.fontSize = `${FONT_LEVELS[next]}%`
-      return next
-    })
+  function setFontLevelDirect(i: number) {
+    setFontLevel(i)
+    localStorage.setItem(FONT_STORAGE, String(i))
+    document.documentElement.style.fontSize = `${FONT_LEVELS[i]}%`
   }
 
   // ── Collapsed: icon-only rail ────────────────────────────────────────────────
@@ -155,22 +152,21 @@ export function NavSidebar() {
 
         {/* Font size controls */}
         <div className="mt-auto flex flex-col items-center gap-1 pb-2">
-          <button
-            onClick={() => changeFontSize(1)}
-            disabled={fontLevel >= FONT_LEVELS.length - 1}
-            title="Increase text size"
-            className="flex h-7 w-7 items-center justify-center rounded text-xs font-bold text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            A+
-          </button>
-          <button
-            onClick={() => changeFontSize(-1)}
-            disabled={fontLevel <= 0}
-            title="Decrease text size"
-            className="flex h-7 w-7 items-center justify-center rounded text-xs font-bold text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            A-
-          </button>
+          {FONT_LEVELS.map((level, i) => (
+            <button
+              key={level}
+              onClick={() => setFontLevelDirect(i)}
+              title={`Text size ${level}%`}
+              className={`flex h-7 w-7 items-center justify-center rounded font-bold transition-colors ${
+                fontLevel === i
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700'
+              }`}
+              style={{ fontSize: i === 0 ? '10px' : i === 1 ? '12px' : '15px' }}
+            >
+              A
+            </button>
+          ))}
         </div>
       </aside>
     )
@@ -254,25 +250,21 @@ export function NavSidebar() {
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-400">Text size</span>
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => changeFontSize(-1)}
-              disabled={fontLevel <= 0}
-              title="Decrease text size"
-              className="flex h-6 w-8 items-center justify-center rounded border border-gray-200 bg-white text-xs font-semibold text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
-              A-
-            </button>
-            <span className="w-8 text-center text-xs text-gray-400">
-              {FONT_LEVELS[fontLevel]}%
-            </span>
-            <button
-              onClick={() => changeFontSize(1)}
-              disabled={fontLevel >= FONT_LEVELS.length - 1}
-              title="Increase text size"
-              className="flex h-6 w-8 items-center justify-center rounded border border-gray-200 bg-white text-xs font-semibold text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
-              A+
-            </button>
+            {FONT_LEVELS.map((level, i) => (
+              <button
+                key={level}
+                onClick={() => setFontLevelDirect(i)}
+                title={`${level}%`}
+                className={`flex h-6 w-7 items-center justify-center rounded border font-bold transition-colors ${
+                  fontLevel === i
+                    ? 'border-blue-300 bg-blue-50 text-blue-700'
+                    : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-100'
+                }`}
+                style={{ fontSize: i === 0 ? '9px' : i === 1 ? '11px' : '13px' }}
+              >
+                A
+              </button>
+            ))}
           </div>
         </div>
       </div>

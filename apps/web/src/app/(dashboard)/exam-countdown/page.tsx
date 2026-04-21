@@ -8,7 +8,7 @@ import {
 
 export default function ExamCountdownPage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-12 xl:max-w-4xl 2xl:max-w-5xl">
+    <div className="mx-auto max-w-3xl space-y-12 xl:max-w-4xl 2xl:max-w-7xl">
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 px-8 py-7">
