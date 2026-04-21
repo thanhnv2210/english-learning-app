@@ -26,11 +26,13 @@ type Props = {
 export function CollocationList({ initialItems }: Props) {
   const [items, setItems] = useOptimistic(initialItems)
   const [search, setSearch] = useState('')
-  const [activeSkill, setActiveSkill] = useState<CollocationSkill | null>(null)
+  const [activeSkill, setActiveSkill] = useState<CollocationSkill | 'all_skills' | null>(null)
 
   const filtered = useMemo(() => {
     let result = items
-    if (activeSkill) {
+    if (activeSkill === 'all_skills') {
+      result = result.filter((c) => ALL_SKILLS.every((s) => c.skills.includes(s)))
+    } else if (activeSkill) {
       result = result.filter((c) => c.skills.includes(activeSkill))
     }
     if (search.trim()) {
@@ -87,6 +89,12 @@ export function CollocationList({ initialItems }: Props) {
                   onClick={() => setActiveSkill(activeSkill === skill ? null : skill)}
                 />
               ))}
+              <FilterChip
+                label="All 3 Skills"
+                active={activeSkill === 'all_skills'}
+                onClick={() => setActiveSkill(activeSkill === 'all_skills' ? null : 'all_skills')}
+                highlight
+              />
             </div>
           </div>
 
@@ -237,16 +245,24 @@ function FilterChip({
   label,
   active,
   onClick,
+  highlight = false,
 }: {
   label: string
   active: boolean
   onClick: () => void
+  highlight?: boolean
 }) {
   return (
     <button
       onClick={onClick}
       className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-        active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+        active
+          ? highlight
+            ? 'bg-amber-500 text-white'
+            : 'bg-blue-600 text-white'
+          : highlight
+            ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
+            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
       }`}
     >
       {label}
