@@ -272,6 +272,7 @@ export const collocationEntries = pgTable('collocation_entries', {
   id: serial('id').primaryKey(),
   phrase: text('phrase').notNull().unique(),
   type: text('type').notNull(),
+  explanation: text('explanation'),
   skills: jsonb('skills').notNull().$type<CollocationSkill[]>(),
   examples: jsonb('examples').notNull().$type<string[]>(),
   createdAt: timestamp('created_at').notNull().defaultNow(),

@@ -3,6 +3,7 @@ import type { CollocationSkill } from '@/lib/db/schema'
 export type CollocationResult = {
   phrase: string
   type: string
+  explanation: string
   suggestedSkills: CollocationSkill[]
   examples: string[]
 }
@@ -17,6 +18,7 @@ export function COLLOCATION_BY_WORD_PROMPT(word: string): string {
 For each collocation return:
 - "phrase": the full collocation (2–4 words)
 - "type": the grammatical pattern — one of: "verb+noun", "adj+noun", "noun+noun", "adv+verb", "adv+adj", "verb+prep", "noun+prep", "other"
+- "explanation": 1–2 sentences explaining what the collocation means and when/how to use it in IELTS context
 - "suggestedSkills": which IELTS skills this collocation is most useful for — pick from ["Writing_1", "Writing_2", "Speaking"]. Writing_1 = Task 1 (charts/graphs/processes), Writing_2 = Task 2 (essays). Include all that apply.
 - "examples": 2 natural example sentences using this collocation at IELTS Band 6–7 level
 
@@ -26,6 +28,7 @@ Return ONLY valid JSON — no markdown, no explanation:
     {
       "phrase": "<the collocation>",
       "type": "<grammatical type>",
+      "explanation": "<what it means and when to use it>",
       "suggestedSkills": ["Writing_2", "Speaking"],
       "examples": [
         "<example sentence 1>",
@@ -54,6 +57,7 @@ If it IS a valid collocation, return:
   "valid": true,
   "phrase": "<the collocation, corrected/normalised if needed>",
   "type": "<grammatical pattern — one of: verb+noun, adj+noun, noun+noun, adv+verb, adv+adj, verb+prep, noun+prep, other>",
+  "explanation": "<1–2 sentences: what the collocation means and when/how to use it in IELTS Academic Writing or Speaking>",
   "suggestedSkills": ["Writing_1" | "Writing_2" | "Speaking"],
   "examples": [
     "<natural IELTS Band 6–7 example sentence 1>",

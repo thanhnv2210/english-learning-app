@@ -157,6 +157,11 @@ function SavedCard({
         </span>
       </div>
 
+      {/* Explanation */}
+      {card.explanation && (
+        <p className="text-sm leading-relaxed text-gray-600">{card.explanation}</p>
+      )}
+
       {/* Skills */}
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">

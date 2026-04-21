@@ -7,6 +7,7 @@ export type CollocationCard = {
   id: number
   phrase: string
   type: string
+  explanation: string | null
   skills: CollocationSkill[]
   examples: string[]
   createdAt: Date
@@ -24,6 +25,7 @@ export async function findCollocation(phrase: string): Promise<CollocationCard |
 export async function saveCollocation(data: {
   phrase: string
   type: string
+  explanation?: string
   skills: CollocationSkill[]
   examples: string[]
 }): Promise<CollocationCard | null> {

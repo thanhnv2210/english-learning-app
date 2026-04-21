@@ -6,6 +6,10 @@ export type ReadingGuide = {
   steps: string[]
   strategies: string[]
   mistakes: string[]
+  tip?: {
+    label: string
+    text: string
+  }
 }
 
 export const READING_GUIDES: ReadingGuide[] = [
@@ -33,6 +37,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       'Using outside knowledge instead of the passage text.',
       'Rushing past qualifying words (e.g. the passage says "some studies" but the statement says "all studies" — this is False, not True).',
     ],
+    tip: {
+      label: 'Lost in the passage?',
+      text: 'Statements follow the passage order. If you lose your place, take the last statement you answered correctly and resume scanning from that point forward — never restart from the top.',
+    },
   },
   {
     id: 'ynng',
@@ -81,6 +89,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       'Not reading the whole paragraph before choosing — topic sentences are not always at the start.',
       'Using a heading that is too specific (it describes a supporting detail, not the overall point).',
     ],
+    tip: {
+      label: 'Can\'t hold the whole passage in your head?',
+      text: 'Write the paragraph letter next to each heading as you work (e.g. "A = intro, B = problem, C = solutions"). This one-line map prevents you from re-reading already-processed paragraphs and keeps your working memory free for comparing the remaining headings.',
+    },
   },
   {
     id: 'matching-info',
@@ -105,6 +117,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       'Matching based on proximity (the statement mentions something near the keyword) without confirming the full meaning matches.',
       'Assuming each option is used only once when the instruction says options may be used more than once.',
     ],
+    tip: {
+      label: 'Losing track of which statement you\'re on?',
+      text: 'Work through the statements one at a time and highlight the paragraph letter in the passage margin once matched. If a statement sends you to a completely different part of the passage, jot that paragraph letter beside the statement before moving on — this builds a quick reference map so you never search the same section twice.',
+    },
   },
   {
     id: 'multiple-choice',
@@ -154,6 +170,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       'Paraphrasing instead of copying exact words from the passage.',
       'Exceeding the word limit — include only the words needed to fill the gap, not the surrounding context.',
     ],
+    tip: {
+      label: 'Can\'t follow the long passage to find each gap?',
+      text: 'Use the words immediately before AND after the gap as a two-word anchor. These surrounding words are rarely paraphrased — search the passage for that exact phrase pair (e.g. "solar energy _____ cities" → find "solar energy" near "cities"). Once you land on the right line, the answer is right there. Never scan the whole passage for each gap — pin the section first, then extract.',
+    },
   },
   {
     id: 'sentence-completion',
@@ -178,6 +198,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       'Including the word that comes just before or after the gap in the passage, pushing the answer over the word limit.',
       'Paraphrasing the passage instead of copying the exact words.',
     ],
+    tip: {
+      label: 'Sentence too long to track where it maps in the passage?',
+      text: 'Underline the main verb of the incomplete sentence — it is almost always kept the same (or closely synonymised) in the passage. Searching for that verb anchors you to the right line instantly, even in a dense paragraph. Once found, read that sentence only, not the surrounding text.',
+    },
   },
   {
     id: 'diagram-labelling',
@@ -202,6 +226,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       'Clicking the wrong blank on screen because the diagram labels look similar — confirm which number is active before typing.',
       'Using a term from a different part of the passage that sounds plausible but does not match the specific diagram element.',
     ],
+    tip: {
+      label: 'Can\'t match the diagram to the right part of the passage?',
+      text: 'Find one label that is already filled in on the diagram (or the diagram\'s title) and search the passage for that exact term — this pins you to the correct paragraph immediately. All other blanks are in the same paragraph or the next one. Work outward from this anchor rather than scanning the whole passage for each blank separately.',
+    },
   },
   {
     id: 'short-answer',

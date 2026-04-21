@@ -74,6 +74,7 @@ export async function POST(req: Request) {
   const result: CollocationResult = {
     phrase: data.phrase ?? trimmed,
     type: data.type ?? 'other',
+    explanation: data.explanation ?? '',
     suggestedSkills: data.suggestedSkills ?? [],
     examples: data.examples ?? [],
   }
