@@ -26,7 +26,7 @@ const MODULES = [
 
 export default function DashboardPage() {
   return (
-    <div className="mx-auto max-w-2xl xl:max-w-3xl 2xl:max-w-4xl">
+    <div className="mx-auto max-w-2xl xl:max-w-3xl 2xl:max-w-6xl">
       <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
       <p className="mt-1 text-sm text-gray-500">
         Target: <span className="font-semibold text-blue-600">IELTS Band 6.5</span>

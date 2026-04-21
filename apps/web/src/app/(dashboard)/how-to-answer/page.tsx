@@ -33,7 +33,7 @@ const SKILLS = [
 
 export default function HowToAnswerPage() {
   return (
-    <div className="mx-auto max-w-2xl xl:max-w-3xl 2xl:max-w-4xl">
+    <div className="mx-auto max-w-2xl xl:max-w-3xl 2xl:max-w-6xl">
       <h1 className="text-2xl font-bold text-gray-900">How to Answer</h1>
       <p className="mt-1 text-sm text-gray-500">
         Step-by-step strategies for every IELTS question type, organised by skill.
