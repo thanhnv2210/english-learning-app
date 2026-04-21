@@ -51,8 +51,16 @@ export function CollocationSearch() {
       const data: CollocationSearchResponse = await res.json()
 
       if (data.mode === 'word') {
+        const seen = new Set<string>()
         setCards(
-          data.results.map((r) => ({ ...r, savedSkills: r.suggestedSkills })),
+          data.results
+            .filter((r) => {
+              const key = r.phrase.toLowerCase()
+              if (seen.has(key)) return false
+              seen.add(key)
+              return true
+            })
+            .map((r) => ({ ...r, savedSkills: r.suggestedSkills })),
         )
         setStatus('done')
       } else if (data.valid) {
@@ -152,7 +160,7 @@ export function CollocationSearch() {
           </p>
           {cards.map((card, i) => (
             <CollocationResultCard
-              key={card.phrase}
+              key={`${card.phrase}-${i}`}
               card={card}
               onToggleSkill={(skill) => toggleSkill(i, skill)}
               onSaved={() => markSaved(i)}
