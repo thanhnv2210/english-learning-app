@@ -4,6 +4,7 @@ import {
   SKILL_PRIORITIES,
   CORE_TOPICS,
   GRAMMAR_STRUCTURES,
+  VN_TECH_SKILL_PRIORITIES,
 } from '@/lib/guides/exam-countdown'
 
 export default function ExamCountdownPage() {
@@ -116,6 +117,77 @@ export default function ExamCountdownPage() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ── Vietnamese Tech Engineer Profile ─────────────────────────────────── */}
+      <section className="rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-6 py-7">
+        {/* Header */}
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <span className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+            🇻🇳 Vietnamese Tech Engineer
+          </span>
+          <span className="rounded-full border border-indigo-200 bg-white px-3 py-1 text-xs font-medium text-indigo-700">
+            Previous score: 5.5 all skills → Target: 6.5
+          </span>
+        </div>
+
+        <h2 className="mb-1 text-lg font-bold text-gray-900">
+          Skill Priority for You — Ranked by ROI
+        </h2>
+        <p className="mb-6 text-sm text-gray-500">
+          Based on your 5.5 baseline and tech background, this is the order to invest your
+          two weeks. Effort is relative to the band gain you can realistically achieve.
+        </p>
+
+        <div className="flex flex-col gap-4">
+          {VN_TECH_SKILL_PRIORITIES.map((item) => {
+            const effortColor = {
+              'Low':          'bg-green-100 text-green-700',
+              'Medium':       'bg-blue-100 text-blue-700',
+              'Medium-High':  'bg-amber-100 text-amber-700',
+              'High':         'bg-red-100 text-red-700',
+            }[item.effort]
+
+            const rankColor = [
+              'bg-green-500',
+              'bg-blue-500',
+              'bg-amber-500',
+              'bg-red-400',
+            ][item.rank - 1]
+
+            return (
+              <div key={item.skill} className="rounded-xl border border-indigo-100 bg-white p-5">
+                {/* Row 1: rank + skill + badges */}
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${rankColor}`}>
+                    {item.rank}
+                  </span>
+                  <span className="text-base">{item.icon}</span>
+                  <span className="font-semibold text-gray-900">{item.skill}</span>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${effortColor}`}>
+                    Effort: {item.effort}
+                  </span>
+                  <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">
+                    Expected gain: {item.expectedGain}
+                  </span>
+                </div>
+
+                {/* Why */}
+                <p className="mb-3 text-sm leading-relaxed text-gray-600">{item.why}</p>
+
+                {/* Tips */}
+                <ul className="space-y-2">
+                  {item.tips.map((tip, i) => (
+                    <li key={i} className="flex gap-2 text-xs leading-relaxed text-gray-700">
+                      <span className="mt-0.5 shrink-0 text-indigo-400">▸</span>
+                      {tip}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          })}
         </div>
       </section>
 
