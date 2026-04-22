@@ -18,6 +18,16 @@ export type CoreTopic = {
   keyVocab: string[]
 }
 
+export type VnTechSkillRank = {
+  rank: number
+  skill: string
+  icon: string
+  effort: 'Low' | 'Medium' | 'Medium-High' | 'High'
+  expectedGain: string
+  why: string
+  tips: string[]
+}
+
 export type GrammarStructure = {
   name: string
   pattern: string
@@ -209,5 +219,68 @@ export const GRAMMAR_STRUCTURES: GrammarStructure[] = [
       'Personal data is collected by apps without users being fully informed of the associated risks.',
     whyItWorks:
       'Academic and formal register relies heavily on the passive. Using it correctly in Writing Task 2 and Speaking Part 3 demonstrates both Grammatical Range and appropriate register — two criteria in one.',
+  },
+]
+
+// ─── Vietnamese Tech Engineer Profile ────────────────────────────────────────
+// Assumption: previous IELTS result 5.5 across all 4 skills.
+// Ranks skills by effort-to-reward ratio over a 2-week window.
+
+export const VN_TECH_SKILL_PRIORITIES: VnTechSkillRank[] = [
+  {
+    rank: 1,
+    skill: 'Reading',
+    icon: '📖',
+    effort: 'Low',
+    expectedGain: '+0.5 – 1.0',
+    why: 'You read English documentation every day — your vocabulary and scanning habits are already trained. The 5.5 → 6.5 gap here is almost entirely technique, not comprehension. Two weeks of focused question-type drilling will close it faster than any other skill.',
+    tips: [
+      'Treat T/F/NG like a code diff: find the exact mismatch between the statement and the passage. If the passage simply does not mention it — Not Given. If it contradicts it — False.',
+      'You already Ctrl+F through docs. IELTS Reading rewards the same keyword-scanning instinct — practice spotting synonyms rather than exact matches.',
+      'Timebox strictly: 20 minutes per section, then move on — same discipline as a sprint.',
+      'Questions follow passage order for most types. Use each found answer as a pointer to the next one.',
+    ],
+  },
+  {
+    rank: 2,
+    skill: 'Listening',
+    icon: '🎧',
+    effort: 'Medium',
+    expectedGain: '+0.5',
+    why: 'Constant exposure to English via tech YouTube, podcasts, and online meetings means you are comfortable with the language in context. The main gap is academic accent (British/Australian) and the speed of connected speech — both fixable in two weeks.',
+    tips: [
+      'Spend 2–3 days on British/Australian IELTS recordings specifically — the accent is noticeably different from American tech content you are used to.',
+      'Note-completion maps directly to the way engineers take meeting notes: read the gap, predict the answer type (number? noun? adjective?), then listen for it.',
+      'Pre-read every question before the audio starts — treat it like reading an API contract before making a call.',
+      'Section 1 and 2 are high-accuracy territory. Do not drop marks there. Focus harder practice on Sections 3–4.',
+    ],
+  },
+  {
+    rank: 3,
+    skill: 'Writing',
+    icon: '✍️',
+    effort: 'Medium-High',
+    expectedGain: '+0.5',
+    why: 'Your engineering background is a structural asset — IELTS Task 2 essays reward logical problem → solution → trade-off thinking, which is how you write design docs. The main blockers are Vietnamese-specific grammar patterns (missing articles, plural omission) and limited academic collocation range.',
+    tips: [
+      'Article rule of thumb: first mention of a countable noun = "a"; the same noun referred to again = "the"; uncountable or general nouns = no article. Drilling this one rule lifts your Grammatical Range score noticeably.',
+      'Avoid direct translation traps: "the government should have the policy to…" → "the government should introduce policies that…"',
+      'Structure Task 2 like a system design doc: state your position (intro) → elaborate problem (body 1) → propose solution with trade-off acknowledged (body 2) → restate (conclusion).',
+      'Learn 8–10 collocations for your 2 strongest topics and use them deliberately — one natural collocation per paragraph signals Lexical Resource above Band 6.',
+    ],
+  },
+  {
+    rank: 4,
+    skill: 'Speaking',
+    icon: '🎤',
+    effort: 'High',
+    expectedGain: '+0.25 – 0.5',
+    why: 'Vietnamese is a tonal language with almost no word-final consonant clusters. English final consonants (/kt/, /pt/, /ld/, /st/) are the single biggest pronunciation issue for Vietnamese speakers, and they take months to fully correct. In two weeks, focus on fluency strategies and topic preparation rather than pronunciation overhaul.',
+    tips: [
+      'Final consonants are critical: "worked" ends in /kt/, "helped" in /pt/, "called" in /ld/. Record yourself saying 10 past-tense verbs and listen for dropped endings — awareness alone reduces the error rate.',
+      'Never pause silently — Vietnamese speakers often translate internally before speaking. Use English filler phrases instead: "That\'s an interesting question…", "What I mean is…", "To give you an example…"',
+      'Your tech background is a speaking advantage: AI, automation, remote work, and data privacy are common Part 3 topics. Prepare 2–3 structured opinions on each and you will speak with genuine fluency on those topics.',
+      'Part 2 cue cards: practise the 1-minute prep by writing 3 bullet points only — not a script. Speaking from bullets sounds natural; speaking from a memorised script sounds flat and risks the examiner cutting you off.',
+    ],
   },
 ]
