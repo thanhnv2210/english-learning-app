@@ -33,6 +33,76 @@ type HistoryFilter = 'all' | Phenomenon
 const EXAMPLE_TEXT =
   "I want to go on and pick it up at the last night market, but the black coffee there is going to take ten minutes."
 
+// 30 IELTS collocations organised by the three most common connected-speech patterns.
+// Clicking any phrase auto-fills the analyser input so users always have a starting point.
+type QuickCategory = {
+  category: string
+  tag: string            // short label shown on the chip
+  phenomenon: Phenomenon
+  description: string
+  phrases: { original: string; sounds: string }[]
+}
+
+const QUICK_EXAMPLES: QuickCategory[] = [
+  {
+    category: 'The Slide',
+    tag: 'Catenation',
+    phenomenon: 'catenation',
+    description:
+      'A consonant at the end of one word slides onto the vowel at the start of the next — the boundary disappears and they sound like a single word.',
+    phrases: [
+      { original: 'Pick it up',  sounds: 'Pi-ki-tup'    },
+      { original: 'Wake up',     sounds: 'Way-kup'       },
+      { original: 'Ask about',   sounds: 'As-kabout'     },
+      { original: 'Fill in',     sounds: 'Fil-lin'       },
+      { original: 'Check out',   sounds: 'Che-kout'      },
+      { original: 'An apple',    sounds: 'A-napple'      },
+      { original: 'Sign up',     sounds: 'Si-nup'        },
+      { original: 'Look at',     sounds: 'Loo-kat'       },
+      { original: 'Talk about',  sounds: 'Tal-kabout'    },
+      { original: 'Think of',    sounds: 'Thin-kof'      },
+    ],
+  },
+  {
+    category: 'The Drop',
+    tag: 'Elision',
+    phenomenon: 'elision',
+    description:
+      'A /t/ or /d/ between two consonants is silently removed to keep speech flowing — the surrounding words stay clear but the stop sound vanishes.',
+    phrases: [
+      { original: 'Next week',         sounds: 'Nex-week'        },
+      { original: 'Must be',           sounds: 'Mus-be'          },
+      { original: 'Best friend',       sounds: 'Bes-friend'      },
+      { original: 'Old man',           sounds: 'Ol-man'          },
+      { original: 'Just now',          sounds: 'Jus-now'         },
+      { original: 'Last night',        sounds: 'Las-night'       },
+      { original: 'Stand by',          sounds: 'Stan-by'         },
+      { original: 'Handbag',           sounds: 'Ham-bag'         },
+      { original: 'Facts and figures', sounds: 'Fax-an-figures'  },
+      { original: 'Sandwich',          sounds: 'San-wich'        },
+    ],
+  },
+  {
+    category: 'The Weak Form',
+    tag: 'Weakening',
+    phenomenon: 'weakening',
+    description:
+      'Small grammar words (to, of, and, a, have) lose their full vowel and collapse to a short "uh" /ə/ sound — they are still there, just quiet and fast.',
+    phrases: [
+      { original: 'What type of sugar',  sounds: 'Wut-ty-puh sugar'  },
+      { original: 'Want to leave',       sounds: 'Wan-tuh leave'      },
+      { original: 'Have to go',          sounds: 'Hav-tuh go'         },
+      { original: 'Going to finish',     sounds: 'Gonna finish'       },
+      { original: 'Fish and chips',      sounds: "Fish 'n' chips"     },
+      { original: 'Should have known',   sounds: 'Shud-uv known'      },
+      { original: 'Kind of difficult',   sounds: 'Kin-duh difficult'  },
+      { original: 'A lot of people',     sounds: 'A lo-tuh people'    },
+      { original: 'Out of time',         sounds: 'Ou-tuh time'        },
+      { original: 'A pair of glasses',   sounds: 'A pai-ruh glasses'  },
+    ],
+  },
+]
+
 export default function ConnectedSpeechPage() {
   const [stage, setStage] = useState<Stage>('input')
   const [text, setText] = useState('')
@@ -155,6 +225,11 @@ export default function ConnectedSpeechPage() {
 
       {/* Reference accordion */}
       <ReferenceSection />
+
+      {/* Quick Start — 30 IELTS collocations */}
+      {stage === 'input' && (
+        <QuickStartSection onSelect={setText} />
+      )}
 
       {/* Input stage */}
       {(stage === 'input' || stage === 'loading') && (
@@ -363,6 +438,73 @@ export default function ConnectedSpeechPage() {
               )}
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ── Quick Start — IELTS collocation examples ────────────────────────────── */
+
+function QuickStartSection({ onSelect }: { onSelect: (phrase: string) => void }) {
+  const [open, setOpen] = useState(true)
+
+  return (
+    <div className="rounded-lg border border-blue-200 bg-blue-50">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-4 py-3 text-left"
+      >
+        <div>
+          <span className="text-sm font-semibold text-blue-800">
+            30 Common IELTS Collocations — click any phrase to analyse it
+          </span>
+          <span className="ml-2 text-xs text-blue-500">
+            (organised by connected-speech pattern)
+          </span>
+        </div>
+        <span className="shrink-0 text-xs text-blue-400">{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div className="border-t border-blue-100 px-4 pb-4 pt-3 space-y-4">
+          {QUICK_EXAMPLES.map((cat) => {
+            const c = getPhenomenonColor(cat.phenomenon)
+            return (
+              <div key={cat.category}>
+                {/* Category header */}
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${c.bg} ${c.text} ${c.border}`}>
+                    {cat.tag}
+                  </span>
+                  <span className="text-sm font-semibold text-gray-800">{cat.category}</span>
+                  <span className="text-xs text-gray-500">— {cat.description}</span>
+                </div>
+
+                {/* Phrase chips */}
+                <div className="flex flex-wrap gap-2">
+                  {cat.phrases.map((p) => (
+                    <button
+                      key={p.original}
+                      onClick={() => onSelect(p.original)}
+                      title={`Sounds like: ${p.sounds}`}
+                      className="group flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-left transition-colors hover:border-blue-300 hover:bg-blue-50"
+                    >
+                      <span className="text-xs font-medium text-gray-800 group-hover:text-blue-700">
+                        {p.original}
+                      </span>
+                      <span className="text-[10px] text-gray-400 group-hover:text-blue-400">
+                        → {p.sounds}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+          <p className="text-xs text-blue-600 pt-1">
+            💡 Hover over a chip to see how it sounds. Click to load it into the analyser.
+          </p>
         </div>
       )}
     </div>
