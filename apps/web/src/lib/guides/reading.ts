@@ -10,6 +10,10 @@ export type ReadingGuide = {
     label: string
     text: string
   }
+  decisionTip?: {
+    label: string
+    text: string
+  }
 }
 
 export const READING_GUIDES: ReadingGuide[] = [
@@ -41,6 +45,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       label: 'Lost in the passage?',
       text: 'Statements follow the passage order. If you lose your place, take the last statement you answered correctly and resume scanning from that point forward — never restart from the top.',
     },
+    decisionTip: {
+      label: 'Decision trap: absolute words',
+      text: 'Watch for absolute words in the statement — "always", "never", "all", "every", "daily", "must". If the passage uses a softer word like "often", "regular", "may", or "some", the statement is almost never True. If the passage does not address the specific frequency or scope at all, it is NOT GIVEN — not False. Only mark False when the passage actively says the opposite.',
+    },
   },
   {
     id: 'ynng',
@@ -64,6 +72,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       'Marking Yes when the passage mentions the topic but the writer does not express a clear view.',
       'Ignoring tone indicators like "unfortunately" or "surprisingly" that reveal the writer\'s opinion.',
     ],
+    decisionTip: {
+      label: 'Decision trap: hedging language',
+      text: 'If the writer uses "may", "might", "could", or "it is possible that", they are expressing uncertainty — not a clear opinion. A statement that says the writer "believes" something strongly is likely NOT GIVEN if the passage only hedges. Also, a fact the writer quotes from another source (a study, an expert) is not the writer\'s own view — do not treat attributed evidence as a Yes/No answer.',
+    },
   },
   {
     id: 'matching-headings',
@@ -93,6 +105,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       label: 'Can\'t hold the whole passage in your head?',
       text: 'Write the paragraph letter next to each heading as you work (e.g. "A = intro, B = problem, C = solutions"). This one-line map prevents you from re-reading already-processed paragraphs and keeps your working memory free for comparing the remaining headings.',
     },
+    decisionTip: {
+      label: 'Decision trap: keyword match ≠ main idea',
+      text: 'Distractor headings deliberately contain a keyword that appears in the paragraph — but refers to a supporting detail, not the main point. If you find a heading that fits one sentence perfectly but the rest of the paragraph is about something else, that heading is wrong. The correct heading must summarise what the whole paragraph is doing. When two headings both seem to fit, ask: which one covers the paragraph\'s purpose from start to finish?',
+    },
   },
   {
     id: 'matching-info',
@@ -121,6 +137,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       label: 'Losing track of which statement you\'re on?',
       text: 'Work through the statements one at a time and highlight the paragraph letter in the passage margin once matched. If a statement sends you to a completely different part of the passage, jot that paragraph letter beside the statement before moving on — this builds a quick reference map so you never search the same section twice.',
     },
+    decisionTip: {
+      label: 'Decision trap: two paragraphs, same topic',
+      text: 'Some topics appear in more than one paragraph. When two paragraphs both seem to contain your statement, check which one contains it as a specific, concrete detail — not just a passing mention. Match to where the detail is the focus, not where the topic word happens to appear. For Matching Sentence Endings specifically, also test grammatical fit: the completed sentence must read naturally in English — if it sounds awkward, it is the wrong ending even if the content seems right.',
+    },
   },
   {
     id: 'multiple-choice',
@@ -146,6 +166,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       'Selecting the most detailed or specific-sounding option — correctness is not determined by specificity.',
       'Not reading all options before going to the passage.',
     ],
+    decisionTip: {
+      label: 'Decision trap: Frankenstein options',
+      text: 'The most common wrong answer combines two true pieces of information from the passage that do not belong together — for example, a cause from one sentence joined to an effect from a different sentence. Before selecting, verify that the passage explicitly links the two ideas in the option. Also watch for scope changes: the passage may say "some researchers" but an option says "most researchers" — this small shift makes it wrong. Always re-read the exact passage sentence that supports your choice before clicking.',
+    },
   },
   {
     id: 'completion',
@@ -173,6 +197,10 @@ export const READING_GUIDES: ReadingGuide[] = [
     tip: {
       label: 'Can\'t follow the long passage to find each gap?',
       text: 'Use the words immediately before AND after the gap as a two-word anchor. These surrounding words are rarely paraphrased — search the passage for that exact phrase pair (e.g. "solar energy _____ cities" → find "solar energy" near "cities"). Once you land on the right line, the answer is right there. Never scan the whole passage for each gap — pin the section first, then extract.',
+    },
+    decisionTip: {
+      label: 'Decision trap: articles and word limits',
+      text: 'If the instruction says ONE WORD, the answer cannot include "the" or "a" — even if those words appear in the passage before the answer. For example, if the passage says "the reduction in costs" and the answer is one word, write "reduction", not "the reduction". Also, the summary is a paraphrase of the passage, so the words around the gap will look different — do not try to match the gap\'s surrounding words directly; match the meaning, then find the exact word from the passage to fill it.',
     },
   },
   {
@@ -202,6 +230,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       label: 'Sentence too long to track where it maps in the passage?',
       text: 'Underline the main verb of the incomplete sentence — it is almost always kept the same (or closely synonymised) in the passage. Searching for that verb anchors you to the right line instantly, even in a dense paragraph. Once found, read that sentence only, not the surrounding text.',
     },
+    decisionTip: {
+      label: 'Decision trap: grammatical fit',
+      text: 'The grammar of the incomplete sentence is a hard constraint — not a hint. If the gap follows "a", the answer must be a singular countable noun. If the gap follows "is", the answer is likely an adjective or noun phrase describing a state. Even if you find the right section in the passage, if the word does not fit the grammar of the incomplete sentence, keep reading. Also, never use the word immediately after the gap in the passage as part of your answer — that word already appears in the question, and copying it would put you over the word limit.',
+    },
   },
   {
     id: 'diagram-labelling',
@@ -230,6 +262,10 @@ export const READING_GUIDES: ReadingGuide[] = [
       label: 'Can\'t match the diagram to the right part of the passage?',
       text: 'Find one label that is already filled in on the diagram (or the diagram\'s title) and search the passage for that exact term — this pins you to the correct paragraph immediately. All other blanks are in the same paragraph or the next one. Work outward from this anchor rather than scanning the whole passage for each blank separately.',
     },
+    decisionTip: {
+      label: 'Decision trap: direction and order',
+      text: 'If you label the diagram in the wrong order (e.g. output before input, or bottom before top), every answer shifts and they all appear wrong. Before filling any blank, trace the diagram\'s flow direction — follow the arrows, numbered sequence, or spatial layout. If the passage describes a left-to-right process, work through the blanks left to right on the diagram, not by their number order if the numbers are not sequential. Also, technical terms in diagrams are rarely paraphrased — if the passage uses "condenser", the blank wants "condenser", not a synonym.',
+    },
   },
   {
     id: 'short-answer',
@@ -254,5 +290,9 @@ export const READING_GUIDES: ReadingGuide[] = [
       'Including unnecessary words (articles, prepositions) that push the answer over the word limit.',
       'Answering with outside knowledge rather than words from the passage.',
     ],
+    decisionTip: {
+      label: 'Decision trap: question word type',
+      text: 'The question word tells you the exact category of answer — not just the topic. "How many" demands a number; "several" or "a few" are wrong even if that is what the passage implies. "Where" demands a place name; a description like "near the coast" may be incorrect if the passage gives an actual location name. "When" demands a time or period — not a reason or condition. If your answer does not match the category the question word demands, you have found the right section but the wrong sentence. Read more carefully within that section.',
+    },
   },
 ]

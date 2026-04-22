@@ -87,6 +87,19 @@ export function ReadingGuide({ guides }: { guides: ReadingGuide[] }) {
                   </div>
                 )}
 
+                {/* Decision trap pro tip */}
+                {guide.decisionTip && (
+                  <div className="flex gap-3 rounded-lg border border-orange-200 bg-orange-50 px-4 py-3">
+                    <span className="mt-0.5 shrink-0 text-base leading-none">⚠️</span>
+                    <div>
+                      <p className="mb-1 text-xs font-bold uppercase tracking-wide text-orange-700">
+                        {guide.decisionTip.label}
+                      </p>
+                      <p className="text-sm leading-relaxed text-orange-900">{guide.decisionTip.text}</p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Common mistakes */}
                 <div>
                   <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
