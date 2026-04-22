@@ -54,6 +54,7 @@ export const SPEAKING_GUIDES: SpeakingGuide[] = [
       'If you lose your place, refer to your notes — this is expected and does not penalise you.',
       'Add sensory and emotional detail to fill time naturally: "I remember it was quite cold that day", "I felt nervous at first, but then…".',
       'The rounding-off question after your 2 minutes is very short — just 1–2 sentences. Do not over-elaborate.',
+      'Your auxiliary verb carries the tense signal for your listener. In connected speech the -d on past participles often reduces or disappears ("have evolve" instead of "have evolved") — this is natural and the examiner follows it. But your auxiliary (have, had, was, were) must be clear and correctly chosen, because that is what your listener uses to identify your tense.',
     ],
     mistakes: [
       'Stopping before 2 minutes and waiting for the examiner to ask a question — keep talking.',
