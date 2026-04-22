@@ -1,3 +1,13 @@
+export type PeelPart = 'P' | 'E-evidence' | 'E-explanation' | 'E-example' | 'L' | 'intro' | 'conclusion'
+
+export type SampleQuestion = {
+  num: number
+  question: string
+  peelPart: PeelPart
+  lookFor: string   // signal words / text patterns that mark this zone
+  hint: string      // what to do once you land there
+}
+
 export type ReadingGuide = {
   id: string
   name: string
@@ -14,9 +24,75 @@ export type ReadingGuide = {
     label: string
     text: string
   }
+  sampleAnalysis?: SampleQuestion[]
 }
 
 export const READING_GUIDES: ReadingGuide[] = [
+  // ── 0. Meta-strategy — applies to every question type ─────────────────────
+  {
+    id: 'peel',
+    name: 'Paragraph Structure — PEEL Navigation',
+    description:
+      'Most IELTS academic passages use structured body paragraphs. The most common framework is PEEL: Point → Evidence → Explanation → Link. Knowing which zone holds which type of information lets you skip directly to the right sentence instead of reading the whole paragraph for every question. However, not every paragraph follows PEEL — introduction and conclusion paragraphs use different structures and require a different scanning approach.',
+    answerFormat:
+      'P = Point (topic sentence — main claim)  ·  E = Evidence (specific facts, named things, statistics, quotes)  ·  E = Explanation (consequences, "why it matters", hedged effects)  ·  L = Link (summary — skip)  ·  INTRO = hook with examples  ·  CONCLUSION = recommendation list',
+    steps: [
+      'First identify the paragraph TYPE. Does it open with a topic sentence making a claim? → PEEL body paragraph. Does it open with historical anecdotes or a hook? → Introduction paragraph. Does it open with a rhetorical question like "So what can we do…"? → Conclusion/advice paragraph.',
+      'For PEEL body paragraphs: decide what TYPE of information the question asks for. A specific named thing (a fruit, a chemical, a person)? → Evidence zone. A consequence or effect? → Explanation zone. The main claim of the paragraph? → Point (first sentence only).',
+      'For Introduction paragraphs: do not expect a topic sentence. They list historical examples and anecdotes as a hook. Scan for the specific named thing (a fruit name, a product, a substance) directly — the answer is embedded in one of the examples.',
+      'For Conclusion/advice paragraphs: they contain a list of practical recommendations. The answer is usually the first or second item in the advice list — read each sentence as a standalone tip rather than as part of a PEEL structure.',
+      'Skip the Link sentence in any body paragraph — it paraphrases the Point and almost never introduces new information that could be an answer.',
+    ],
+    strategies: [
+      'Signal words reveal which PEEL zone you are in: "For example / such as / including" → Evidence or Example zone; "Therefore / as a result / this means / consequently" → Explanation zone; "In summary / overall / this shows" → Link zone (skip).',
+      'Specific named things — a fruit, a sugar type, a chemical — are almost always in the Evidence zone, never in the Point sentence, even if the question makes them sound like a major claim.',
+      'Questions about what "may", "could", or "is suggested to" happen are answered in the Explanation zone — look for hedged causal language, not hard facts.',
+      'When a question says "other than X" or "apart from Y", find X first in the passage, then read the sentences immediately around it — the answer is adjacent.',
+      '"So what can we/you do?" or "What should we…?" in a paragraph opening signals a Conclusion paragraph. Do not apply PEEL logic here — read each advice sentence individually.',
+    ],
+    mistakes: [
+      'Assuming every paragraph follows PEEL — Introduction and Conclusion paragraphs do not, and forcing PEEL logic onto them sends you to the wrong sentence.',
+      'Treating specific named things (a particular sugar, a specific fruit) as Point-level claims — even important-sounding specifics live in the Evidence zone.',
+      'Stopping at the first sentence for every question — the Point only holds the paragraph\'s main claim, not the specific details that questions usually target.',
+    ],
+    sampleAnalysis: [
+      {
+        num: 1,
+        question: 'What fruit was linked to a serious disease in the past?',
+        peelPart: 'intro',
+        lookFor: 'Introduction paragraph — scan for a fruit name near disease vocabulary; no topic sentence exists here',
+        hint: 'Answer: apples (Para A — "chemicals on apples caused cancer"). Para A is an Introduction paragraph listing historical health scares as a hook — it has no PEEL structure. Do not look for a topic sentence. Scan each anecdote directly for a fruit name.',
+      },
+      {
+        num: 2,
+        question: 'What type of sugar have humans evolved to seek out?',
+        peelPart: 'E-evidence',
+        lookFor: 'Para B Evidence zone — look for a sugar name (fructose, glucose, sucrose) several sentences after the topic sentence',
+        hint: 'Answer: fructose (Para B — "tongue receptors that responded positively to the taste of fructose"). The Point of Para B is "Humans naturally have a sweet tooth." Fructose is a specific named detail — always Evidence, not Point — even though the question sounds like a major claim.',
+      },
+      {
+        num: 3,
+        question: 'What may be negatively affected by children consuming too much sugar?',
+        peelPart: 'E-explanation',
+        lookFor: '"may", "could", "might" near consequence language ("ruining", "damage", "affect") in the second half of Para C',
+        hint: 'Answer: their palate (Para C — "fizzy drinks and sweets may be ruining their palate"). The word "may" marks this as a consequence — Explanation zone. Skip the early evidence sentences and look at the latter half of Para C.',
+      },
+      {
+        num: 4,
+        question: 'Other than acid-producing bacteria, what is suggested to have a negative effect on our teeth?',
+        peelPart: 'E-evidence',
+        lookFor: 'Find "bacteria" in Para F, then read the surrounding expert quote for the second negative factor',
+        hint: 'Answer: brushing (Para F — "brushing may be causing more harm than good"). Find "bacteria" first, then look at the professor\'s quote immediately after — the answer is embedded in the expert evidence adjacent to the bacteria mention.',
+      },
+      {
+        num: 5,
+        question: 'What do some customers find confusing?',
+        peelPart: 'conclusion',
+        lookFor: 'Conclusion/advice paragraph (Para H) — read each recommendation sentence; the answer is in the first few pieces of advice',
+        hint: 'Answer: ingredient labels (Para H — "Ingredient labels can be misleading"). Para H opens with "So what can we do…" — a Conclusion paragraph. Do not apply PEEL. Read each advice sentence individually; the answer is the second tip in the list.',
+      },
+    ],
+  },
   // ── 1. Most common ────────────────────────────────────────────────────────
   {
     id: 'tfng',
