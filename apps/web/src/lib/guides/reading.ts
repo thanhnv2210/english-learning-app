@@ -17,6 +17,7 @@ export type ReadingGuide = {
 }
 
 export const READING_GUIDES: ReadingGuide[] = [
+  // ── 1. Most common ────────────────────────────────────────────────────────
   {
     id: 'tfng',
     name: 'True / False / Not Given',
@@ -50,33 +51,7 @@ export const READING_GUIDES: ReadingGuide[] = [
       text: 'Watch for absolute words in the statement — "always", "never", "all", "every", "daily", "must". If the passage uses a softer word like "often", "regular", "may", or "some", the statement is almost never True. If the passage does not address the specific frequency or scope at all, it is NOT GIVEN — not False. Only mark False when the passage actively says the opposite.',
     },
   },
-  {
-    id: 'ynng',
-    name: 'Yes / No / Not Given',
-    description:
-      'Similar to True/False/Not Given, but tests the writer\'s views or claims rather than factual information. Yes = the statement agrees with the writer\'s opinion; No = the statement contradicts the writer\'s opinion; Not Given = the writer does not express a view on this.',
-    answerFormat: 'Type Y, N, or NG. In some interfaces, select from a dropdown.',
-    steps: [
-      'Identify whether the question is asking about a fact (→ use T/F/NG logic) or the writer\'s opinion/claim (→ use Y/N/NG logic).',
-      'Find the relevant section of the passage where the writer discusses this topic.',
-      'Determine what the writer\'s position is — look for opinion markers: "argues", "believes", "suggests", "it is clear that", "unfortunately".',
-      'Compare the statement with the writer\'s expressed view: agrees → Yes; contradicts → No; writer does not express a view → Not Given.',
-    ],
-    strategies: [
-      'Focus on the writer\'s own voice, not facts cited from other sources. A fact the writer quotes from a study is not necessarily the writer\'s own view.',
-      'Not Given is common when the topic is mentioned but the writer\'s stance on the specific point is neutral or absent.',
-      'Look for hedging language: "may", "might", "could suggest" — this indicates the writer is tentative, which can affect whether a strong statement qualifies as Yes or No.',
-    ],
-    mistakes: [
-      'Treating this as a True/False/Not Given question — the key difference is opinion vs. fact.',
-      'Marking Yes when the passage mentions the topic but the writer does not express a clear view.',
-      'Ignoring tone indicators like "unfortunately" or "surprisingly" that reveal the writer\'s opinion.',
-    ],
-    decisionTip: {
-      label: 'Decision trap: hedging language',
-      text: 'If the writer uses "may", "might", "could", or "it is possible that", they are expressing uncertainty — not a clear opinion. A statement that says the writer "believes" something strongly is likely NOT GIVEN if the passage only hedges. Also, a fact the writer quotes from another source (a study, an expert) is not the writer\'s own view — do not treat attributed evidence as a Yes/No answer.',
-    },
-  },
+  // ── 2 ────────────────────────────────────────────────────────────────────
   {
     id: 'matching-headings',
     name: 'Matching Headings',
@@ -110,6 +85,7 @@ export const READING_GUIDES: ReadingGuide[] = [
       text: 'Distractor headings deliberately contain a keyword that appears in the paragraph — but refers to a supporting detail, not the main point. If you find a heading that fits one sentence perfectly but the rest of the paragraph is about something else, that heading is wrong. The correct heading must summarise what the whole paragraph is doing. When two headings both seem to fit, ask: which one covers the paragraph\'s purpose from start to finish?',
     },
   },
+  // ── 3 ────────────────────────────────────────────────────────────────────
   {
     id: 'matching-info',
     name: 'Matching Information / Features / Sentence Endings',
@@ -142,6 +118,35 @@ export const READING_GUIDES: ReadingGuide[] = [
       text: 'Some topics appear in more than one paragraph. When two paragraphs both seem to contain your statement, check which one contains it as a specific, concrete detail — not just a passing mention. Match to where the detail is the focus, not where the topic word happens to appear. For Matching Sentence Endings specifically, also test grammatical fit: the completed sentence must read naturally in English — if it sounds awkward, it is the wrong ending even if the content seems right.',
     },
   },
+  // ── 4 ────────────────────────────────────────────────────────────────────
+  {
+    id: 'ynng',
+    name: 'Yes / No / Not Given',
+    description:
+      'Similar to True/False/Not Given, but tests the writer\'s views or claims rather than factual information. Yes = the statement agrees with the writer\'s opinion; No = the statement contradicts the writer\'s opinion; Not Given = the writer does not express a view on this.',
+    answerFormat: 'Type Y, N, or NG. In some interfaces, select from a dropdown.',
+    steps: [
+      'Identify whether the question is asking about a fact (→ use T/F/NG logic) or the writer\'s opinion/claim (→ use Y/N/NG logic).',
+      'Find the relevant section of the passage where the writer discusses this topic.',
+      'Determine what the writer\'s position is — look for opinion markers: "argues", "believes", "suggests", "it is clear that", "unfortunately".',
+      'Compare the statement with the writer\'s expressed view: agrees → Yes; contradicts → No; writer does not express a view → Not Given.',
+    ],
+    strategies: [
+      'Focus on the writer\'s own voice, not facts cited from other sources. A fact the writer quotes from a study is not necessarily the writer\'s own view.',
+      'Not Given is common when the topic is mentioned but the writer\'s stance on the specific point is neutral or absent.',
+      'Look for hedging language: "may", "might", "could suggest" — this indicates the writer is tentative, which can affect whether a strong statement qualifies as Yes or No.',
+    ],
+    mistakes: [
+      'Treating this as a True/False/Not Given question — the key difference is opinion vs. fact.',
+      'Marking Yes when the passage mentions the topic but the writer does not express a clear view.',
+      'Ignoring tone indicators like "unfortunately" or "surprisingly" that reveal the writer\'s opinion.',
+    ],
+    decisionTip: {
+      label: 'Decision trap: hedging language',
+      text: 'If the writer uses "may", "might", "could", or "it is possible that", they are expressing uncertainty — not a clear opinion. A statement that says the writer "believes" something strongly is likely NOT GIVEN if the passage only hedges. Also, a fact the writer quotes from another source (a study, an expert) is not the writer\'s own view — do not treat attributed evidence as a Yes/No answer.',
+    },
+  },
+  // ── 5 ────────────────────────────────────────────────────────────────────
   {
     id: 'multiple-choice',
     name: 'Multiple Choice',
@@ -171,6 +176,7 @@ export const READING_GUIDES: ReadingGuide[] = [
       text: 'The most common wrong answer combines two true pieces of information from the passage that do not belong together — for example, a cause from one sentence joined to an effect from a different sentence. Before selecting, verify that the passage explicitly links the two ideas in the option. Also watch for scope changes: the passage may say "some researchers" but an option says "most researchers" — this small shift makes it wrong. Always re-read the exact passage sentence that supports your choice before clicking.',
     },
   },
+  // ── 6 ────────────────────────────────────────────────────────────────────
   {
     id: 'completion',
     name: 'Summary / Note / Table / Flow-chart Completion',
@@ -203,6 +209,7 @@ export const READING_GUIDES: ReadingGuide[] = [
       text: 'If the instruction says ONE WORD, the answer cannot include "the" or "a" — even if those words appear in the passage before the answer. For example, if the passage says "the reduction in costs" and the answer is one word, write "reduction", not "the reduction". Also, the summary is a paraphrase of the passage, so the words around the gap will look different — do not try to match the gap\'s surrounding words directly; match the meaning, then find the exact word from the passage to fill it.',
     },
   },
+  // ── 7 ────────────────────────────────────────────────────────────────────
   {
     id: 'sentence-completion',
     name: 'Sentence Completion',
@@ -235,6 +242,36 @@ export const READING_GUIDES: ReadingGuide[] = [
       text: 'The grammar of the incomplete sentence is a hard constraint — not a hint. If the gap follows "a", the answer must be a singular countable noun. If the gap follows "is", the answer is likely an adjective or noun phrase describing a state. Even if you find the right section in the passage, if the word does not fit the grammar of the incomplete sentence, keep reading. Also, never use the word immediately after the gap in the passage as part of your answer — that word already appears in the question, and copying it would put you over the word limit.',
     },
   },
+  // ── 8 ────────────────────────────────────────────────────────────────────
+  {
+    id: 'short-answer',
+    name: 'Short Answer Questions',
+    description:
+      'Direct questions about specific factual details in the passage. Answers come directly from the passage text and are kept short — usually one to three words.',
+    answerFormat: 'ONE, TWO, or THREE WORDS from the passage — check the instruction.',
+    steps: [
+      'Read the question and identify the question word: Who, What, Where, When, Why, How many, How much. This tells you exactly the type of information to find.',
+      'Highlight the key content word from the question on screen (left-click drag → right-click → Highlight) — this is your search anchor for scanning the passage.',
+      'Scan the passage for that anchor, then read the surrounding sentences carefully.',
+      'Extract the exact words from the passage that answer the specific question. Do not paraphrase.',
+      'Check: does your answer directly answer the question word? Check the word count.',
+    ],
+    strategies: [
+      '"Who" → a name or role. "Where" → a place. "When" → a time, date, or period. "How many/much" → a number or quantity. Use the question word to narrow your focus before scanning.',
+      'Answers appear in the same order as the questions — use each found answer as a signpost to the next section.',
+      'The question is usually a paraphrase of the passage. Your search keyword will often not appear word-for-word; scan for synonyms.',
+    ],
+    mistakes: [
+      'Typing a full sentence instead of the specific word or phrase the question asks for.',
+      'Including unnecessary words (articles, prepositions) that push the answer over the word limit.',
+      'Answering with outside knowledge rather than words from the passage.',
+    ],
+    decisionTip: {
+      label: 'Decision trap: question word type',
+      text: 'The question word tells you the exact category of answer — not just the topic. "How many" demands a number; "several" or "a few" are wrong even if that is what the passage implies. "Where" demands a place name; a description like "near the coast" may be incorrect if the passage gives an actual location name. "When" demands a time or period — not a reason or condition. If your answer does not match the category the question word demands, you have found the right section but the wrong sentence. Read more carefully within that section.',
+    },
+  },
+  // ── 9. Least common ───────────────────────────────────────────────────────
   {
     id: 'diagram-labelling',
     name: 'Diagram Label Completion',
@@ -265,34 +302,6 @@ export const READING_GUIDES: ReadingGuide[] = [
     decisionTip: {
       label: 'Decision trap: direction and order',
       text: 'If you label the diagram in the wrong order (e.g. output before input, or bottom before top), every answer shifts and they all appear wrong. Before filling any blank, trace the diagram\'s flow direction — follow the arrows, numbered sequence, or spatial layout. If the passage describes a left-to-right process, work through the blanks left to right on the diagram, not by their number order if the numbers are not sequential. Also, technical terms in diagrams are rarely paraphrased — if the passage uses "condenser", the blank wants "condenser", not a synonym.',
-    },
-  },
-  {
-    id: 'short-answer',
-    name: 'Short Answer Questions',
-    description:
-      'Direct questions about specific factual details in the passage. Answers come directly from the passage text and are kept short — usually one to three words.',
-    answerFormat: 'ONE, TWO, or THREE WORDS from the passage — check the instruction.',
-    steps: [
-      'Read the question and identify the question word: Who, What, Where, When, Why, How many, How much. This tells you exactly the type of information to find.',
-      'Highlight the key content word from the question on screen (left-click drag → right-click → Highlight) — this is your search anchor for scanning the passage.',
-      'Scan the passage for that anchor, then read the surrounding sentences carefully.',
-      'Extract the exact words from the passage that answer the specific question. Do not paraphrase.',
-      'Check: does your answer directly answer the question word? Check the word count.',
-    ],
-    strategies: [
-      '"Who" → a name or role. "Where" → a place. "When" → a time, date, or period. "How many/much" → a number or quantity. Use the question word to narrow your focus before scanning.',
-      'Answers appear in the same order as the questions — use each found answer as a signpost to the next section.',
-      'The question is usually a paraphrase of the passage. Your search keyword will often not appear word-for-word; scan for synonyms.',
-    ],
-    mistakes: [
-      'Typing a full sentence instead of the specific word or phrase the question asks for.',
-      'Including unnecessary words (articles, prepositions) that push the answer over the word limit.',
-      'Answering with outside knowledge rather than words from the passage.',
-    ],
-    decisionTip: {
-      label: 'Decision trap: question word type',
-      text: 'The question word tells you the exact category of answer — not just the topic. "How many" demands a number; "several" or "a few" are wrong even if that is what the passage implies. "Where" demands a place name; a description like "near the coast" may be incorrect if the passage gives an actual location name. "When" demands a time or period — not a reason or condition. If your answer does not match the category the question word demands, you have found the right section but the wrong sentence. Read more carefully within that section.',
     },
   },
 ]
