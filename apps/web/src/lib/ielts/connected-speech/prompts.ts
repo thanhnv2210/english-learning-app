@@ -34,6 +34,7 @@ export type PhenomenonMeta = {
   label: string
   explanation: string
   examples: { original: string; transformed: string; note: string }[]
+  grammarTip?: string   // IELTS-specific note: how this phenomenon affects grammar signals in listening/speaking
 }
 
 export const PHENOMENON_META: Record<Phenomenon, PhenomenonMeta> = {
@@ -45,6 +46,8 @@ export const PHENOMENON_META: Record<Phenomenon, PhenomenonMeta> = {
       { original: 'next day', transformed: 'nex day', note: '/t/ dropped before consonant /d/' },
       { original: 'last night', transformed: 'las night', note: '/t/ dropped before consonant /n/' },
     ],
+    grammarTip:
+      'The /d/ at the end of past participles is frequently elided, so "have evolved" sounds like "have evolve" and "had finished" sounds like "had finish". In listening, do not rely on hearing the -d to know the tense — read the tense from the auxiliary verb instead: "have/has" → present perfect, "had" → past perfect, "will have" → future perfect. In speaking, your auxiliary must be clear and full-strength even if the main verb\'s ending reduces — the auxiliary is what the listener uses to track your grammar.',
   },
   assimilation: {
     label: 'Assimilation',

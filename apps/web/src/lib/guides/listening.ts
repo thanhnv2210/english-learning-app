@@ -27,6 +27,7 @@ export const LISTENING_GUIDES: QuestionTypeGuide[] = [
       'Answers appear in the same order as the recording. If you miss one, move on immediately — do not dwell.',
       'Numbers, dates, names, and prices are common gap-fill answers. Listen carefully to the exact form (e.g. "thirty" vs "13").',
       'In form completion, the category label on screen (e.g. "Name:", "Date of birth:") tells you exactly what type of answer to expect.',
+      'Do not rely on hearing the -d ending to know the tense of a verb — in natural speech it is often dropped. Read the tense from the auxiliary verb instead: "have/has" signals present perfect, "had" signals past perfect. If a gap expects a past participle and you hear "have evolve", write "evolved".',
     ],
     mistakes: [
       'Typing more words than the limit allows — even a correct answer is marked wrong if it exceeds the word count.',

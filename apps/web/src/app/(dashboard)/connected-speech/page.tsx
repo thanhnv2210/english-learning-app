@@ -423,6 +423,17 @@ function ReferenceSection() {
                 </div>
               ))}
             </div>
+            {meta.grammarTip && (
+              <div className="mt-4 flex gap-2 rounded-md border border-white/60 bg-white/50 px-3 py-2.5">
+                <span className="mt-0.5 shrink-0 text-sm">🎯</span>
+                <div>
+                  <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-gray-500">
+                    IELTS listening &amp; speaking
+                  </p>
+                  <p className="text-xs leading-relaxed text-gray-700">{meta.grammarTip}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
