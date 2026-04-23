@@ -1,7 +1,12 @@
 'use server'
 
-import { saveVocabularyWord } from '@/lib/db/vocabulary'
-import type { VocabularyCard } from '@/lib/db/vocabulary'
+import { revalidatePath } from 'next/cache'
+import {
+  saveVocabularyWord,
+  deleteVocabularyWord,
+  updateVocabularyRank,
+  type VocabularyCard,
+} from '@/lib/db/vocabulary'
 
 export async function addWordToLibrary(card: VocabularyCard): Promise<{ ok: boolean }> {
   const result = await saveVocabularyWord({
@@ -12,6 +17,17 @@ export async function addWordToLibrary(card: VocabularyCard): Promise<{ ok: bool
     collocations: card.collocations,
     examples: card.examples,
     domainNames: card.domains,
+    userAdded: true,
   })
   return { ok: result !== null }
+}
+
+export async function deleteVocabularyWordAction(id: number): Promise<void> {
+  await deleteVocabularyWord(id)
+  revalidatePath('/vocabulary')
+}
+
+export async function updateVocabularyRankAction(id: number, rank: number): Promise<void> {
+  await updateVocabularyRank(id, rank)
+  revalidatePath('/vocabulary')
 }
