@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, Collocation Library, Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides), and Target Switcher UI. Still pending: Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
+Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, Collocation Library, Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides), and Target Switcher UI. Still pending: Progress Analytics. Recently added: AI Prompt Library (5 practice prompts per skill × 3 platforms, profile-aware, static). See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
 
 ## Tech Stack
 
@@ -291,6 +291,14 @@ See `.devcontainer/README.md` for full setup steps.
 - **Target Switcher UI** (Phase 3 complete): `/settings` page — 3 profile cards (`IELTS_Academic_6.5`, `IELTS_Academic_7.5`, `Business_Fluent`); `updateTargetProfileAction` server action updates DB + calls `revalidatePath('/', 'layout')`; `DashboardLayout` (`layout.tsx`) is now `async` — fetches `getDefaultUser()` and passes `targetProfile` as prop to `NavSidebar`; sidebar header and footer target badge are now dynamic via `formatTargetLabel(profile)`
 - `'use server'` files may only export async functions — `VALID_PROFILES` constant lives inside the action file (not exported); `TargetProfileValue` type is defined locally in the client component
 
+**AI Prompt Library** (static, profile-aware)
+- Route `/prompt-library` — 5 practice prompts per skill (Speaking, Writing, Reading, Listening) × 3 platforms (Claude, ChatGPT, Gemini)
+- Fully static — `lib/prompt-library/index.ts` exports `getPromptLibrary(targetBand, targetProfile)` which interpolates band/goal into every prompt string at call time
+- `Business_Fluent` profile: replaces band references with "professional business English" throughout
+- `PLATFORM_META` stores label, icon, and platform-specific usage tip per platform
+- Backlog: Examiner prompts (act-as examiner for interactive sessions), Evaluator prompts (grade my response)
+- Client component `PromptLibraryView`: skill tab switcher + platform tab switcher + `PromptCard` with clipboard copy (icon swaps to checkmark for 2s via `useState`)
+
 ### Key Design Decisions
 - Use "Band 6.5 vs 7.0 gap analysis" framing in all feedback (not just scores)
 - Writing feedback includes "Drafting Mode" (outline critique before full essay)
@@ -310,7 +318,7 @@ See `.devcontainer/README.md` for full setup steps.
 | 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
-| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Collocation Library ✅ · Nav reorganisation ✅ · Target Switcher ✅ · Analytics ⬜ |
+| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Collocation Library ✅ · Nav reorganisation ✅ · Target Switcher ✅ · AI Prompt Library ✅ · Analytics ⬜ |
 | 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.
