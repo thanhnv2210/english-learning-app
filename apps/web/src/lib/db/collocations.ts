@@ -10,6 +10,7 @@ export type CollocationCard = {
   explanation: string | null
   skills: CollocationSkill[]
   examples: string[]
+  rank: number
   createdAt: Date
 }
 
@@ -31,7 +32,7 @@ export async function saveCollocation(data: {
 }): Promise<CollocationCard | null> {
   const [row] = await db
     .insert(collocationEntries)
-    .values(data)
+    .values({ ...data, phrase: data.phrase.toLowerCase() })
     .onConflictDoNothing()
     .returning()
   return (row as CollocationCard) ?? null
@@ -41,7 +42,7 @@ export async function getAllCollocations(): Promise<CollocationCard[]> {
   return db
     .select()
     .from(collocationEntries)
-    .orderBy(desc(collocationEntries.createdAt)) as Promise<CollocationCard[]>
+    .orderBy(desc(collocationEntries.rank), desc(collocationEntries.createdAt)) as Promise<CollocationCard[]>
 }
 
 export async function updateCollocationSkills(
@@ -51,6 +52,13 @@ export async function updateCollocationSkills(
   await db
     .update(collocationEntries)
     .set({ skills })
+    .where(eq(collocationEntries.id, id))
+}
+
+export async function updateCollocationRank(id: number, rank: number): Promise<void> {
+  await db
+    .update(collocationEntries)
+    .set({ rank })
     .where(eq(collocationEntries.id, id))
 }
 

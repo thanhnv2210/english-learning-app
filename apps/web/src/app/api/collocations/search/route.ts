@@ -23,12 +23,12 @@ export async function POST(req: Request) {
     return Response.json({ error: 'mode must be "word" or "phrase"' }, { status: 400 })
   }
 
-  const trimmed = query.trim()
+  const normalized = query.trim().toLowerCase()
 
   const prompt =
     mode === 'word'
-      ? COLLOCATION_BY_WORD_PROMPT(trimmed)
-      : COLLOCATION_BY_PHRASE_PROMPT(trimmed)
+      ? COLLOCATION_BY_WORD_PROMPT(normalized)
+      : COLLOCATION_BY_PHRASE_PROMPT(normalized)
 
   const { text: raw } = await generateText({
     model: ollamaModel(),
@@ -52,8 +52,9 @@ export async function POST(req: Request) {
 
     const results = await Promise.all(
       collocations.map(async (c) => {
-        const existing = await findCollocation(c.phrase)
-        return { ...c, inLibrary: !!existing }
+        const phrase = c.phrase.toLowerCase()
+        const existing = await findCollocation(phrase)
+        return { ...c, phrase, inLibrary: !!existing }
       }),
     )
 
@@ -72,7 +73,7 @@ export async function POST(req: Request) {
   }
 
   const result: CollocationResult = {
-    phrase: data.phrase ?? trimmed,
+    phrase: (data.phrase ?? normalized).toLowerCase(),
     type: data.type ?? 'other',
     explanation: data.explanation ?? '',
     suggestedSkills: data.suggestedSkills ?? [],

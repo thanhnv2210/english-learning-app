@@ -275,8 +275,11 @@ export const collocationEntries = pgTable('collocation_entries', {
   explanation: text('explanation'),
   skills: jsonb('skills').notNull().$type<CollocationSkill[]>(),
   examples: jsonb('examples').notNull().$type<string[]>(),
+  rank: integer('rank').notNull().default(3),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-})
+}, (t) => [
+  check('collocation_entries_rank_check', sql`${t.rank} between 1 and 5`),
+])
 
 // ─── Relations ────────────────────────────────────────────────────────────────
 
