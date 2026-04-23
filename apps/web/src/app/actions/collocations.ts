@@ -4,6 +4,7 @@ import {
   saveCollocation,
   getAllCollocations,
   updateCollocationSkills,
+  updateCollocationRank,
   deleteCollocation,
   type CollocationCard,
 } from '@/lib/db/collocations'
@@ -28,6 +29,10 @@ export async function updateCollocationSkillsAction(
   skills: CollocationSkill[],
 ): Promise<void> {
   return updateCollocationSkills(id, skills)
+}
+
+export async function updateCollocationRankAction(id: number, rank: number): Promise<void> {
+  return updateCollocationRank(id, rank)
 }
 
 export async function deleteCollocationAction(id: number): Promise<void> {

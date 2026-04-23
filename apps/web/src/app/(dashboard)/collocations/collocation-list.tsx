@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useTransition, useOptimistic } from 'react'
-import { deleteCollocationAction, updateCollocationSkillsAction } from '@/app/actions/collocations'
+import { deleteCollocationAction, updateCollocationSkillsAction, updateCollocationRankAction } from '@/app/actions/collocations'
 import type { CollocationCard } from '@/lib/db/collocations'
 import type { CollocationSkill } from '@/lib/db/schema'
 
@@ -23,10 +23,35 @@ type Props = {
   initialItems: CollocationCard[]
 }
 
+type SortKey = 'rank_desc' | 'rank_asc' | 'date_desc' | 'date_asc' | 'alpha_asc' | 'alpha_desc'
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: 'rank_desc', label: 'Rank: high → low' },
+  { value: 'rank_asc',  label: 'Rank: low → high' },
+  { value: 'date_desc', label: 'Newest first' },
+  { value: 'date_asc',  label: 'Oldest first' },
+  { value: 'alpha_asc', label: 'A → Z' },
+  { value: 'alpha_desc',label: 'Z → A' },
+]
+
+function applySort(items: CollocationCard[], sort: SortKey): CollocationCard[] {
+  const arr = [...items]
+  switch (sort) {
+    case 'rank_desc': return arr.sort((a, b) => b.rank - a.rank || b.createdAt.getTime() - a.createdAt.getTime())
+    case 'rank_asc':  return arr.sort((a, b) => a.rank - b.rank || b.createdAt.getTime() - a.createdAt.getTime())
+    case 'date_desc': return arr.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    case 'date_asc':  return arr.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+    case 'alpha_asc': return arr.sort((a, b) => a.phrase.localeCompare(b.phrase))
+    case 'alpha_desc':return arr.sort((a, b) => b.phrase.localeCompare(a.phrase))
+  }
+}
+
 export function CollocationList({ initialItems }: Props) {
   const [items, setItems] = useOptimistic(initialItems)
   const [search, setSearch] = useState('')
   const [activeSkill, setActiveSkill] = useState<CollocationSkill | 'all_skills' | null>(null)
+  const [activeRank, setActiveRank] = useState<number | null>(null)
+  const [sort, setSort] = useState<SortKey>('rank_desc')
 
   const filtered = useMemo(() => {
     let result = items
@@ -34,6 +59,9 @@ export function CollocationList({ initialItems }: Props) {
       result = result.filter((c) => ALL_SKILLS.every((s) => c.skills.includes(s)))
     } else if (activeSkill) {
       result = result.filter((c) => c.skills.includes(activeSkill))
+    }
+    if (activeRank !== null) {
+      result = result.filter((c) => c.rank === activeRank)
     }
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -44,8 +72,8 @@ export function CollocationList({ initialItems }: Props) {
           c.examples.some((e) => e.toLowerCase().includes(q)),
       )
     }
-    return result
-  }, [items, activeSkill, search])
+    return applySort(result, sort)
+  }, [items, activeSkill, activeRank, search, sort])
 
   function handleDelete(id: number) {
     setItems((prev) => prev.filter((c) => c.id !== id))
@@ -55,6 +83,15 @@ export function CollocationList({ initialItems }: Props) {
   function handleSkillsUpdate(id: number, skills: CollocationSkill[]) {
     setItems((prev) => prev.map((c) => (c.id === id ? { ...c, skills } : c)))
     updateCollocationSkillsAction(id, skills)
+  }
+
+  function handleRankUpdate(id: number, rank: number) {
+    setItems((prev) =>
+      [...prev.map((c) => (c.id === id ? { ...c, rank } : c))].sort(
+        (a, b) => b.rank - a.rank || b.createdAt.getTime() - a.createdAt.getTime(),
+      ),
+    )
+    updateCollocationRankAction(id, rank)
   }
 
   return (
@@ -72,13 +109,24 @@ export function CollocationList({ initialItems }: Props) {
         <>
           {/* Filter bar */}
           <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search phrase, type, or example…"
-              className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm outline-none focus:border-blue-400"
-            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search phrase, type, or example…"
+                className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm outline-none focus:border-blue-400"
+              />
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortKey)}
+                className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 outline-none focus:border-blue-400 bg-white"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
             <div className="flex flex-wrap gap-2">
               <FilterChip label="All" active={activeSkill === null} onClick={() => setActiveSkill(null)} />
               {ALL_SKILLS.map((skill) => (
@@ -95,6 +143,25 @@ export function CollocationList({ initialItems }: Props) {
                 onClick={() => setActiveSkill(activeSkill === 'all_skills' ? null : 'all_skills')}
                 highlight
               />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-400 shrink-0">Rank</span>
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4, 5].map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setActiveRank(activeRank === r ? null : r)}
+                    title={`Filter by rank ${r}`}
+                    className={`flex items-center gap-0.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                      activeRank === r
+                        ? 'border-amber-400 bg-amber-50 text-amber-700'
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-amber-300 hover:text-amber-600'
+                    }`}
+                  >
+                    {'★'.repeat(r)}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -114,6 +181,7 @@ export function CollocationList({ initialItems }: Props) {
                   card={card}
                   onDelete={() => handleDelete(card.id)}
                   onSkillsUpdate={(skills) => handleSkillsUpdate(card.id, skills)}
+                  onRankUpdate={(rank) => handleRankUpdate(card.id, rank)}
                 />
               ))}
             </div>
@@ -128,15 +196,25 @@ function SavedCard({
   card,
   onDelete,
   onSkillsUpdate,
+  onRankUpdate,
 }: {
   card: CollocationCard
   onDelete: () => void
   onSkillsUpdate: (skills: CollocationSkill[]) => void
+  onRankUpdate: (rank: number) => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const [editingSkills, setEditingSkills] = useState(false)
   const [localSkills, setLocalSkills] = useState<CollocationSkill[]>(card.skills)
+  const [localRank, setLocalRank] = useState(card.rank)
+  const [hoverRank, setHoverRank] = useState(0)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [, startTransition] = useTransition()
+
+  function handleRankClick(rank: number) {
+    setLocalRank(rank)
+    startTransition(() => onRankUpdate(rank))
+  }
 
   function toggleSkill(skill: CollocationSkill) {
     const updated = localSkills.includes(skill)
@@ -148,14 +226,32 @@ function SavedCard({
 
   return (
     <div className="group relative flex flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm gap-3">
-      {/* Delete button */}
-      <button
-        onClick={onDelete}
-        className="absolute top-3 right-3 hidden group-hover:flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-500 hover:bg-red-200 text-xs transition-colors"
-        title="Delete"
-      >
-        ✕
-      </button>
+      {/* Delete button — two-step confirmation */}
+      {confirmingDelete ? (
+        <div className="absolute top-2.5 right-3 flex items-center gap-1.5">
+          <span className="text-xs text-red-600 font-medium">Delete?</span>
+          <button
+            onClick={onDelete}
+            className="rounded px-2 py-0.5 text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors"
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => setConfirmingDelete(false)}
+            className="rounded px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+          >
+            No
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setConfirmingDelete(true)}
+          className="absolute top-3 right-3 hidden group-hover:flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-500 hover:bg-red-200 text-xs transition-colors"
+          title="Delete"
+        >
+          ✕
+        </button>
+      )}
 
       {/* Phrase + type */}
       <div className="flex flex-col gap-1 pr-7">
@@ -169,6 +265,26 @@ function SavedCard({
       {card.explanation && (
         <p className="text-sm leading-relaxed text-gray-600">{card.explanation}</p>
       )}
+
+      {/* Rank */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs text-gray-400">Rank</span>
+        <div className="flex gap-0.5" onMouseLeave={() => setHoverRank(0)}>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              onClick={() => handleRankClick(star)}
+              onMouseEnter={() => setHoverRank(star)}
+              title={`Rank ${star}`}
+              className="text-base leading-none transition-transform hover:scale-110"
+            >
+              <span className={(hoverRank || localRank) >= star ? 'text-amber-400' : 'text-gray-200'}>
+                ★
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Skills */}
       <div className="flex flex-col gap-1">
