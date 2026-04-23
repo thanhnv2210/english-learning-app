@@ -23,3 +23,10 @@ export function parseTargetBand(profile: string): number {
   const match = profile.match(/(\d+\.\d+|\d+)$/)
   return match ? parseFloat(match[1]) : 6.5
 }
+
+export async function updateTargetProfile(profile: string): Promise<void> {
+  await db
+    .update(users)
+    .set({ targetProfile: profile })
+    .where(eq(users.email, DEFAULT_EMAIL))
+}

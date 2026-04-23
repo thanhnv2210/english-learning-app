@@ -44,7 +44,15 @@ const GROUPS: NavGroup[] = [
 
 const STANDALONE_BOTTOM: NavItem[] = [
   { href: '/history', label: 'History', icon: '🕐' },
+  { href: '/settings', label: 'Settings', icon: '⚙️' },
 ]
+
+function formatTargetLabel(profile: string): string {
+  if (profile === 'Business_Fluent') return 'Business'
+  const match = profile.match(/(\d+\.\d+|\d+)$/)
+  const band = match ? parseFloat(match[1]) : 6.5
+  return `IELTS ${band}`
+}
 
 const FONT_LEVELS = [100, 125, 155] as const
 type FontLevel = 0 | 1 | 2
@@ -62,7 +70,7 @@ function groupContainsActive(group: NavGroup, pathname: string) {
   return group.items.some((item) => isActive(item.href, pathname))
 }
 
-export function NavSidebar() {
+export function NavSidebar({ targetProfile = 'IELTS_Academic_6.5' }: { targetProfile?: string }) {
   const pathname = usePathname()
 
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
@@ -183,7 +191,7 @@ export function NavSidebar() {
       {/* Header row: title + collapse button (only shown at wide viewports) */}
       <div className="mb-6 flex items-center justify-between px-2">
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-          IELTS 6.5
+          {formatTargetLabel(targetProfile)}
         </p>
         {!isNarrow && (
           <button
@@ -248,7 +256,7 @@ export function NavSidebar() {
       <div className="mt-4 space-y-3 rounded-lg bg-gray-50 px-3 py-3">
         <div>
           <p className="text-xs text-gray-500">Target</p>
-          <p className="text-sm font-semibold text-gray-800">Band 6.5</p>
+          <p className="text-sm font-semibold text-gray-800">{formatTargetLabel(targetProfile)}</p>
         </div>
 
         {/* Font size control */}
