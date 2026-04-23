@@ -50,7 +50,8 @@ english-learning-app/
 │       │   │   ├── writing.ts            # saveTopicToLibrary, pickRandomTopic, listTopicsByDomain
 │       │   │   ├── vocabulary.ts         # addWordToLibrary
 │       │   │   ├── connected-speech.ts   # saveAnalysisAction, listRecentAnalyses, listByPhenomenon, deleteAnalysisAction
-│       │   │   └── collocations.ts       # saveCollocationAction, listCollocationAction, updateCollocationSkillsAction, deleteCollocationAction
+│       │   │   ├── collocations.ts       # saveCollocationAction, listCollocationAction, updateCollocationSkillsAction, updateCollocationRankAction, deleteCollocationAction
+│       │   │   └── user.ts               # updateTargetProfileAction
 │       │   └── api/                      # Backend API routes (BFF)
 │       │       ├── chat/                 # POST — examiner streaming (Part 1/2/3 + topic)
 │       │       ├── feedback/             # POST — post-session band scoring
@@ -273,16 +274,20 @@ See `.devcontainer/README.md` for full setup steps.
 - `connected_speech_analyses` table: `id`, `originalText`, `transformedText`, `instances` (jsonb), `phenomena` (jsonb — deduplicated list for filtering), `createdAt`
 - Recommended model: `llama3.1:8b` or `gemma2:9b` (general-purpose); `qwen2.5-coder:7b` lacks phonetic knowledge
 
-**Collocation Library** (Phase 3 complete)
+**Collocation Library** (Phase 3 complete + enhancements)
 - Route `/collocations` — standalone tool; no session required
 - Two search modes via `POST /api/collocations/search`: **By Word** (returns up to 8 collocations containing the word) and **By Phrase** (validates a specific phrase, or returns invalid reason)
 - Uses `generateText` (not streaming) — needs full JSON before rendering; strips markdown fences before `JSON.parse`
 - Each collocation card: `phrase`, `type` (e.g. `verb+noun`), `skills` (`Writing_1` | `Writing_2` | `Speaking`), `examples` (2–3 sentences)
 - AI suggests skills; user can toggle any skill on/off before saving
-- `collocation_entries` table: `id`, `phrase` (unique), `type`, `skills` (jsonb), `examples` (jsonb), `createdAt`
-- Library: search by phrase/type/example text; filter by skill chip; edit skills inline post-save; delete on hover
+- `collocation_entries` table: `id`, `phrase` (unique, lowercase-enforced), `type`, `explanation`, `skills` (jsonb), `examples` (jsonb), `rank` (integer 1–5, default 3, CHECK constraint), `createdAt`
+- **Lowercase normalization**: query is `.toLowerCase()` before hitting the AI prompt; AI-returned phrases are also lowercased before DB ops; `saveCollocation` lowercases `phrase` on insert — prevents duplicate entries with different casing
+- **Rank field**: 1–5 stars, default 3; inline star widget in each card (hover preview + click to set); `updateCollocationRankAction` persists to DB + calls `revalidatePath('/collocations')`; DB orders by `rank DESC, createdAt DESC`
+- **Delete confirmation**: two-step inline confirm — click ✕ → shows "Delete? Yes / No" in the card header; `deleteCollocationAction` calls `revalidatePath('/collocations')`
+- **Library controls**: text search (phrase/type/examples) + skill filter chips + rank filter chips (★ through ★★★★★, toggle) + sort dropdown (Rank high→low, Rank low→high, Newest, Oldest, A→Z, Z→A); all four compose in `useMemo`
 - `CollocationSkill` type exported from `schema.ts`: `'Writing_1' | 'Writing_2' | 'Speaking'`
 - Two AI prompts: `COLLOCATION_BY_WORD_PROMPT(word)` → `{ collocations: CollocationResult[] }`, `COLLOCATION_BY_PHRASE_PROMPT(phrase)` → `{ valid, phrase, type, suggestedSkills, examples } | { valid: false, reason }`
+- **`useOptimistic` + `revalidatePath` rule**: any mutation that must persist after optimistic state reverts (rank change, delete) **must** call `revalidatePath` in the server action so `initialItems` refreshes and `useOptimistic` settles on the correct server value
 
 **Target Profile System**
 - `users.targetProfile` stored in DB; `parseTargetBand()` parses `IELTS_6.5` → `6.5`
@@ -305,9 +310,10 @@ See `.devcontainer/README.md` for full setup steps.
 - Vocabulary Replacer identifies dev-slang and suggests formal IELTS-appropriate equivalents
 - `FeedbackGenerator` runs *after* a session, not during, to maintain examiner strictness
 - Web Speech API (not Whisper) chosen for STT: zero setup, free, native in Chrome
-- All three content library tables (`reading_passages`, `listening_scripts`, `writing_topics`) share a `rank` column (1–5, default 1, DB-enforced CHECK constraint); sort order is `rank DESC, createdAt DESC` — see [PDR-0010](./docs/pdr/0010-library-rank-ordering.md)
+- All three content library tables (`reading_passages`, `listening_scripts`, `writing_topics`) share a `rank` column (1–5, default 1, DB-enforced CHECK constraint); sort order is `rank DESC, createdAt DESC` — see [PDR-0010](./docs/pdr/0010-library-rank-ordering.md). `collocation_entries` also has `rank` (1–5, default 3) following the same pattern
+- **`useOptimistic` contract**: optimistic state reverts to `initialItems` once the server action settles. If `initialItems` does not refresh (no `revalidatePath`), the old value reappears. Rule: any mutation that must outlive the optimistic window **must** call `revalidatePath` in its server action
 - Centralised Ollama client (`src/lib/ai-client.ts`) — single source for `createOllama` config, `OLLAMA_ENABLED` flag, and disabled-response helper; all 16 API routes + 1 server action import from here
-- Nav sidebar (`components/nav-sidebar.tsx`) uses collapsible groups: **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech), **Guides** (How to Answer, Topic Ideas); Dashboard and History are standalone. Active group auto-opens on load; group header turns blue when it contains the active page.
+- Nav sidebar (`components/nav-sidebar.tsx`) uses collapsible groups: **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech), **Guides** (How to Answer, Question Anatomy, Topic Ideas, AI Prompts, Exam Sprint); Dashboard, History, and Settings are standalone. Active group auto-opens on load; group header turns blue when it contains the active page.
 - `NEXT_PUBLIC_OLLAMA_ENABLED=false` disables all AI routes and shows an amber banner in the dashboard layout; designed for GitHub Codespaces where Ollama cannot run in-container
 - Safe colour getter pattern (`getPhenomenonColor(p)`) — always look up dynamic AI-returned strings through a getter with a fallback rather than direct object indexing; prevents crashes when the model returns an unexpected value
 
