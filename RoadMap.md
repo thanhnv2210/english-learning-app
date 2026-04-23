@@ -94,11 +94,27 @@
 
 ### Task 3.10 — Collocation Library ✅
 - Route `/collocations`; `POST /api/collocations/search` — `generateText` (full JSON), two modes: `word` (returns array) and `phrase` (validates single collocation)
-- `collocation_entries` table: `phrase` (unique), `type` (e.g. `verb+noun`), `skills` (jsonb `CollocationSkill[]`), `examples` (jsonb `string[]`)
+- `collocation_entries` table: `phrase` (unique, lowercase), `type`, `explanation`, `skills` (jsonb `CollocationSkill[]`), `examples` (jsonb `string[]`), `rank` (integer 1–5, default 3, CHECK constraint)
 - `CollocationSkill` type: `'Writing_1' | 'Writing_2' | 'Speaking'` — AI-suggested, user-editable before and after save
 - Search UI: shared input + two buttons ("By Word" / "By Phrase"); "By Phrase" shows invalid reason if not a real collocation
-- Library: text search across phrase/type/examples; filter chip per skill; inline skill editing (toggle + "Done"); delete on hover
+- **Lowercase normalization**: query lowercased before AI prompt; AI-returned phrases lowercased before DB ops; `saveCollocation` lowercases on insert
+- **Rank (1–5)**: inline star widget per card; `updateCollocationRankAction` + `revalidatePath('/collocations')`; DB orders by `rank DESC, createdAt DESC`
+- **Delete confirmation**: two-step inline "Delete? Yes / No"; `deleteCollocationAction` + `revalidatePath('/collocations')`
+- **Library controls**: text search + skill filter chips + rank filter chips (★–★★★★★) + sort dropdown (6 options: rank↑↓, date↑↓, A→Z, Z→A); all compose in `useMemo`
 - `lib/ielts/collocations/prompts.ts`: `COLLOCATION_BY_WORD_PROMPT` → `{ collocations: CollocationResult[] }`, `COLLOCATION_BY_PHRASE_PROMPT` → `{ valid, ...CollocationResult } | { valid: false, reason }`
+
+### Task 3.12 — AI Prompt Library ✅
+- Route `/prompt-library` — 5 practice prompts × 4 skills (Speaking, Writing, Reading, Listening) × 3 platforms (Claude, ChatGPT, Gemini) = 60 prompts
+- Fully static — `lib/prompt-library/index.ts` exports `getPromptLibrary(targetBand, targetProfile)`; band and goal line interpolated at call time
+- `Business_Fluent` profile: band references replaced with "professional business English" throughout
+- `PLATFORM_META`: label, icon, and platform-specific usage tip per platform
+- **Token input UI**: `[BRACKETED]` placeholders parsed into labeled input fields (label from token text, placeholder from `e.g.` clause); prompt preview highlights unfilled tokens amber, filled tokens blue; copy button copies fully assembled text
+- Copy button turns blue when all fields are filled; icon swaps to checkmark for 2s on copy
+- Backlog: Examiner prompts (interactive session), Evaluator prompts (grade my response)
+- Added to Guides group in nav sidebar
+
+### Task 3.13 — Target Switcher UI ✅
+- See Task 3.2 — implemented as part of Phase 3 completion
 
 ### Task 3.11 — Nav Sidebar Reorganisation ✅
 - Sidebar reorganised from a flat list into collapsible groups to reduce visual clutter
