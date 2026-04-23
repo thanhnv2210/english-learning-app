@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import {
   saveCollocation,
   getAllCollocations,
@@ -32,9 +33,11 @@ export async function updateCollocationSkillsAction(
 }
 
 export async function updateCollocationRankAction(id: number, rank: number): Promise<void> {
-  return updateCollocationRank(id, rank)
+  await updateCollocationRank(id, rank)
+  revalidatePath('/collocations')
 }
 
 export async function deleteCollocationAction(id: number): Promise<void> {
-  return deleteCollocation(id)
+  await deleteCollocation(id)
+  revalidatePath('/collocations')
 }
