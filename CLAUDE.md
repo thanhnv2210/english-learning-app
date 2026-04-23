@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, and Collocation Library. Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides). Still pending: Target Switcher UI, Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
+Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, Collocation Library, Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides), and Target Switcher UI. Still pending: Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
 
 ## Tech Stack
 
@@ -102,6 +102,8 @@ english-learning-app/
 
 **AI client rule:** Never import `createOllama` directly in route files or server actions. Always import from `@/lib/ai-client` and guard with `if (!OLLAMA_ENABLED) return ollamaDisabledResponse()` (route handlers) or `if (!OLLAMA_ENABLED) throw new Error(...)` (server actions).
 
+**`'use server'` file rule:** Files marked `'use server'` may only export **async functions** — no plain `const`, objects, or types. Move any shared constants or types to a separate non-server file and import them from there. Violating this causes: `A "use server" file can only export async functions, found object.`
+
 ## Commands
 
 ```bash
@@ -128,6 +130,40 @@ docker compose -f docker/docker-compose.yml up -d
 
 > `next dev` without `--turbo` must not be used for local development (M1 memory constraint).
 > If you see "Internal Server Error" on first page load, run `pnpm dev:clean` to clear the stale `.next` cache.
+
+### Restarting the Dev Server (force kill + clean start)
+
+If the dev server is running on the wrong port or you need a clean restart:
+
+```bash
+# Kill any process holding ports 3000, 3001, 3002
+lsof -ti tcp:3000 | xargs kill -9 2>/dev/null
+lsof -ti tcp:3001 | xargs kill -9 2>/dev/null
+lsof -ti tcp:3002 | xargs kill -9 2>/dev/null
+
+# Start clean on port 3000 (from apps/web/)
+PORT=3000 pnpm dev:clean
+```
+
+> Always use `PORT=3000 pnpm dev:clean` — never plain `pnpm dev` — to guarantee a fresh build on the correct port.
+
+### Stale Data Troubleshooting
+
+**Symptoms of stale data:**
+- UI shows old values after a server action (e.g. target profile change not reflected in sidebar)
+- Pages render cached output that doesn't match the current DB state
+- Layout-level data (fetched in `layout.tsx`) does not update after mutations
+
+**Causes and fixes:**
+
+| Cause | Fix |
+|-------|-----|
+| Stale `.next` build cache | `pnpm dev:clean` (clears `.next/` and restarts) |
+| Server action missing `revalidatePath` | Add `revalidatePath('/', 'layout')` after DB mutation in the server action |
+| Layout fetching data without `revalidatePath` invalidating it | Ensure the mutating server action calls `revalidatePath` with the correct scope (`'layout'` for layout-level data, `'page'` for page-only data) |
+| Next.js fetch cache (RSC) | Add `export const dynamic = 'force-dynamic'` to the page/layout if it must never be cached, or use `noStore()` from `next/cache` inside the data-fetching function |
+
+**Rule:** Any server action that mutates data shown in `layout.tsx` (e.g. `targetProfile` in the nav sidebar) **must** call `revalidatePath('/', 'layout')` to invalidate the layout cache across all routes.
 
 ### Environment variables (key ones)
 
@@ -252,6 +288,8 @@ See `.devcontainer/README.md` for full setup steps.
 - `users.targetProfile` stored in DB; `parseTargetBand()` parses `IELTS_6.5` → `6.5`
 - `targetBand` flows into all feedback prompts
 - Refactored to load different prompt templates per target in Phase 3
+- **Target Switcher UI** (Phase 3 complete): `/settings` page — 3 profile cards (`IELTS_Academic_6.5`, `IELTS_Academic_7.5`, `Business_Fluent`); `updateTargetProfileAction` server action updates DB + calls `revalidatePath('/', 'layout')`; `DashboardLayout` (`layout.tsx`) is now `async` — fetches `getDefaultUser()` and passes `targetProfile` as prop to `NavSidebar`; sidebar header and footer target badge are now dynamic via `formatTargetLabel(profile)`
+- `'use server'` files may only export async functions — `VALID_PROFILES` constant lives inside the action file (not exported); `TargetProfileValue` type is defined locally in the client component
 
 ### Key Design Decisions
 - Use "Band 6.5 vs 7.0 gap analysis" framing in all feedback (not just scores)
@@ -272,7 +310,7 @@ See `.devcontainer/README.md` for full setup steps.
 | 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
-| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Collocation Library ✅ · Nav reorganisation ✅ · Target Switcher ⬜ · Analytics ⬜ |
+| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Collocation Library ✅ · Nav reorganisation ✅ · Target Switcher ✅ · Analytics ⬜ |
 | 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.

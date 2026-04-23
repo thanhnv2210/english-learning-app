@@ -16,7 +16,7 @@
 ## Phase 3: Complete the 4 Skills + Analytics (Weeks 6-10)
 *Goal: Full IELTS coverage — add Reading and Listening, show progress against target, expose the Target Switcher.*
 - [ ] **Progress Analytics**: `/analytics` dashboard — rolling band average per skill per criterion, trend over time, "Distance to target" summary
-- [ ] **Target Switcher UI**: `/settings` page — profile selector (`IELTS_6.5`, `IELTS_7.5`, `Business_Fluent`); update `users.targetProfile` via server action; load different prompt templates per profile
+- [x] **Target Switcher UI**: `/settings` page — profile selector (`IELTS_6.5`, `IELTS_7.5`, `Business_Fluent`); update `users.targetProfile` via server action; load different prompt templates per profile
 - [x] **Reading Module**: AI-generated tech-themed IELTS passages (~750 words) with 10–13 questions (T/F/NG, matching headings, short answer); 20-min timer; auto-scoring; saved to history as `skill: 'reading'`
 - [x] **Listening Simulator**: AI-generated tech conversation transcript; browser TTS (`SpeechSynthesis`) reads it aloud; user completes note-completion blanks during/after playback; auto-scored; saved to history as `skill: 'listening'`
 
@@ -30,13 +30,13 @@
 - No charting library needed in MVP — plain table with colour-coded gap badges (same green/amber/red logic as `FeedbackView`)
 - Show session count and date of last practice per skill
 
-### Task 3.2 — Target Switcher UI
-- New route `/settings`
-- Profile options: `IELTS_6.5` (current), `IELTS_7.5`, `Business_Fluent`
-- Server action updates `users.targetProfile` in DB; page re-renders with new value
-- `Business_Fluent` requires a new feedback prompt framing: drop band-score language, focus on professional register, clarity, and conciseness
-- Nav sidebar: add "Settings" link at bottom (above the Target badge)
-- Target badge in sidebar footer reads the live DB value, not a hardcoded string
+### Task 3.2 — Target Switcher UI ✅
+- Route `/settings` — 3 profile cards with active-state ring highlight
+- Profile values: `IELTS_Academic_6.5`, `IELTS_Academic_7.5`, `Business_Fluent`
+- `updateTargetProfileAction` (server action, `app/actions/user.ts`) — updates DB + `revalidatePath('/', 'layout')`; only async functions exported from `'use server'` files
+- `DashboardLayout` made `async` to fetch `getDefaultUser()` and pass `targetProfile` prop to `NavSidebar`
+- `NavSidebar` updated: accepts `targetProfile` prop, `formatTargetLabel()` renders dynamic label in both header and footer badge; Settings link added to `STANDALONE_BOTTOM`
+- `SettingsForm` client component uses `useTransition` for non-blocking server action call
 
 ### Task 3.3 — Reading Module ✅
 - Route `/reading`; API `POST /api/reading/passage`
