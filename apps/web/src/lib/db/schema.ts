@@ -127,8 +127,12 @@ export const vocabularyWords = pgTable('vocabulary_words', {
   synonyms: jsonb('synonyms').notNull().$type<VocabSynonym[]>(),
   collocations: jsonb('collocations').notNull().$type<string[]>(),
   examples: jsonb('examples').notNull().$type<VocabExamples>(),
+  rank: integer('rank').notNull().default(3),
+  userAdded: boolean('user_added').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-})
+}, (t) => [
+  check('vocabulary_words_rank_check', sql`${t.rank} between 1 and 5`),
+])
 
 export const vocabularyWordDomains = pgTable(
   'vocabulary_word_domains',

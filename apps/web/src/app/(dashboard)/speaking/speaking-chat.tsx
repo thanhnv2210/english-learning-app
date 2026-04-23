@@ -13,6 +13,35 @@ import type { TranscriptMessage, FeedbackResult } from '@/lib/db/schema'
 import type { SpeakingTopic } from '@/lib/db/speaking'
 import type { Message } from 'ai'
 
+// Topics always visible — future: drive from user profile preferences
+const PINNED_TOPIC_NAMES = ['Technology', 'Environment', 'Education', 'Health', 'Economy', 'Work']
+
+function TopicButton({
+  topic,
+  selected,
+  onClick,
+}: {
+  topic: SpeakingTopic
+  selected: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-lg border px-3 py-2.5 text-left transition-colors ${
+        selected
+          ? 'border-blue-500 bg-blue-50 text-blue-700'
+          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+      }`}
+    >
+      <p className={`text-xs font-semibold leading-snug ${selected ? 'text-blue-700' : 'text-gray-800'}`}>
+        {topic.name}
+      </p>
+      <p className="text-xs text-gray-400 mt-0.5 line-clamp-2 leading-tight">{topic.description}</p>
+    </button>
+  )
+}
+
 type Props = {
   initialMessages?: TranscriptMessage[]
   resumeExamId?: number
@@ -25,6 +54,26 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
   const timer = useTimer(5 * 60) // 5-min session guideline for Part 1
 
   const [selectedTopic, setSelectedTopic] = useState<SpeakingTopic | null>(null)
+  const [showMore, setShowMore] = useState(false)
+  const moreRef = useRef<HTMLDivElement>(null)
+
+  const pinnedTopics = topics.filter((t) =>
+    PINNED_TOPIC_NAMES.some((name) => t.name.toLowerCase().includes(name.toLowerCase())),
+  )
+  const otherTopics = topics.filter((t) =>
+    !PINNED_TOPIC_NAMES.some((name) => t.name.toLowerCase().includes(name.toLowerCase())),
+  )
+
+  // Close "More" dropdown on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setShowMore(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   const { messages, input, handleInputChange, handleSubmit, isLoading, append } = useChat({
     api: '/api/chat',
@@ -115,23 +164,52 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
                 <p className="text-sm font-semibold text-gray-700">Choose a topic</p>
                 <p className="text-xs text-gray-400 mt-0.5">The examiner will focus on this topic. Leave unselected for a mixed session.</p>
               </div>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-                {topics.map((t) => (
-                  <button
+              <div className="flex flex-wrap gap-2">
+                {pinnedTopics.map((t) => (
+                  <TopicButton
                     key={t.id}
+                    topic={t}
+                    selected={selectedTopic?.id === t.id}
                     onClick={() => setSelectedTopic((prev) => prev?.id === t.id ? null : t)}
-                    className={`rounded-lg border px-3 py-2.5 text-left transition-colors ${
-                      selectedTopic?.id === t.id
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    <p className={`text-xs font-semibold leading-snug ${selectedTopic?.id === t.id ? 'text-blue-700' : 'text-gray-800'}`}>
-                      {t.name}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-0.5 line-clamp-2 leading-tight">{t.description}</p>
-                  </button>
+                  />
                 ))}
+                {otherTopics.length > 0 && (
+                  <div ref={moreRef} className="relative">
+                    <button
+                      onClick={() => setShowMore((v) => !v)}
+                      className={`rounded-lg border px-3 py-2.5 text-xs font-semibold transition-colors ${
+                        showMore || otherTopics.some((t) => t.id === selectedTopic?.id)
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      ···
+                    </button>
+                    {showMore && (
+                      <div className="absolute left-0 top-full mt-1 z-10 w-56 rounded-xl border border-gray-200 bg-white shadow-lg p-2 flex flex-col gap-1">
+                        {otherTopics.map((t) => (
+                          <button
+                            key={t.id}
+                            onClick={() => {
+                              setSelectedTopic((prev) => prev?.id === t.id ? null : t)
+                              setShowMore(false)
+                            }}
+                            className={`w-full rounded-lg px-3 py-2 text-left transition-colors ${
+                              selectedTopic?.id === t.id
+                                ? 'bg-blue-50 text-blue-700'
+                                : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            <p className={`text-xs font-semibold leading-snug ${selectedTopic?.id === t.id ? 'text-blue-700' : 'text-gray-800'}`}>
+                              {t.name}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5 line-clamp-1 leading-tight">{t.description}</p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Selected topic preview */}

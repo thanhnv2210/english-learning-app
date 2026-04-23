@@ -1,7 +1,35 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useOptimistic, useTransition } from 'react'
+import { deleteVocabularyWordAction, updateVocabularyRankAction } from '@/app/actions/vocabulary'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
+
+// ── Sort ─────────────────────────────────────────────────────────────────────
+
+type SortKey = 'rank_desc' | 'rank_asc' | 'date_desc' | 'date_asc' | 'alpha_asc' | 'alpha_desc'
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: 'alpha_asc',  label: 'A → Z' },
+  { value: 'alpha_desc', label: 'Z → A' },
+  { value: 'rank_desc',  label: 'Rank: high → low' },
+  { value: 'rank_asc',   label: 'Rank: low → high' },
+  { value: 'date_desc',  label: 'Newest first' },
+  { value: 'date_asc',   label: 'Oldest first' },
+]
+
+function applySort(items: VocabularyCard[], sort: SortKey): VocabularyCard[] {
+  const arr = [...items]
+  switch (sort) {
+    case 'alpha_asc':  return arr.sort((a, b) => a.word.localeCompare(b.word))
+    case 'alpha_desc': return arr.sort((a, b) => b.word.localeCompare(a.word))
+    case 'rank_desc':  return arr.sort((a, b) => b.rank - a.rank || a.word.localeCompare(b.word))
+    case 'rank_asc':   return arr.sort((a, b) => a.rank - b.rank || a.word.localeCompare(b.word))
+    case 'date_desc':  return arr.sort((a, b) => (b.id ?? 0) - (a.id ?? 0))
+    case 'date_asc':   return arr.sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
+  }
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 type Props = {
   words: VocabularyCard[]
@@ -9,16 +37,23 @@ type Props = {
 }
 
 export function VocabularyList({ words, domains }: Props) {
+  const [items, setItems] = useOptimistic(words)
   const [search, setSearch] = useState('')
   const [activeDomain, setActiveDomain] = useState<string | null>(null)
+  const [activeRank, setActiveRank] = useState<number | null>(null)
+  const [sort, setSort] = useState<SortKey>('alpha_asc')
 
   const filtered = useMemo(() => {
-    let result = words
+    let result = items
 
     if (activeDomain === '__general__') {
       result = result.filter((w) => w.domains.length === 0)
     } else if (activeDomain) {
       result = result.filter((w) => w.domains.includes(activeDomain))
+    }
+
+    if (activeRank !== null) {
+      result = result.filter((w) => w.rank === activeRank)
     }
 
     if (search.trim()) {
@@ -30,39 +65,78 @@ export function VocabularyList({ words, domains }: Props) {
       )
     }
 
-    return result
-  }, [words, activeDomain, search])
+    return applySort(result, sort)
+  }, [items, activeDomain, activeRank, search, sort])
+
+  function handleDelete(id: number) {
+    setItems((prev) => prev.filter((w) => w.id !== id))
+    deleteVocabularyWordAction(id)
+  }
+
+  function handleRankUpdate(id: number, rank: number) {
+    setItems((prev) =>
+      prev.map((w) => (w.id === id ? { ...w, rank } : w)),
+    )
+    updateVocabularyRankAction(id, rank)
+  }
 
   return (
     <div className="flex flex-col gap-6">
       {/* ── Filter bar ── */}
       <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search word or definition…"
-          className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm outline-none focus:border-blue-400"
-        />
+        {/* Search + Sort */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search word or definition…"
+            className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm outline-none focus:border-blue-400"
+          />
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 outline-none focus:border-blue-400 bg-white"
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Domain filter chips */}
         <div className="flex flex-wrap gap-2">
-          <FilterChip
-            label="All"
-            active={activeDomain === null}
-            onClick={() => setActiveDomain(null)}
-          />
-          <FilterChip
-            label="General"
-            active={activeDomain === '__general__'}
-            onClick={() => setActiveDomain('__general__')}
-          />
+          <FilterChip label="All" active={activeDomain === null} onClick={() => setActiveDomain(null)} />
+          <FilterChip label="General" active={activeDomain === '__general__'} onClick={() => setActiveDomain('__general__')} />
           {domains.map((d) => (
             <FilterChip
               key={d}
               label={d}
               active={activeDomain === d}
-              onClick={() => setActiveDomain(d)}
+              onClick={() => setActiveDomain(activeDomain === d ? null : d)}
             />
           ))}
+        </div>
+
+        {/* Rank filter chips */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-400 shrink-0">Rank</span>
+          <div className="flex gap-1.5">
+            {[1, 2, 3, 4, 5].map((r) => (
+              <button
+                key={r}
+                onClick={() => setActiveRank(activeRank === r ? null : r)}
+                title={`Filter by rank ${r}`}
+                className={`flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                  activeRank === r
+                    ? 'border-amber-400 bg-amber-50 text-amber-700'
+                    : 'border-gray-200 bg-white text-gray-500 hover:border-amber-300 hover:text-amber-600'
+                }`}
+              >
+                {'★'.repeat(r)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -80,7 +154,12 @@ export function VocabularyList({ words, domains }: Props) {
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {filtered.map((word) => (
-            <WordCard key={word.word} word={word} />
+            <WordCard
+              key={word.word}
+              word={word}
+              onDelete={word.userAdded ? () => handleDelete(word.id) : undefined}
+              onRankUpdate={(rank) => handleRankUpdate(word.id, rank)}
+            />
           ))}
         </div>
       )}
@@ -88,42 +167,72 @@ export function VocabularyList({ words, domains }: Props) {
   )
 }
 
-function FilterChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string
-  active: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-        active
-          ? 'bg-blue-600 text-white'
-          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-      }`}
-    >
-      {label}
-    </button>
-  )
-}
+// ── WordCard ──────────────────────────────────────────────────────────────────
 
-export function WordCard({ word }: { word: VocabularyCard }) {
+export function WordCard({
+  word,
+  onDelete,
+  onRankUpdate,
+}: {
+  word: VocabularyCard
+  onDelete?: () => void
+  onRankUpdate?: (rank: number) => void
+}) {
   const [expanded, setExpanded] = useState(false)
+  const [localRank, setLocalRank] = useState(word.rank)
+  const [hoverRank, setHoverRank] = useState(0)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [, startTransition] = useTransition()
+
+  function handleRankClick(rank: number) {
+    setLocalRank(rank)
+    startTransition(() => onRankUpdate?.(rank))
+  }
 
   const synonyms = word.synonyms.filter((s) => s.type === 'synonym').slice(0, 3)
   const antonyms = word.synonyms.filter((s) => s.type === 'antonym').slice(0, 2)
   const familyEntries = Object.entries(word.familyWords).filter(([, v]) => v)
 
   return (
-    <div className="flex flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="group relative flex flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      {/* Delete — two-step, only for user-added words */}
+      {onDelete && (
+        confirmingDelete ? (
+          <div className="absolute top-3 right-4 flex items-center gap-1.5">
+            <span className="text-xs text-red-600 font-medium">Delete?</span>
+            <button
+              onClick={onDelete}
+              className="rounded px-2 py-0.5 text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors"
+            >
+              Yes
+            </button>
+            <button
+              onClick={() => setConfirmingDelete(false)}
+              className="rounded px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+            >
+              No
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setConfirmingDelete(true)}
+            className="absolute top-4 right-4 hidden group-hover:flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-500 hover:bg-red-200 text-xs transition-colors"
+            title="Delete"
+          >
+            ✕
+          </button>
+        )
+      )}
+
       {/* Header */}
-      <div className="mb-2 flex items-start justify-between gap-2">
+      <div className="mb-2 flex items-start justify-between gap-2 pr-8">
         <h3 className="text-lg font-bold text-gray-900">{word.word}</h3>
-        {word.domains.length === 0 && (
+        {word.userAdded && (
+          <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs text-blue-600 font-medium">
+            Added
+          </span>
+        )}
+        {word.domains.length === 0 && !word.userAdded && (
           <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-500">
             General
           </span>
@@ -185,6 +294,26 @@ export function WordCard({ word }: { word: VocabularyCard }) {
         </div>
       )}
 
+      {/* Rank */}
+      <div className="flex items-center gap-1.5 mb-2">
+        <span className="text-xs text-gray-400">Rank</span>
+        <div className="flex gap-0.5" onMouseLeave={() => setHoverRank(0)}>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              onClick={() => handleRankClick(star)}
+              onMouseEnter={() => setHoverRank(star)}
+              title={`Rank ${star}`}
+              className="text-base leading-none transition-transform hover:scale-110"
+            >
+              <span className={(hoverRank || localRank) >= star ? 'text-amber-400' : 'text-gray-200'}>
+                ★
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Examples toggle */}
       <button
         onClick={() => setExpanded((v) => !v)}
@@ -214,5 +343,20 @@ export function WordCard({ word }: { word: VocabularyCard }) {
         </div>
       )}
     </div>
+  )
+}
+
+// ── FilterChip ────────────────────────────────────────────────────────────────
+
+function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+        active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+      }`}
+    >
+      {label}
+    </button>
   )
 }

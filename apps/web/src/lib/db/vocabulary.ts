@@ -4,6 +4,7 @@ import { asc, eq, inArray, sql } from 'drizzle-orm'
 import type { VocabWordFamily, VocabSynonym, VocabExamples } from '@/lib/db/schema'
 
 export type VocabularyCard = {
+  id: number
   originalWord: string
   word: string
   definition: string
@@ -12,6 +13,8 @@ export type VocabularyCard = {
   collocations: string[]
   examples: VocabExamples
   domains: string[]
+  rank: number
+  userAdded: boolean
   source: 'db' | 'ai'
 }
 
@@ -77,6 +80,7 @@ export async function saveVocabularyWord(data: {
   collocations: string[]
   examples: VocabExamples
   domainNames: string[]
+  userAdded?: boolean
 }): Promise<VocabularyCard | null> {
   const [row] = await db
     .insert(vocabularyWords)
@@ -87,6 +91,7 @@ export async function saveVocabularyWord(data: {
       synonyms: data.synonyms,
       collocations: data.collocations,
       examples: data.examples,
+      userAdded: data.userAdded ?? false,
     })
     .onConflictDoNothing()
     .returning()
@@ -111,6 +116,14 @@ export async function saveVocabularyWord(data: {
   return toCard(row, row.word, data.domainNames, 'db')
 }
 
+export async function deleteVocabularyWord(id: number): Promise<void> {
+  await db.delete(vocabularyWords).where(eq(vocabularyWords.id, id))
+}
+
+export async function updateVocabularyRank(id: number, rank: number): Promise<void> {
+  await db.update(vocabularyWords).set({ rank }).where(eq(vocabularyWords.id, id))
+}
+
 async function getDomainsForWord(wordId: number): Promise<string[]> {
   const rows = await db
     .select({ name: writingDomains.name })
@@ -127,6 +140,7 @@ function toCard(
   source: 'db' | 'ai',
 ): VocabularyCard {
   return {
+    id: row.id,
     originalWord,
     word: row.word,
     definition: row.definition,
@@ -135,6 +149,8 @@ function toCard(
     collocations: row.collocations as string[],
     examples: row.examples as VocabExamples,
     domains,
+    rank: row.rank,
+    userAdded: row.userAdded,
     source,
   }
 }
