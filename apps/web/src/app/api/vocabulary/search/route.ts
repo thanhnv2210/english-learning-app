@@ -60,6 +60,7 @@ export async function POST(req: Request) {
   )
 
   const card: VocabularyCard = {
+    id: 0,
     originalWord: trimmed,
     word: parsed.word ?? trimmed,
     definition: parsed.definition ?? '',
@@ -68,6 +69,8 @@ export async function POST(req: Request) {
     collocations: parsed.collocations ?? [],
     examples: parsed.examples ?? { speaking: '', writing: ['', ''] },
     domains: canonicalDomains,
+    rank: 3,
+    userAdded: false,
     source: 'ai',
   }
 

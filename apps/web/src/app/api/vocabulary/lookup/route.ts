@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
       if (match) {
         const parsed = JSON.parse(match[0])
         cards.push({
+          id: 0,
           originalWord: original,
           word: parsed.word ?? academic,
           definition: parsed.definition ?? '',
@@ -66,6 +67,8 @@ export async function POST(req: NextRequest) {
           collocations: parsed.collocations ?? [],
           examples: parsed.examples ?? { speaking: '', writing: ['', ''] },
           domains: [],
+          rank: 3,
+          userAdded: false,
           source: 'ai',
         })
       }
