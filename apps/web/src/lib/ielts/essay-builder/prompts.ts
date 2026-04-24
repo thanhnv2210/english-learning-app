@@ -38,9 +38,9 @@ Instructions:
 - Do not force words that don't fit — prioritise natural flow at Band ${targetBand} level.
 - Do not label which words you used.
 
-Return ONLY valid JSON — no markdown, no explanation:
-{
-  "topic": "<the question or task prompt>",
-  "text": "<the full response>"
-}`
+Output format — use EXACTLY these two delimiters on their own lines, nothing else:
+---TOPIC---
+<the question or task prompt, single line>
+---TEXT---
+<the full response, plain text, paragraphs separated by blank lines>`
 }
