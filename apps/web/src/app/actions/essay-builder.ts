@@ -3,11 +3,16 @@
 import { revalidatePath } from 'next/cache'
 import {
   saveEssayBuilderRecord,
+  getVersionsByDomainSkill,
   updateEssayDecoratedText,
   toggleEssayFavorite,
   deleteEssayBuilderRecord,
   type EssayBuilderRecord,
 } from '@/lib/db/essay-builder'
+
+export async function getVersionsAction(domain: string, skill: string): Promise<EssayBuilderRecord[]> {
+  return getVersionsByDomainSkill(domain, skill, 5)
+}
 
 export async function saveEssayAction(
   data: Omit<EssayBuilderRecord, 'id' | 'createdAt'>,

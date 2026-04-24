@@ -44,3 +44,28 @@ Output format — use EXACTLY these two delimiters on their own lines, nothing e
 ---TEXT---
 <the full response, plain text, paragraphs separated by blank lines>`
 }
+
+/**
+ * Analyses a pasted text to detect IELTS domain, skill, and a matching question.
+ *
+ * Output format uses delimiters to avoid JSON issues with long text.
+ */
+export function ESSAY_ANALYSE_PROMPT(text: string, domains: string[]): string {
+  return `You are an IELTS examiner. Analyse the following text and determine:
+1. The most fitting IELTS domain from this list: ${domains.join(', ')}
+2. The IELTS skill it belongs to: writing_task1, writing_task2, or speaking
+3. A realistic IELTS question/prompt that this text could be a response to (one sentence)
+
+Text to analyse:
+"""
+${text}
+"""
+
+Output format — use EXACTLY these three delimiters on their own lines, nothing else:
+---DOMAIN---
+<one domain name from the list above, exactly as written>
+---SKILL---
+<writing_task1 | writing_task2 | speaking>
+---QUESTION---
+<the generated IELTS question, single line>`
+}

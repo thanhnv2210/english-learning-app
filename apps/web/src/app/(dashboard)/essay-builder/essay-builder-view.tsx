@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo, useTransition, useEffect } from 'react'
-import { saveEssayAction, updateDecoratedTextAction, toggleEssayFavoriteAction, deleteEssayAction } from '@/app/actions/essay-builder'
+import { useState, useMemo, useTransition, useEffect, useCallback } from 'react'
+import { saveEssayAction, getVersionsAction, updateDecoratedTextAction, toggleEssayFavoriteAction, deleteEssayAction } from '@/app/actions/essay-builder'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 import type { CollocationCard } from '@/lib/db/collocations'
 import type { EssayBuilderRecord } from '@/lib/db/essay-builder'
@@ -98,23 +98,75 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
 
   function handleDomainChange(newDomain: string) {
     setDomain(newDomain)
-    if (newDomain) loadSaved(newDomain, skill)
-    else { setSelectedVocab(new Set()); setSelectedColloc(new Set()) }
+    if (newDomain) {
+      loadSaved(newDomain, skill)
+      loadVersions(newDomain, skill)
+    } else {
+      setSelectedVocab(new Set())
+      setSelectedColloc(new Set())
+      setVersions([])
+      setActiveVersion(null)
+    }
   }
 
   function handleSkillChange(newSkill: Skill) {
     setSkill(newSkill)
-    if (domain) loadSaved(domain, newSkill)
+    if (domain) {
+      loadSaved(domain, newSkill)
+      loadVersions(domain, newSkill)
+    }
+  }
+
+  // ── Versions (last 5 per domain+skill) ───────────────────────────────────
+  const [versions, setVersions] = useState<EssayBuilderRecord[]>([])
+  const [activeVersion, setActiveVersion] = useState<EssayBuilderRecord | null>(null)
+  const [isLoadingVersions, setIsLoadingVersions] = useState(false)
+  const [, startDeleteTransition] = useTransition()
+
+  const selectVersion = useCallback((record: EssayBuilderRecord) => {
+    setActiveVersion(record)
+    setDecoratedText(record.decoratedText)
+    setSelectedVocab(new Set(record.selectedVocabulary))
+    setSelectedColloc(new Set(record.selectedCollocations))
+    setActiveTab('view')
+    // Compute bonus coverage for the selected version
+    const lower = record.decoratedText.toLowerCase()
+    setBonusVocab(
+      words.filter((w) => !record.selectedVocabulary.includes(w.word) && lower.includes(w.word.toLowerCase())).map((w) => w.word),
+    )
+    setBonusColloc(
+      collocations.filter((c) => !record.selectedCollocations.includes(c.phrase) && lower.includes(c.phrase.toLowerCase())).map((c) => c.phrase),
+    )
+  }, [words, collocations])
+
+  async function loadVersions(d: string, s: string) {
+    setIsLoadingVersions(true)
+    try {
+      const vs = await getVersionsAction(d, s)
+      setVersions(vs)
+      if (vs.length > 0) selectVersion(vs[0])
+      else { setActiveVersion(null); setDecoratedText('') }
+    } finally {
+      setIsLoadingVersions(false)
+    }
+  }
+
+  function handleDeleteVersion(id: number) {
+    const next = versions.filter((v) => v.id !== id)
+    setVersions(next)
+    if (activeVersion?.id === id) {
+      if (next.length > 0) selectVersion(next[0])
+      else { setActiveVersion(null); setDecoratedText('') }
+    }
+    startDeleteTransition(() => deleteEssayAction(id))
   }
 
   // ── Result state ─────────────────────────────────────────────────────────
-  const [result, setResult] = useState<{ topic: string; text: string } | null>(null)
   const [decoratedText, setDecoratedText] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [generateError, setGenerateError] = useState('')
   const [activeTab, setActiveTab] = useState<'view' | 'edit'>('view')
-  const [savedRecord, setSavedRecord] = useState<EssayBuilderRecord | null>(null)
-  const [isSaving, startSaveTransition] = useTransition()
+  const [isSavingText, startSaveTextTransition] = useTransition()
 
   // ── Bonus coverage (library matches not in selection) ────────────────────
   const [bonusVocab, setBonusVocab] = useState<string[]>([])
@@ -146,8 +198,98 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
 
   // ── History state ────────────────────────────────────────────────────────
   const [history, setHistory] = useState(initialHistory)
-  const [historyTab, setHistoryTab] = useState<'builder' | 'history'>('builder')
+  const [historyTab, setHistoryTab] = useState<'builder' | 'history' | 'analyse'>('builder')
+
+  // ── Analyse tab state ────────────────────────────────────────────────────
+  const [analyseText, setAnalyseText] = useState('')
+  const [isAnalysing, setIsAnalysing] = useState(false)
+  const [analyseError, setAnalyseError] = useState('')
+  const [analyseResult, setAnalyseResult] = useState<{ domain: string; skill: string; question: string } | null>(null)
+  const [analyseHighlightSets, setAnalyseHighlightSets] = useState<PhraseSet[]>([])
+
+  async function handleAnalyse() {
+    if (!analyseText.trim()) return
+    setIsAnalysing(true)
+    setAnalyseError('')
+    setAnalyseResult(null)
+    setAnalyseHighlightSets([])
+    setAnalyseSaved(false)
+    try {
+      const res = await fetch('/api/essay-builder/analyse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: analyseText }),
+      })
+      if (!res.ok) throw new Error('Analysis failed')
+      const data: { domain: string; skill: string; question: string } = await res.json()
+      setAnalyseResult(data)
+      // Compute highlight sets from library
+      const lower = analyseText.toLowerCase()
+      const matchedVocab = words.filter((w) => lower.includes(w.word.toLowerCase())).map((w) => w.word)
+      const matchedColloc = collocations.filter((c) => lower.includes(c.phrase.toLowerCase())).map((c) => c.phrase)
+      setAnalyseHighlightSets([
+        { phrases: matchedVocab,   className: 'bg-purple-100 text-purple-800' },
+        { phrases: matchedColloc,  className: 'bg-blue-100 text-blue-800' },
+      ])
+    } catch {
+      setAnalyseError('Analysis failed. Check that Ollama is running.')
+    } finally {
+      setIsAnalysing(false)
+    }
+  }
+
+  function handleLoadIntoBuilder() {
+    if (!analyseResult) return
+    const matchedVocab = analyseHighlightSets[0]?.phrases ?? []
+    const matchedColloc = analyseHighlightSets[1]?.phrases ?? []
+    setDomain(analyseResult.domain)
+    setSkill(analyseResult.skill as Skill)
+    setSelectedVocab(new Set(matchedVocab))
+    setSelectedColloc(new Set(matchedColloc))
+    loadVersions(analyseResult.domain, analyseResult.skill)
+    setHistoryTab('builder')
+  }
+
+  const [isSavingAnalyse, setIsSavingAnalyse] = useState(false)
+  const [analyseSaved, setAnalyseSaved] = useState(false)
+
+  async function handleSaveAnalyseResult() {
+    if (!analyseResult) return
+    setIsSavingAnalyse(true)
+    try {
+      const matchedVocab = analyseHighlightSets[0]?.phrases ?? []
+      const matchedColloc = analyseHighlightSets[1]?.phrases ?? []
+      const record = await saveEssayAction({
+        skill: analyseResult.skill,
+        domain: analyseResult.domain,
+        topic: analyseResult.question,
+        selectedVocabulary: matchedVocab,
+        selectedCollocations: matchedColloc,
+        originalGeneratedText: analyseText,
+        decoratedText: analyseText,
+        targetBand,
+        isFavorite: false,
+      })
+      setHistory((prev) => [record, ...prev])
+      setAnalyseSaved(true)
+    } finally {
+      setIsSavingAnalyse(false)
+    }
+  }
   const [, startHistoryTransition] = useTransition()
+
+  function handleHistoryToggleFavorite(record: EssayBuilderRecord) {
+    const next = !record.isFavorite
+    setHistory((prev) => prev.map((r) => (r.id === record.id ? { ...r, isFavorite: next } : r)))
+    startHistoryTransition(() => toggleEssayFavoriteAction(record.id, next))
+  }
+
+  function handleHistoryDelete(id: number) {
+    setHistory((prev) => prev.filter((r) => r.id !== id))
+    setVersions((prev) => prev.filter((v) => v.id !== id))
+    if (activeVersion?.id === id) setActiveVersion(null)
+    startHistoryTransition(() => deleteEssayAction(id))
+  }
 
   // ── Filtered lists ───────────────────────────────────────────────────────
   const filteredWords = useMemo(() => {
@@ -164,13 +306,11 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
     )
   }, [collocations, collocSearch])
 
-  // ── Generate ─────────────────────────────────────────────────────────────
+  // ── Generate (auto-saves as new version) ─────────────────────────────────
   async function handleGenerate() {
     if (!domain) return
     setIsGenerating(true)
     setGenerateError('')
-    setResult(null)
-    setSavedRecord(null)
     setBonusVocab([])
     setBonusColloc([])
 
@@ -189,9 +329,25 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
 
       if (!res.ok) throw new Error('Generation failed')
       const data: { topic: string; text: string } = await res.json()
-      setResult(data)
+
+      // Auto-save as a new version
+      const record = await saveEssayAction({
+        skill,
+        domain,
+        topic: data.topic,
+        selectedVocabulary: Array.from(selectedVocab),
+        selectedCollocations: Array.from(selectedColloc),
+        originalGeneratedText: data.text,
+        decoratedText: data.text,
+        targetBand,
+        isFavorite: false,
+      })
+
+      setVersions((prev) => [record, ...prev].slice(0, 5))
+      setActiveVersion(record)
       setDecoratedText(data.text)
       setActiveTab('view')
+      setHistory((prev) => [record, ...prev])
       computeBonus(data.text, selectedVocab, selectedColloc)
     } catch {
       setGenerateError('Failed to generate. Check that Ollama is running.')
@@ -200,36 +356,15 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
     }
   }
 
-  // ── Save ─────────────────────────────────────────────────────────────────
-  function handleSave() {
-    if (!result) return
-    startSaveTransition(async () => {
-      const record = await saveEssayAction({
-        skill,
-        domain,
-        topic: result.topic,
-        selectedVocabulary: Array.from(selectedVocab),
-        selectedCollocations: Array.from(selectedColloc),
-        originalGeneratedText: result.text,
-        decoratedText,
-        targetBand,
-        isFavorite: false,
-      })
-      setSavedRecord(record)
-      setHistory((prev) => [record, ...prev])
+  // ── Save decorated text changes to active version ─────────────────────────
+  function handleSaveText() {
+    if (!activeVersion) return
+    startSaveTextTransition(async () => {
+      await updateDecoratedTextAction(activeVersion.id, decoratedText)
+      setActiveVersion((prev) => prev ? { ...prev, decoratedText } : null)
+      setVersions((prev) => prev.map((v) => v.id === activeVersion.id ? { ...v, decoratedText } : v))
+      setHistory((prev) => prev.map((v) => v.id === activeVersion.id ? { ...v, decoratedText } : v))
     })
-  }
-
-  // ── History actions ───────────────────────────────────────────────────────
-  function handleToggleFavorite(record: EssayBuilderRecord) {
-    const next = !record.isFavorite
-    setHistory((prev) => prev.map((r) => (r.id === record.id ? { ...r, isFavorite: next } : r)))
-    startHistoryTransition(() => toggleEssayFavoriteAction(record.id, next))
-  }
-
-  function handleDelete(id: number) {
-    setHistory((prev) => prev.filter((r) => r.id !== id))
-    startHistoryTransition(() => deleteEssayAction(id))
   }
 
   // ── Highlight phrase sets (priority order: selected first) ───────────────
@@ -244,7 +379,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
     <div className="flex flex-col gap-6">
       {/* Tab switcher */}
       <div className="flex gap-1 rounded-lg bg-gray-100 p-1 w-fit">
-        {(['builder', 'history'] as const).map((tab) => (
+        {(['builder', 'history', 'analyse'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setHistoryTab(tab)}
@@ -252,12 +387,88 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
               historyTab === tab ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            {tab === 'history' ? `History (${history.length})` : 'Builder'}
+            {tab === 'history' ? `History (${history.length})` : tab === 'analyse' ? 'Analyse' : 'Builder'}
           </button>
         ))}
       </div>
 
-      {historyTab === 'builder' ? (
+      {historyTab === 'analyse' && (
+        /* ── Analyse tab ──────────────────────────────────────────────────── */
+        <div className="flex flex-col gap-6 max-w-3xl">
+          <div className="rounded-xl border border-gray-200 bg-white p-5 flex flex-col gap-3">
+            <p className="text-xs font-semibold text-gray-700">Paste your text</p>
+            <textarea
+              value={analyseText}
+              onChange={(e) => setAnalyseText(e.target.value)}
+              rows={10}
+              placeholder="Paste an IELTS essay, task response, or speaking transcript here…"
+              className="w-full resize-none rounded-lg border border-gray-200 p-3 text-sm text-gray-700 outline-none focus:border-blue-400 leading-relaxed"
+            />
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleAnalyse}
+                disabled={!analyseText.trim() || isAnalysing}
+                className="rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-40 transition-colors"
+              >
+                {isAnalysing ? 'Analysing…' : 'Analyse'}
+              </button>
+              {analyseError && <p className="text-xs text-red-500">{analyseError}</p>}
+            </div>
+          </div>
+
+          {analyseResult && (
+            <>
+              {/* Detected metadata */}
+              <div className="rounded-xl border border-green-200 bg-green-50 p-5 flex flex-col gap-3">
+                <p className="text-xs font-semibold text-green-700 uppercase tracking-wide">Analysis Result</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="rounded-full bg-white border border-green-200 px-3 py-1 text-xs font-medium text-green-800">
+                    {analyseResult.domain}
+                  </span>
+                  <span className="rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-medium text-blue-700">
+                    {SKILL_LABELS[analyseResult.skill] ?? analyseResult.skill}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs text-green-600 font-medium mb-1">Suggested question</p>
+                  <p className="text-sm text-gray-800 leading-relaxed">{analyseResult.question}</p>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={handleLoadIntoBuilder}
+                    className="rounded-lg bg-green-600 px-5 py-2 text-xs font-semibold text-white hover:bg-green-700 transition-colors"
+                  >
+                    Load into Builder →
+                  </button>
+                  <button
+                    onClick={handleSaveAnalyseResult}
+                    disabled={isSavingAnalyse || analyseSaved}
+                    className="rounded-lg border border-green-300 px-5 py-2 text-xs font-semibold text-green-700 hover:bg-green-100 disabled:opacity-50 transition-colors"
+                  >
+                    {isSavingAnalyse ? 'Saving…' : analyseSaved ? 'Saved ✓' : 'Save to History'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Highlighted text */}
+              {analyseHighlightSets.some((s) => s.phrases.length > 0) && (
+                <div className="rounded-xl border border-gray-200 bg-white p-5 flex flex-col gap-3">
+                  <p className="text-xs font-semibold text-gray-700">Library matches in your text</p>
+                  <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+                    {highlight(analyseText, analyseHighlightSets)}
+                  </p>
+                  <div className="flex flex-wrap gap-3 text-xs text-gray-500 border-t border-gray-100 pt-3">
+                    <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-purple-100 text-purple-800 font-semibold">word</span> vocab match</span>
+                    <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-blue-100 text-blue-800 font-semibold">phrase</span> collocation match</span>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {historyTab === 'builder' && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* ── Left: Selection panel ────────────────────────────────────── */}
           <div className="flex flex-col gap-5">
@@ -358,23 +569,53 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
             {generateError && <p className="text-xs text-red-500">{generateError}</p>}
           </div>
 
-          {/* ── Right: Result panel ──────────────────────────────────────── */}
+          {/* ── Right: Versions + Result panel ───────────────────────────── */}
           <div className="flex flex-col gap-4">
-            {result ? (
+
+            {/* Versions strip */}
+            {domain && (
+              <div className="rounded-xl border border-gray-200 bg-white p-3 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-gray-600">
+                    Versions {versions.length > 0 ? `(${versions.length}/5)` : ''}
+                  </p>
+                  {isLoadingVersions && <span className="text-xs text-gray-400">Loading…</span>}
+                </div>
+                {versions.length === 0 && !isLoadingVersions ? (
+                  <p className="text-xs text-gray-400">No versions yet — click Generate.</p>
+                ) : (
+                  <div className="flex flex-col gap-1">
+                    {versions.map((v, i) => (
+                      <VersionRow
+                        key={v.id}
+                        version={v}
+                        index={versions.length - i}
+                        isActive={activeVersion?.id === v.id}
+                        onSelect={() => selectVersion(v)}
+                        onDelete={() => handleDeleteVersion(v.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Result */}
+            {activeVersion ? (
               <>
                 {/* Topic */}
                 <div className="rounded-xl border border-gray-200 bg-white p-4">
                   <p className="text-xs font-semibold text-gray-400 mb-1">Topic</p>
-                  <p className="text-sm text-gray-800 leading-relaxed">{result.topic}</p>
+                  <p className="text-sm text-gray-800 leading-relaxed">{activeVersion.topic}</p>
                   <div className="mt-2 flex gap-2 flex-wrap">
                     <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600 font-medium">
-                      {SKILL_LABELS[skill]}
+                      {SKILL_LABELS[activeVersion.skill] ?? activeVersion.skill}
                     </span>
                     <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
-                      {domain}
+                      {activeVersion.domain}
                     </span>
                     <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
-                      Band {targetBand}
+                      Band {activeVersion.targetBand}
                     </span>
                   </div>
                 </div>
@@ -425,37 +666,21 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                         <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
                           {highlight(decoratedText, highlightSets)}
                         </p>
-
-                        {/* Colour legend */}
                         <div className="flex flex-wrap gap-3 text-xs text-gray-500 border-t border-gray-100 pt-3">
                           <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-purple-100 text-purple-800 font-semibold">word</span> selected vocab</span>
                           <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-blue-100 text-blue-800 font-semibold">phrase</span> selected collocation</span>
                           <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-green-100 text-green-800 font-semibold">word</span> bonus vocab</span>
                           <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-amber-100 text-amber-800 font-semibold">phrase</span> bonus collocation</span>
                         </div>
-
-                        {/* Also covered — clickable to add to selection */}
                         {(bonusVocab.length > 0 || bonusColloc.length > 0) && (
                           <div className="rounded-lg border border-dashed border-gray-200 p-3 flex flex-col gap-2">
                             <p className="text-xs font-semibold text-gray-500">Also covered — click to add to selection:</p>
                             <div className="flex flex-wrap gap-1.5">
                               {bonusVocab.map((w) => (
-                                <button
-                                  key={w}
-                                  onClick={() => addBonusVocab(w)}
-                                  className="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs text-green-700 hover:bg-green-100 transition-colors"
-                                >
-                                  + {w}
-                                </button>
+                                <button key={w} onClick={() => addBonusVocab(w)} className="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs text-green-700 hover:bg-green-100 transition-colors">+ {w}</button>
                               ))}
                               {bonusColloc.map((c) => (
-                                <button
-                                  key={c}
-                                  onClick={() => addBonusColloc(c)}
-                                  className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs text-amber-700 hover:bg-amber-100 transition-colors"
-                                >
-                                  + {c}
-                                </button>
+                                <button key={c} onClick={() => addBonusColloc(c)} className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs text-amber-700 hover:bg-amber-100 transition-colors">+ {c}</button>
                               ))}
                             </div>
                           </div>
@@ -472,46 +697,89 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                   </div>
                 </div>
 
-                {/* Save */}
-                {savedRecord ? (
-                  <p className="text-xs text-green-600 font-medium text-center">Saved to history ✓</p>
-                ) : (
+                {/* Save text edits */}
+                {activeTab === 'edit' && decoratedText !== activeVersion.decoratedText && (
                   <button
-                    onClick={handleSave}
-                    disabled={isSaving}
+                    onClick={handleSaveText}
+                    disabled={isSavingText}
                     className="self-end rounded-lg bg-green-600 px-5 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
                   >
-                    {isSaving ? 'Saving…' : 'Save to History'}
+                    {isSavingText ? 'Saving…' : 'Save changes'}
                   </button>
                 )}
               </>
             ) : (
               <div className="flex h-full min-h-64 items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white">
                 <p className="text-sm text-gray-400 text-center px-8">
-                  Select a domain and at least one vocabulary word or collocation, then click Generate.
+                  {domain ? 'Click Generate to create the first version.' : 'Select a domain to get started.'}
                 </p>
               </div>
             )}
           </div>
         </div>
-      ) : (
+      )}
+
+      {historyTab === 'history' && (
         /* ── History tab ─────────────────────────────────────────────────── */
         <div className="flex flex-col gap-4">
           {history.length === 0 ? (
             <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-              <p className="text-sm text-gray-400">No saved essays yet. Generate one and hit Save.</p>
+              <p className="text-sm text-gray-400">No essays yet. Generate one in the Builder tab.</p>
             </div>
           ) : (
             history.map((record) => (
               <HistoryCard
                 key={record.id}
                 record={record}
-                onToggleFavorite={() => handleToggleFavorite(record)}
-                onDelete={() => handleDelete(record.id)}
+                onToggleFavorite={() => handleHistoryToggleFavorite(record)}
+                onDelete={() => handleHistoryDelete(record.id)}
               />
             ))
           )}
         </div>
+      )}
+    </div>
+  )
+}
+
+// ── VersionRow ────────────────────────────────────────────────────────────────
+
+function VersionRow({
+  version,
+  index,
+  isActive,
+  onSelect,
+  onDelete,
+}: {
+  version: EssayBuilderRecord
+  index: number
+  isActive: boolean
+  onSelect: () => void
+  onDelete: () => void
+}) {
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  return (
+    <div
+      className={`flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer transition-colors ${
+        isActive ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50 border border-transparent'
+      }`}
+      onClick={onSelect}
+    >
+      <span className={`text-xs font-semibold shrink-0 w-5 text-center ${isActive ? 'text-blue-600' : 'text-gray-400'}`}>
+        v{index}
+      </span>
+      <span className="text-xs text-gray-700 truncate flex-1">{version.topic}</span>
+      <span className="text-xs text-gray-400 shrink-0">{new Date(version.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+      {confirmDelete ? (
+        <div className="flex gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <button onClick={onDelete} className="rounded px-1.5 py-0.5 text-xs bg-red-500 text-white hover:bg-red-600">Yes</button>
+          <button onClick={() => setConfirmDelete(false)} className="rounded px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 hover:bg-gray-200">No</button>
+        </div>
+      ) : (
+        <button
+          onClick={(e) => { e.stopPropagation(); setConfirmDelete(true) }}
+          className="shrink-0 flex h-5 w-5 items-center justify-center rounded-full text-gray-300 hover:bg-red-100 hover:text-red-500 text-xs transition-colors"
+        >✕</button>
       )}
     </div>
   )
