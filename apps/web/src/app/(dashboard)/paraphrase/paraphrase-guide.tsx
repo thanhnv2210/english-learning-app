@@ -20,6 +20,20 @@ const SKILL_ACCENT: Record<string, { tab: string; active: string; badge: string;
     example: 'bg-blue-50 border-blue-200 text-blue-900',
     border:  'border-blue-300',
   },
+  speaking: {
+    tab:     'hover:text-green-600',
+    active:  'border-green-500 text-green-700 bg-green-50',
+    badge:   'bg-green-600',
+    example: 'bg-green-50 border-green-200 text-green-900',
+    border:  'border-green-300',
+  },
+  listening: {
+    tab:     'hover:text-purple-600',
+    active:  'border-purple-500 text-purple-700 bg-purple-50',
+    badge:   'bg-purple-600',
+    example: 'bg-purple-50 border-purple-200 text-purple-900',
+    border:  'border-purple-300',
+  },
 }
 
 const LEVEL_COLORS: Record<number, { bg: string; text: string; border: string; active: string }> = {
