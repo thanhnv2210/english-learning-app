@@ -534,7 +534,11 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
             {/* Vocabulary selector */}
             <SelectionPanel
               title="Vocabulary"
-              count={selectedVocab.size}
+              selectedChips={Array.from(selectedVocab).map((w) => ({
+                label: w,
+                onRemove: () => setSelectedVocab((prev) => { const next = new Set(prev); next.delete(w); return next }),
+              }))}
+              onClearAll={() => setSelectedVocab(new Set())}
               search={vocabSearch}
               onSearch={setVocabSearch}
               placeholder="Search words…"
@@ -559,7 +563,11 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
             {/* Collocation selector */}
             <SelectionPanel
               title="Collocations"
-              count={selectedColloc.size}
+              selectedChips={Array.from(selectedColloc).map((c) => ({
+                label: c,
+                onRemove: () => setSelectedColloc((prev) => { const next = new Set(prev); next.delete(c); return next }),
+              }))}
+              onClearAll={() => setSelectedColloc(new Set())}
               search={collocSearch}
               onSearch={setCollocSearch}
               placeholder="Search collocations…"
@@ -841,16 +849,20 @@ function VersionRow({
 
 // ── SelectionPanel ────────────────────────────────────────────────────────────
 
+type SelectionChip = { label: string; onRemove: () => void }
+
 function SelectionPanel({
   title,
-  count,
+  selectedChips,
+  onClearAll,
   search,
   onSearch,
   placeholder,
   children,
 }: {
   title: string
-  count: number
+  selectedChips: SelectionChip[]
+  onClearAll: () => void
   search: string
   onSearch: (v: string) => void
   placeholder: string
@@ -858,21 +870,50 @@ function SelectionPanel({
 }) {
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between min-h-5">
         <p className="text-xs font-semibold text-gray-700">{title}</p>
-        {count > 0 && (
-          <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
-            {count} selected
-          </span>
+        {selectedChips.length > 0 && (
+          <button
+            onClick={onClearAll}
+            className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+          >
+            Clear all ({selectedChips.length})
+          </button>
         )}
       </div>
+
+      {/* Selected chips */}
+      {selectedChips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 rounded-lg bg-gray-50 p-2 border border-gray-100">
+          {selectedChips.map(({ label, onRemove }) => (
+            <span
+              key={label}
+              className="flex items-center gap-1 rounded-full bg-white border border-blue-200 px-2 py-0.5 text-xs text-blue-700 shadow-sm"
+            >
+              {label}
+              <button
+                onClick={onRemove}
+                className="ml-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-blue-400 hover:bg-blue-100 hover:text-blue-700 transition-colors leading-none"
+                aria-label={`Remove ${label}`}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Search */}
       <input
         type="text"
         value={search}
         onChange={(e) => onSearch(e.target.value)}
-        placeholder={placeholder}
+        placeholder={selectedChips.length > 0 ? `Search to add more…` : placeholder}
         className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs outline-none focus:border-blue-400"
       />
+
+      {/* List */}
       <div className="max-h-44 overflow-y-auto flex flex-col gap-0.5">
         {children}
       </div>
