@@ -8,11 +8,30 @@ import {
   updateEssaySelections,
   toggleEssayFavorite,
   deleteEssayBuilderRecord,
+  getEssayBuilderConfig,
+  upsertEssayBuilderConfig,
   type EssayBuilderRecord,
+  type EssayBuilderConfig,
 } from '@/lib/db/essay-builder'
 
 export async function getVersionsAction(domain: string, skill: string): Promise<EssayBuilderRecord[]> {
   return getVersionsByDomainSkill(domain, skill, 5)
+}
+
+export async function getEssayBuilderConfigAction(
+  domain: string,
+  skill: string,
+): Promise<EssayBuilderConfig | null> {
+  return getEssayBuilderConfig(domain, skill)
+}
+
+export async function saveEssayBuilderConfigAction(
+  domain: string,
+  skill: string,
+  selectedVocabulary: string[],
+  selectedCollocations: string[],
+): Promise<void> {
+  await upsertEssayBuilderConfig(domain, skill, selectedVocabulary, selectedCollocations)
 }
 
 export async function saveEssayAction(

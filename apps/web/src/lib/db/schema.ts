@@ -293,6 +293,23 @@ export const collocationEntries = pgTable('collocation_entries', {
   check('collocation_entries_rank_check', sql`${t.rank} between 1 and 5`),
 ])
 
+// ─── Essay Builder selection config (persisted per user × domain × skill) ────
+// Replaces localStorage — enables cross-device / cross-browser persistence.
+// One row per (userId, domain, skill); upserted on every selection change.
+
+export const essayBuilderConfigs = pgTable(
+  'essay_builder_configs',
+  {
+    userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    domain: text('domain').notNull(),
+    skill: text('skill').notNull(),
+    selectedVocabulary: jsonb('selected_vocabulary').notNull().$type<string[]>(),
+    selectedCollocations: jsonb('selected_collocations').notNull().$type<string[]>(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.domain, t.skill] })],
+)
+
 // ─── AI Essay Builder history ─────────────────────────────────────────────────
 // Separate from mockExams — stores richer context (domain, vocab/collocation selections)
 
