@@ -1,7 +1,7 @@
 import { generateText } from 'ai'
 import { LISTENING_SCRIPT_PROMPT } from '@/lib/ielts/listening/prompts'
 import type { ListeningTurn, ListeningQuestion } from '@/lib/db/schema'
-import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export type GeneratedScript = {
   title: string
@@ -23,6 +23,7 @@ export async function POST(req: Request) {
     console.error('[listening/script] generateText failed:', err)
     return Response.json({ error: 'Ollama request failed' }, { status: 502 })
   }
+  ollamaDebug('listening/script', text)
 
   const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')
 

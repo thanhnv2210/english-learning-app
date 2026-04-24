@@ -1,6 +1,6 @@
 import { generateText } from 'ai'
 import { ESSAY_BUILDER_PROMPT, type EssayBuilderSkill } from '@/lib/ielts/essay-builder/prompts'
-import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export async function POST(req: Request) {
   if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
@@ -28,6 +28,7 @@ export async function POST(req: Request) {
     console.error('[essay-builder] generateText failed:', err)
     return Response.json({ error: 'Ollama request failed. Is Ollama running?' }, { status: 502 })
   }
+  ollamaDebug('essay-builder/generate', raw)
 
   const match = raw.match(/\{[\s\S]*\}/)
   if (!match) {
@@ -36,7 +37,13 @@ export async function POST(req: Request) {
 
   let parsed: { topic: string; text: string }
   try {
-    parsed = JSON.parse(match[0])
+    // Sanitize literal control chars the AI may embed inside JSON string values
+    const sanitized = match[0].replace(
+      /"((?:[^"\\]|\\[\s\S])*)"/g,
+      (_, inner: string) =>
+        `"${inner.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t')}"`,
+    )
+    parsed = JSON.parse(sanitized)
   } catch {
     return Response.json({ error: 'Failed to parse AI response' }, { status: 502 })
   }

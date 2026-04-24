@@ -1,7 +1,7 @@
 import { generateText } from 'ai'
 import { CONNECTED_SPEECH_PROMPT } from '@/lib/ielts/connected-speech/prompts'
 import type { AnalysisResult } from '@/lib/ielts/connected-speech/prompts'
-import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export type { AnalysisResult }
 
@@ -24,6 +24,7 @@ export async function POST(req: Request) {
     console.error('[connected-speech] generateText failed:', err)
     return Response.json({ error: 'Ollama request failed' }, { status: 502 })
   }
+  ollamaDebug('connected-speech/analyse', raw)
 
   const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')
 

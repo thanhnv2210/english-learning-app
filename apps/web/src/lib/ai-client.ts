@@ -29,6 +29,18 @@ export function ollamaModel() {
 }
 
 /**
+ * When OLLAMA_DEBUG=true, logs the raw AI response text to the server console.
+ * Useful for diagnosing JSON parse errors or unexpected model output.
+ * Usage: ollamaDebug('route-label', rawText)
+ */
+export const OLLAMA_DEBUG = process.env.OLLAMA_DEBUG === 'true'
+
+export function ollamaDebug(label: string, raw: string) {
+  if (!OLLAMA_DEBUG) return
+  console.log(`[ollama:debug][${label}] raw response (${raw.length} chars):\n${raw}\n`)
+}
+
+/**
  * Standard 503 response returned by API routes when Ollama is disabled.
  */
 export function ollamaDisabledResponse() {

@@ -1,6 +1,6 @@
 import { generateText } from 'ai'
 import { VOCABULARY_PROMPT } from '@/lib/ielts/writing/prompts'
-import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export type VocabSuggestion = {
   word: string
@@ -29,6 +29,7 @@ export async function POST(req: Request) {
     console.error('[writing/vocabulary] generateText failed:', err)
     return Response.json({ error: 'Ollama request failed' }, { status: 502 })
   }
+  ollamaDebug('writing/vocabulary', text)
 
   const jsonMatch = text.match(/\{[\s\S]*\}/)
   if (!jsonMatch) return Response.json({ informalWords: [] })
