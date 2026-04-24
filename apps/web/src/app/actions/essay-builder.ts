@@ -5,6 +5,7 @@ import {
   saveEssayBuilderRecord,
   getVersionsByDomainSkill,
   updateEssayDecoratedText,
+  updateEssaySelections,
   toggleEssayFavorite,
   deleteEssayBuilderRecord,
   type EssayBuilderRecord,
@@ -24,6 +25,15 @@ export async function saveEssayAction(
 
 export async function updateDecoratedTextAction(id: number, decoratedText: string): Promise<void> {
   await updateEssayDecoratedText(id, decoratedText)
+  revalidatePath('/essay-builder')
+}
+
+export async function updateEssaySelectionsAction(
+  id: number,
+  selectedVocabulary: string[],
+  selectedCollocations: string[],
+): Promise<void> {
+  await updateEssaySelections(id, selectedVocabulary, selectedCollocations)
   revalidatePath('/essay-builder')
 }
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useTransition, useEffect, useCallback } from 'react'
-import { saveEssayAction, getVersionsAction, updateDecoratedTextAction, toggleEssayFavoriteAction, deleteEssayAction } from '@/app/actions/essay-builder'
+import { saveEssayAction, getVersionsAction, updateDecoratedTextAction, updateEssaySelectionsAction, toggleEssayFavoriteAction, deleteEssayAction } from '@/app/actions/essay-builder'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 import type { CollocationCard } from '@/lib/db/collocations'
 import type { EssayBuilderRecord } from '@/lib/db/essay-builder'
@@ -199,6 +199,17 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
   // ── History state ────────────────────────────────────────────────────────
   const [history, setHistory] = useState(initialHistory)
   const [historyTab, setHistoryTab] = useState<'builder' | 'history' | 'analyse'>('builder')
+  const [historySkillFilter, setHistorySkillFilter] = useState<string>('all')
+  const [historyTopicSearch, setHistoryTopicSearch] = useState('')
+
+  const filteredHistory = useMemo(() => {
+    const q = historyTopicSearch.toLowerCase()
+    return history.filter((r) => {
+      if (historySkillFilter !== 'all' && r.skill !== historySkillFilter) return false
+      if (q && !r.topic.toLowerCase().includes(q) && !r.domain.toLowerCase().includes(q)) return false
+      return true
+    })
+  }, [history, historySkillFilter, historyTopicSearch])
 
   // ── Analyse tab state ────────────────────────────────────────────────────
   const [analyseText, setAnalyseText] = useState('')
@@ -289,6 +300,18 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
     setVersions((prev) => prev.filter((v) => v.id !== id))
     if (activeVersion?.id === id) setActiveVersion(null)
     startHistoryTransition(() => deleteEssayAction(id))
+  }
+
+  function handleHistoryUpdateSelections(id: number, vocab: string[], colloc: string[]) {
+    setHistory((prev) =>
+      prev.map((r) => r.id === id ? { ...r, selectedVocabulary: vocab, selectedCollocations: colloc } : r),
+    )
+    setVersions((prev) =>
+      prev.map((v) => v.id === id ? { ...v, selectedVocabulary: vocab, selectedCollocations: colloc } : v),
+    )
+    if (activeVersion?.id === id)
+      setActiveVersion((prev) => prev ? { ...prev, selectedVocabulary: vocab, selectedCollocations: colloc } : null)
+    startHistoryTransition(() => updateEssaySelectionsAction(id, vocab, colloc))
   }
 
   // ── Filtered lists ───────────────────────────────────────────────────────
@@ -722,17 +745,48 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
       {historyTab === 'history' && (
         /* ── History tab ─────────────────────────────────────────────────── */
         <div className="flex flex-col gap-4">
-          {history.length === 0 ? (
+          {/* Filters */}
+          <div className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-3">
+            <input
+              type="text"
+              value={historyTopicSearch}
+              onChange={(e) => setHistoryTopicSearch(e.target.value)}
+              placeholder="Search by topic or domain…"
+              className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+            />
+            <div className="flex gap-1.5 flex-wrap">
+              {(['all', 'writing_task1', 'writing_task2', 'speaking'] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setHistorySkillFilter(s)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    historySkillFilter === s
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {s === 'all' ? `All (${history.length})` : SKILL_LABELS[s]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {filteredHistory.length === 0 ? (
             <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-              <p className="text-sm text-gray-400">No essays yet. Generate one in the Builder tab.</p>
+              <p className="text-sm text-gray-400">
+                {history.length === 0 ? 'No essays yet. Generate one in the Builder tab.' : 'No essays match the current filters.'}
+              </p>
             </div>
           ) : (
-            history.map((record) => (
+            filteredHistory.map((record) => (
               <HistoryCard
                 key={record.id}
                 record={record}
+                words={words}
+                collocations={collocations}
                 onToggleFavorite={() => handleHistoryToggleFavorite(record)}
                 onDelete={() => handleHistoryDelete(record.id)}
+                onUpdateSelections={(vocab, colloc) => handleHistoryUpdateSelections(record.id, vocab, colloc)}
               />
             ))
           )}
@@ -861,15 +915,63 @@ function SelectionRow({
 
 function HistoryCard({
   record,
+  words,
+  collocations,
   onToggleFavorite,
   onDelete,
+  onUpdateSelections,
 }: {
   record: EssayBuilderRecord
+  words: VocabularyCard[]
+  collocations: CollocationCard[]
   onToggleFavorite: () => void
   onDelete: () => void
+  onUpdateSelections: (vocab: string[], colloc: string[]) => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [bonusVocab, setBonusVocab] = useState<string[]>([])
+  const [bonusColloc, setBonusColloc] = useState<string[]>([])
+  const [detected, setDetected] = useState(false)
+  const [isSavingSelections, setIsSavingSelections] = useState(false)
+  const [selectionsSaved, setSelectionsSaved] = useState(false)
+
+  function handleDetect() {
+    const lower = record.decoratedText.toLowerCase()
+    setBonusVocab(
+      words
+        .filter((w) => !record.selectedVocabulary.includes(w.word) && lower.includes(w.word.toLowerCase()))
+        .map((w) => w.word),
+    )
+    setBonusColloc(
+      collocations
+        .filter((c) => !record.selectedCollocations.includes(c.phrase) && lower.includes(c.phrase.toLowerCase()))
+        .map((c) => c.phrase),
+    )
+    setDetected(true)
+    setSelectionsSaved(false)
+  }
+
+  async function handleSaveSelections() {
+    const mergedVocab = [...record.selectedVocabulary, ...bonusVocab]
+    const mergedColloc = [...record.selectedCollocations, ...bonusColloc]
+    setIsSavingSelections(true)
+    try {
+      onUpdateSelections(mergedVocab, mergedColloc)
+      setBonusVocab([])
+      setBonusColloc([])
+      setSelectionsSaved(true)
+    } finally {
+      setIsSavingSelections(false)
+    }
+  }
+
+  const highlightSets: PhraseSet[] = [
+    { phrases: record.selectedVocabulary,   className: 'bg-purple-100 text-purple-800' },
+    { phrases: record.selectedCollocations, className: 'bg-blue-100 text-blue-800' },
+    { phrases: bonusVocab,                  className: 'bg-green-100 text-green-800' },
+    { phrases: bonusColloc,                 className: 'bg-amber-100 text-amber-800' },
+  ]
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col gap-3">
@@ -937,15 +1039,52 @@ function HistoryCard({
       </button>
 
       {expanded && (
-        <div className="rounded-lg bg-gray-50 p-4">
+        <div className="rounded-lg bg-gray-50 p-4 flex flex-col gap-3">
+          {/* Detect button + save */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={handleDetect}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              {detected ? '↻ Re-detect vocab & collocations' : 'Detect vocab & collocations'}
+            </button>
+            {detected && (bonusVocab.length > 0 || bonusColloc.length > 0) && (
+              <>
+                <span className="text-xs text-gray-400">
+                  {bonusVocab.length + bonusColloc.length} extra match{bonusVocab.length + bonusColloc.length !== 1 ? 'es' : ''} found
+                </span>
+                <button
+                  onClick={handleSaveSelections}
+                  disabled={isSavingSelections}
+                  className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                >
+                  {isSavingSelections ? 'Saving…' : 'Save to this essay'}
+                </button>
+              </>
+            )}
+            {detected && bonusVocab.length === 0 && bonusColloc.length === 0 && (
+              <span className="text-xs text-gray-400">
+                {selectionsSaved ? 'Selections saved ✓' : 'No additional matches'}
+              </span>
+            )}
+          </div>
+
           <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
-            {highlight(record.decoratedText, [
-              { phrases: record.selectedVocabulary, className: 'bg-purple-100 text-purple-800' },
-              { phrases: record.selectedCollocations, className: 'bg-blue-100 text-blue-800' },
-            ])}
+            {highlight(record.decoratedText, highlightSets)}
           </p>
+
+          {/* Legend */}
+          {detected && (
+            <div className="flex flex-wrap gap-3 text-xs text-gray-500 border-t border-gray-200 pt-2">
+              <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-purple-100 text-purple-800 font-semibold">word</span> selected vocab</span>
+              <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-blue-100 text-blue-800 font-semibold">phrase</span> selected collocation</span>
+              {bonusVocab.length > 0 && <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-green-100 text-green-800 font-semibold">word</span> bonus vocab</span>}
+              {bonusColloc.length > 0 && <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-amber-100 text-amber-800 font-semibold">phrase</span> bonus collocation</span>}
+            </div>
+          )}
+
           {record.decoratedText !== record.originalGeneratedText && (
-            <details className="mt-3">
+            <details>
               <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600">Original (unedited)</summary>
               <p className="mt-2 text-xs leading-relaxed text-gray-500 italic whitespace-pre-wrap">
                 {record.originalGeneratedText}

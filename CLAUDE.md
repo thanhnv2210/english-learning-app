@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, Collocation Library, Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides), and Target Switcher UI. Still pending: Progress Analytics. Recently added: AI Prompt Library (5 practice prompts per skill × 3 platforms, profile-aware, static). See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
+Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, Collocation Library, Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides), Target Switcher UI, AI Prompt Library, and Essay Builder. Still pending: Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
 
 ## Tech Stack
 
@@ -39,6 +39,7 @@ english-learning-app/
 │       │   │   ├── reading/              # Reading module (Phase 3)
 │       │   │   ├── vocabulary/           # AWL browser
 │       │   │   ├── collocations/         # Collocation Library (search + saved)
+│       │   │   ├── essay-builder/        # Essay Builder (generate + analyse + history)
 │       │   │   ├── history/              # Session history
 │       │   │   └── how-to-answer/        # Static exam guides (skill landing + per-skill pages)
 │       │   │       └── listening/        # Listening guide — 7 IELTS question types
@@ -51,6 +52,7 @@ english-learning-app/
 │       │   │   ├── vocabulary.ts         # addWordToLibrary
 │       │   │   ├── connected-speech.ts   # saveAnalysisAction, listRecentAnalyses, listByPhenomenon, deleteAnalysisAction
 │       │   │   ├── collocations.ts       # saveCollocationAction, listCollocationAction, updateCollocationSkillsAction, updateCollocationRankAction, deleteCollocationAction
+│       │   │   ├── essay-builder.ts      # saveEssayAction, getVersionsAction, updateDecoratedTextAction, updateEssaySelectionsAction, toggleEssayFavoriteAction, deleteEssayAction
 │       │   │   └── user.ts               # updateTargetProfileAction
 │       │   └── api/                      # Backend API routes (BFF)
 │       │       ├── chat/                 # POST — examiner streaming (Part 1/2/3 + topic)
@@ -61,7 +63,8 @@ english-learning-app/
 │       │       ├── vocabulary/search/    # POST — search/generate full vocabulary card
 │       │       ├── writing/             # POST — multi-pass auditor (6 routes) + topic generation
 │       │       ├── connected-speech/analyse/ # POST — identify connected speech phenomena (JSON)
-│       │       └── collocations/search/ # POST — search by word (array) or phrase (single card)
+│       │       ├── collocations/search/ # POST — search by word (array) or phrase (single card)
+│       │       └── essay-builder/       # POST generate (delimiter text) · POST analyse (detect domain/skill/question)
 │       ├── components/                   # Shared React components
 │       │   ├── mic-input.tsx             # Mic button + interim transcript (Phase 2)
 │       │   ├── vocabulary-drawer.tsx     # AWL word-swap sidebar
@@ -77,7 +80,8 @@ english-learning-app/
 │       │   │   ├── speaking.ts           # getAllSpeakingTopics
 │       │   │   ├── vocabulary.ts         # findWord, saveVocabularyWord
 │       │   │   ├── connected-speech.ts   # saveAnalysis, getRecentAnalyses, getTopByPhenomenon, deleteAnalysis
-│       │   │   └── collocations.ts       # findCollocation, saveCollocation, getAllCollocations, updateCollocationSkills, deleteCollocation
+│       │   │   ├── collocations.ts       # findCollocation, saveCollocation, getAllCollocations, updateCollocationSkills, deleteCollocation
+│       │   │   └── essay-builder.ts      # saveEssayBuilderRecord, getVersionsByDomainSkill, getAllEssayBuilderRecords, updateEssayDecoratedText, updateEssaySelections, toggleEssayFavorite, deleteEssayBuilderRecord
 │       │   ├── guides/                   # Static content for How to Answer (no DB, no AI)
 │       │   │   ├── listening.ts          # LISTENING_GUIDES — 7 question types, steps/strategies/mistakes
 │       │   │   ├── reading.ts            # READING_GUIDES — 9 question types
@@ -91,7 +95,8 @@ english-learning-app/
 │       │       ├── timer/               # use-timer.ts, use-speech-input.ts (Phase 2)
 │       │       ├── vocabulary/          # AWL prompts, DB queries, VOCAB_SEARCH_PROMPT
 │       │       ├── connected-speech/    # prompts.ts — CONNECTED_SPEECH_PROMPT, types, PHENOMENON_META, getPhenomenonColor
-│       │       └── collocations/        # prompts.ts — COLLOCATION_BY_WORD_PROMPT, COLLOCATION_BY_PHRASE_PROMPT, CollocationResult
+│       │       ├── collocations/        # prompts.ts — COLLOCATION_BY_WORD_PROMPT, COLLOCATION_BY_PHRASE_PROMPT, CollocationResult
+│       │       └── essay-builder/       # prompts.ts — ESSAY_BUILDER_PROMPT (delimiter), ESSAY_ANALYSE_PROMPT, EssayBuilderSkill
 │       └── types/                        # App-local TypeScript types
 ├── packages/
 │   └── shared/src/types/                 # TargetProfile, FeedbackSchema (cross-workspace)
@@ -340,6 +345,20 @@ See `.devcontainer/README.md` for full setup steps.
 - Backlog: Examiner prompts (act-as examiner for interactive sessions), Evaluator prompts (grade my response)
 - Client component `PromptLibraryView`: skill tab switcher + platform tab switcher + `PromptCard` with clipboard copy (icon swaps to checkmark for 2s via `useState`)
 
+**Essay Builder** (Phase 3 complete)
+- Route `/essay-builder` — three tabs: **Builder**, **History**, **Analyse**
+- **Builder tab**: select domain + skill (Writing Task 1/2 or Speaking) + vocabulary words + collocations → `POST /api/essay-builder/generate` → generated topic + essay incorporating selected items
+- **AI output format**: delimiter-based (`---TOPIC---` / `---TEXT---`) instead of JSON — small 7B models truncate or corrupt JSON when generating 250+ word essays; delimiters are model-safe and trivially parseable; same pattern used for Analyse (`---DOMAIN---` / `---SKILL---` / `---QUESTION---`) — see [PDR-0012](./docs/pdr/0012-essay-builder-design.md)
+- **Versioning**: last 5 versions per `(domain, skill)` from `ai_generated_content` table; auto-saved on generate; selectable from a strip; deletable with two-step confirm; selecting a version restores text + selections + bonus coverage
+- **localStorage persistence**: selections (vocab + collocations) saved per `essay-builder:${domain}:${skill}` key; restored on domain/skill change; survives page refresh; only the generated essay is persisted to DB
+- **4-tier highlight system**: selected vocab (purple) · selected colloc (blue) · bonus vocab (green) · bonus colloc (amber); first match wins; bonus items are clickable pills to promote to selection
+- **Bonus coverage**: post-generation scan of full library against generated text; unselected matches surfaced as green/amber; clicking promotes item to selected set and updates localStorage
+- **Edit mode**: inline textarea for modifying `decoratedText`; "Save changes" persists to DB via `updateDecoratedTextAction`
+- **Analyse tab**: paste raw IELTS text → `POST /api/essay-builder/analyse` detects domain, skill, generates realistic IELTS question → library matches highlighted (vocab purple, colloc blue) → "Load into Builder" pre-fills domain/skill/selections → "Save to History" creates `EssayBuilderRecord` from pasted text; save button disables after save to prevent duplicates
+- **History tab**: filter by skill (chip: All / Writing Task 1 / Writing Task 2 / Speaking) + topic/domain text search (client-side `useMemo`); each card has "Detect vocab & collocations" button — scans `decoratedText` against current library, shows bonus matches with 4-tier highlighting; "Save to this essay" merges bonus into `selectedVocabulary`/`selectedCollocations` via `updateEssaySelectionsAction`, updating both `history` and `versions` state optimistically
+- **DB table**: `ai_generated_content` — `id`, `skill`, `domain`, `topic`, `selectedVocabulary` (jsonb), `selectedCollocations` (jsonb), `originalGeneratedText`, `decoratedText`, `targetBand`, `isFavorite`, `createdAt`; shared between Builder versioning and History global view
+- **Prompts**: `ESSAY_BUILDER_PROMPT(skill, domain, vocabulary, collocations, targetBand)` and `ESSAY_ANALYSE_PROMPT(text, domains)` in `lib/ielts/essay-builder/prompts.ts`
+
 ### Key Design Decisions
 - Use "Band 6.5 vs 7.0 gap analysis" framing in all feedback (not just scores)
 - Writing feedback includes "Drafting Mode" (outline critique before full essay)
@@ -350,8 +369,9 @@ See `.devcontainer/README.md` for full setup steps.
 - **Vocabulary pronunciation source priority**: Free Dictionary API (no key, real IPA + audio URLs) → AI fallback (offline-safe, IPA only, no audio); result stored in `pronunciation` jsonb on `vocabulary_words`; `↻` refresh indicator distinguishes AI-sourced (no audio) from API-sourced (has audio) data
 - **User roles — backlog**: multi-role system (admin, student, group admin) is planned for a future phase; do not implement until explicitly started; current app assumes single user (`DEFAULT_EMAIL`)
 - **`useOptimistic` contract**: optimistic state reverts to `initialItems` once the server action settles. If `initialItems` does not refresh (no `revalidatePath`), the old value reappears. Rule: any mutation that must outlive the optimistic window **must** call `revalidatePath` in its server action
-- Centralised Ollama client (`src/lib/ai-client.ts`) — single source for `createOllama` config, `OLLAMA_ENABLED` flag, and disabled-response helper; all 16 API routes + 1 server action import from here
-- Nav sidebar (`components/nav-sidebar.tsx`) uses collapsible groups: **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech), **Guides** (How to Answer, Question Anatomy, Topic Ideas, AI Prompts, Exam Sprint); Dashboard, History, and Settings are standalone. Active group auto-opens on load; group header turns blue when it contains the active page.
+- Centralised Ollama client (`src/lib/ai-client.ts`) — single source for `createOllama` config, `OLLAMA_ENABLED` flag, `OLLAMA_DEBUG` flag, `ollamaDebug(label, raw)` helper, and disabled-response helper; all API routes import from here; set `OLLAMA_DEBUG=true` in `.env.local` to log full raw model output — first diagnostic step for any `generateText` parse failure
+- **Delimiter-based AI output for long text**: routes that ask the model to generate 150+ word bodies use `---SECTION---` delimiters instead of JSON; small 7B models reliably truncate or corrupt JSON at this length; delimiter capture regex `/([\s\S]+)/` after the last sentinel is robust to trailing fences or whitespace — see [PDR-0012](./docs/pdr/0012-essay-builder-design.md) for the root-cause analysis
+- Nav sidebar (`components/nav-sidebar.tsx`) uses collapsible groups: **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech, Essay Builder), **Guides** (How to Answer, Question Anatomy, Topic Ideas, AI Prompts, Exam Sprint); Dashboard, History, and Settings are standalone. Active group auto-opens on load; group header turns blue when it contains the active page.
 - `NEXT_PUBLIC_OLLAMA_ENABLED=false` disables all AI routes and shows an amber banner in the dashboard layout; designed for GitHub Codespaces where Ollama cannot run in-container
 - Safe colour getter pattern (`getPhenomenonColor(p)`) — always look up dynamic AI-returned strings through a getter with a fallback rather than direct object indexing; prevents crashes when the model returns an unexpected value
 
@@ -362,7 +382,7 @@ See `.devcontainer/README.md` for full setup steps.
 | 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
-| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Collocation Library ✅ · Nav reorganisation ✅ · Target Switcher ✅ · AI Prompt Library ✅ · Analytics ⬜ |
+| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Collocation Library ✅ · Nav reorganisation ✅ · Target Switcher ✅ · AI Prompt Library ✅ · Essay Builder ✅ · Analytics ⬜ |
 | 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.
