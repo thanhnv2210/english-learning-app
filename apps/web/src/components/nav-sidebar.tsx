@@ -45,6 +45,7 @@ const GROUPS: NavGroup[] = [
 ]
 
 const STANDALONE_BOTTOM: NavItem[] = [
+  { href: '/analytics', label: 'Analytics', icon: '📊' },
   { href: '/history', label: 'History', icon: '🕐' },
   { href: '/settings', label: 'Settings', icon: '⚙️' },
 ]
