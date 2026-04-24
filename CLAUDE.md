@@ -242,8 +242,15 @@ See `.devcontainer/README.md` for full setup steps.
 **Vocabulary Builder** (Phase 2 + Phase 3 extensions complete)
 - `VocabularyDrawer` component — post-session collapsible panel, never blocks examiner flow
 - `POST /api/vocabulary/lookup` — two-pass: detect informal words → fetch/generate academic cards
-- AWL browser at `/vocabulary` — searchable, filterable by domain
+- AWL browser at `/vocabulary` — searchable, filterable by domain; sort dropdown (A→Z, Z→A, Rank high→low, Rank low→high, Newest, Oldest); rank filter chips (★–★★★★★); delete for user-added words (two-step confirm)
 - **Vocabulary Search** (Phase 3): `VocabSearch` component + `POST /api/vocabulary/search`; checks DB first (`findWord`), falls back to AI generation (`VOCAB_SEARCH_PROMPT`); auto-detects domains from known list; "Add to Library" button for AI-generated cards; already-saved words show read-only
+- **Pronunciation** (`VocabPronunciation = { uk, us, ukAudio?, usAudio? }`):
+  - `vocabularyWords.pronunciation` — nullable jsonb column; existing seeded rows start as `null`
+  - `POST /api/vocabulary/pronunciation` — tries Free Dictionary API (`https://api.dictionaryapi.dev/api/v2/entries/en/<word>`) first (no API key needed); falls back to AI (`VOCAB_PRONUNCIATION_PROMPT`) if offline or word not found; persists result to DB
+  - **UK/US detection**: US = entry whose audio URL contains `-us`; UK = first entry with text that is not the US entry; audio URLs stored so ▶ play button works on subsequent loads
+  - **WordCard UI**: shows `UK /ɪpə/ ▶ · US /ɪpə/ ▶` when available; `+ pronunciation` auto-fetch button + `enter manually` link when absent; `↻` refresh icon when IPA exists but no audio URLs (AI-sourced — click to retry real API); `✎` edit icon to open inline manual edit form
+  - **Manual edit**: two `font-mono` inputs (UK / US IPA); save merges with existing audio URLs so real API audio is preserved; `updateWordPronunciationAction` server action
+  - **Offline workflow**: generate pronunciation via AI while offline → `↻` refresh to upgrade to real API data when back online
 
 **How to Answer Guide** (Phase 3 — all 4 skills complete)
 - Route `/how-to-answer` — skill landing page linking to all four skill guides
@@ -318,7 +325,9 @@ See `.devcontainer/README.md` for full setup steps.
 - Vocabulary Replacer identifies dev-slang and suggests formal IELTS-appropriate equivalents
 - `FeedbackGenerator` runs *after* a session, not during, to maintain examiner strictness
 - Web Speech API (not Whisper) chosen for STT: zero setup, free, native in Chrome
-- All three content library tables (`reading_passages`, `listening_scripts`, `writing_topics`) share a `rank` column (1–5, default 1, DB-enforced CHECK constraint); sort order is `rank DESC, createdAt DESC` — see [PDR-0010](./docs/pdr/0010-library-rank-ordering.md). `collocation_entries` also has `rank` (1–5, default 3) following the same pattern
+- All three content library tables (`reading_passages`, `listening_scripts`, `writing_topics`) share a `rank` column (1–5, default 1, DB-enforced CHECK constraint); sort order is `rank DESC, createdAt DESC` — see [PDR-0010](./docs/pdr/0010-library-rank-ordering.md). `collocation_entries` and `vocabulary_words` also have `rank` (1–5, default 3) following the same pattern
+- **Vocabulary pronunciation source priority**: Free Dictionary API (no key, real IPA + audio URLs) → AI fallback (offline-safe, IPA only, no audio); result stored in `pronunciation` jsonb on `vocabulary_words`; `↻` refresh indicator distinguishes AI-sourced (no audio) from API-sourced (has audio) data
+- **User roles — backlog**: multi-role system (admin, student, group admin) is planned for a future phase; do not implement until explicitly started; current app assumes single user (`DEFAULT_EMAIL`)
 - **`useOptimistic` contract**: optimistic state reverts to `initialItems` once the server action settles. If `initialItems` does not refresh (no `revalidatePath`), the old value reappears. Rule: any mutation that must outlive the optimistic window **must** call `revalidatePath` in its server action
 - Centralised Ollama client (`src/lib/ai-client.ts`) — single source for `createOllama` config, `OLLAMA_ENABLED` flag, and disabled-response helper; all 16 API routes + 1 server action import from here
 - Nav sidebar (`components/nav-sidebar.tsx`) uses collapsible groups: **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech), **Guides** (How to Answer, Question Anatomy, Topic Ideas, AI Prompts, Exam Sprint); Dashboard, History, and Settings are standalone. Active group auto-opens on load; group header turns blue when it contains the active page.

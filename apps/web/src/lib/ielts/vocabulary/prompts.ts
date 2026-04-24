@@ -73,6 +73,10 @@ Return ONLY valid JSON — no markdown, no explanation:
       "<another formal IELTS Writing Task 2 sentence>"
     ]
   },
+  "pronunciation": {
+    "uk": "<British IPA e.g. /ɪnˈfluəns/>",
+    "us": "<American IPA e.g. /ˈɪnfluəns/>"
+  },
   "suggestedDomains": ["<domain name from the list above>"]
 }
 
@@ -118,8 +122,29 @@ Return ONLY valid JSON — no markdown, no explanation:
       "<formal IELTS Writing Task 2 sentence>",
       "<another formal IELTS Writing Task 2 sentence>"
     ]
+  },
+  "pronunciation": {
+    "uk": "<British IPA e.g. /ɪnˈfluəns/>",
+    "us": "<American IPA e.g. /ˈɪnfluəns/>"
   }
 }
 
 Ensure all examples are realistic for IELTS Band 6–7 level.`
+}
+
+/**
+ * Generates UK and US IPA pronunciation for a single word.
+ *
+ * Returns JSON: { "uk": "...", "us": "..." }
+ */
+export function VOCAB_PRONUNCIATION_PROMPT(word: string): string {
+  return `Provide the standard IPA pronunciation for the English word "${word}" in both British English (UK) and American English (US).
+
+Return ONLY valid JSON — no markdown, no explanation:
+{
+  "uk": "<British IPA notation including slashes, e.g. /ɪnˈfluəns/>",
+  "us": "<American IPA notation including slashes, e.g. /ˈɪnfluəns/>"
+}
+
+Use standard IPA symbols. Include the surrounding slashes in the string values.`
 }

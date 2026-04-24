@@ -5,8 +5,10 @@ import {
   saveVocabularyWord,
   deleteVocabularyWord,
   updateVocabularyRank,
+  saveWordPronunciation,
   type VocabularyCard,
 } from '@/lib/db/vocabulary'
+import type { VocabPronunciation } from '@/lib/db/schema'
 
 export async function addWordToLibrary(card: VocabularyCard): Promise<{ ok: boolean }> {
   const result = await saveVocabularyWord({
@@ -16,6 +18,7 @@ export async function addWordToLibrary(card: VocabularyCard): Promise<{ ok: bool
     synonyms: card.synonyms,
     collocations: card.collocations,
     examples: card.examples,
+    pronunciation: card.pronunciation,
     domainNames: card.domains,
     userAdded: true,
   })
@@ -29,5 +32,22 @@ export async function deleteVocabularyWordAction(id: number): Promise<void> {
 
 export async function updateVocabularyRankAction(id: number, rank: number): Promise<void> {
   await updateVocabularyRank(id, rank)
+  revalidatePath('/vocabulary')
+}
+
+// Merges UK/US IPA text with any existing audio URLs so API-fetched audio is preserved
+export async function updateWordPronunciationAction(
+  id: number,
+  uk: string,
+  us: string,
+  existing: VocabPronunciation | null,
+): Promise<void> {
+  const pronunciation: VocabPronunciation = {
+    uk,
+    us,
+    ukAudio: existing?.ukAudio,
+    usAudio: existing?.usAudio,
+  }
+  await saveWordPronunciation(id, pronunciation)
   revalidatePath('/vocabulary')
 }

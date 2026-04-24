@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useOptimistic, useTransition, useRef, useEffect } from 'react'
-import { deleteVocabularyWordAction, updateVocabularyRankAction } from '@/app/actions/vocabulary'
+import { deleteVocabularyWordAction, updateVocabularyRankAction, updateWordPronunciationAction } from '@/app/actions/vocabulary'
 import { toggleVocabFavoriteAction } from '@/app/actions/user-skill-topics'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 
@@ -256,10 +256,55 @@ export function WordCard({
   const [hoverRank, setHoverRank] = useState(0)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [, startTransition] = useTransition()
+  const [pronunciation, setPronunciation] = useState(word.pronunciation)
+  const [isGeneratingPronunciation, setIsGeneratingPronunciation] = useState(false)
+  const [editingPronunciation, setEditingPronunciation] = useState(false)
+  const [editUk, setEditUk] = useState('')
+  const [editUs, setEditUs] = useState('')
+  const [isSavingPronunciation, setIsSavingPronunciation] = useState(false)
 
   function handleRankClick(rank: number) {
     setLocalRank(rank)
     startTransition(() => onRankUpdate?.(rank))
+  }
+
+  function openPronunciationEdit() {
+    setEditUk(pronunciation?.uk ?? '')
+    setEditUs(pronunciation?.us ?? '')
+    setEditingPronunciation(true)
+  }
+
+  async function handleSavePronunciation() {
+    if (!editUk.trim() && !editUs.trim()) return
+    setIsSavingPronunciation(true)
+    try {
+      const uk = editUk.trim()
+      const us = editUs.trim()
+      setPronunciation((prev) => ({ uk, us, ukAudio: prev?.ukAudio, usAudio: prev?.usAudio }))
+      setEditingPronunciation(false)
+      if (word.id > 0) {
+        await updateWordPronunciationAction(word.id, uk, us, pronunciation)
+      }
+    } finally {
+      setIsSavingPronunciation(false)
+    }
+  }
+
+  async function handleGeneratePronunciation() {
+    setIsGeneratingPronunciation(true)
+    try {
+      const res = await fetch('/api/vocabulary/pronunciation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wordId: word.id, word: word.word }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setPronunciation(data)
+      }
+    } finally {
+      setIsGeneratingPronunciation(false)
+    }
   }
 
   const synonyms = word.synonyms.filter((s) => s.type === 'synonym').slice(0, 3)
@@ -320,6 +365,88 @@ export function WordCard({
               {d}
             </span>
           ))}
+        </div>
+      )}
+
+      {/* Pronunciation */}
+      {editingPronunciation ? (
+        <div className="mb-2 flex flex-col gap-1.5">
+          <div className="flex gap-2">
+            <label className="flex items-center gap-1.5">
+              <span className="text-xs font-medium text-gray-400 w-5">UK</span>
+              <input
+                type="text"
+                value={editUk}
+                onChange={(e) => setEditUk(e.target.value)}
+                placeholder="/ɪnˈfluəns/"
+                className="w-36 rounded border border-gray-200 px-2 py-1 font-mono text-xs text-gray-700 outline-none focus:border-blue-400"
+              />
+            </label>
+            <label className="flex items-center gap-1.5">
+              <span className="text-xs font-medium text-gray-400 w-5">US</span>
+              <input
+                type="text"
+                value={editUs}
+                onChange={(e) => setEditUs(e.target.value)}
+                placeholder="/ˈɪnfluəns/"
+                className="w-36 rounded border border-gray-200 px-2 py-1 font-mono text-xs text-gray-700 outline-none focus:border-blue-400"
+              />
+            </label>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleSavePronunciation}
+              disabled={isSavingPronunciation || (!editUk.trim() && !editUs.trim())}
+              className="rounded px-2.5 py-1 text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            >
+              {isSavingPronunciation ? 'Saving…' : 'Save'}
+            </button>
+            <button
+              onClick={() => setEditingPronunciation(false)}
+              className="rounded px-2.5 py-1 text-xs text-gray-500 hover:bg-gray-100 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : pronunciation ? (
+        <div className="mb-2 flex flex-wrap items-center gap-3">
+          <PronunciationChip label="UK" ipa={pronunciation.uk} audioUrl={pronunciation.ukAudio} />
+          <PronunciationChip label="US" ipa={pronunciation.us} audioUrl={pronunciation.usAudio} />
+          {!pronunciation.ukAudio && !pronunciation.usAudio && (
+            <button
+              onClick={handleGeneratePronunciation}
+              disabled={isGeneratingPronunciation}
+              title="Refresh from dictionary API"
+              className="text-xs text-gray-300 hover:text-blue-400 disabled:opacity-40 transition-colors"
+            >
+              {isGeneratingPronunciation ? '…' : '↻'}
+            </button>
+          )}
+          <button
+            onClick={openPronunciationEdit}
+            title="Edit pronunciation manually"
+            className="text-xs text-gray-300 hover:text-gray-500 transition-colors"
+          >
+            ✎
+          </button>
+        </div>
+      ) : (
+        <div className="mb-2 flex items-center gap-3">
+          <button
+            onClick={handleGeneratePronunciation}
+            disabled={isGeneratingPronunciation}
+            className="text-xs text-gray-400 hover:text-blue-500 disabled:opacity-50 transition-colors"
+          >
+            {isGeneratingPronunciation ? 'Fetching…' : '+ pronunciation'}
+          </button>
+          <span className="text-xs text-gray-200">·</span>
+          <button
+            onClick={openPronunciationEdit}
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            enter manually
+          </button>
         </div>
       )}
 
@@ -416,6 +543,39 @@ export function WordCard({
         </div>
       )}
     </div>
+  )
+}
+
+// ── PronunciationChip ─────────────────────────────────────────────────────────
+
+function PronunciationChip({
+  label,
+  ipa,
+  audioUrl,
+}: {
+  label: string
+  ipa: string
+  audioUrl?: string
+}) {
+  function play() {
+    if (!audioUrl) return
+    new Audio(audioUrl).play()
+  }
+
+  return (
+    <span className="flex items-center gap-1 text-xs text-gray-500">
+      <span className="font-medium text-gray-400">{label}</span>
+      <span className="font-mono tracking-wide text-gray-700">{ipa}</span>
+      {audioUrl && (
+        <button
+          onClick={play}
+          title={`Play ${label} pronunciation`}
+          className="ml-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 text-gray-400 hover:bg-blue-50 hover:text-blue-500 transition-colors"
+        >
+          ▶
+        </button>
+      )}
+    </span>
   )
 }
 

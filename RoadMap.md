@@ -71,6 +71,18 @@
 ### Task 3.5 — Vocabulary Search ✅
 - `VocabSearch` component at `/vocabulary`; `POST /api/vocabulary/search` — checks DB first (`findWord`), falls back to AI generation (`VOCAB_SEARCH_PROMPT`); auto-detects domains; "Add to Library" for AI-generated cards; saved words show read-only
 
+### Task 3.14 — Vocabulary Enhancements ✅
+- **Rank field**: `vocabulary_words.rank` (integer 1–5, default 3, CHECK constraint); inline star widget on every card; `updateVocabularyRankAction` + `revalidatePath('/vocabulary')`
+- **User-added flag**: `vocabulary_words.userAdded` boolean; two-step delete confirmation only for user-added words; "Added" badge on card header
+- **Library controls**: sort dropdown (A→Z, Z→A, Rank high→low, Rank low→high, Newest, Oldest) + rank filter chips (★–★★★★★); filter and sort compose in `useMemo`
+- **Favourite domains** (`user_skill_topics` table, skill=`'vocabulary'`): lazy default seeding on first visit (Technology, Environment, Education, Health, Economy, Work); pinned domain chips + `···` dropdown for others; ★ unpin / ☆ pin buttons; `toggleVocabFavoriteAction` + `revalidatePath('/vocabulary')`; pattern ready for speaking/writing/listening/reading (backlog)
+- **Pronunciation** (`vocabulary_words.pronunciation` nullable jsonb `{ uk, us, ukAudio?, usAudio? }`):
+  - `POST /api/vocabulary/pronunciation` — Free Dictionary API first (no key, real IPA + CDN audio URLs), AI fallback (`VOCAB_PRONUNCIATION_PROMPT`) when offline
+  - UK/US detection: US = entry with `-us` in audio URL; UK = first non-US entry with IPA text
+  - WordCard: IPA chips with ▶ play button (browser `Audio` API); `↻` refresh when AI-sourced (no audio URLs); `✎` manual edit form (two `font-mono` inputs); `enter manually` link when no pronunciation yet
+  - Manual `updateWordPronunciationAction` merges IPA text with existing audio URLs
+  - Offline workflow: AI generates IPA → `↻` upgrades to real API data when back online
+
 ### Task 3.6 — Writing Topic Library ✅
 - `writing_topics` table (`domain`, `prompt`, `taskType`, `rank`); domain selector → "Pick from Library" (browse by domain, select specific) or "Generate New" (`POST /api/writing/topic`); `task_type` badge shown throughout session
 - Back navigation: `options → select`, `library → options`, `writing/drafting → options`
@@ -127,6 +139,7 @@
 ## Phase 4: Release & Community
 - [ ] **Peer Review Mode**: Let other "Tech Guys" review each other's practice essays.
 - [ ] **Official Mock Integration**: Connect to official [IELTS by IDP](url) or [British Council](url) resources for final testing.
+- [ ] **User Roles System**: Multi-role support — `admin`, `student`, `admin of a student group` (group admin manages a cohort); currently single-user (`DEFAULT_EMAIL`); requires auth layer and RBAC before implementation.
 
 ## Phase 1 Sprint: The "Examiner" Engine
 - [x] **Task 1.1**: Develop the `IELTS_Examiner` system prompt that enforces "Examiner Protocol" (no helping the user, strict transitions).
