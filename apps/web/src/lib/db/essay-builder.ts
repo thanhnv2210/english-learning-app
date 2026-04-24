@@ -1,6 +1,53 @@
 import { db } from '@/lib/db'
-import { aiGeneratedContent } from '@/lib/db/schema'
+import { aiGeneratedContent, essayBuilderConfigs } from '@/lib/db/schema'
+import { getDefaultUser } from '@/lib/db/user'
 import { and, desc, eq } from 'drizzle-orm'
+
+// ── Essay Builder selection config ────────────────────────────────────────────
+
+export type EssayBuilderConfig = {
+  selectedVocabulary: string[]
+  selectedCollocations: string[]
+}
+
+export async function getEssayBuilderConfig(
+  domain: string,
+  skill: string,
+): Promise<EssayBuilderConfig | null> {
+  const user = await getDefaultUser()
+  const [row] = await db
+    .select()
+    .from(essayBuilderConfigs)
+    .where(
+      and(
+        eq(essayBuilderConfigs.userId, user.id),
+        eq(essayBuilderConfigs.domain, domain),
+        eq(essayBuilderConfigs.skill, skill),
+      ),
+    )
+    .limit(1)
+  if (!row) return null
+  return {
+    selectedVocabulary: row.selectedVocabulary as string[],
+    selectedCollocations: row.selectedCollocations as string[],
+  }
+}
+
+export async function upsertEssayBuilderConfig(
+  domain: string,
+  skill: string,
+  selectedVocabulary: string[],
+  selectedCollocations: string[],
+): Promise<void> {
+  const user = await getDefaultUser()
+  await db
+    .insert(essayBuilderConfigs)
+    .values({ userId: user.id, domain, skill, selectedVocabulary, selectedCollocations, updatedAt: new Date() })
+    .onConflictDoUpdate({
+      target: [essayBuilderConfigs.userId, essayBuilderConfigs.domain, essayBuilderConfigs.skill],
+      set: { selectedVocabulary, selectedCollocations, updatedAt: new Date() },
+    })
+}
 
 export type EssayBuilderRecord = {
   id: number

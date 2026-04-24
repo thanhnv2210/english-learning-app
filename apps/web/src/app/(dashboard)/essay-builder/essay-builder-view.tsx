@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo, useTransition, useEffect, useCallback } from 'react'
-import { saveEssayAction, getVersionsAction, updateDecoratedTextAction, updateEssaySelectionsAction, toggleEssayFavoriteAction, deleteEssayAction } from '@/app/actions/essay-builder'
+import { useState, useMemo, useTransition, useEffect, useCallback, useRef } from 'react'
+import { saveEssayAction, getVersionsAction, updateDecoratedTextAction, updateEssaySelectionsAction, toggleEssayFavoriteAction, deleteEssayAction, getEssayBuilderConfigAction, saveEssayBuilderConfigAction } from '@/app/actions/essay-builder'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 import type { CollocationCard } from '@/lib/db/collocations'
 import type { EssayBuilderRecord } from '@/lib/db/essay-builder'
@@ -73,33 +73,33 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
   const [vocabSearch, setVocabSearch] = useState('')
   const [collocSearch, setCollocSearch] = useState('')
 
-  // ── Persist selections to localStorage keyed by domain:skill ─────────────
+  // ── Persist selections to DB (debounced, suppressed during config load) ──
+  const isLoadingConfigRef = useRef(false)
+
   useEffect(() => {
-    if (!domain) return
-    localStorage.setItem(
-      `essay-builder:${domain}:${skill}`,
-      JSON.stringify({ vocab: Array.from(selectedVocab), colloc: Array.from(selectedColloc) }),
-    )
+    if (!domain || isLoadingConfigRef.current) return
+    const timer = setTimeout(() => {
+      saveEssayBuilderConfigAction(domain, skill, Array.from(selectedVocab), Array.from(selectedColloc))
+    }, 800)
+    return () => clearTimeout(timer)
   }, [domain, skill, selectedVocab, selectedColloc])
 
-  function loadSaved(d: string, s: string) {
+  async function loadConfig(d: string, s: string) {
+    isLoadingConfigRef.current = true
     try {
-      const saved = localStorage.getItem(`essay-builder:${d}:${s}`)
-      if (saved) {
-        const { vocab, colloc } = JSON.parse(saved) as { vocab: string[]; colloc: string[] }
-        setSelectedVocab(new Set(vocab))
-        setSelectedColloc(new Set(colloc))
-        return
-      }
-    } catch {}
-    setSelectedVocab(new Set())
-    setSelectedColloc(new Set())
+      const config = await getEssayBuilderConfigAction(d, s)
+      setSelectedVocab(new Set(config?.selectedVocabulary ?? []))
+      setSelectedColloc(new Set(config?.selectedCollocations ?? []))
+    } finally {
+      // Clear flag after React has processed the state updates
+      setTimeout(() => { isLoadingConfigRef.current = false }, 0)
+    }
   }
 
-  function handleDomainChange(newDomain: string) {
+  async function handleDomainChange(newDomain: string) {
     setDomain(newDomain)
     if (newDomain) {
-      loadSaved(newDomain, skill)
+      await loadConfig(newDomain, skill)
       loadVersions(newDomain, skill)
     } else {
       setSelectedVocab(new Set())
@@ -109,10 +109,10 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
     }
   }
 
-  function handleSkillChange(newSkill: Skill) {
+  async function handleSkillChange(newSkill: Skill) {
     setSkill(newSkill)
     if (domain) {
-      loadSaved(domain, newSkill)
+      await loadConfig(domain, newSkill)
       loadVersions(domain, newSkill)
     }
   }
