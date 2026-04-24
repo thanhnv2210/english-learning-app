@@ -2,7 +2,7 @@ import { generateText } from 'ai'
 import { findWord } from '@/lib/db/vocabulary'
 import { getAllDomains } from '@/lib/db/domains'
 import { VOCAB_SEARCH_PROMPT } from '@/lib/ielts/vocabulary/prompts'
-import type { VocabWordFamily, VocabSynonym, VocabExamples } from '@/lib/db/schema'
+import type { VocabWordFamily, VocabSynonym, VocabExamples, VocabPronunciation } from '@/lib/db/schema'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
 
@@ -40,6 +40,7 @@ export async function POST(req: Request) {
     synonyms: VocabSynonym[]
     collocations: string[]
     examples: VocabExamples
+    pronunciation?: VocabPronunciation
     suggestedDomains: string[]
   }
 
@@ -68,6 +69,7 @@ export async function POST(req: Request) {
     synonyms: parsed.synonyms ?? [],
     collocations: parsed.collocations ?? [],
     examples: parsed.examples ?? { speaking: '', writing: ['', ''] },
+    pronunciation: (parsed.pronunciation as VocabPronunciation) ?? null,
     domains: canonicalDomains,
     rank: 3,
     userAdded: false,

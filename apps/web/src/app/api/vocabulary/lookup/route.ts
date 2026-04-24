@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
           synonyms: parsed.synonyms ?? [],
           collocations: parsed.collocations ?? [],
           examples: parsed.examples ?? { speaking: '', writing: ['', ''] },
+          pronunciation: parsed.pronunciation ?? null,
           domains: [],
           rank: 3,
           userAdded: false,

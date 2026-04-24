@@ -102,6 +102,13 @@ export const examTags = pgTable(
 
 // ─── Vocabulary word catalogue ────────────────────────────────────────────────
 
+export type VocabPronunciation = {
+  uk: string
+  us: string
+  ukAudio?: string
+  usAudio?: string
+}
+
 export type VocabWordFamily = {
   noun?: string | null
   verb?: string | null
@@ -127,6 +134,7 @@ export const vocabularyWords = pgTable('vocabulary_words', {
   synonyms: jsonb('synonyms').notNull().$type<VocabSynonym[]>(),
   collocations: jsonb('collocations').notNull().$type<string[]>(),
   examples: jsonb('examples').notNull().$type<VocabExamples>(),
+  pronunciation: jsonb('pronunciation').$type<VocabPronunciation>(),
   rank: integer('rank').notNull().default(3),
   userAdded: boolean('user_added').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),

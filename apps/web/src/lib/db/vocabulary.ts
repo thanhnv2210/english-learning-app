@@ -1,7 +1,7 @@
 import { db } from '@/lib/db'
 import { vocabularyWords, vocabularyWordDomains, writingDomains } from '@/lib/db/schema'
 import { asc, eq, inArray, sql } from 'drizzle-orm'
-import type { VocabWordFamily, VocabSynonym, VocabExamples } from '@/lib/db/schema'
+import type { VocabWordFamily, VocabSynonym, VocabExamples, VocabPronunciation } from '@/lib/db/schema'
 
 export type VocabularyCard = {
   id: number
@@ -12,6 +12,7 @@ export type VocabularyCard = {
   synonyms: VocabSynonym[]
   collocations: string[]
   examples: VocabExamples
+  pronunciation: VocabPronunciation | null
   domains: string[]
   rank: number
   userAdded: boolean
@@ -79,6 +80,7 @@ export async function saveVocabularyWord(data: {
   synonyms: VocabSynonym[]
   collocations: string[]
   examples: VocabExamples
+  pronunciation?: VocabPronunciation | null
   domainNames: string[]
   userAdded?: boolean
 }): Promise<VocabularyCard | null> {
@@ -91,6 +93,7 @@ export async function saveVocabularyWord(data: {
       synonyms: data.synonyms,
       collocations: data.collocations,
       examples: data.examples,
+      pronunciation: data.pronunciation ?? null,
       userAdded: data.userAdded ?? false,
     })
     .onConflictDoNothing()
@@ -124,6 +127,10 @@ export async function updateVocabularyRank(id: number, rank: number): Promise<vo
   await db.update(vocabularyWords).set({ rank }).where(eq(vocabularyWords.id, id))
 }
 
+export async function saveWordPronunciation(id: number, pronunciation: VocabPronunciation): Promise<void> {
+  await db.update(vocabularyWords).set({ pronunciation }).where(eq(vocabularyWords.id, id))
+}
+
 async function getDomainsForWord(wordId: number): Promise<string[]> {
   const rows = await db
     .select({ name: writingDomains.name })
@@ -148,6 +155,7 @@ function toCard(
     synonyms: row.synonyms as VocabSynonym[],
     collocations: row.collocations as string[],
     examples: row.examples as VocabExamples,
+    pronunciation: (row.pronunciation as VocabPronunciation) ?? null,
     domains,
     rank: row.rank,
     userAdded: row.userAdded,
