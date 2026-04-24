@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Phase 1, 2, and 3 complete. Phase 3 delivered: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, Collocation Library, Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides), Target Switcher UI, AI Prompt Library, Essay Builder (with Analyse tab, Versioning, Writing Evaluator integration), and Progress Analytics. Phase 4 pending. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
+Phase 1, 2, and 3 complete. Phase 4 in progress. Phase 3 delivered: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, Collocation Library, Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides), Target Switcher UI, AI Prompt Library, Essay Builder (with Analyse tab, Versioning, Writing Evaluator integration), and Progress Analytics. Phase 4 started: Wrong Decision Log (manual mistake journal with AI analysis, question role tagging, skill/role analytics). See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
 
 ## Tech Stack
 
@@ -41,6 +41,7 @@ english-learning-app/
 │       │   │   ├── collocations/         # Collocation Library (search + saved)
 │       │   │   ├── analytics/            # Progress Analytics (per-skill stats, trend bars)
 │       │   │   ├── essay-builder/        # Essay Builder (generate + analyse + history)
+│       │   │   ├── wrong-decisions/      # Wrong Decision Log (mistake journal + AI analysis)
 │       │   │   ├── history/              # Session history
 │       │   │   └── how-to-answer/        # Static exam guides (skill landing + per-skill pages)
 │       │   │       └── listening/        # Listening guide — 7 IELTS question types
@@ -54,6 +55,7 @@ english-learning-app/
 │       │   │   ├── connected-speech.ts   # saveAnalysisAction, listRecentAnalyses, listByPhenomenon, deleteAnalysisAction
 │       │   │   ├── collocations.ts       # saveCollocationAction, listCollocationAction, updateCollocationSkillsAction, updateCollocationRankAction, deleteCollocationAction
 │       │   │   ├── essay-builder.ts      # saveEssayAction, getVersionsAction, updateDecoratedTextAction, updateEssaySelectionsAction, toggleEssayFavoriteAction, deleteEssayAction, getEssayBuilderConfigAction, saveEssayBuilderConfigAction
+│       │   │   ├── wrong-decisions.ts    # saveWrongDecisionAction, updateWrongDecisionAction, deleteWrongDecisionAction
 │       │   │   └── user.ts               # updateTargetProfileAction
 │       │   └── api/                      # Backend API routes (BFF)
 │       │       ├── chat/                 # POST — examiner streaming (Part 1/2/3 + topic)
@@ -65,7 +67,8 @@ english-learning-app/
 │       │       ├── writing/             # POST — multi-pass auditor (6 routes) + topic generation
 │       │       ├── connected-speech/analyse/ # POST — identify connected speech phenomena (JSON)
 │       │       ├── collocations/search/ # POST — search by word (array) or phrase (single card)
-│       │       └── essay-builder/       # POST generate (delimiter text) · POST analyse (detect domain/skill/question)
+│       │       ├── essay-builder/       # POST generate (delimiter text) · POST analyse (detect domain/skill/question)
+│       │       └── wrong-decisions/analyse/ # POST — AI analytic + solution + question role tags (delimiter format)
 │       ├── components/                   # Shared React components
 │       │   ├── mic-input.tsx             # Mic button + interim transcript (Phase 2)
 │       │   ├── vocabulary-drawer.tsx     # AWL word-swap sidebar
@@ -83,7 +86,8 @@ english-learning-app/
 │       │   │   ├── connected-speech.ts   # saveAnalysis, getRecentAnalyses, getTopByPhenomenon, deleteAnalysis
 │       │   │   ├── collocations.ts       # findCollocation, saveCollocation, getAllCollocations, updateCollocationSkills, deleteCollocation
 │       │   │   ├── essay-builder.ts      # saveEssayBuilderRecord, getVersionsByDomainSkill, getAllEssayBuilderRecords, updateEssayDecoratedText, updateEssaySelections, toggleEssayFavorite, deleteEssayBuilderRecord, getEssayBuilderConfig, upsertEssayBuilderConfig
-│       │   │   └── analytics.ts          # getAnalyticsStats → SkillStats[] (queries mock_exams where feedback IS NOT NULL)
+│       │   │   ├── analytics.ts          # getAnalyticsStats → SkillStats[] (queries mock_exams where feedback IS NOT NULL)
+│       │   │   └── wrong-decisions.ts    # saveWrongDecision, getAllWrongDecisions, updateWrongDecision, deleteWrongDecision, getWrongDecisionStats → WrongDecisionStats
 │       │   ├── guides/                   # Static content for How to Answer (no DB, no AI)
 │       │   │   ├── listening.ts          # LISTENING_GUIDES — 7 question types, steps/strategies/mistakes
 │       │   │   ├── reading.ts            # READING_GUIDES — 9 question types
@@ -98,7 +102,8 @@ english-learning-app/
 │       │       ├── vocabulary/          # AWL prompts, DB queries, VOCAB_SEARCH_PROMPT
 │       │       ├── connected-speech/    # prompts.ts — CONNECTED_SPEECH_PROMPT, types, PHENOMENON_META, getPhenomenonColor
 │       │       ├── collocations/        # prompts.ts — COLLOCATION_BY_WORD_PROMPT, COLLOCATION_BY_PHRASE_PROMPT, CollocationResult
-│       │       └── essay-builder/       # prompts.ts — ESSAY_BUILDER_PROMPT (delimiter), ESSAY_ANALYSE_PROMPT, EssayBuilderSkill
+│       │       ├── essay-builder/       # prompts.ts — ESSAY_BUILDER_PROMPT (delimiter), ESSAY_ANALYSE_PROMPT, EssayBuilderSkill
+│       │       └── wrong-decisions/     # prompts.ts — WRONG_DECISION_PROMPT (delimiter), parseWrongDecisionAnalysis, WrongDecisionAnalysis
 │       └── types/                        # App-local TypeScript types
 ├── packages/
 │   └── shared/src/types/                 # TargetProfile, FeedbackSchema (cross-workspace)
@@ -362,6 +367,19 @@ See `.devcontainer/README.md` for full setup steps.
 - Skills tracked: `speaking` (Pt 1 & 3) · `speaking_part2` · `writing` · `reading` · `listening`
 - `getAnalyticsStats` returns skills in a fixed order (`SKILL_ORDER`) regardless of session date order
 
+**Wrong Decision Log** (Phase 4 — Task 4.1 complete)
+- Route `/wrong-decisions` — manual mistake journal; standalone item in nav sidebar (`STANDALONE_BOTTOM`)
+- **Entry fields**: skill (Reading/Listening/Speaking/Writing) · source text (optional — passage or transcript) · question · my thought/answer · correct answer · analytic · solution · question roles (from Question Anatomy role set)
+- **AI analysis**: `POST /api/wrong-decisions/analyse` — given skill + question + myThought + actualAnswer + sourceText → returns analytic, solution, and auto-tagged `questionRoles`; delimiter format (`---ANALYTIC---` / `---SOLUTION---` / `---ROLES---`); roles validated against known list before returning
+- **Question roles**: subset of `QuestionRole` from `lib/guides/question-anatomy` — `question-word`, `category`, `exclusion`, `hedge`, `relationship`, `target`, `time`; AI-suggested on analyse, user-editable at any time via chip toggle
+- **Stats**: top of page shows total logged · most error-prone skill · most missed role; skill breakdown mini-bars (count per skill)
+- **Filters**: skill chip filter + role chip filter (only roles that appear in logged data) + text search (question / my thought / correct answer / analytic); all compose client-side via `useMemo`
+- **Entry cards**: collapsed shows skill badge + question (truncated) + role badges + date; expanded shows source text · my thought (red) / correct answer (green) cards · analytic + solution (violet panel) · role tags
+- **Edit mode**: inline edit for analytic, solution, and roles with "↻ Re-analyse with AI" button; two-step delete confirm
+- **Analytics page integration**: `WrongDecisionCard` appended to `/analytics` — shows total mistakes, most-missed role, most-error skill, link to full log; always visible regardless of whether graded sessions exist
+- `wrong_decision_logs` table: `id`, `userId`, `skill`, `sourceText` (nullable), `question`, `myThought`, `actualAnswer`, `analytic` (nullable), `solution` (nullable), `questionRoles` (jsonb `string[]`), `createdAt`
+- `WrongDecisionStats`: `{ total, bySkill: Record<string, number>, byRole: { role, count }[] }` — computed in JS from all rows; `byRole` sorted descending, top 7 shown in filter chips
+
 **Essay Builder** (Phase 3 complete)
 - Route `/essay-builder` — three tabs: **Builder**, **History**, **Analyse**
 - **Builder tab**: select domain + skill (Writing Task 1/2 or Speaking) + vocabulary words + collocations → `POST /api/essay-builder/generate` → generated topic + essay incorporating selected items
@@ -390,7 +408,7 @@ See `.devcontainer/README.md` for full setup steps.
 - **`useOptimistic` contract**: optimistic state reverts to `initialItems` once the server action settles. If `initialItems` does not refresh (no `revalidatePath`), the old value reappears. Rule: any mutation that must outlive the optimistic window **must** call `revalidatePath` in its server action
 - Centralised Ollama client (`src/lib/ai-client.ts`) — single source for `createOllama` config, `OLLAMA_ENABLED` flag, `OLLAMA_DEBUG` flag, `ollamaDebug(label, raw)` helper, and disabled-response helper; all API routes import from here; set `OLLAMA_DEBUG=true` in `.env.local` to log full raw model output — first diagnostic step for any `generateText` parse failure
 - **Delimiter-based AI output for long text**: routes that ask the model to generate 150+ word bodies use `---SECTION---` delimiters instead of JSON; small 7B models reliably truncate or corrupt JSON at this length; delimiter capture regex `/([\s\S]+)/` after the last sentinel is robust to trailing fences or whitespace — see [PDR-0012](./docs/pdr/0012-essay-builder-design.md) for the root-cause analysis
-- Nav sidebar (`components/nav-sidebar.tsx`) uses collapsible groups: **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech, Essay Builder), **Guides** (How to Answer, Question Anatomy, Topic Ideas, AI Prompts, Exam Sprint); Dashboard is a standalone top item; Analytics, History, and Settings are standalone bottom items (`STANDALONE_BOTTOM`). Active group auto-opens on load; group header turns blue when it contains the active page.
+- Nav sidebar (`components/nav-sidebar.tsx`) uses collapsible groups: **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech, Essay Builder), **Guides** (How to Answer, Question Anatomy, Topic Ideas, AI Prompts, Exam Sprint); Dashboard is a standalone top item; Analytics, Wrong Decisions, History, and Settings are standalone bottom items (`STANDALONE_BOTTOM`). Active group auto-opens on load; group header turns blue when it contains the active page.
 - `NEXT_PUBLIC_OLLAMA_ENABLED=false` disables all AI routes and shows an amber banner in the dashboard layout; designed for GitHub Codespaces where Ollama cannot run in-container
 - Safe colour getter pattern (`getPhenomenonColor(p)`) — always look up dynamic AI-returned strings through a getter with a fallback rather than direct object indexing; prevents crashes when the model returns an unexpected value
 
@@ -402,6 +420,6 @@ See `.devcontainer/README.md` for full setup steps.
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
 | 3 | 6–10 | ✅ Done | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Collocation Library ✅ · Nav reorganisation ✅ · Target Switcher ✅ · AI Prompt Library ✅ · Essay Builder ✅ · Analytics ✅ |
-| 4 | TBD | Pending | Peer Review, Official Mock Integration |
+| 4 | TBD | In progress | Wrong Decision Log ✅ · Question Anatomy deep-dive · Peer Review · Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.

@@ -167,10 +167,26 @@
 - Dashboard and History remain standalone (not grouped)
 - Group containing the active page auto-opens on load; group label turns blue when active; items indented inside open groups
 
-## Phase 4: Release & Community
+## Phase 4: Progress Focus & Community
+- [x] **Wrong Decision Log**: Manual mistake journal — record wrong answers with source text, reasoning, correct answer, AI analytic, solution, and question role tags.
+- [ ] **Question Anatomy deep-dive**: Interactive practice mode for decoding question structure (role identification drill or try-it-yourself mode).
 - [ ] **Peer Review Mode**: Let other "Tech Guys" review each other's practice essays.
 - [ ] **Official Mock Integration**: Connect to official [IELTS by IDP](url) or [British Council](url) resources for final testing.
 - [ ] **User Roles System**: Multi-role support — `admin`, `student`, `admin of a student group` (group admin manages a cohort); currently single-user (`DEFAULT_EMAIL`); requires auth layer and RBAC before implementation.
+
+## Phase 4 Sprint Tasks
+
+### Task 4.1 — Wrong Decision Log ✅
+- Route `/wrong-decisions` — mistake journal for all 4 skills; standalone item in nav sidebar (`STANDALONE_BOTTOM` between Analytics and History)
+- **Entry**: skill selector + source text (optional) + question + my thought + correct answer + AI Analyse button + analytic + solution + question role chip toggles + Save
+- **AI analysis**: `POST /api/wrong-decisions/analyse` — delimiter format (`---ANALYTIC---` / `---SOLUTION---` / `---ROLES---`); roles validated against known `QuestionRole` list before returning; `WRONG_DECISION_PROMPT` in `lib/ielts/wrong-decisions/prompts.ts`
+- **Question roles**: 7 roles from Question Anatomy (`question-word`, `category`, `exclusion`, `hedge`, `relationship`, `target`, `time`); AI-suggested, user-editable at any time; colour-coded badges match Question Anatomy page
+- **Stats bar**: total logged · most error-prone skill · most missed role; skill breakdown mini-bars
+- **Filters**: skill chips + role chips (only roles present in data) + text search — all client-side `useMemo`
+- **Cards**: collapsed = skill badge + question + role badges + date; expanded = source text · my thought (red) / correct answer (green) · analytic/solution (violet) · roles · Edit mode with re-analyse button · two-step delete
+- **Analytics page**: `WrongDecisionCard` appended to `/analytics` — total, most-missed role, most-error skill, link to full log
+- **DB**: `wrong_decision_logs` — `(userId, skill, sourceText?, question, myThought, actualAnswer, analytic?, solution?, questionRoles jsonb, createdAt)`
+- **Server actions** (`app/actions/wrong-decisions.ts`): `saveWrongDecisionAction`, `updateWrongDecisionAction`, `deleteWrongDecisionAction` — all call `revalidatePath('/wrong-decisions')`
 
 ## Phase 1 Sprint: The "Examiner" Engine
 - [x] **Task 1.1**: Develop the `IELTS_Examiner` system prompt that enforces "Examiner Protocol" (no helping the user, strict transitions).
