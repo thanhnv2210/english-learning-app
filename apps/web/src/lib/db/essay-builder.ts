@@ -65,6 +65,17 @@ export async function updateEssayDecoratedText(id: number, decoratedText: string
   await db.update(aiGeneratedContent).set({ decoratedText }).where(eq(aiGeneratedContent.id, id))
 }
 
+export async function updateEssaySelections(
+  id: number,
+  selectedVocabulary: string[],
+  selectedCollocations: string[],
+): Promise<void> {
+  await db
+    .update(aiGeneratedContent)
+    .set({ selectedVocabulary, selectedCollocations })
+    .where(eq(aiGeneratedContent.id, id))
+}
+
 export async function toggleEssayFavorite(id: number, isFavorite: boolean): Promise<void> {
   await db.update(aiGeneratedContent).set({ isFavorite }).where(eq(aiGeneratedContent.id, id))
 }

@@ -16,6 +16,7 @@
 ## Phase 3: Complete the 4 Skills + Analytics (Weeks 6-10)
 *Goal: Full IELTS coverage — add Reading and Listening, show progress against target, expose the Target Switcher.*
 - [ ] **Progress Analytics**: `/analytics` dashboard — rolling band average per skill per criterion, trend over time, "Distance to target" summary
+- [x] **Essay Builder**: `/essay-builder` — select vocab + collocations → generate sample essay/speaking response; versioning (5 per domain+skill); Analyse tab (paste text → detect domain/skill/question); History tab with filter + re-detect + save selections
 - [x] **Target Switcher UI**: `/settings` page — profile selector (`IELTS_6.5`, `IELTS_7.5`, `Business_Fluent`); update `users.targetProfile` via server action; load different prompt templates per profile
 - [x] **Reading Module**: AI-generated tech-themed IELTS passages (~750 words) with 10–13 questions (T/F/NG, matching headings, short answer); 20-min timer; auto-scoring; saved to history as `skill: 'reading'`
 - [x] **Listening Simulator**: AI-generated tech conversation transcript; browser TTS (`SpeechSynthesis`) reads it aloud; user completes note-completion blanks during/after playback; auto-scored; saved to history as `skill: 'listening'`
@@ -114,6 +115,22 @@
 - **Delete confirmation**: two-step inline "Delete? Yes / No"; `deleteCollocationAction` + `revalidatePath('/collocations')`
 - **Library controls**: text search + skill filter chips + rank filter chips (★–★★★★★) + sort dropdown (6 options: rank↑↓, date↑↓, A→Z, Z→A); all compose in `useMemo`
 - `lib/ielts/collocations/prompts.ts`: `COLLOCATION_BY_WORD_PROMPT` → `{ collocations: CollocationResult[] }`, `COLLOCATION_BY_PHRASE_PROMPT` → `{ valid, ...CollocationResult } | { valid: false, reason }`
+
+### Task 3.15 — Essay Builder ✅
+- Route `/essay-builder` — three-tab layout: Builder · History · Analyse
+- **Builder tab**: domain selector (from `writing_domains`) + skill chips (Writing Task 1 / Task 2 / Speaking) + vocabulary checklist + collocation checklist → `POST /api/essay-builder/generate` → generated topic + sample essay
+- **AI output format**: delimiter-based (`---TOPIC---` / `---TEXT---`) replacing JSON — 7B models truncate or corrupt JSON when generating 250+ word bodies; delimiters are model-safe; parsed with regex capture groups
+- **Versioning**: last 5 per `(domain, skill)` from `ai_generated_content`; auto-saved on generate; version strip (v1–v5) with two-step delete; selecting a version restores text + selections + bonus coverage
+- **localStorage persistence**: vocab + collocation selections stored per `essay-builder:${domain}:${skill}`; restored on domain/skill change; survives page refresh without DB writes per keystroke
+- **4-tier highlight**: selected vocab (purple) · selected colloc (blue) · bonus vocab (green) · bonus colloc (amber); first match wins; bonus items are clickable pills to promote to selection
+- **Bonus coverage scan**: post-generation client-side scan of full library against generated text; unselected matches shown as green/amber bonus strip
+- **Edit mode**: inline textarea for modifying `decoratedText`; "Save changes" → `updateDecoratedTextAction` → DB
+- **Analyse tab**: paste raw text → `POST /api/essay-builder/analyse` (delimiter format: `---DOMAIN---` / `---SKILL---` / `---QUESTION---`) → detected domain, skill badge, generated IELTS question; library matches highlighted; "Load into Builder" pre-fills state + switches tab; "Save to History" → `saveEssayAction` with pasted text as `decoratedText`, detected question as `topic`
+- **History tab**: filter by skill (chips) + topic/domain text search (client-side `useMemo`); per-card "Detect vocab & collocations" button scans `decoratedText` against library; "Save to this essay" → `updateEssaySelectionsAction` merges bonus into `selectedVocabulary`/`selectedCollocations` + optimistic update
+- **DB table**: `ai_generated_content` — shared by Builder versioning and History global view; `selectedVocabulary` and `selectedCollocations` are mutable jsonb columns updated by `updateEssaySelections`
+- **Server actions** (`app/actions/essay-builder.ts`): `saveEssayAction`, `getVersionsAction`, `updateDecoratedTextAction`, `updateEssaySelectionsAction`, `toggleEssayFavoriteAction`, `deleteEssayAction`
+- **Prompts** (`lib/ielts/essay-builder/prompts.ts`): `ESSAY_BUILDER_PROMPT(skill, domain, vocabulary, collocations, targetBand)`, `ESSAY_ANALYSE_PROMPT(text, domains)`
+- See [PDR-0012](./docs/pdr/0012-essay-builder-design.md) for all design decisions
 
 ### Task 3.12 — AI Prompt Library ✅
 - Route `/prompt-library` — 5 practice prompts × 4 skills (Speaking, Writing, Reading, Listening) × 3 platforms (Claude, ChatGPT, Gemini) = 60 prompts
