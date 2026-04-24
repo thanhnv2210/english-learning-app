@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { aiGeneratedContent } from '@/lib/db/schema'
-import { desc, eq } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 
 export type EssayBuilderRecord = {
   id: number
@@ -37,6 +37,20 @@ export async function saveEssayBuilderRecord(
 ): Promise<EssayBuilderRecord> {
   const [row] = await db.insert(aiGeneratedContent).values(data).returning()
   return toRecord(row)
+}
+
+export async function getVersionsByDomainSkill(
+  domain: string,
+  skill: string,
+  limit = 5,
+): Promise<EssayBuilderRecord[]> {
+  const rows = await db
+    .select()
+    .from(aiGeneratedContent)
+    .where(and(eq(aiGeneratedContent.domain, domain), eq(aiGeneratedContent.skill, skill)))
+    .orderBy(desc(aiGeneratedContent.createdAt))
+    .limit(limit)
+  return rows.map(toRecord)
 }
 
 export async function getAllEssayBuilderRecords(): Promise<EssayBuilderRecord[]> {
