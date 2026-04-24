@@ -193,6 +193,7 @@ Log files are written to `apps/web/logs/YYYY-MM-DD.log`. A new file is created e
 | `OLLAMA_BASE_URL` | `http://localhost:11434/api` | Ollama API endpoint — use ngrok URL in Codespaces |
 | `OLLAMA_MODEL` | `qwen2.5-coder:7b` | Model name passed to Ollama |
 | `NEXT_PUBLIC_OLLAMA_ENABLED` | `true` | Set to `false` to disable all AI routes; shows amber banner in UI |
+| `OLLAMA_DEBUG` | `false` | Set to `true` to log the full raw Ollama response for every `generateText` call — useful for diagnosing JSON parse errors |
 | `DATABASE_URL` | — | PostgreSQL connection string |
 
 ### GitHub Codespaces

@@ -46,7 +46,7 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
   const [sort, setSort] = useState<SortKey>('alpha_asc')
 
   // Favourite domain management
-  const [localFavorites, setLocalFavorites] = useState<string[]>(favoriteDomains)
+  const [localFavorites, setLocalFavorites] = useState<string[]>(favoriteDomains ?? [])
   const [, startFavTransition] = useTransition()
   const [showMoreDomains, setShowMoreDomains] = useState(false)
   const moreDomainsRef = useRef<HTMLDivElement>(null)

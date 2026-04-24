@@ -1,7 +1,7 @@
 import { generateText } from 'ai'
 import { TOPIC_GENERATION_PROMPT } from '@/lib/ielts/writing/prompts'
 import { saveWritingTopic } from '@/lib/db/writing'
-import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export type GeneratedTopic = {
   prompt: string
@@ -25,6 +25,7 @@ export async function POST(req: Request) {
     console.error('[writing/topic] generateText failed:', err)
     return Response.json({ error: 'Ollama request failed' }, { status: 502 })
   }
+  ollamaDebug('writing/topic', text)
 
   const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')
 

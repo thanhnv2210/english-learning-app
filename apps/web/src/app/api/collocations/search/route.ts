@@ -5,7 +5,7 @@ import {
 } from '@/lib/ielts/collocations/prompts'
 import type { CollocationResult } from '@/lib/ielts/collocations/prompts'
 import { findCollocation } from '@/lib/db/collocations'
-import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export type CollocationSearchResponse =
   | { mode: 'word'; results: (CollocationResult & { inLibrary: boolean })[] }
@@ -38,6 +38,7 @@ export async function POST(req: Request) {
     console.error('[collocations/search] generateText failed:', err)
     return Response.json({ error: 'Ollama request failed' }, { status: 502 })
   }
+  ollamaDebug('collocations/search', raw)
 
   const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')
 

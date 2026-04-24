@@ -1,6 +1,6 @@
 import { generateText } from 'ai'
 import { READING_PASSAGE_PROMPT, type ReadingPassage } from '@/lib/ielts/reading/prompts'
-import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export async function POST(req: Request) {
   if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
@@ -15,6 +15,7 @@ export async function POST(req: Request) {
     console.error('[reading/passage] generateText failed:', err)
     return Response.json({ error: 'Ollama request failed' }, { status: 502 })
   }
+  ollamaDebug('reading/passage', text)
 
   // Strip markdown fences if the model wraps its output
   const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()

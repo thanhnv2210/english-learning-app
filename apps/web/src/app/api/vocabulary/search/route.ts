@@ -4,7 +4,7 @@ import { getAllDomains } from '@/lib/db/domains'
 import { VOCAB_SEARCH_PROMPT } from '@/lib/ielts/vocabulary/prompts'
 import type { VocabWordFamily, VocabSynonym, VocabExamples, VocabPronunciation } from '@/lib/db/schema'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
-import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export async function POST(req: Request) {
   if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
     console.error('[vocabulary/search] generateText failed:', err)
     return Response.json({ error: 'Ollama request failed' }, { status: 502 })
   }
+  ollamaDebug('vocabulary/search', text)
 
   const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')
 

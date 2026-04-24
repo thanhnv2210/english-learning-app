@@ -1,7 +1,7 @@
 import { generateText } from 'ai'
 import { FEEDBACK_SYSTEM_PROMPT } from '@/lib/ielts/examiner/part2-prompt'
 import type { TranscriptMessage, FeedbackResult } from '@/lib/db/schema'
-import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export async function POST(req: Request) {
   if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
@@ -29,6 +29,7 @@ export async function POST(req: Request) {
     console.error('[feedback] generateText failed:', err)
     return Response.json({ error: 'Ollama request failed' }, { status: 502 })
   }
+  ollamaDebug('feedback', text)
 
   // Strip markdown code fences if the model wraps the JSON
   const jsonMatch = text.match(/\{[\s\S]*\}/)
