@@ -148,6 +148,26 @@ PORT=3000 pnpm dev:clean
 
 > Always use `PORT=3000 pnpm dev:clean` — never plain `pnpm dev` — to guarantee a fresh build on the correct port.
 
+### Dev Server with Log File
+
+To capture server logs to a daily rotating file while also seeing output in the terminal:
+
+```bash
+# Start with logging (from apps/web/)
+PORT=3000 pnpm dev:clean:log
+
+# In a separate terminal — tail today's log in real time
+tail -f apps/web/logs/$(date +%Y-%m-%d).log
+
+# Search for errors in today's log
+grep ERROR apps/web/logs/$(date +%Y-%m-%d).log
+
+# List all log files (one per day)
+ls apps/web/logs/
+```
+
+Log files are written to `apps/web/logs/YYYY-MM-DD.log`. A new file is created each calendar day; restarting the server on the same day appends to the existing file (`tee -a`). The `logs/` directory is gitignored.
+
 ### Stale Data Troubleshooting
 
 **Symptoms of stale data:**

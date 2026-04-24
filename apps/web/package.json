@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev --turbo",
     "dev:clean": "rm -rf .next && next dev --turbo",
+    "dev:log": "mkdir -p logs && next dev --turbo 2>&1 | tee -a logs/$(date +%Y-%m-%d).log",
+    "dev:clean:log": "rm -rf .next && mkdir -p logs && next dev --turbo 2>&1 | tee -a logs/$(date +%Y-%m-%d).log",
     "build": "next build",
     "start": "next start",
     "lint": "eslint src/",
