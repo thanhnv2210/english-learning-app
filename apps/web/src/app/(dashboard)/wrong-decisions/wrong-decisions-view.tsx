@@ -28,6 +28,46 @@ const SKILL_COLORS: Record<string, { bg: string; text: string; border: string }>
   writing:   { bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-200' },
 }
 
+const QUESTION_TYPES_BY_SKILL: Record<string, string[]> = {
+  reading: [
+    'True/False/NG',
+    'Yes/No/NG',
+    'Matching Headings',
+    'Matching Information',
+    'Multiple Choice',
+    'Note/Table Completion',
+    'Sentence Completion',
+    'Diagram Labelling',
+    'Short Answer',
+  ],
+  listening: [
+    'Multiple Choice',
+    'Form Completion',
+    'Sentence Completion',
+    'Note/Table Completion',
+    'Diagram/Map Labelling',
+    'Matching',
+    'Short Answer',
+  ],
+  writing: [
+    'Task 1 – Bar/Line Chart',
+    'Task 1 – Pie Chart',
+    'Task 1 – Table',
+    'Task 1 – Process',
+    'Task 1 – Map',
+    'Task 1 – Mixed',
+    'Task 2 – Opinion',
+    'Task 2 – Discussion',
+    'Task 2 – Problem/Solution',
+    'Task 2 – Two-Part',
+  ],
+  speaking: [
+    'Part 1 – Personal Questions',
+    'Part 2 – Long Turn',
+    'Part 3 – Discussion',
+  ],
+}
+
 const QUESTION_ROLES = [
   'question-word',
   'category',
@@ -127,6 +167,7 @@ function SkillBreakdown({ bySkill, total }: { bySkill: Record<string, number>; t
 
 const EMPTY_FORM = {
   skill: 'reading' as Skill,
+  questionType: '',
   sourceText: '',
   question: '',
   myThought: '',
@@ -200,6 +241,7 @@ function EntryForm({
     startSaving(async () => {
       const id = await saveWrongDecisionAction({
         skill: form.skill,
+        questionType: form.questionType || undefined,
         sourceText: form.sourceText || undefined,
         question: form.question,
         myThought: form.myThought,
@@ -211,6 +253,7 @@ function EntryForm({
       onSaved({
         id,
         skill: form.skill,
+        questionType: form.questionType || null,
         sourceText: form.sourceText || null,
         question: form.question,
         myThought: form.myThought,
@@ -238,7 +281,7 @@ function EntryForm({
             return (
               <button
                 key={s}
-                onClick={() => set('skill', s)}
+                onClick={() => setForm((prev) => ({ ...prev, skill: s, questionType: '' }))}
                 className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
                   form.skill === s ? `${c.bg} ${c.text} ${c.border}` : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
                 }`}
@@ -247,6 +290,28 @@ function EntryForm({
               </button>
             )
           })}
+        </div>
+      </div>
+
+      {/* Question type */}
+      <div>
+        <p className="text-xs font-semibold text-gray-500 mb-1.5">
+          Question type <span className="font-normal text-gray-400">(optional)</span>
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {(QUESTION_TYPES_BY_SKILL[form.skill] ?? []).map((qt) => (
+            <button
+              key={qt}
+              onClick={() => set('questionType', form.questionType === qt ? '' : qt)}
+              className={`rounded-full px-2.5 py-0.5 text-xs font-semibold border transition-colors ${
+                form.questionType === qt
+                  ? 'bg-gray-800 text-white border-gray-800'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+              }`}
+            >
+              {qt}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -397,7 +462,10 @@ function LogCard({
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [isPending, startTransition] = useTransition()
 
-  // Edit state — only analytic, solution, roles editable inline
+  // Edit state
+  const [editQuestionType, setEditQuestionType] = useState(log.questionType ?? '')
+  const [editQuestion, setEditQuestion] = useState(log.question)
+  const [editMyThought, setEditMyThought] = useState(log.myThought)
   const [editAnalytic, setEditAnalytic] = useState(log.analytic ?? '')
   const [editSolution, setEditSolution] = useState(log.solution ?? '')
   const [editRoles, setEditRoles] = useState<string[]>(log.questionRoles)
@@ -438,13 +506,20 @@ function LogCard({
   }
 
   function handleSaveEdit() {
+    if (!editQuestion.trim() || !editMyThought.trim()) return
     startTransition(async () => {
       await updateWrongDecisionAction(log.id, {
+        questionType: editQuestionType || undefined,
+        question: editQuestion,
+        myThought: editMyThought,
         analytic: editAnalytic || undefined,
         solution: editSolution || undefined,
         questionRoles: editRoles,
       })
       onUpdate(log.id, {
+        questionType: editQuestionType || null,
+        question: editQuestion,
+        myThought: editMyThought,
         analytic: editAnalytic || null,
         solution: editSolution || null,
         questionRoles: editRoles,
@@ -470,6 +545,11 @@ function LogCard({
         <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold border ${c.bg} ${c.text} ${c.border}`}>
           {SKILL_LABELS[log.skill] ?? log.skill}
         </span>
+        {log.questionType && (
+          <span className="shrink-0 rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-[10px] font-semibold text-gray-600">
+            {log.questionType}
+          </span>
+        )}
         <p className="flex-1 text-sm font-medium text-gray-800 line-clamp-2">{log.question}</p>
         <div className="flex shrink-0 items-center gap-2 ml-2">
           {log.questionRoles.slice(0, 2).map((role) => {
@@ -517,8 +597,41 @@ function LogCard({
           {/* Analytic + Solution + Roles — view or edit mode */}
           {isEditing ? (
             <div className="space-y-3 rounded-lg border border-violet-200 bg-violet-50 p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-bold text-violet-700">Edit analytic</p>
+              <p className="text-xs font-bold text-violet-700">Question type</p>
+              <div className="flex flex-wrap gap-1.5">
+                {(QUESTION_TYPES_BY_SKILL[log.skill] ?? []).map((qt) => (
+                  <button
+                    key={qt}
+                    onClick={() => setEditQuestionType(editQuestionType === qt ? '' : qt)}
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold border transition-colors ${
+                      editQuestionType === qt
+                        ? 'bg-gray-800 text-white border-gray-800'
+                        : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    {qt}
+                  </button>
+                ))}
+              </div>
+
+              <p className="text-xs font-bold text-violet-700">Question *</p>
+              <textarea
+                value={editQuestion}
+                onChange={(e) => setEditQuestion(e.target.value)}
+                rows={2}
+                className="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y"
+              />
+
+              <p className="text-xs font-bold text-violet-700">My thought / answer *</p>
+              <textarea
+                value={editMyThought}
+                onChange={(e) => setEditMyThought(e.target.value)}
+                rows={2}
+                className="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y"
+              />
+
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-xs font-bold text-violet-700">Analytic</p>
                 <button
                   onClick={handleReanalyse}
                   disabled={isReanalysing}
@@ -565,7 +678,7 @@ function LogCard({
               <div className="flex gap-2 pt-1">
                 <button
                   onClick={handleSaveEdit}
-                  disabled={isPending}
+                  disabled={isPending || !editQuestion.trim() || !editMyThought.trim()}
                   className="rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-violet-700 disabled:opacity-40 transition-colors"
                 >
                   {isPending ? 'Saving…' : 'Save'}
@@ -573,6 +686,9 @@ function LogCard({
                 <button
                   onClick={() => {
                     setIsEditing(false)
+                    setEditQuestionType(log.questionType ?? '')
+                    setEditQuestion(log.question)
+                    setEditMyThought(log.myThought)
                     setEditAnalytic(log.analytic ?? '')
                     setEditSolution(log.solution ?? '')
                     setEditRoles(log.questionRoles)
@@ -668,6 +784,7 @@ export function WrongDecisionsView({
   const [stats, setStats] = useState<WrongDecisionStats>(initialStats)
   const [showForm, setShowForm] = useState(false)
   const [skillFilter, setSkillFilter] = useState<string>('all')
+  const [typeFilter, setTypeFilter] = useState<string>('all')
   const [roleFilter, setRoleFilter] = useState<string>('all')
   const [search, setSearch] = useState('')
 
@@ -706,9 +823,25 @@ export function WrongDecisionsView({
     setStats(rebuildStats(next))
   }
 
+  // Question types present in current logs (for the type filter chips)
+  const presentTypes = useMemo(() => {
+    const types = new Set<string>()
+    for (const l of logs) {
+      if (l.questionType) types.add(l.questionType)
+    }
+    return [...types].sort()
+  }, [logs])
+
+  // Reset type filter when skill filter changes
+  function setSkillFilterAndResetType(skill: string) {
+    setSkillFilter(skill)
+    setTypeFilter('all')
+  }
+
   const filtered = useMemo(() => {
     return logs.filter((l) => {
       if (skillFilter !== 'all' && l.skill !== skillFilter) return false
+      if (typeFilter !== 'all' && l.questionType !== typeFilter) return false
       if (roleFilter !== 'all' && !l.questionRoles.includes(roleFilter)) return false
       if (search) {
         const q = search.toLowerCase()
@@ -721,7 +854,7 @@ export function WrongDecisionsView({
       }
       return true
     })
-  }, [logs, skillFilter, roleFilter, search])
+  }, [logs, skillFilter, typeFilter, roleFilter, search])
 
   return (
     <div>
@@ -754,7 +887,7 @@ export function WrongDecisionsView({
               return (
                 <button
                   key={s}
-                  onClick={() => setSkillFilter(s)}
+                  onClick={() => setSkillFilterAndResetType(s)}
                   className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
                     isActive && c
                       ? `${c.bg} ${c.text} ${c.border}`
@@ -768,6 +901,35 @@ export function WrongDecisionsView({
               )
             })}
           </div>
+
+          {/* Question type filter — only show types present in logged data */}
+          {presentTypes.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                onClick={() => setTypeFilter('all')}
+                className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
+                  typeFilter === 'all'
+                    ? 'bg-gray-800 text-white border-gray-800'
+                    : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                All types
+              </button>
+              {presentTypes.map((qt) => (
+                <button
+                  key={qt}
+                  onClick={() => setTypeFilter(typeFilter === qt ? 'all' : qt)}
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold border transition-colors ${
+                    typeFilter === qt
+                      ? 'bg-gray-800 text-white border-gray-800'
+                      : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  {qt}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Role filter */}
           <div className="flex flex-wrap gap-1.5">

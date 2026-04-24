@@ -74,7 +74,8 @@
       "Bash(echo \"=== $f ===\")",
       "Read(//Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/**)",
       "Bash(done)",
-      "Bash(PORT=3000 pnpm dev:clean:log)"
+      "Bash(PORT=3000 pnpm dev:clean:log)",
+      "Bash(ls /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/language-comparison)"
     ]
   }
 }

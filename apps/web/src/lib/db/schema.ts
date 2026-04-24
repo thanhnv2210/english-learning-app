@@ -359,6 +359,7 @@ export const wrongDecisionLogs = pgTable('wrong_decision_logs', {
   question: text('question').notNull(),
   myThought: text('my_thought').notNull(),
   actualAnswer: text('actual_answer').notNull(),
+  questionType: text('question_type'),      // nullable — e.g. 'True/False/NG', 'Matching Headings'
   analytic: text('analytic'),               // nullable — AI or manual explanation
   solution: text('solution'),               // nullable — AI or manual prevention tip
   questionRoles: jsonb('question_roles').notNull().$type<string[]>(), // QuestionRole[]

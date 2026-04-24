@@ -6,6 +6,7 @@ import { getDefaultUser } from '@/lib/db/user'
 export type WrongDecisionLog = {
   id: number
   skill: string
+  questionType: string | null
   sourceText: string | null
   question: string
   myThought: string
@@ -24,6 +25,7 @@ export type WrongDecisionStats = {
 
 export async function saveWrongDecision(data: {
   skill: string
+  questionType?: string
   sourceText?: string
   question: string
   myThought: string
@@ -38,6 +40,7 @@ export async function saveWrongDecision(data: {
     .values({
       userId: user.id,
       skill: data.skill,
+      questionType: data.questionType ?? null,
       sourceText: data.sourceText ?? null,
       question: data.question,
       myThought: data.myThought,
@@ -62,6 +65,7 @@ export async function getAllWrongDecisions(): Promise<WrongDecisionLog[]> {
 export async function updateWrongDecision(
   id: number,
   data: {
+    questionType?: string
     analytic?: string
     solution?: string
     questionRoles?: string[]
