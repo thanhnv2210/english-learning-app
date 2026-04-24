@@ -30,27 +30,17 @@ export async function POST(req: Request) {
   }
   ollamaDebug('essay-builder/generate', raw)
 
-  const match = raw.match(/\{[\s\S]*\}/)
-  if (!match) {
+  // Parse delimiter format:  ---TOPIC--- / ---TEXT---
+  const topicMatch = raw.match(/---TOPIC---\s*\n([\s\S]*?)\n---TEXT---/)
+  const textMatch  = raw.match(/---TEXT---\s*\n([\s\S]+)/)
+
+  const topic = topicMatch?.[1]?.trim()
+  const text  = textMatch?.[1]?.trim()
+
+  if (!topic || !text) {
+    console.error('[essay-builder] could not extract topic/text from response:', raw)
     return Response.json({ error: 'Invalid AI response format' }, { status: 502 })
   }
 
-  let parsed: { topic: string; text: string }
-  try {
-    // Sanitize literal control chars the AI may embed inside JSON string values
-    const sanitized = match[0].replace(
-      /"((?:[^"\\]|\\[\s\S])*)"/g,
-      (_, inner: string) =>
-        `"${inner.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t')}"`,
-    )
-    parsed = JSON.parse(sanitized)
-  } catch {
-    return Response.json({ error: 'Failed to parse AI response' }, { status: 502 })
-  }
-
-  if (!parsed.topic || !parsed.text) {
-    return Response.json({ error: 'Incomplete AI response' }, { status: 502 })
-  }
-
-  return Response.json({ topic: parsed.topic, text: parsed.text })
+  return Response.json({ topic, text })
 }

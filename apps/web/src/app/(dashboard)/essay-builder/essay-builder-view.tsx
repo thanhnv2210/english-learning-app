@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useTransition } from 'react'
+import { useState, useMemo, useTransition, useEffect } from 'react'
 import { saveEssayAction, updateDecoratedTextAction, toggleEssayFavoriteAction, deleteEssayAction } from '@/app/actions/essay-builder'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 import type { CollocationCard } from '@/lib/db/collocations'
@@ -18,29 +18,36 @@ const SKILL_LABELS: Record<string, string> = {
 
 // ── Highlight helper ──────────────────────────────────────────────────────────
 
-function highlight(text: string, phrases: string[]) {
-  if (phrases.length === 0) return <>{text}</>
+type PhraseSet = { phrases: string[]; className: string }
 
-  const escaped = phrases
-    .map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    .sort((a, b) => b.length - a.length) // longest first to avoid partial matches
+function highlight(text: string, phraseSets: PhraseSet[]) {
+  const all = phraseSets
+    .flatMap(({ phrases, className }) => phrases.map((p) => ({ phrase: p, className })))
+    .sort((a, b) => b.phrase.length - a.phrase.length) // longest first
 
+  if (all.length === 0) return <>{text}</>
+
+  // First match wins (selected takes priority over bonus via order)
+  const phraseMap = new Map<string, string>()
+  for (const { phrase, className } of all) {
+    const key = phrase.toLowerCase()
+    if (!phraseMap.has(key)) phraseMap.set(key, className)
+  }
+
+  const escaped = all.map(({ phrase }) => phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
   const regex = new RegExp(`(${escaped.join('|')})`, 'gi')
   const parts = text.split(regex)
 
-  const phraseSet = new Set(phrases.map((p) => p.toLowerCase()))
-
   return (
     <>
-      {parts.map((part, i) =>
-        phraseSet.has(part.toLowerCase()) ? (
-          <mark key={i} className="bg-blue-100 text-blue-800 rounded px-0.5 font-semibold not-italic">
-            {part}
-          </mark>
+      {parts.map((part, i) => {
+        const cls = phraseMap.get(part.toLowerCase())
+        return cls ? (
+          <mark key={i} className={`rounded px-0.5 font-semibold not-italic ${cls}`}>{part}</mark>
         ) : (
           part
-        ),
-      )}
+        )
+      })}
     </>
   )
 }
@@ -66,6 +73,40 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
   const [vocabSearch, setVocabSearch] = useState('')
   const [collocSearch, setCollocSearch] = useState('')
 
+  // ── Persist selections to localStorage keyed by domain:skill ─────────────
+  useEffect(() => {
+    if (!domain) return
+    localStorage.setItem(
+      `essay-builder:${domain}:${skill}`,
+      JSON.stringify({ vocab: Array.from(selectedVocab), colloc: Array.from(selectedColloc) }),
+    )
+  }, [domain, skill, selectedVocab, selectedColloc])
+
+  function loadSaved(d: string, s: string) {
+    try {
+      const saved = localStorage.getItem(`essay-builder:${d}:${s}`)
+      if (saved) {
+        const { vocab, colloc } = JSON.parse(saved) as { vocab: string[]; colloc: string[] }
+        setSelectedVocab(new Set(vocab))
+        setSelectedColloc(new Set(colloc))
+        return
+      }
+    } catch {}
+    setSelectedVocab(new Set())
+    setSelectedColloc(new Set())
+  }
+
+  function handleDomainChange(newDomain: string) {
+    setDomain(newDomain)
+    if (newDomain) loadSaved(newDomain, skill)
+    else { setSelectedVocab(new Set()); setSelectedColloc(new Set()) }
+  }
+
+  function handleSkillChange(newSkill: Skill) {
+    setSkill(newSkill)
+    if (domain) loadSaved(domain, newSkill)
+  }
+
   // ── Result state ─────────────────────────────────────────────────────────
   const [result, setResult] = useState<{ topic: string; text: string } | null>(null)
   const [decoratedText, setDecoratedText] = useState('')
@@ -74,6 +115,34 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
   const [activeTab, setActiveTab] = useState<'view' | 'edit'>('view')
   const [savedRecord, setSavedRecord] = useState<EssayBuilderRecord | null>(null)
   const [isSaving, startSaveTransition] = useTransition()
+
+  // ── Bonus coverage (library matches not in selection) ────────────────────
+  const [bonusVocab, setBonusVocab] = useState<string[]>([])
+  const [bonusColloc, setBonusColloc] = useState<string[]>([])
+
+  function computeBonus(text: string, currentVocab: Set<string>, currentColloc: Set<string>) {
+    const lower = text.toLowerCase()
+    setBonusVocab(
+      words
+        .filter((w) => !currentVocab.has(w.word) && lower.includes(w.word.toLowerCase()))
+        .map((w) => w.word),
+    )
+    setBonusColloc(
+      collocations
+        .filter((c) => !currentColloc.has(c.phrase) && lower.includes(c.phrase.toLowerCase()))
+        .map((c) => c.phrase),
+    )
+  }
+
+  function addBonusVocab(word: string) {
+    setSelectedVocab((prev) => new Set([...prev, word]))
+    setBonusVocab((prev) => prev.filter((w) => w !== word))
+  }
+
+  function addBonusColloc(phrase: string) {
+    setSelectedColloc((prev) => new Set([...prev, phrase]))
+    setBonusColloc((prev) => prev.filter((p) => p !== phrase))
+  }
 
   // ── History state ────────────────────────────────────────────────────────
   const [history, setHistory] = useState(initialHistory)
@@ -102,6 +171,8 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
     setGenerateError('')
     setResult(null)
     setSavedRecord(null)
+    setBonusVocab([])
+    setBonusColloc([])
 
     try {
       const res = await fetch('/api/essay-builder/generate', {
@@ -121,6 +192,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
       setResult(data)
       setDecoratedText(data.text)
       setActiveTab('view')
+      computeBonus(data.text, selectedVocab, selectedColloc)
     } catch {
       setGenerateError('Failed to generate. Check that Ollama is running.')
     } finally {
@@ -160,8 +232,13 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
     startHistoryTransition(() => deleteEssayAction(id))
   }
 
-  // ── Highlighted phrases (vocab words + collocations) ────────────────────
-  const highlightPhrases = [...Array.from(selectedVocab), ...Array.from(selectedColloc)]
+  // ── Highlight phrase sets (priority order: selected first) ───────────────
+  const highlightSets: PhraseSet[] = [
+    { phrases: Array.from(selectedVocab),  className: 'bg-purple-100 text-purple-800' },
+    { phrases: Array.from(selectedColloc), className: 'bg-blue-100 text-blue-800' },
+    { phrases: bonusVocab,                 className: 'bg-green-100 text-green-800' },
+    { phrases: bonusColloc,                className: 'bg-amber-100 text-amber-800' },
+  ]
 
   return (
     <div className="flex flex-col gap-6">
@@ -190,7 +267,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
               <p className="text-xs font-semibold text-gray-700">Domain</p>
               <select
                 value={domain}
-                onChange={(e) => setDomain(e.target.value)}
+                onChange={(e) => handleDomainChange(e.target.value)}
                 className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none focus:border-blue-400 bg-white"
               >
                 <option value="">Select a domain…</option>
@@ -207,7 +284,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                 {(Object.keys(SKILL_LABELS) as Skill[]).map((s) => (
                   <button
                     key={s}
-                    onClick={() => setSkill(s)}
+                    onClick={() => handleSkillChange(s)}
                     className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                       skill === s
                         ? 'bg-blue-600 text-white'
@@ -344,9 +421,46 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
 
                   <div className="p-4">
                     {activeTab === 'view' ? (
-                      <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
-                        {highlight(decoratedText, highlightPhrases)}
-                      </p>
+                      <div className="flex flex-col gap-4">
+                        <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+                          {highlight(decoratedText, highlightSets)}
+                        </p>
+
+                        {/* Colour legend */}
+                        <div className="flex flex-wrap gap-3 text-xs text-gray-500 border-t border-gray-100 pt-3">
+                          <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-purple-100 text-purple-800 font-semibold">word</span> selected vocab</span>
+                          <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-blue-100 text-blue-800 font-semibold">phrase</span> selected collocation</span>
+                          <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-green-100 text-green-800 font-semibold">word</span> bonus vocab</span>
+                          <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-amber-100 text-amber-800 font-semibold">phrase</span> bonus collocation</span>
+                        </div>
+
+                        {/* Also covered — clickable to add to selection */}
+                        {(bonusVocab.length > 0 || bonusColloc.length > 0) && (
+                          <div className="rounded-lg border border-dashed border-gray-200 p-3 flex flex-col gap-2">
+                            <p className="text-xs font-semibold text-gray-500">Also covered — click to add to selection:</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {bonusVocab.map((w) => (
+                                <button
+                                  key={w}
+                                  onClick={() => addBonusVocab(w)}
+                                  className="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs text-green-700 hover:bg-green-100 transition-colors"
+                                >
+                                  + {w}
+                                </button>
+                              ))}
+                              {bonusColloc.map((c) => (
+                                <button
+                                  key={c}
+                                  onClick={() => addBonusColloc(c)}
+                                  className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs text-amber-700 hover:bg-amber-100 transition-colors"
+                                >
+                                  + {c}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <textarea
                         value={decoratedText}
@@ -489,8 +603,6 @@ function HistoryCard({
   const [expanded, setExpanded] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const allPhrases = [...record.selectedVocabulary, ...record.selectedCollocations]
-
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col gap-3">
       {/* Header */}
@@ -559,7 +671,10 @@ function HistoryCard({
       {expanded && (
         <div className="rounded-lg bg-gray-50 p-4">
           <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
-            {highlight(record.decoratedText, allPhrases)}
+            {highlight(record.decoratedText, [
+              { phrases: record.selectedVocabulary, className: 'bg-purple-100 text-purple-800' },
+              { phrases: record.selectedCollocations, className: 'bg-blue-100 text-blue-800' },
+            ])}
           </p>
           {record.decoratedText !== record.originalGeneratedText && (
             <details className="mt-3">
