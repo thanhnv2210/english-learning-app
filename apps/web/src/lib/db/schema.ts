@@ -346,6 +346,25 @@ export const userSkillTopics = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.skill, t.topicName] })]
 )
 
+// ─── Wrong Decision Log ───────────────────────────────────────────────────────
+// Manual journal: learner records a wrong answer, their reasoning, the correct
+// answer, and AI-generated (or hand-written) analytic + prevention strategy.
+// questionRoles: subset of QuestionRole values from lib/guides/question-anatomy
+
+export const wrongDecisionLogs = pgTable('wrong_decision_logs', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  skill: text('skill').notNull(), // 'reading' | 'listening' | 'speaking' | 'writing'
+  sourceText: text('source_text'),          // nullable — passage / transcript
+  question: text('question').notNull(),
+  myThought: text('my_thought').notNull(),
+  actualAnswer: text('actual_answer').notNull(),
+  analytic: text('analytic'),               // nullable — AI or manual explanation
+  solution: text('solution'),               // nullable — AI or manual prevention tip
+  questionRoles: jsonb('question_roles').notNull().$type<string[]>(), // QuestionRole[]
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const cueCardsRelations = relations(cueCards, ({ many }) => ({

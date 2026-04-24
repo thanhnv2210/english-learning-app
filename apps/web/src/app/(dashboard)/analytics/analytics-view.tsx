@@ -1,6 +1,7 @@
 'use client'
 
 import type { SkillStats } from '@/lib/db/analytics'
+import type { WrongDecisionStats } from '@/lib/db/wrong-decisions'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -179,32 +180,86 @@ function SummaryBar({ stats }: { stats: SkillStats[] }) {
   )
 }
 
+// ── Wrong decision summary card ───────────────────────────────────────────────
+
+const ROLE_LABELS: Record<string, string> = {
+  'question-word': 'Question word',
+  'category':      'Category',
+  'exclusion':     'Exclusion',
+  'hedge':         'Hedge signal',
+  'relationship':  'Relationship',
+  'target':        'Target',
+  'time':          'Time constraint',
+}
+
+function WrongDecisionCard({ wrongStats }: { wrongStats: WrongDecisionStats }) {
+  const topRole = wrongStats.byRole[0]
+  return (
+    <div className="rounded-xl border border-rose-200 bg-white p-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold text-gray-800">Wrong Decision Log</p>
+          <p className="text-xs text-gray-400 mt-0.5">{wrongStats.total} mistake{wrongStats.total !== 1 ? 's' : ''} recorded</p>
+        </div>
+        <a
+          href="/wrong-decisions"
+          className="shrink-0 rounded-lg border border-gray-200 px-3 py-1 text-xs text-gray-500 hover:bg-gray-50 transition-colors"
+        >
+          View log →
+        </a>
+      </div>
+      {wrongStats.total > 0 && (
+        <div className="flex gap-4">
+          {topRole && (
+            <div className="flex flex-col">
+              <span className="text-xs text-gray-400">Most missed role</span>
+              <span className="text-sm font-semibold text-rose-600">{ROLE_LABELS[topRole.role] ?? topRole.role}</span>
+            </div>
+          )}
+          <div className="flex flex-col">
+            <span className="text-xs text-gray-400">Most errors in</span>
+            <span className="text-sm font-semibold text-gray-700">
+              {Object.entries(wrongStats.bySkill).sort(([, a], [, b]) => b - a)[0]?.[0] ?? '—'}
+            </span>
+          </div>
+        </div>
+      )}
+      {wrongStats.total === 0 && (
+        <p className="text-xs text-gray-400">No mistakes logged yet. Record your first wrong decision to see patterns here.</p>
+      )}
+    </div>
+  )
+}
+
 // ── Main view ─────────────────────────────────────────────────────────────────
 
-export function AnalyticsView({ stats }: { stats: SkillStats[] }) {
+export function AnalyticsView({ stats, wrongDecisionStats }: { stats: SkillStats[]; wrongDecisionStats: WrongDecisionStats }) {
   if (stats.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-gray-300 bg-white p-16 text-center">
-        <p className="text-sm font-medium text-gray-500">No graded sessions yet.</p>
-        <p className="mt-1 text-xs text-gray-400">
-          Complete a Speaking, Writing, Reading, or Listening session and request feedback to see your analytics.
-        </p>
-        <div className="mt-6 flex justify-center gap-3">
-          {[
-            { href: '/speaking', label: 'Speaking' },
-            { href: '/writing', label: 'Writing' },
-            { href: '/reading', label: 'Reading' },
-            { href: '/listening', label: 'Listening' },
-          ].map(({ href, label }) => (
-            <a
-              key={href}
-              href={href}
-              className="rounded-lg border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              {label} →
-            </a>
-          ))}
+      <div className="flex flex-col gap-4">
+        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-16 text-center">
+          <p className="text-sm font-medium text-gray-500">No graded sessions yet.</p>
+          <p className="mt-1 text-xs text-gray-400">
+            Complete a Speaking, Writing, Reading, or Listening session and request feedback to see your analytics.
+          </p>
+          <div className="mt-6 flex justify-center gap-3">
+            {[
+              { href: '/speaking', label: 'Speaking' },
+              { href: '/writing', label: 'Writing' },
+              { href: '/reading', label: 'Reading' },
+              { href: '/listening', label: 'Listening' },
+            ].map(({ href, label }) => (
+              <a
+                key={href}
+                href={href}
+                className="rounded-lg border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                {label} →
+              </a>
+            ))}
+          </div>
         </div>
+        <WrongDecisionCard wrongStats={wrongDecisionStats} />
       </div>
     )
   }
@@ -215,6 +270,7 @@ export function AnalyticsView({ stats }: { stats: SkillStats[] }) {
       {stats.map((stat) => (
         <SkillCard key={stat.skill} stat={stat} />
       ))}
+      <WrongDecisionCard wrongStats={wrongDecisionStats} />
     </div>
   )
 }

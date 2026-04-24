@@ -25,8 +25,8 @@ export default function QuestionAnatomyPage() {
           </p>
           <p className="text-sm text-blue-900">
             Most wrong answers come from reacting to the <em>topic</em> of a question rather than its{' '}
-            <em>structure</em>. A question about sugar that contains "other than acid-producing
-            bacteria" is not asking about bacteria — it is asking about something else entirely. The
+            <em>structure</em>. A question about sugar that contains &quot;other than acid-producing
+            bacteria&quot; is not asking about bacteria — it is asking about something else entirely. The
             structure tells you that; the topic distracts you from it.
           </p>
         </div>
