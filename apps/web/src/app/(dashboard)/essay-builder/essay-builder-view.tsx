@@ -649,7 +649,7 @@ function HistoryCard({
       </div>
 
       {/* Words used */}
-      {allPhrases.length > 0 && (
+      {(record.selectedVocabulary.length > 0 || record.selectedCollocations.length > 0) && (
         <div className="flex flex-wrap gap-1">
           {record.selectedVocabulary.map((w) => (
             <span key={w} className="rounded-full bg-purple-50 px-2 py-0.5 text-xs text-purple-700">{w}</span>
