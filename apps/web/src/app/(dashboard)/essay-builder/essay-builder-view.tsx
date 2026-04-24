@@ -196,6 +196,70 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
     setBonusColloc((prev) => prev.filter((p) => p !== phrase))
   }
 
+  // ── Evaluate (writing skills only) ───────────────────────────────────────
+  type EvalState = 'idle' | 'auditing' | 'scoring' | 'done' | 'error'
+  const [evalState, setEvalState] = useState<EvalState>('idle')
+  const [evalAudit, setEvalAudit] = useState<{ wordCount: number; notes: string[] } | null>(null)
+  const [evalScoreStream, setEvalScoreStream] = useState('')
+  const [evalFeedback, setEvalFeedback] = useState<import('@/lib/db/schema').FeedbackResult | null>(null)
+
+  async function handleEvaluate() {
+    if (!activeVersion || !decoratedText) return
+    setEvalState('auditing')
+    setEvalAudit(null)
+    setEvalScoreStream('')
+    setEvalFeedback(null)
+
+    try {
+      // Pass 1: audit
+      const auditRes = await fetch('/api/writing/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ essay: decoratedText, topic: activeVersion.topic }),
+      })
+      if (auditRes.ok) {
+        const a = await auditRes.json()
+        setEvalAudit({ wordCount: a.wordCount ?? 0, notes: a.notes ?? [] })
+      }
+
+      // Pass 2: score (streaming)
+      setEvalState('scoring')
+      const scoreRes = await fetch('/api/writing/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ essay: decoratedText, topic: activeVersion.topic, targetBand }),
+      })
+      if (!scoreRes.ok || !scoreRes.body) throw new Error('score failed')
+
+      const reader = scoreRes.body.getReader()
+      const decoder = new TextDecoder()
+      let full = ''
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        full += decoder.decode(value, { stream: true })
+        setEvalScoreStream(full)
+      }
+      const jsonMatch = full.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        try {
+          setEvalFeedback(JSON.parse(jsonMatch[0]))
+        } catch {}
+      }
+      setEvalState('done')
+    } catch {
+      setEvalState('error')
+    }
+  }
+
+  // Reset eval when active version changes
+  useEffect(() => {
+    setEvalState('idle')
+    setEvalAudit(null)
+    setEvalScoreStream('')
+    setEvalFeedback(null)
+  }, [activeVersion?.id])
+
   // ── History state ────────────────────────────────────────────────────────
   const [history, setHistory] = useState(initialHistory)
   const [historyTab, setHistoryTab] = useState<'builder' | 'history' | 'analyse'>('builder')
@@ -737,6 +801,88 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                   >
                     {isSavingText ? 'Saving…' : 'Save changes'}
                   </button>
+                )}
+
+                {/* ── Evaluate (writing skills only) ────────────────────── */}
+                {(activeVersion.skill === 'writing_task1' || activeVersion.skill === 'writing_task2') && (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={handleEvaluate}
+                        disabled={evalState === 'auditing' || evalState === 'scoring'}
+                        className="rounded-xl bg-purple-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-40 transition-colors"
+                      >
+                        {evalState === 'auditing' ? 'Auditing…'
+                          : evalState === 'scoring' ? 'Scoring…'
+                          : evalState === 'done' ? '↻ Re-evaluate'
+                          : 'Evaluate essay'}
+                      </button>
+                      {evalAudit && (
+                        <span className="text-xs text-gray-500">
+                          {evalAudit.wordCount} words
+                          {evalAudit.notes.length > 0 && ` · ${evalAudit.notes[0]}`}
+                        </span>
+                      )}
+                      {evalState === 'error' && (
+                        <span className="text-xs text-red-500">Evaluation failed — check Ollama</span>
+                      )}
+                    </div>
+
+                    {/* Streaming score raw text while scoring */}
+                    {evalState === 'scoring' && evalScoreStream && !evalFeedback && (
+                      <div className="rounded-lg bg-gray-50 border border-gray-200 p-3">
+                        <p className="text-xs text-gray-400 font-mono whitespace-pre-wrap leading-relaxed line-clamp-6">
+                          {evalScoreStream}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Parsed feedback */}
+                    {evalFeedback && (
+                      <div className="flex flex-col gap-3">
+                        {/* Overall band */}
+                        <div className={`rounded-xl p-4 ${evalFeedback.overallBand >= evalFeedback.targetBand ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Overall Band</p>
+                          <div className="mt-1 flex items-end gap-2">
+                            <span className="text-3xl font-bold text-gray-900">{evalFeedback.overallBand}</span>
+                            <span className="mb-0.5 text-sm text-gray-500">
+                              / target <strong>{evalFeedback.targetBand}</strong>
+                              {evalFeedback.overallBand < evalFeedback.targetBand && (
+                                <span className="ml-2 text-amber-600 font-medium">
+                                  ({(evalFeedback.targetBand - evalFeedback.overallBand).toFixed(1)} to go)
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                        {/* Criteria */}
+                        {evalFeedback.criteria.map((c) => {
+                          const gap = c.targetScore - c.score
+                          const badge = gap <= 0 ? 'bg-green-100 text-green-700' : gap <= 0.5 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                          return (
+                            <div key={c.criterion} className="rounded-xl border border-gray-200 bg-white p-4">
+                              <div className="flex items-center justify-between">
+                                <p className="text-sm font-semibold text-gray-800">{c.criterion}</p>
+                                <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${badge}`}>
+                                  {c.score} / {c.targetScore}
+                                </span>
+                              </div>
+                              {c.keyPoints.length > 0 && (
+                                <ul className="mt-3 flex flex-col gap-1.5">
+                                  {c.keyPoints.map((pt, i) => (
+                                    <li key={i} className="flex items-start gap-2 text-xs text-gray-600">
+                                      <span className="mt-0.5 shrink-0 text-amber-400">▸</span>
+                                      {pt}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
                 )}
               </>
             ) : (

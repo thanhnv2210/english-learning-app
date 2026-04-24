@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Phase 1, 2, and majority of Phase 3 complete. Done in Phase 3: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, Collocation Library, Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides), Target Switcher UI, AI Prompt Library, and Essay Builder. Still pending: Progress Analytics. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
+Phase 1, 2, and 3 complete. Phase 3 delivered: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, Collocation Library, Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides), Target Switcher UI, AI Prompt Library, Essay Builder (with Analyse tab, Versioning, Writing Evaluator integration), and Progress Analytics. Phase 4 pending. See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
 
 ## Tech Stack
 
@@ -39,6 +39,7 @@ english-learning-app/
 │       │   │   ├── reading/              # Reading module (Phase 3)
 │       │   │   ├── vocabulary/           # AWL browser
 │       │   │   ├── collocations/         # Collocation Library (search + saved)
+│       │   │   ├── analytics/            # Progress Analytics (per-skill stats, trend bars)
 │       │   │   ├── essay-builder/        # Essay Builder (generate + analyse + history)
 │       │   │   ├── history/              # Session history
 │       │   │   └── how-to-answer/        # Static exam guides (skill landing + per-skill pages)
@@ -52,7 +53,7 @@ english-learning-app/
 │       │   │   ├── vocabulary.ts         # addWordToLibrary
 │       │   │   ├── connected-speech.ts   # saveAnalysisAction, listRecentAnalyses, listByPhenomenon, deleteAnalysisAction
 │       │   │   ├── collocations.ts       # saveCollocationAction, listCollocationAction, updateCollocationSkillsAction, updateCollocationRankAction, deleteCollocationAction
-│       │   │   ├── essay-builder.ts      # saveEssayAction, getVersionsAction, updateDecoratedTextAction, updateEssaySelectionsAction, toggleEssayFavoriteAction, deleteEssayAction
+│       │   │   ├── essay-builder.ts      # saveEssayAction, getVersionsAction, updateDecoratedTextAction, updateEssaySelectionsAction, toggleEssayFavoriteAction, deleteEssayAction, getEssayBuilderConfigAction, saveEssayBuilderConfigAction
 │       │   │   └── user.ts               # updateTargetProfileAction
 │       │   └── api/                      # Backend API routes (BFF)
 │       │       ├── chat/                 # POST — examiner streaming (Part 1/2/3 + topic)
@@ -81,7 +82,8 @@ english-learning-app/
 │       │   │   ├── vocabulary.ts         # findWord, saveVocabularyWord
 │       │   │   ├── connected-speech.ts   # saveAnalysis, getRecentAnalyses, getTopByPhenomenon, deleteAnalysis
 │       │   │   ├── collocations.ts       # findCollocation, saveCollocation, getAllCollocations, updateCollocationSkills, deleteCollocation
-│       │   │   └── essay-builder.ts      # saveEssayBuilderRecord, getVersionsByDomainSkill, getAllEssayBuilderRecords, updateEssayDecoratedText, updateEssaySelections, toggleEssayFavorite, deleteEssayBuilderRecord
+│       │   │   ├── essay-builder.ts      # saveEssayBuilderRecord, getVersionsByDomainSkill, getAllEssayBuilderRecords, updateEssayDecoratedText, updateEssaySelections, toggleEssayFavorite, deleteEssayBuilderRecord, getEssayBuilderConfig, upsertEssayBuilderConfig
+│       │   │   └── analytics.ts          # getAnalyticsStats → SkillStats[] (queries mock_exams where feedback IS NOT NULL)
 │       │   ├── guides/                   # Static content for How to Answer (no DB, no AI)
 │       │   │   ├── listening.ts          # LISTENING_GUIDES — 7 question types, steps/strategies/mistakes
 │       │   │   ├── reading.ts            # READING_GUIDES — 9 question types
@@ -345,18 +347,35 @@ See `.devcontainer/README.md` for full setup steps.
 - Backlog: Examiner prompts (act-as examiner for interactive sessions), Evaluator prompts (grade my response)
 - Client component `PromptLibraryView`: skill tab switcher + platform tab switcher + `PromptCard` with clipboard copy (icon swaps to checkmark for 2s via `useState`)
 
+**Progress Analytics** (Phase 3 complete)
+- Route `/analytics` — per-skill performance dashboard; standalone item in nav sidebar bottom section
+- Server component (`page.tsx`) calls `getAnalyticsStats()` → passes `SkillStats[]` to `<AnalyticsView>`
+- Data source: `mock_exams` table rows where `feedback IS NOT NULL`; grouped by `skill` in JS; no new table needed
+- `SkillStats` shape: `{ skill, sessionCount, lastPracticed, avgBand, targetBand, gap, criteriaStats: CriterionStat[], recentSessions: SessionPoint[] }`
+- `CriterionStat`: `{ criterion, avg, target, gap }` — criteria names parsed from `feedback.criteria[]`
+- `SessionPoint`: `{ band }` — last 5 sessions per skill for the trend chart
+- `SummaryBar`: 3 stat cards (total sessions · skills at target · strongest skill)
+- `SkillCard`: avg band (large, colour-coded) · target · gap badge · `TrendDots` (proportional bar chart, hover tooltip) · criteria breakdown (inline progress bars with target marker line)
+- Gap colouring: green (gap ≥ 0) · amber (≥ −0.5) · red (< −0.5) — consistent across avg band, gap badge, criteria bars
+- `TrendDots`: proportional bar height `= Math.max(20, (band/9)*100)%`; colour uses same gap thresholds vs `targetBand`; hover shows `Band X.X` tooltip
+- Empty state: friendly message + links to each practice module
+- Skills tracked: `speaking` (Pt 1 & 3) · `speaking_part2` · `writing` · `reading` · `listening`
+- `getAnalyticsStats` returns skills in a fixed order (`SKILL_ORDER`) regardless of session date order
+
 **Essay Builder** (Phase 3 complete)
 - Route `/essay-builder` — three tabs: **Builder**, **History**, **Analyse**
 - **Builder tab**: select domain + skill (Writing Task 1/2 or Speaking) + vocabulary words + collocations → `POST /api/essay-builder/generate` → generated topic + essay incorporating selected items
 - **AI output format**: delimiter-based (`---TOPIC---` / `---TEXT---`) instead of JSON — small 7B models truncate or corrupt JSON when generating 250+ word essays; delimiters are model-safe and trivially parseable; same pattern used for Analyse (`---DOMAIN---` / `---SKILL---` / `---QUESTION---`) — see [PDR-0012](./docs/pdr/0012-essay-builder-design.md)
 - **Versioning**: last 5 versions per `(domain, skill)` from `ai_generated_content` table; auto-saved on generate; selectable from a strip; deletable with two-step confirm; selecting a version restores text + selections + bonus coverage
-- **localStorage persistence**: selections (vocab + collocations) saved per `essay-builder:${domain}:${skill}` key; restored on domain/skill change; survives page refresh; only the generated essay is persisted to DB
+- **DB config persistence**: selections (vocab + collocations) persisted to `essay_builder_configs` table (`userId`, `domain`, `skill` composite PK, `selectedVocabulary` jsonb, `selectedCollocations` jsonb, `updatedAt`); loaded via `getEssayBuilderConfigAction(domain, skill)` on domain/skill change; auto-saved with 800ms debounce via `saveEssayBuilderConfigAction`; `isLoadingConfigRef = useRef(false)` prevents debounce from firing during the load phase (race-condition guard — set `true` before setState, cleared via `setTimeout(..., 0)` after React processes updates); survives page refresh and works across browsers/devices
 - **4-tier highlight system**: selected vocab (purple) · selected colloc (blue) · bonus vocab (green) · bonus colloc (amber); first match wins; bonus items are clickable pills to promote to selection
-- **Bonus coverage**: post-generation scan of full library against generated text; unselected matches surfaced as green/amber; clicking promotes item to selected set and updates localStorage
+- **Bonus coverage**: post-generation scan of full library against generated text; unselected matches surfaced as green/amber; clicking promotes item to selected set and triggers debounced DB save
 - **Edit mode**: inline textarea for modifying `decoratedText`; "Save changes" persists to DB via `updateDecoratedTextAction`
 - **Analyse tab**: paste raw IELTS text → `POST /api/essay-builder/analyse` detects domain, skill, generates realistic IELTS question → library matches highlighted (vocab purple, colloc blue) → "Load into Builder" pre-fills domain/skill/selections → "Save to History" creates `EssayBuilderRecord` from pasted text; save button disables after save to prevent duplicates
 - **History tab**: filter by skill (chip: All / Writing Task 1 / Writing Task 2 / Speaking) + topic/domain text search (client-side `useMemo`); each card has "Detect vocab & collocations" button — scans `decoratedText` against current library, shows bonus matches with 4-tier highlighting; "Save to this essay" merges bonus into `selectedVocabulary`/`selectedCollocations` via `updateEssaySelectionsAction`, updating both `history` and `versions` state optimistically
+- **Writing Evaluator integration**: "Evaluate essay" button (purple, writing skills only) runs the same multi-pass pipeline as the Writing module — `POST /api/writing/audit` (structural check) → `POST /api/writing/score` (streaming band score); `evalState` machine: `idle → auditing → scoring → done | error`; streaming text accumulated in `evalScoreStream`; parsed into `FeedbackResult` on stream end; per-criterion cards with band scores and feedback displayed inline; state resets when active version changes
 - **DB table**: `ai_generated_content` — `id`, `skill`, `domain`, `topic`, `selectedVocabulary` (jsonb), `selectedCollocations` (jsonb), `originalGeneratedText`, `decoratedText`, `targetBand`, `isFavorite`, `createdAt`; shared between Builder versioning and History global view
+- **Config table**: `essay_builder_configs` — `(userId, domain, skill)` composite PK, `selectedVocabulary` jsonb, `selectedCollocations` jsonb, `updatedAt`; cross-device selection persistence
 - **Prompts**: `ESSAY_BUILDER_PROMPT(skill, domain, vocabulary, collocations, targetBand)` and `ESSAY_ANALYSE_PROMPT(text, domains)` in `lib/ielts/essay-builder/prompts.ts`
 
 ### Key Design Decisions
@@ -371,7 +390,7 @@ See `.devcontainer/README.md` for full setup steps.
 - **`useOptimistic` contract**: optimistic state reverts to `initialItems` once the server action settles. If `initialItems` does not refresh (no `revalidatePath`), the old value reappears. Rule: any mutation that must outlive the optimistic window **must** call `revalidatePath` in its server action
 - Centralised Ollama client (`src/lib/ai-client.ts`) — single source for `createOllama` config, `OLLAMA_ENABLED` flag, `OLLAMA_DEBUG` flag, `ollamaDebug(label, raw)` helper, and disabled-response helper; all API routes import from here; set `OLLAMA_DEBUG=true` in `.env.local` to log full raw model output — first diagnostic step for any `generateText` parse failure
 - **Delimiter-based AI output for long text**: routes that ask the model to generate 150+ word bodies use `---SECTION---` delimiters instead of JSON; small 7B models reliably truncate or corrupt JSON at this length; delimiter capture regex `/([\s\S]+)/` after the last sentinel is robust to trailing fences or whitespace — see [PDR-0012](./docs/pdr/0012-essay-builder-design.md) for the root-cause analysis
-- Nav sidebar (`components/nav-sidebar.tsx`) uses collapsible groups: **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech, Essay Builder), **Guides** (How to Answer, Question Anatomy, Topic Ideas, AI Prompts, Exam Sprint); Dashboard, History, and Settings are standalone. Active group auto-opens on load; group header turns blue when it contains the active page.
+- Nav sidebar (`components/nav-sidebar.tsx`) uses collapsible groups: **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech, Essay Builder), **Guides** (How to Answer, Question Anatomy, Topic Ideas, AI Prompts, Exam Sprint); Dashboard is a standalone top item; Analytics, History, and Settings are standalone bottom items (`STANDALONE_BOTTOM`). Active group auto-opens on load; group header turns blue when it contains the active page.
 - `NEXT_PUBLIC_OLLAMA_ENABLED=false` disables all AI routes and shows an amber banner in the dashboard layout; designed for GitHub Codespaces where Ollama cannot run in-container
 - Safe colour getter pattern (`getPhenomenonColor(p)`) — always look up dynamic AI-returned strings through a getter with a fallback rather than direct object indexing; prevents crashes when the model returns an unexpected value
 
@@ -382,7 +401,7 @@ See `.devcontainer/README.md` for full setup steps.
 | 1 | 1–2 | ✅ Done | IELTS Scorer MVP: Examiner engine, Writing Task 2, Target Profile |
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
-| 3 | 6–10 | 🔄 In progress | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Collocation Library ✅ · Nav reorganisation ✅ · Target Switcher ✅ · AI Prompt Library ✅ · Essay Builder ✅ · Analytics ⬜ |
+| 3 | 6–10 | ✅ Done | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Collocation Library ✅ · Nav reorganisation ✅ · Target Switcher ✅ · AI Prompt Library ✅ · Essay Builder ✅ · Analytics ✅ |
 | 4 | TBD | Pending | Peer Review, Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.

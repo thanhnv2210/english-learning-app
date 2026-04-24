@@ -8,7 +8,7 @@
 
 The Vocabulary Library and Collocation Library give users curated word lists and phrases, but there was no tool to put them into practice together. Users needed a way to generate realistic IELTS sample essays and speaking responses that incorporate their saved vocabulary and collocations in context — turning passive library browsing into active writing practice.
 
-Five sub-decisions were required: (1) AI output format for long-form text, (2) versioning and persistence strategy, (3) selection persistence across sessions, (4) bonus coverage scanning, and (5) the Analyse tab design.
+Six sub-decisions were required: (1) AI output format for long-form text, (2) versioning and persistence strategy, (3) selection persistence across sessions, (4) bonus coverage scanning, (5) the Analyse tab design, and (6) History tab filters and re-detect.
 
 ---
 
@@ -59,9 +59,9 @@ The `---TEXT---` pattern captures everything after the sentinel to end-of-output
 
 ---
 
-## Decision 3 — localStorage Persistence for Selections
+## Decision 3 — DB Persistence for Selections (Revised from localStorage)
 
-**Problem**: The vocabulary and collocation checkboxes a user selects are valuable context. Losing them on every page refresh creates friction that discourages library-building.
+**Problem**: The vocabulary and collocation checkboxes a user selects are valuable context. Losing them on page refresh or when switching devices creates friction that discourages library-building.
 
 **Options considered:**
 
@@ -69,11 +69,18 @@ The `---TEXT---` pattern captures everything after the sentinel to end-of-output
 
 **Option B — localStorage keyed by `essay-builder:${domain}:${skill}`**: zero-latency, no server round-trip, survives refresh. Does not survive clearing site data or switching devices.
 
-**Decision**: Use **Option B** — localStorage.
+**Option C — Debounced DB writes**: 800ms debounce collapses rapid checkbox toggles into a single write per burst. Cross-device, zero friction after the initial delay.
 
-Rationale: selections are ephemeral working state, not durable user data. The generated essay (which incorporates those selections) is what gets saved to DB. Persisting every intermediate checkbox state to the server would be over-engineering for a single-user local app.
+**Decision**: Initially implemented as **Option B** (localStorage). Later revised to **Option C** (debounced DB) to support cross-device and cross-browser access.
 
-Selections are loaded (`loadSaved(domain, skill)`) whenever the domain or skill changes, and persisted (`useEffect`) whenever the selection sets change. If no saved state exists for a key, selections reset to empty.
+**Implementation**:
+- `essay_builder_configs` table: `(userId, domain, skill)` composite PK, `selectedVocabulary` jsonb, `selectedCollocations` jsonb, `updatedAt`
+- `upsertEssayBuilderConfig(domain, skill, vocab, colloc)` — Drizzle `onConflictDoUpdate` on composite PK
+- `getEssayBuilderConfig(domain, skill)` — returns saved selections or `null`
+- Client: `useEffect` with 800ms `setTimeout`/`clearTimeout` cleanup → `saveEssayBuilderConfigAction`; `loadConfig(domain, skill)` → `getEssayBuilderConfigAction` called on domain/skill change
+- **Race-condition guard**: `isLoadingConfigRef = useRef(false)` — set to `true` before calling setState with loaded values; cleared via `setTimeout(..., 0)` after React processes state updates. This prevents the debounced save `useEffect` from firing with the just-loaded values and writing them back as if they were user changes.
+
+If no saved config exists for a `(domain, skill)` pair, selections default to empty.
 
 ---
 
@@ -127,7 +134,9 @@ The same 4-tier system is reused in the History tab's "Detect vocab & collocatio
 ## Consequences
 
 - `ai_generated_content` table serves both the Essay Builder (versioned practice) and the global History view. The `topic` field doubles as the "generated IELTS question" for both builder-generated and analyse-imported records.
+- `essay_builder_configs` table holds one row per `(userId, domain, skill)` — the user's last saved selection state for each combination. Upserted on each debounced save; never grows beyond one row per pair.
 - The 5-version limit per domain+skill is a display limit only — older records remain in the DB and appear in the History tab. Users can delete individual versions from the Builder's versions strip.
 - The delimiter parsing regex (`/---TEXT---\s*\n([\s\S]+)/`) captures trailing whitespace and markdown fences if the model adds them. `trim()` is applied to all captured groups.
 - `OLLAMA_DEBUG=true` should be set in `.env.local` when diagnosing any new `generateText` parse failure — it logs the full raw model output before any processing.
 - The Analyse tab's "Load into Builder" function calls `loadVersions` after setting state, which is async. The domain/skill state update and version load are fire-and-forget; no race condition exists because `loadVersions` only reads state after the next render cycle.
+- The `isLoadingConfigRef` guard is critical: without it, loading config from DB triggers the save `useEffect` (because state changed), which immediately writes the loaded values back — creating a redundant write on every domain/skill switch. The `setTimeout(..., 0)` clear ensures the guard stays `true` for the entire React render cycle triggered by the state update.

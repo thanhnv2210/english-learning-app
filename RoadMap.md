@@ -15,7 +15,7 @@
 
 ## Phase 3: Complete the 4 Skills + Analytics (Weeks 6-10)
 *Goal: Full IELTS coverage — add Reading and Listening, show progress against target, expose the Target Switcher.*
-- [ ] **Progress Analytics**: `/analytics` dashboard — rolling band average per skill per criterion, trend over time, "Distance to target" summary
+- [x] **Progress Analytics**: `/analytics` dashboard — rolling band average per skill per criterion, trend over time, "Distance to target" summary
 - [x] **Essay Builder**: `/essay-builder` — select vocab + collocations → generate sample essay/speaking response; versioning (5 per domain+skill); Analyse tab (paste text → detect domain/skill/question); History tab with filter + re-detect + save selections
 - [x] **Target Switcher UI**: `/settings` page — profile selector (`IELTS_6.5`, `IELTS_7.5`, `Business_Fluent`); update `users.targetProfile` via server action; load different prompt templates per profile
 - [x] **Reading Module**: AI-generated tech-themed IELTS passages (~750 words) with 10–13 questions (T/F/NG, matching headings, short answer); 20-min timer; auto-scoring; saved to history as `skill: 'reading'`
@@ -23,13 +23,20 @@
 
 ## Phase 3 Sprint Tasks
 
-### Task 3.1 — Progress Analytics Dashboard
-- New route `/analytics`
-- Query all `mockExams` rows that have a `feedback` JSON blob
-- Compute per-skill rolling averages: overall band + per-criterion band (last 5 sessions)
-- UI: summary cards ("Speaking avg 6.0 · target 6.5 · gap −0.5") + per-criterion breakdown table
-- No charting library needed in MVP — plain table with colour-coded gap badges (same green/amber/red logic as `FeedbackView`)
-- Show session count and date of last practice per skill
+### Task 3.1 — Progress Analytics Dashboard ✅
+- Route `/analytics`; nav item added to `STANDALONE_BOTTOM`
+- Queries all `mock_exams` rows with non-null `feedback` jsonb; groups by skill; computes per-skill stats in JS
+- `lib/db/analytics.ts`: `getAnalyticsStats()` → `SkillStats[]` (sessionCount, avgBand, targetBand, gap, criteriaStats, recentSessions)
+- **Summary bar**: total sessions · skills at target · strongest skill
+- **Per-skill card**: avg band (colour-coded) · target · gap badge (green/amber/red) · criteria breakdown with inline progress bars + target marker · trend dots (last 5 sessions, colour by band vs target)
+- Empty state with direct links to each practice module
+
+### Task 3.16 — Essay Builder → Writing Evaluator Integration ✅
+- "Evaluate essay" button appears in Builder result view for `writing_task1` and `writing_task2` skills only
+- Runs the same 2-pass pipeline as the Writing module: `POST /api/writing/audit` (word count + notes) → `POST /api/writing/score` (streaming → `FeedbackResult`)
+- Shows word count inline while scoring streams; renders parsed band scores + per-criterion keyPoints identical to `FeedbackView`
+- "↻ Re-evaluate" button to re-run after editing the essay
+- Eval state resets automatically when a different version is selected
 
 ### Task 3.2 — Target Switcher UI ✅
 - Route `/settings` — 3 profile cards with active-state ring highlight
@@ -121,16 +128,23 @@
 - **Builder tab**: domain selector (from `writing_domains`) + skill chips (Writing Task 1 / Task 2 / Speaking) + vocabulary checklist + collocation checklist → `POST /api/essay-builder/generate` → generated topic + sample essay
 - **AI output format**: delimiter-based (`---TOPIC---` / `---TEXT---`) replacing JSON — 7B models truncate or corrupt JSON when generating 250+ word bodies; delimiters are model-safe; parsed with regex capture groups
 - **Versioning**: last 5 per `(domain, skill)` from `ai_generated_content`; auto-saved on generate; version strip (v1–v5) with two-step delete; selecting a version restores text + selections + bonus coverage
-- **localStorage persistence**: vocab + collocation selections stored per `essay-builder:${domain}:${skill}`; restored on domain/skill change; survives page refresh without DB writes per keystroke
+- **DB config persistence**: selections persisted to `essay_builder_configs` table (`(userId, domain, skill)` composite PK, `selectedVocabulary` / `selectedCollocations` jsonb); loaded via `getEssayBuilderConfigAction` on domain/skill change; auto-saved with 800ms debounce via `saveEssayBuilderConfigAction`; `isLoadingConfigRef` guard prevents debounce firing during load; cross-device and cross-browser access (previously localStorage, revised to DB)
 - **4-tier highlight**: selected vocab (purple) · selected colloc (blue) · bonus vocab (green) · bonus colloc (amber); first match wins; bonus items are clickable pills to promote to selection
 - **Bonus coverage scan**: post-generation client-side scan of full library against generated text; unselected matches shown as green/amber bonus strip
 - **Edit mode**: inline textarea for modifying `decoratedText`; "Save changes" → `updateDecoratedTextAction` → DB
 - **Analyse tab**: paste raw text → `POST /api/essay-builder/analyse` (delimiter format: `---DOMAIN---` / `---SKILL---` / `---QUESTION---`) → detected domain, skill badge, generated IELTS question; library matches highlighted; "Load into Builder" pre-fills state + switches tab; "Save to History" → `saveEssayAction` with pasted text as `decoratedText`, detected question as `topic`
 - **History tab**: filter by skill (chips) + topic/domain text search (client-side `useMemo`); per-card "Detect vocab & collocations" button scans `decoratedText` against library; "Save to this essay" → `updateEssaySelectionsAction` merges bonus into `selectedVocabulary`/`selectedCollocations` + optimistic update
 - **DB table**: `ai_generated_content` — shared by Builder versioning and History global view; `selectedVocabulary` and `selectedCollocations` are mutable jsonb columns updated by `updateEssaySelections`
-- **Server actions** (`app/actions/essay-builder.ts`): `saveEssayAction`, `getVersionsAction`, `updateDecoratedTextAction`, `updateEssaySelectionsAction`, `toggleEssayFavoriteAction`, `deleteEssayAction`
+- **Server actions** (`app/actions/essay-builder.ts`): `saveEssayAction`, `getVersionsAction`, `updateDecoratedTextAction`, `updateEssaySelectionsAction`, `toggleEssayFavoriteAction`, `deleteEssayAction`, `getEssayBuilderConfigAction`, `saveEssayBuilderConfigAction`
 - **Prompts** (`lib/ielts/essay-builder/prompts.ts`): `ESSAY_BUILDER_PROMPT(skill, domain, vocabulary, collocations, targetBand)`, `ESSAY_ANALYSE_PROMPT(text, domains)`
 - See [PDR-0012](./docs/pdr/0012-essay-builder-design.md) for all design decisions
+
+### Task 3.17 — Essay Builder Config DB Persistence ✅
+- Moved selection persistence from localStorage to `essay_builder_configs` DB table for cross-device access
+- `essay_builder_configs`: `(userId, domain, skill)` composite PK; `selectedVocabulary` / `selectedCollocations` jsonb; `updatedAt`
+- Drizzle `onConflictDoUpdate` upsert on composite PK — one row per user/domain/skill pair, no unbounded growth
+- 800ms debounce collapses rapid checkbox toggles into a single write per burst
+- `isLoadingConfigRef = useRef(false)` race-condition guard: set `true` before applying loaded config to state; cleared via `setTimeout(..., 0)` after React render cycle — prevents the save `useEffect` from treating the load as a user change
 
 ### Task 3.12 — AI Prompt Library ✅
 - Route `/prompt-library` — 5 practice prompts × 4 skills (Speaking, Writing, Reading, Listening) × 3 platforms (Claude, ChatGPT, Gemini) = 60 prompts
