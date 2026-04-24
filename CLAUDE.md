@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Phase 1, 2, and 3 complete. Phase 4 in progress. Phase 3 delivered: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, Collocation Library, Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides), Target Switcher UI, AI Prompt Library, Essay Builder (with Analyse tab, Versioning, Writing Evaluator integration), and Progress Analytics. Phase 4 started: Wrong Decision Log (manual mistake journal with AI analysis, question role tagging, skill/role analytics). See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
+Phase 1, 2, and 3 complete. Phase 4 in progress. Phase 3 delivered: Reading Module, Speaking Part 1 topic selector, Listening Simulator, Vocabulary Search, Writing Topic Library, How to Answer guide (all 4 skills), Topic Ideas (10 topics), Connected Speech Analyser, Collocation Library, Nav sidebar reorganised into collapsible groups (Practice / Tools / Guides), Target Switcher UI, AI Prompt Library, Essay Builder (with Analyse tab, Versioning, Writing Evaluator integration), and Progress Analytics. Phase 4 started: Wrong Decision Log (manual mistake journal with AI analysis, question role tagging, skill/role analytics) and Paraphrase guide (all 4 skills, 3 difficulty levels each). See `Discussion.md` for the full project vision, `RoadMap.md` for the sprint breakdown, `docs/adr/` for architecture decision records, and `docs/pdr/` for product decision records.
 
 ## Tech Stack
 
@@ -42,6 +42,7 @@ english-learning-app/
 │       │   │   ├── analytics/            # Progress Analytics (per-skill stats, trend bars)
 │       │   │   ├── essay-builder/        # Essay Builder (generate + analyse + history)
 │       │   │   ├── wrong-decisions/      # Wrong Decision Log (mistake journal + AI analysis)
+│       │   │   ├── paraphrase/           # Paraphrase guide — all 4 skills, 3 levels each (static)
 │       │   │   ├── history/              # Session history
 │       │   │   └── how-to-answer/        # Static exam guides (skill landing + per-skill pages)
 │       │   │       └── listening/        # Listening guide — 7 IELTS question types
@@ -88,11 +89,12 @@ english-learning-app/
 │       │   │   ├── essay-builder.ts      # saveEssayBuilderRecord, getVersionsByDomainSkill, getAllEssayBuilderRecords, updateEssayDecoratedText, updateEssaySelections, toggleEssayFavorite, deleteEssayBuilderRecord, getEssayBuilderConfig, upsertEssayBuilderConfig
 │       │   │   ├── analytics.ts          # getAnalyticsStats → SkillStats[] (queries mock_exams where feedback IS NOT NULL)
 │       │   │   └── wrong-decisions.ts    # saveWrongDecision, getAllWrongDecisions, updateWrongDecision, deleteWrongDecision, getWrongDecisionStats → WrongDecisionStats
-│       │   ├── guides/                   # Static content for How to Answer (no DB, no AI)
+│       │   ├── guides/                   # Static content for How to Answer + Paraphrase (no DB, no AI)
 │       │   │   ├── listening.ts          # LISTENING_GUIDES — 7 question types, steps/strategies/mistakes
 │       │   │   ├── reading.ts            # READING_GUIDES — 9 question types
 │       │   │   ├── writing.ts            # WRITING_TASK1_GUIDES (6 types) + WRITING_TASK2_GUIDES (4 types)
-│       │   │   └── speaking.ts           # SPEAKING_GUIDES — 3 parts (Part 1, Part 2, Part 3)
+│       │   │   ├── speaking.ts           # SPEAKING_GUIDES — 3 parts (Part 1, Part 2, Part 3)
+│       │   │   └── paraphrase.ts         # PARAPHRASE_GUIDES — 4 skills × 3 levels; ParaphraseSkillGuide, ParaphraseLevel, ParaphraseTechnique, ParaphraseExample types
 │       │   └── ielts/                    # Core domain logic (no Next.js imports)
 │       │       ├── examiner/             # Part 1 (fn+topic), Part 2, Part 3 prompts + feedback
 │       │       ├── feedback/             # filler-detector.ts (Phase 2)
@@ -367,6 +369,19 @@ See `.devcontainer/README.md` for full setup steps.
 - Skills tracked: `speaking` (Pt 1 & 3) · `speaking_part2` · `writing` · `reading` · `listening`
 - `getAnalyticsStats` returns skills in a fixed order (`SKILL_ORDER`) regardless of session date order
 
+**Paraphrase Guide** (Phase 4 — complete, all 4 skills)
+- Route `/paraphrase` — fully static guide; no DB, no AI; Guides group in nav sidebar
+- Structure: hero section (Core IELTS skill badge) → level legend (3 cards: L1 Beginner / L2 Intermediate / L3 Advanced) → interactive guide (`ParaphraseGuide` client component)
+- **Skill tabs**: Writing (amber) · Reading (blue) · Speaking (green) · Listening (purple); switching resets to Level 1
+- **Level pills**: L1 green · L2 amber · L3 purple; each level has a header, techniques, and an exam tip
+- **Technique blocks**: name + description + expandable `ExampleCard` per example; each card shows original → paraphrased → `ChangeTable` (from / to / reason columns, mono font) → optional trap callout
+- **Writing levels**: L1 Synonym Substitution · L2 Structural Restructuring · L3 Concept-Level Rewrite
+- **Reading levels**: L1 Recognising Synonyms · L2 Structural Paraphrase Recognition · L3 Concept-Level & Distractor Traps
+- **Speaking levels**: L1 Restating the Question with Synonyms (reformulate before answering, cue card bullet paraphrase) · L2 Structural Reformulation (clause restructuring, active↔passive) · L3 Concept-Level Reformulation (self-correction repair strategy, conclusion restatement)
+- **Listening levels**: L1 Recognising Spoken Synonyms (audio→question mapping, correct option identification) · L2 Structural Paraphrase in Audio (active↔passive, spatial/quantity paraphrase) · L3 Distractor Traps (reversed relationship, partial match, multi-sentence concept)
+- Content pattern: `lib/guides/paraphrase.ts` → `paraphrase/page.tsx` (server) → `paraphrase/paraphrase-guide.tsx` (client)
+- Interactive practice mode kept in backlog; connection to practice sessions deferred
+
 **Wrong Decision Log** (Phase 4 — Task 4.1 complete)
 - Route `/wrong-decisions` — manual mistake journal; standalone item in nav sidebar (`STANDALONE_BOTTOM`)
 - **Entry fields**: skill (Reading/Listening/Speaking/Writing) · source text (optional — passage or transcript) · question · my thought/answer · correct answer · analytic · solution · question roles (from Question Anatomy role set)
@@ -408,7 +423,7 @@ See `.devcontainer/README.md` for full setup steps.
 - **`useOptimistic` contract**: optimistic state reverts to `initialItems` once the server action settles. If `initialItems` does not refresh (no `revalidatePath`), the old value reappears. Rule: any mutation that must outlive the optimistic window **must** call `revalidatePath` in its server action
 - Centralised Ollama client (`src/lib/ai-client.ts`) — single source for `createOllama` config, `OLLAMA_ENABLED` flag, `OLLAMA_DEBUG` flag, `ollamaDebug(label, raw)` helper, and disabled-response helper; all API routes import from here; set `OLLAMA_DEBUG=true` in `.env.local` to log full raw model output — first diagnostic step for any `generateText` parse failure
 - **Delimiter-based AI output for long text**: routes that ask the model to generate 150+ word bodies use `---SECTION---` delimiters instead of JSON; small 7B models reliably truncate or corrupt JSON at this length; delimiter capture regex `/([\s\S]+)/` after the last sentinel is robust to trailing fences or whitespace — see [PDR-0012](./docs/pdr/0012-essay-builder-design.md) for the root-cause analysis
-- Nav sidebar (`components/nav-sidebar.tsx`) uses collapsible groups: **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech, Essay Builder), **Guides** (How to Answer, Question Anatomy, Topic Ideas, AI Prompts, Exam Sprint); Dashboard is a standalone top item; Analytics, Wrong Decisions, History, and Settings are standalone bottom items (`STANDALONE_BOTTOM`). Active group auto-opens on load; group header turns blue when it contains the active page.
+- Nav sidebar (`components/nav-sidebar.tsx`) uses collapsible groups: **Practice** (Speaking Full/Pt1/Pt2, Writing, Reading, Listening), **Tools** (Vocabulary, Collocations, Connected Speech, Essay Builder), **Guides** (How to Answer, Question Anatomy, Paraphrase, Topic Ideas, AI Prompts, Exam Sprint); Dashboard is a standalone top item; Analytics, Wrong Decisions, History, and Settings are standalone bottom items (`STANDALONE_BOTTOM`). Active group auto-opens on load; group header turns blue when it contains the active page.
 - `NEXT_PUBLIC_OLLAMA_ENABLED=false` disables all AI routes and shows an amber banner in the dashboard layout; designed for GitHub Codespaces where Ollama cannot run in-container
 - Safe colour getter pattern (`getPhenomenonColor(p)`) — always look up dynamic AI-returned strings through a getter with a fallback rather than direct object indexing; prevents crashes when the model returns an unexpected value
 
@@ -420,6 +435,6 @@ See `.devcontainer/README.md` for full setup steps.
 | 1.5 | 2–3 | ✅ Done | Writing Auditor: multi-pass pipeline, vocabulary replacer, drafting mode |
 | 2 | 3–5 | ✅ Done | Speaking simulator, Web Speech API STT, filler detection, unified session |
 | 3 | 6–10 | ✅ Done | Reading ✅ · Speaking Topic Selector ✅ · Listening ✅ · Vocab Search ✅ · Writing Topic Library ✅ · How to Answer (all 4 skills) ✅ · Topic Ideas (10 topics) ✅ · Connected Speech Analyser ✅ · Collocation Library ✅ · Nav reorganisation ✅ · Target Switcher ✅ · AI Prompt Library ✅ · Essay Builder ✅ · Analytics ✅ |
-| 4 | TBD | In progress | Wrong Decision Log ✅ · Question Anatomy deep-dive · Peer Review · Official Mock Integration |
+| 4 | TBD | In progress | Wrong Decision Log ✅ · Paraphrase Guide (all 4 skills) ✅ · Question Anatomy deep-dive · Peer Review · Official Mock Integration |
 
 Full sprint task details in `RoadMap.md` and `TODO.md`.

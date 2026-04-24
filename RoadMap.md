@@ -169,6 +169,7 @@
 
 ## Phase 4: Progress Focus & Community
 - [x] **Wrong Decision Log**: Manual mistake journal — record wrong answers with source text, reasoning, correct answer, AI analytic, solution, and question role tags.
+- [x] **Paraphrase Guide**: Static guide covering all 4 IELTS skills (Writing, Reading, Speaking, Listening) × 3 difficulty levels (Beginner / Intermediate / Advanced) with expandable examples, change tables, and exam tips.
 - [ ] **Question Anatomy deep-dive**: Interactive practice mode for decoding question structure (role identification drill or try-it-yourself mode).
 - [ ] **Peer Review Mode**: Let other "Tech Guys" review each other's practice essays.
 - [ ] **Official Mock Integration**: Connect to official [IELTS by IDP](url) or [British Council](url) resources for final testing.
@@ -187,6 +188,18 @@
 - **Analytics page**: `WrongDecisionCard` appended to `/analytics` — total, most-missed role, most-error skill, link to full log
 - **DB**: `wrong_decision_logs` — `(userId, skill, sourceText?, question, myThought, actualAnswer, analytic?, solution?, questionRoles jsonb, createdAt)`
 - **Server actions** (`app/actions/wrong-decisions.ts`): `saveWrongDecisionAction`, `updateWrongDecisionAction`, `deleteWrongDecisionAction` — all call `revalidatePath('/wrong-decisions')`
+
+### Task 4.2 — Paraphrase Guide ✅
+- Route `/paraphrase` — fully static guide (no DB, no AI); added to Guides group in nav sidebar
+- **4 skill tabs**: Writing (amber) · Reading (blue) · Speaking (green) · Listening (purple)
+- **3 level pills per skill**: L1 Beginner (green) · L2 Intermediate (amber) · L3 Advanced (purple)
+- **Technique blocks**: name + description + expandable example cards; each card: original → paraphrased → ChangeTable (from / to / reason, mono) → optional trap callout
+- **Writing**: L1 Synonym Substitution · L2 Structural Restructuring · L3 Concept-Level Rewrite
+- **Reading**: L1 Recognising Synonyms · L2 Structural Paraphrase Recognition · L3 Concept-Level & Distractor Traps
+- **Speaking**: L1 Restating the Question · L2 Structural Reformulation · L3 Concept-Level Reformulation (self-correction repair strategy)
+- **Listening**: L1 Recognising Spoken Synonyms · L2 Structural Paraphrase in Audio · L3 Distractor Traps
+- Content: `lib/guides/paraphrase.ts` → `paraphrase/page.tsx` (server) → `paraphrase/paraphrase-guide.tsx` (client)
+- Interactive practice deferred to backlog; connection to practice sessions deferred
 
 ## Phase 1 Sprint: The "Examiner" Engine
 - [x] **Task 1.1**: Develop the `IELTS_Examiner` system prompt that enforces "Examiner Protocol" (no helping the user, strict transitions).

@@ -30,7 +30,7 @@ export type ParaphraseLevel = {
 }
 
 export type ParaphraseSkillGuide = {
-  skill: 'writing' | 'reading'
+  skill: 'writing' | 'reading' | 'speaking' | 'listening'
   label: string
   icon: string
   intro: string
@@ -406,6 +406,319 @@ const READING_LEVELS: ParaphraseLevel[] = [
   },
 ]
 
+// ── Speaking Guide ────────────────────────────────────────────────────────────
+
+const SPEAKING_LEVELS: ParaphraseLevel[] = [
+  {
+    level: 1,
+    badge: 'Beginner',
+    title: 'Restating the Question with Synonyms',
+    focus: 'Open your answer by reformulating the examiner\'s question using synonym swaps',
+    techniques: [
+      {
+        name: 'Reformulate before answering',
+        description:
+          'Never repeat the question word-for-word when you begin your answer. Paraphrase it in your opening sentence — this immediately signals Lexical Resource to the examiner and buys you 2–3 seconds to think.',
+        examples: [
+          {
+            label: 'Part 1 — preference question',
+            original:   'Examiner: Do you enjoy reading books?',
+            paraphrased: 'Answer opening: Reading is something I find genuinely enjoyable, yes…',
+            changes: [
+              { from: 'Do you enjoy', to: 'is something I find … enjoyable', reason: 'Question → statement; verb form shifted' },
+              { from: 'reading books', to: 'Reading',                          reason: 'Gerund kept, "books" implied — avoids word-for-word echo' },
+            ],
+          },
+          {
+            label: 'Part 1 — frequency question',
+            original:   'Examiner: How often do you use public transport?',
+            paraphrased: 'Answer opening: In terms of how frequently I rely on public transit…',
+            changes: [
+              { from: 'How often',        to: 'how frequently',  reason: 'Synonym adverb' },
+              { from: 'do you use',       to: 'I rely on',       reason: 'Question → statement; verb synonym' },
+              { from: 'public transport', to: 'public transit',  reason: 'Synonym (British/American variant)' },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'Cue card bullet paraphrase (Part 2)',
+        description:
+          'In Part 2, your cue card gives bullet points. Do not read them aloud — paraphrase each one when you address it. This shows range throughout your 2-minute talk.',
+        examples: [
+          {
+            label: 'Part 2 — cue card bullet',
+            original:   'Cue card bullet: Who you were with',
+            paraphrased: 'In your talk: I was in the company of my closest colleague at the time…',
+            changes: [
+              { from: 'Who you were with', to: 'in the company of',  reason: 'Prepositional phrase → more formal expression' },
+              { from: 'you were',          to: 'I was',              reason: 'Second person → first person (you are describing your experience)' },
+            ],
+          },
+        ],
+      },
+    ],
+    examTip:
+      'Examiners notice when you begin every answer with the exact question words. Even one synonym swap in your opening sentence signals awareness of Lexical Resource. Practice restarting sentences with "In terms of…", "When it comes to…", "As for…" + paraphrased subject.',
+  },
+  {
+    level: 2,
+    badge: 'Intermediate',
+    title: 'Structural Reformulation',
+    focus: 'Change the grammatical structure of the question — not just the words — in your opening',
+    techniques: [
+      {
+        name: 'Clause restructuring',
+        description:
+          'Convert a direct question into a complex noun phrase or subordinate clause. This demonstrates grammatical range from your very first sentence.',
+        examples: [
+          {
+            label: 'Part 3 — comparison question',
+            original:   'Examiner: How has technology changed the way people communicate?',
+            paraphrased: 'Answer opening: The question of how communication has been transformed by technological advances is one I find fascinating…',
+            changes: [
+              { from: 'How has technology changed',       to: 'how … has been transformed by technological advances', reason: 'Active → passive; question clause → embedded noun clause' },
+              { from: 'the way people communicate',       to: 'communication',                                        reason: 'Relative clause → nominalisation' },
+              { from: 'How has [question form]',          to: 'The question of how [noun phrase]',                    reason: 'Question → noun phrase — allows complex sentence opening' },
+            ],
+          },
+          {
+            label: 'Part 3 — opinion question',
+            original:   'Examiner: Do you think governments should invest more in public transport?',
+            paraphrased: 'Answer opening: Whether greater government investment in public transportation is warranted is something many people debate…',
+            changes: [
+              { from: 'Do you think [question]', to: 'Whether … is something [noun clause]', reason: 'Yes/no question → embedded whether-clause' },
+              { from: 'governments should',      to: 'government investment … is warranted', reason: 'Modal verb → passive adjective (nominalisation)' },
+              { from: 'invest more',             to: 'greater … investment',                reason: 'Verb phrase → noun phrase' },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'Active ↔ Passive in your response',
+        description:
+          'When elaborating on a point, alternate between active and passive constructions to avoid repetition and show grammatical range.',
+        examples: [
+          {
+            label: 'Part 3 — elaboration with voice change',
+            original:   'Technology has changed communication.',
+            paraphrased: 'Communication has been fundamentally reshaped by the rapid advancement of technology.',
+            changes: [
+              { from: 'Technology [subject] has changed communication [object]', to: 'Communication [subject] has been reshaped by technology', reason: 'Perspective swap via passive — foregrounds the effect' },
+              { from: 'changed',   to: 'fundamentally reshaped', reason: 'Adverb added + stronger verb — more precise' },
+              { from: 'technology', to: 'the rapid advancement of technology',  reason: 'Noun → noun phrase — more academic' },
+            ],
+          },
+        ],
+      },
+    ],
+    examTip:
+      'In Part 3, the examiner expects extended, structured answers. Opening with a paraphrased noun clause ("The extent to which…", "Whether … is debatable") signals Band 7+ grammatical range before you have even made your first point.',
+  },
+  {
+    level: 3,
+    badge: 'Advanced',
+    title: 'Concept-Level Reformulation for Fluency',
+    focus: 'Rephrase mid-answer when you lose a word — and restate conclusions without repeating yourself',
+    techniques: [
+      {
+        name: 'Self-correction paraphrase (repair strategy)',
+        description:
+          'When you cannot recall a word mid-sentence, immediately restate the concept using different vocabulary. This is a natural fluency strategy — examiners view smooth repairs positively. Never stop and say "I don\'t know the word".',
+        examples: [
+          {
+            label: 'Part 3 — mid-answer repair',
+            original:   'I think this has led to … um … [word forgotten] … I mean, it has made society more divided — people tend to only interact with those who share the same views.',
+            paraphrased: 'Smooth repair: I think this has contributed to a kind of fragmentation of society — people increasingly gravitate towards those with similar perspectives.',
+            changes: [
+              { from: 'um … [word forgotten]', to: 'a kind of fragmentation of society', reason: 'Repair — noun phrase replaces forgotten word; "kind of" softens while buying time' },
+              { from: 'interact with',         to: 'gravitate towards',                  reason: 'Synonym — more sophisticated verb' },
+              { from: 'share the same views',  to: 'similar perspectives',               reason: 'Clause → noun phrase — more concise' },
+            ],
+            trap: 'Do not repeat "I mean" or "you know" as fillers — use phrase-level paraphrase instead: "in other words", "that is to say", "or rather".',
+          },
+        ],
+      },
+      {
+        name: 'Conclusion restatement without repetition',
+        description:
+          'When the examiner signals wrap-up ("And finally…"), restate your position using entirely different vocabulary from your opening. This bookends your answer and demonstrates range.',
+        examples: [
+          {
+            label: 'Part 3 — wrap-up restatement',
+            original:   'Opening: I believe technology has fundamentally changed how people communicate.',
+            paraphrased: 'Closing: So overall, the way we exchange information has been irrevocably altered by digital innovation — and I think that shift is only going to accelerate.',
+            changes: [
+              { from: 'I believe',              to: 'So overall … I think',              reason: 'Direct assertion → reflective summary marker + personal view' },
+              { from: 'technology',             to: 'digital innovation',                reason: 'Synonym — more specific, avoids word repetition' },
+              { from: 'has fundamentally changed', to: 'has been irrevocably altered',   reason: 'Active → passive; adverb + verb synonym' },
+              { from: 'how people communicate', to: 'the way we exchange information',   reason: 'Clause → noun phrase; pronoun shift (people → we)' },
+            ],
+          },
+        ],
+      },
+    ],
+    examTip:
+      'Fluency & Coherence rewards self-correction that does NOT break flow. The key is to not pause — replace the lost word immediately with a paraphrase. Practice the phrase "or rather…" followed by a concept-level restatement. It buys thinking time and sounds fluent.',
+  },
+]
+
+// ── Listening Guide ───────────────────────────────────────────────────────────
+
+const LISTENING_LEVELS: ParaphraseLevel[] = [
+  {
+    level: 1,
+    badge: 'Beginner',
+    title: 'Recognising Spoken Synonyms',
+    focus: 'Match what you hear to the written question using synonym recognition',
+    techniques: [
+      {
+        name: 'Audio → question synonym mapping',
+        description:
+          'The recording never uses the exact words from the question. Before the audio plays, identify the key content words in the question and predict their spoken synonyms. When you hear a synonym, that sentence contains your answer.',
+        examples: [
+          {
+            label: 'Note completion — synonym trigger',
+            original:   'Question: The workshop begins at ___ o\'clock.',
+            paraphrased: 'Recording: "The session kicks off at nine in the morning."',
+            changes: [
+              { from: 'workshop', to: 'session',    reason: 'Synonym — your trigger word in the audio' },
+              { from: 'begins',   to: 'kicks off',  reason: 'Informal synonym — common in conversational recordings' },
+              { from: '___',      to: 'nine',       reason: 'The answer — written as "9" or "nine" depending on instruction' },
+            ],
+            trap: 'If you hear "workshop" mentioned later in the recording, it may be a different context. Always verify the full sentence matches the question\'s meaning before writing the answer.',
+          },
+          {
+            label: 'Multiple choice — correct option paraphrased',
+            original:   'Question: Why did the speaker choose the hotel? A) It was affordable. B) It was close to the venue. C) It had good reviews.',
+            paraphrased: 'Recording: "I went with that place mainly because it wasn\'t far from the conference centre."',
+            changes: [
+              { from: 'close to the venue',      to: 'wasn\'t far from the conference centre', reason: 'Synonym + negation: close = not far; venue = conference centre → correct answer is B' },
+              { from: 'affordable',              to: '[not mentioned in recording]',            reason: 'Distractor — sounds plausible but speaker does not say this' },
+              { from: 'had good reviews',        to: '[not mentioned in recording]',            reason: 'Distractor — mentioned in a different context elsewhere' },
+            ],
+          },
+        ],
+      },
+    ],
+    examTip:
+      'Use the 30–60 seconds before the audio plays to underline question keywords and mentally predict their synonyms. The audio always paraphrases — your job is to map heard words back to written options before the recording moves on.',
+  },
+  {
+    level: 2,
+    badge: 'Intermediate',
+    title: 'Structural Paraphrase in Audio',
+    focus: 'Recognise when the recording expresses the same fact in a different grammatical structure',
+    techniques: [
+      {
+        name: 'Active ↔ Passive in speech',
+        description:
+          'Spoken English frequently shifts between active and passive. The question may frame information actively; the speaker states it passively (or vice versa). The fact is the same — the structure is different.',
+        examples: [
+          {
+            label: 'Note completion — voice shift',
+            original:   'Question: The report was written by ___.',
+            paraphrased: 'Recording: "Dr. Hansen produced the final report after six months of research."',
+            changes: [
+              { from: 'was written by [agent]', to: '[Agent] produced',  reason: 'Passive question → active statement; agent is the answer' },
+              { from: 'report',                 to: 'final report',      reason: 'Same noun; adjective added in recording' },
+            ],
+            trap: 'When the question uses passive voice, the answer is always the agent (the "by whom"). In the recording, that agent will usually be the sentence subject.',
+          },
+        ],
+      },
+      {
+        name: 'Cause-effect paraphrase in diagrams and maps',
+        description:
+          'Map/diagram questions describe spatial relationships. The recording paraphrases directions using different prepositions or landmarks. Match the concept — not the exact words.',
+        examples: [
+          {
+            label: 'Map labelling — spatial paraphrase',
+            original:   'Question label position: opposite the main entrance.',
+            paraphrased: 'Recording: "If you\'re facing the front door, you\'ll see it directly ahead."',
+            changes: [
+              { from: 'opposite the main entrance', to: 'facing the front door … directly ahead', reason: 'Spatial synonym: opposite = facing + directly ahead; main entrance = front door' },
+            ],
+            trap: 'Compass directions ("north of", "to the left") and landmark-based directions ("next to the café") can both describe the same location. Pre-read labels carefully and hold both concepts in mind.',
+          },
+        ],
+      },
+      {
+        name: 'Number and quantity paraphrase',
+        description:
+          'Quantities in the recording are often paraphrased as fractions, percentages, or approximate expressions in the question — or vice versa.',
+        examples: [
+          {
+            label: 'Multiple choice — quantity equivalence',
+            original:   'Question: What proportion of students passed the test? A) About half. B) A quarter. C) The majority.',
+            paraphrased: 'Recording: "Roughly 48% of participants achieved a passing grade."',
+            changes: [
+              { from: 'Roughly 48%',   to: 'About half',   reason: '48% ≈ 50% = half → correct answer is A' },
+              { from: 'A quarter',     to: '25%',           reason: 'Distractor — 48% ≠ 25%' },
+              { from: 'The majority',  to: 'over 50%',      reason: 'Distractor — 48% is less than half, not a majority' },
+            ],
+            trap: '"Roughly", "approximately", "around", and "about" signal that the number will be paraphrased as a fraction or rounded figure in the options.',
+          },
+        ],
+      },
+    ],
+    examTip:
+      'For map and diagram questions, label ALL positions on the diagram during pre-reading — not just the gaps. Knowing where the other fixed labels are helps you triangulate position from the spoken description, even when the recording uses completely different spatial vocabulary.',
+  },
+  {
+    level: 3,
+    badge: 'Advanced',
+    title: 'Distractor Traps & Concept-Level Paraphrase',
+    focus: 'Recognise distractors that use recording words deceptively and multi-sentence concept paraphrase',
+    techniques: [
+      {
+        name: 'The distractor trap: same words, wrong relationship',
+        description:
+          'The most dangerous Listening trap: a wrong option uses words you just heard, but misrepresents the relationship between them. Test-takers who write what sounds familiar — rather than what is accurate — fall for this every time.',
+        examples: [
+          {
+            label: 'Multiple choice — reversed relationship',
+            original:   'Option B: Stress causes people to exercise less.',
+            paraphrased: 'Recording: "Interestingly, a lack of exercise has been shown to increase stress levels in office workers."',
+            changes: [
+              { from: 'Stress [cause] → exercise less [effect]',    to: 'lack of exercise [cause] → stress [effect]',  reason: 'TRAP — same words (stress, exercise), completely reversed causal direction. Option B is WRONG.' },
+            ],
+            trap: 'When you hear key words from an option in the recording, DO NOT write it down immediately. Listen for the full sentence to confirm the relationship — cause vs. effect, agent vs. recipient, positive vs. negative.',
+          },
+          {
+            label: 'Multiple choice — partial match distractor',
+            original:   'Option A: The library closes at 6pm on Fridays.',
+            paraphrased: 'Recording: "On Fridays the library has extended hours — it stays open until eight."',
+            changes: [
+              { from: 'closes at 6pm on Fridays', to: 'stays open until eight [on Fridays]', reason: 'TRAP — "Fridays" matches, but the time is wrong. Option A is FALSE.' },
+            ],
+            trap: 'Partial matches are deliberate. The recording mentions the day (Friday) to make option A seem correct — but the time contradicts it. Always verify every element of a multiple-choice option against the recording.',
+          },
+        ],
+      },
+      {
+        name: 'Multi-sentence concept paraphrase',
+        description:
+          'Sometimes a single question answer is spread across two or three spoken sentences. The full concept only becomes clear once all parts are heard. Premature answers (written after one sentence) are often wrong.',
+        examples: [
+          {
+            label: 'Note completion — answer built across two sentences',
+            original:   'Question: The main advantage of the new system is ___.',
+            paraphrased: 'Recording: "The old method was slow and prone to errors. The new approach, by contrast, processes data in real time without any manual input."',
+            changes: [
+              { from: 'main advantage',         to: 'processes data in real time without manual input', reason: 'The advantage is stated in sentence 2 — sentence 1 provides contrast context only' },
+              { from: '[listening only to first sentence]', to: '[incorrect answer: "slow and prone to errors"]', reason: 'TRAP — first sentence describes the old system\'s disadvantage, not the new system\'s advantage' },
+            ],
+            trap: 'When a question asks for a "main advantage" or "key reason", wait for the full contrast or explanation before writing. The answer often comes after a contrast signal: "however", "by contrast", "instead", "on the other hand".',
+          },
+        ],
+      },
+    ],
+    examTip:
+      'In Section 3 and Section 4 (the hardest recordings), every wrong option is designed to sound plausible from the audio. The only defence is to verify the complete fact — not just matching words. Practice "listen for the verb": the relationship word (causes, prevents, leads to, results in) tells you which direction the meaning goes.',
+  },
+]
+
 // ── Exported data ─────────────────────────────────────────────────────────────
 
 export const PARAPHRASE_GUIDES: ParaphraseSkillGuide[] = [
@@ -435,5 +748,33 @@ export const PARAPHRASE_GUIDES: ParaphraseSkillGuide[] = [
       'Short Answer: question words will be paraphrased — scan for concept, not vocabulary',
     ],
     levels: READING_LEVELS,
+  },
+  {
+    skill: 'speaking',
+    label: 'Speaking',
+    icon: '🎤',
+    intro:
+      'In IELTS Speaking, paraphrase serves two purposes: it demonstrates Lexical Resource and Grammatical Range to the examiner, and it gives you thinking time before you answer. Every time you open an answer by restating the question in your own words, you signal vocabulary breadth. Every time you rephrase mid-answer instead of stopping to find a word, you protect your Fluency & Coherence score.',
+    purpose: [
+      'Part 1: paraphrase the question in your opening sentence to show lexical range',
+      'Part 2: paraphrase cue card bullets when addressing them — never read them verbatim',
+      'Part 3: open complex answers with a restructured noun clause to signal grammatical range',
+      'All parts: use concept-level repair when you lose a word — never pause in silence',
+    ],
+    levels: SPEAKING_LEVELS,
+  },
+  {
+    skill: 'listening',
+    label: 'Listening',
+    icon: '🎧',
+    intro:
+      'In IELTS Listening, paraphrase is the mechanism of every question and every distractor. The recording never uses the exact words from the question — it paraphrases them. Wrong answer options use words you just heard but in a different relationship. Your job is to pre-read questions, predict synonyms, listen for meaning — not words — and verify the full fact before writing.',
+    purpose: [
+      'Note completion: the recording paraphrases the gap word — listen for the synonym trigger',
+      'Multiple choice: the correct option paraphrases what you hear; distractors use familiar words deceptively',
+      'Map/diagram: directions are paraphrased spatially — match concept, not vocabulary',
+      'Sections 3–4: answers may span multiple sentences — wait for contrast signals before writing',
+    ],
+    levels: LISTENING_LEVELS,
   },
 ]
