@@ -14,10 +14,17 @@ export async function POST(req: Request) {
   const { domain } = await req.json()
   if (!domain) return Response.json({ error: 'domain is required' }, { status: 400 })
 
-  const { text } = await generateText({
-    model: ollamaModel(),
-    prompt: TOPIC_GENERATION_PROMPT(domain),
-  })
+  let text: string
+  try {
+    const result = await generateText({
+      model: ollamaModel(),
+      prompt: TOPIC_GENERATION_PROMPT(domain),
+    })
+    text = result.text
+  } catch (err) {
+    console.error('[writing/topic] generateText failed:', err)
+    return Response.json({ error: 'Ollama request failed' }, { status: 502 })
+  }
 
   const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')
 

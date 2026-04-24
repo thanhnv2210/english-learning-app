@@ -346,7 +346,9 @@ function SavedCard({
             <div className="flex flex-col gap-2">
               {card.examples.map((ex, i) => (
                 <div key={i} className="rounded-lg bg-gray-50 p-3">
-                  <p className="text-xs leading-relaxed text-gray-700 italic">&ldquo;{ex}&rdquo;</p>
+                  <p className="text-xs leading-relaxed text-gray-700 italic">
+                    &ldquo;<HighlightedExample text={ex} phrase={card.phrase} />&rdquo;
+                  </p>
                 </div>
               ))}
             </div>
@@ -354,6 +356,34 @@ function SavedCard({
         </>
       )}
     </div>
+  )
+}
+
+// ── HighlightedExample ────────────────────────────────────────────────────────
+// Splits the example sentence on the collocation phrase (case-insensitive) and
+// wraps each match in a highlight span, preserving original casing.
+
+function HighlightedExample({ text, phrase }: { text: string; phrase: string }) {
+  if (!phrase) return <>{text}</>
+
+  const regex = new RegExp(`(${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+  const parts = text.split(regex)
+
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === phrase.toLowerCase() ? (
+          <mark
+            key={i}
+            className="not-italic bg-blue-100 text-blue-800 rounded px-0.5 font-semibold"
+          >
+            {part}
+          </mark>
+        ) : (
+          part
+        ),
+      )}
+    </>
   )
 }
 

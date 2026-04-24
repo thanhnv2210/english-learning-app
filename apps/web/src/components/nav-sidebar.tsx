@@ -28,6 +28,7 @@ const GROUPS: NavGroup[] = [
     items: [
       { href: '/vocabulary', label: 'Vocabulary', icon: '📚' },
       { href: '/collocations', label: 'Collocations', icon: '🧩' },
+      { href: '/essay-builder', label: 'Essay Builder', icon: '✍️' },
       { href: '/connected-speech', label: 'Connected Speech', icon: '🔗' },
     ],
   },

@@ -17,11 +17,18 @@ export async function POST(req: Request) {
     .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
     .join('\n\n')
 
-  const { text } = await generateText({
-    model: ollamaModel(),
-    system: FEEDBACK_SYSTEM_PROMPT,
-    prompt: `Target band: ${targetBand}\nSkill: ${skill}\n\nTranscript:\n${transcriptText}`,
-  })
+  let text: string
+  try {
+    const result = await generateText({
+      model: ollamaModel(),
+      system: FEEDBACK_SYSTEM_PROMPT,
+      prompt: `Target band: ${targetBand}\nSkill: ${skill}\n\nTranscript:\n${transcriptText}`,
+    })
+    text = result.text
+  } catch (err) {
+    console.error('[feedback] generateText failed:', err)
+    return Response.json({ error: 'Ollama request failed' }, { status: 502 })
+  }
 
   // Strip markdown code fences if the model wraps the JSON
   const jsonMatch = text.match(/\{[\s\S]*\}/)

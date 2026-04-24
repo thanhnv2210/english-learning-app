@@ -16,11 +16,18 @@ export async function POST(req: Request) {
 
   const { essay, topic } = (await req.json()) as { essay: string; topic: string }
 
-  const { text } = await generateText({
-    model: ollamaModel(),
-    system: AUDIT_PROMPT,
-    prompt: `Essay topic: ${topic}\n\nEssay:\n${essay}`,
-  })
+  let text: string
+  try {
+    const result = await generateText({
+      model: ollamaModel(),
+      system: AUDIT_PROMPT,
+      prompt: `Essay topic: ${topic}\n\nEssay:\n${essay}`,
+    })
+    text = result.text
+  } catch (err) {
+    console.error('[writing/audit] generateText failed:', err)
+    return Response.json({ error: 'Ollama request failed' }, { status: 502 })
+  }
 
   const jsonMatch = text.match(/\{[\s\S]*\}/)
   if (!jsonMatch) return Response.json({ error: 'Parse error' }, { status: 500 })

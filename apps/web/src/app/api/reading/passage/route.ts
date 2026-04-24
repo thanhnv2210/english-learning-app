@@ -7,11 +7,14 @@ export async function POST(req: Request) {
 
   const { domain } = (await req.json()) as { domain: string }
 
-  const { text } = await generateText({
-    model: ollamaModel(),
-    prompt: READING_PASSAGE_PROMPT(domain),
-    maxTokens: 2000,
-  })
+  let text: string
+  try {
+    const result = await generateText({ model: ollamaModel(), prompt: READING_PASSAGE_PROMPT(domain), maxTokens: 2000 })
+    text = result.text
+  } catch (err) {
+    console.error('[reading/passage] generateText failed:', err)
+    return Response.json({ error: 'Ollama request failed' }, { status: 502 })
+  }
 
   // Strip markdown fences if the model wraps its output
   const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
@@ -20,7 +23,7 @@ export async function POST(req: Request) {
   try {
     passage = JSON.parse(cleaned)
   } catch {
-    return Response.json({ error: 'Failed to parse passage JSON', raw: text }, { status: 500 })
+    return Response.json({ error: 'Failed to parse passage JSON', raw: text }, { status: 502 })
   }
 
   return Response.json(passage)

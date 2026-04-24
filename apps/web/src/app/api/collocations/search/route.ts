@@ -30,10 +30,14 @@ export async function POST(req: Request) {
       ? COLLOCATION_BY_WORD_PROMPT(normalized)
       : COLLOCATION_BY_PHRASE_PROMPT(normalized)
 
-  const { text: raw } = await generateText({
-    model: ollamaModel(),
-    prompt,
-  })
+  let raw: string
+  try {
+    const result = await generateText({ model: ollamaModel(), prompt })
+    raw = result.text
+  } catch (err) {
+    console.error('[collocations/search] generateText failed:', err)
+    return Response.json({ error: 'Ollama request failed' }, { status: 502 })
+  }
 
   const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')
 
@@ -41,7 +45,7 @@ export async function POST(req: Request) {
   try {
     parsed = JSON.parse(cleaned)
   } catch {
-    return Response.json({ error: 'Failed to parse AI response', raw }, { status: 500 })
+    return Response.json({ error: 'Failed to parse AI response', raw }, { status: 502 })
   }
 
   if (mode === 'word') {
