@@ -13,10 +13,17 @@ export async function POST(req: Request) {
     return Response.json({ error: 'text is required' }, { status: 400 })
   }
 
-  const { text: raw } = await generateText({
-    model: ollamaModel(),
-    prompt: CONNECTED_SPEECH_PROMPT(text.trim()),
-  })
+  let raw: string
+  try {
+    const result = await generateText({
+      model: ollamaModel(),
+      prompt: CONNECTED_SPEECH_PROMPT(text.trim()),
+    })
+    raw = result.text
+  } catch (err) {
+    console.error('[connected-speech] generateText failed:', err)
+    return Response.json({ error: 'Ollama request failed' }, { status: 502 })
+  }
 
   const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')
 
@@ -24,6 +31,6 @@ export async function POST(req: Request) {
     const parsed: AnalysisResult = JSON.parse(cleaned)
     return Response.json(parsed)
   } catch {
-    return Response.json({ error: 'Failed to parse AI response', raw }, { status: 500 })
+    return Response.json({ error: 'Failed to parse AI response', raw }, { status: 502 })
   }
 }

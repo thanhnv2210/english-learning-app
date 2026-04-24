@@ -293,6 +293,23 @@ export const collocationEntries = pgTable('collocation_entries', {
   check('collocation_entries_rank_check', sql`${t.rank} between 1 and 5`),
 ])
 
+// ─── AI Essay Builder history ─────────────────────────────────────────────────
+// Separate from mockExams — stores richer context (domain, vocab/collocation selections)
+
+export const aiGeneratedContent = pgTable('ai_generated_content', {
+  id: serial('id').primaryKey(),
+  skill: text('skill').notNull(), // 'writing_task1' | 'writing_task2' | 'speaking'
+  domain: text('domain').notNull(),
+  topic: text('topic').notNull(),
+  selectedVocabulary: jsonb('selected_vocabulary').notNull().$type<string[]>(),
+  selectedCollocations: jsonb('selected_collocations').notNull().$type<string[]>(),
+  originalGeneratedText: text('original_generated_text').notNull(),
+  decoratedText: text('decorated_text').notNull(),
+  targetBand: real('target_band').notNull().default(6.5),
+  isFavorite: boolean('is_favorite').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ─── Per-user skill topic favourites ─────────────────────────────────────────
 // Generic table — one row per (user, skill, topicName).
 // skill values: 'vocabulary' | 'speaking' | 'writing' | 'listening' | 'reading'

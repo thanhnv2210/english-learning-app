@@ -68,7 +68,12 @@
       "Bash(sort -t: -k3)",
       "Bash(wc:*)",
       "Bash(PORT=3000 pnpm dev:clean)",
-      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(p\\) for p in d[0][''''phonetics'''']]\")"
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(p\\) for p in d[0][''''phonetics'''']]\")",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Bash(echo \"=== $f ===\")",
+      "Read(//Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/**)",
+      "Bash(done)"
     ]
   }
 }

@@ -26,10 +26,17 @@ export async function POST(req: Request) {
   const allDomains = await getAllDomains()
   const domainNames = allDomains.map((d) => d.name)
 
-  const { text } = await generateText({
-    model: ollamaModel(),
-    prompt: VOCAB_SEARCH_PROMPT(trimmed, domainNames),
-  })
+  let text: string
+  try {
+    const result = await generateText({
+      model: ollamaModel(),
+      prompt: VOCAB_SEARCH_PROMPT(trimmed, domainNames),
+    })
+    text = result.text
+  } catch (err) {
+    console.error('[vocabulary/search] generateText failed:', err)
+    return Response.json({ error: 'Ollama request failed' }, { status: 502 })
+  }
 
   const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')
 
