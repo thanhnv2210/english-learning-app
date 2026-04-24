@@ -10,6 +10,7 @@ export type SpeakingExample = {
 }
 
 export type WritingExample = {
+  context?: string
   taskType: string
   prompt: string
   sample: string

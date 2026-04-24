@@ -135,7 +135,7 @@ function QuestionCard({
                       {f.label}
                     </span>
                     <p className={`font-mono text-xs font-semibold break-words ${s.text}`}>
-                      "{f.text.trim()}"
+                      &quot;{f.text.trim()}&quot;
                     </p>
                   </div>
                   <p className="text-xs leading-relaxed text-gray-700">{f.instruction}</p>

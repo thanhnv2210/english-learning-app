@@ -878,7 +878,7 @@ function SamplePanel({
           {result.collocations.map(({ phrase, usage }, i) => (
             <div key={i} className="rounded-lg border border-green-100 bg-white px-3 py-2">
               <p className="text-xs font-semibold text-green-700">{phrase}</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-gray-500 italic">"{usage}"</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-gray-500 italic">&quot;{usage}&quot;</p>
             </div>
           ))}
         </div>

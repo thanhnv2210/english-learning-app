@@ -15,8 +15,8 @@ import {
   listRecentAnalyses,
   listByPhenomenon,
   deleteAnalysisAction,
-  type SavedAnalysis,
 } from '@/app/actions/connected-speech'
+import type { SavedAnalysis } from '@/lib/db/connected-speech'
 
 type ViewStyle = 'sentence' | 'phrase'
 type Stage = 'input' | 'loading' | 'result'
