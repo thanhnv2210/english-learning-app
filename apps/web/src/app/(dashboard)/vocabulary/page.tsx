@@ -1,9 +1,13 @@
 import { getAllVocabularyWords } from '@/lib/db/vocabulary'
+import { getSkillFavorites } from '@/lib/db/user-skill-topics'
 import { VocabularyList } from './vocabulary-list'
 import { VocabSearch } from './vocab-search'
 
 export default async function VocabularyPage() {
-  const words = await getAllVocabularyWords()
+  const [words, favoriteDomains] = await Promise.all([
+    getAllVocabularyWords(),
+    getSkillFavorites('vocabulary'),
+  ])
 
   // Collect unique domain names across all words (preserving first-seen order)
   const domainSet = new Set<string>()
@@ -26,7 +30,7 @@ export default async function VocabularyPage() {
 
       <VocabSearch />
 
-      <VocabularyList words={words} domains={domains} />
+      <VocabularyList words={words} domains={domains} favoriteDomains={favoriteDomains} />
     </div>
   )
 }

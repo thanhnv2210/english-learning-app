@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo, useOptimistic, useTransition } from 'react'
+import { useState, useMemo, useOptimistic, useTransition, useRef, useEffect } from 'react'
 import { deleteVocabularyWordAction, updateVocabularyRankAction } from '@/app/actions/vocabulary'
+import { toggleVocabFavoriteAction } from '@/app/actions/user-skill-topics'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 
 // ── Sort ─────────────────────────────────────────────────────────────────────
@@ -34,14 +35,42 @@ function applySort(items: VocabularyCard[], sort: SortKey): VocabularyCard[] {
 type Props = {
   words: VocabularyCard[]
   domains: string[]
+  favoriteDomains: string[]
 }
 
-export function VocabularyList({ words, domains }: Props) {
+export function VocabularyList({ words, domains, favoriteDomains }: Props) {
   const [items, setItems] = useOptimistic(words)
   const [search, setSearch] = useState('')
   const [activeDomain, setActiveDomain] = useState<string | null>(null)
   const [activeRank, setActiveRank] = useState<number | null>(null)
   const [sort, setSort] = useState<SortKey>('alpha_asc')
+
+  // Favourite domain management
+  const [localFavorites, setLocalFavorites] = useState<string[]>(favoriteDomains)
+  const [, startFavTransition] = useTransition()
+  const [showMoreDomains, setShowMoreDomains] = useState(false)
+  const moreDomainsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (moreDomainsRef.current && !moreDomainsRef.current.contains(e.target as Node)) {
+        setShowMoreDomains(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  function handleToggleFavorite(domain: string) {
+    setLocalFavorites((prev) =>
+      prev.includes(domain) ? prev.filter((d) => d !== domain) : [...prev, domain],
+    )
+    startFavTransition(() => toggleVocabFavoriteAction(domain))
+  }
+
+  // Domains split into pinned (favourites present in the actual domain list) and others
+  const pinnedDomains = localFavorites.filter((d) => domains.includes(d))
+  const otherDomains = domains.filter((d) => !localFavorites.includes(d))
 
   const filtered = useMemo(() => {
     let result = items
@@ -104,18 +133,62 @@ export function VocabularyList({ words, domains }: Props) {
           </select>
         </div>
 
-        {/* Domain filter chips */}
+        {/* Domain filter chips — favourites first, others behind ··· */}
         <div className="flex flex-wrap gap-2">
           <FilterChip label="All" active={activeDomain === null} onClick={() => setActiveDomain(null)} />
           <FilterChip label="General" active={activeDomain === '__general__'} onClick={() => setActiveDomain('__general__')} />
-          {domains.map((d) => (
-            <FilterChip
+
+          {pinnedDomains.map((d) => (
+            <DomainChip
               key={d}
               label={d}
               active={activeDomain === d}
-              onClick={() => setActiveDomain(activeDomain === d ? null : d)}
+              pinned
+              onSelect={() => setActiveDomain(activeDomain === d ? null : d)}
+              onTogglePin={() => handleToggleFavorite(d)}
             />
           ))}
+
+          {otherDomains.length > 0 && (
+            <div ref={moreDomainsRef} className="relative">
+              <button
+                onClick={() => setShowMoreDomains((v) => !v)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  showMoreDomains || otherDomains.includes(activeDomain ?? '')
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                ···
+              </button>
+              {showMoreDomains && (
+                <div className="absolute left-0 top-full mt-1 z-10 w-52 rounded-xl border border-gray-200 bg-white shadow-lg p-2 flex flex-col gap-0.5">
+                  {otherDomains.map((d) => (
+                    <div key={d} className="group flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          setActiveDomain(activeDomain === d ? null : d)
+                          setShowMoreDomains(false)
+                        }}
+                        className={`flex-1 rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors ${
+                          activeDomain === d ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {d}
+                      </button>
+                      <button
+                        onClick={() => handleToggleFavorite(d)}
+                        title="Pin to favourites"
+                        className="shrink-0 p-1 text-gray-300 hover:text-amber-400 transition-colors"
+                      >
+                        ☆
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Rank filter chips */}
@@ -358,5 +431,46 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
     >
       {label}
     </button>
+  )
+}
+
+// ── DomainChip ────────────────────────────────────────────────────────────────
+// Favourite domain chip — shows a ★ unpin button on hover
+
+function DomainChip({
+  label,
+  active,
+  pinned,
+  onSelect,
+  onTogglePin,
+}: {
+  label: string
+  active: boolean
+  pinned: boolean
+  onSelect: () => void
+  onTogglePin: () => void
+}) {
+  return (
+    <div className="group flex items-center gap-0.5">
+      <button
+        onClick={onSelect}
+        className={`rounded-l-full rounded-r-none border-r-0 px-3 py-1 text-xs font-medium transition-colors ${
+          active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+        } ${pinned ? 'rounded-r-none' : 'rounded-full'}`}
+      >
+        {label}
+      </button>
+      <button
+        onClick={onTogglePin}
+        title="Unpin from favourites"
+        className={`rounded-r-full py-1 pl-1 pr-2 text-xs transition-colors ${
+          active
+            ? 'bg-blue-600 text-blue-200 hover:text-white'
+            : 'bg-gray-100 text-amber-400 opacity-0 group-hover:opacity-100 hover:text-amber-600'
+        }`}
+      >
+        ★
+      </button>
+    </div>
   )
 }

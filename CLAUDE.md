@@ -200,7 +200,8 @@ See `.devcontainer/README.md` for full setup steps.
 - Unified session at `/speaking/session`: state machine `idle → part1 → part2_generating → part2_prep → part2_speaking → part3 → ended`
 - STT via Chrome Web Speech API (`useSpeechInput` hook) — no API key required
 - Filler detection (`filler-detector.ts`): regex scan post-session, shown as amber badges with discourse marker tips
-- Standalone `/speaking` (Part 1) shows a topic selector grid before session start; 10 topics from `speaking_topics` DB table ordered by rank; toggle-select (deselect = mixed session); preview shows example questions; topic passed via `useChat body` → server prompt rebuilt per request
+- Standalone `/speaking` (Part 1) shows a topic selector before session start; pinned topics (`PINNED_TOPIC_NAMES` = Technology, Environment, Education, Health, Economy, Work) shown as chips; remaining topics in a `···` dropdown; toggle-select (deselect = mixed session); preview shows example questions; topic passed via `useChat body` → server prompt rebuilt per request
+- `PINNED_TOPIC_NAMES` is planned to be driven by `user_skill_topics` table (skill = `'speaking'`) — currently hardcoded, backlog
 - Standalone `/speaking/part2` preserved for focused Part 2 practice
 - Evaluation: Fluency & Coherence, Lexical Resource, Grammatical Range & Accuracy, Pronunciation
 
@@ -288,6 +289,13 @@ See `.devcontainer/README.md` for full setup steps.
 - `CollocationSkill` type exported from `schema.ts`: `'Writing_1' | 'Writing_2' | 'Speaking'`
 - Two AI prompts: `COLLOCATION_BY_WORD_PROMPT(word)` → `{ collocations: CollocationResult[] }`, `COLLOCATION_BY_PHRASE_PROMPT(phrase)` → `{ valid, phrase, type, suggestedSkills, examples } | { valid: false, reason }`
 - **`useOptimistic` + `revalidatePath` rule**: any mutation that must persist after optimistic state reverts (rank change, delete) **must** call `revalidatePath` in the server action so `initialItems` refreshes and `useOptimistic` settles on the correct server value
+
+**User Skill Topic Favourites** (`user_skill_topics` table)
+- Generic table: `(userId, skill, topicName)` composite PK — one row per pinned topic per skill
+- `skill` values: `'vocabulary'` (implemented) · `'speaking'`, `'writing'`, `'listening'`, `'reading'` (backlog)
+- **Lazy default seeding**: on first `getSkillFavorites(skill)` call, if no rows exist for that user+skill, inserts the default list from `SKILL_DEFAULTS` in `lib/db/user-skill-topics.ts`; vocabulary defaults = Technology, Environment, Education, Health, Economy, Work
+- **Vocabulary integration**: `VocabularyPage` fetches `getSkillFavorites('vocabulary')` → passes `favoriteDomains` to `VocabularyList`; favourite domains appear as pinned chips with a ★ unpin button on hover; non-favourite domains accessible via `···` dropdown with a ☆ pin button; toggle persisted via `toggleVocabFavoriteAction` (revalidates `/vocabulary`)
+- **Pattern for other skills**: add a default list to `SKILL_DEFAULTS`, fetch in the page, split chips with the same pinned/`···` pattern
 
 **Target Profile System**
 - `users.targetProfile` stored in DB; `parseTargetBand()` parses `IELTS_6.5` → `6.5`

@@ -285,6 +285,25 @@ export const collocationEntries = pgTable('collocation_entries', {
   check('collocation_entries_rank_check', sql`${t.rank} between 1 and 5`),
 ])
 
+// ─── Per-user skill topic favourites ─────────────────────────────────────────
+// Generic table — one row per (user, skill, topicName).
+// skill values: 'vocabulary' | 'speaking' | 'writing' | 'listening' | 'reading'
+// New users get a default set seeded on first fetch (lazy init in lib/db/user-skill-topics.ts).
+// TODO: implement for speaking, writing, listening, reading (backlog)
+
+export const userSkillTopics = pgTable(
+  'user_skill_topics',
+  {
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    skill: text('skill').notNull(),
+    topicName: text('topic_name').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.skill, t.topicName] })]
+)
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const cueCardsRelations = relations(cueCards, ({ many }) => ({
@@ -322,4 +341,8 @@ export const vocabularyWordDomainsRelations = relations(vocabularyWordDomains, (
 export const userDomainPreferencesRelations = relations(userDomainPreferences, ({ one }) => ({
   user: one(users, { fields: [userDomainPreferences.userId], references: [users.id] }),
   domain: one(writingDomains, { fields: [userDomainPreferences.domainId], references: [writingDomains.id] }),
+}))
+
+export const userSkillTopicsRelations = relations(userSkillTopics, ({ one }) => ({
+  user: one(users, { fields: [userSkillTopics.userId], references: [users.id] }),
 }))
