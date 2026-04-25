@@ -17,18 +17,20 @@ const VALID_ROLES = [
 export function WRONG_DECISION_PROMPT(data: {
   skill: string
   sourceText?: string
-  question: string
+  question?: string
   myThought: string
   actualAnswer: string
 }): string {
   const sourceBlock = data.sourceText?.trim()
     ? `\nSOURCE TEXT:\n"""\n${data.sourceText.trim()}\n"""\n`
     : ''
+  const questionBlock = data.question?.trim()
+    ? `\nQUESTION: ${data.question}`
+    : ''
 
   return `You are a strict IELTS examiner helping a learner understand why they got a question wrong.
 
-SKILL: ${data.skill.toUpperCase()}${sourceBlock}
-QUESTION: ${data.question}
+SKILL: ${data.skill.toUpperCase()}${sourceBlock}${questionBlock}
 LEARNER'S THOUGHT / ANSWER: ${data.myThought}
 CORRECT ANSWER: ${data.actualAnswer}
 

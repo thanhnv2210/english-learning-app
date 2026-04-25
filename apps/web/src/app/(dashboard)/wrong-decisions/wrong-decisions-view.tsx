@@ -203,8 +203,8 @@ function EntryForm({
   }
 
   async function handleAnalyse() {
-    if (!form.question.trim() || !form.myThought.trim() || !form.actualAnswer.trim()) {
-      setAnalyseError('Fill in Question, My thought, and Correct answer before analysing.')
+    if (!form.myThought.trim() || !form.actualAnswer.trim()) {
+      setAnalyseError('Fill in My thought and Correct answer before analysing.')
       return
     }
     setAnalyseError('')
@@ -216,7 +216,7 @@ function EntryForm({
         body: JSON.stringify({
           skill: form.skill,
           sourceText: form.sourceText || undefined,
-          question: form.question,
+          question: form.question || undefined,
           myThought: form.myThought,
           actualAnswer: form.actualAnswer,
         }),
@@ -237,7 +237,7 @@ function EntryForm({
   }
 
   function handleSave() {
-    if (!form.question.trim() || !form.myThought.trim() || !form.actualAnswer.trim()) return
+    if (!form.myThought.trim() || !form.actualAnswer.trim()) return
     startSaving(async () => {
       const id = await saveWrongDecisionAction({
         skill: form.skill,
@@ -266,7 +266,7 @@ function EntryForm({
     })
   }
 
-  const canSave = form.question.trim() && form.myThought.trim() && form.actualAnswer.trim()
+  const canSave = form.myThought.trim() && form.actualAnswer.trim()
 
   return (
     <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-5 mb-6 space-y-4">
@@ -331,12 +331,14 @@ function EntryForm({
 
       {/* Question */}
       <div>
-        <p className="text-xs font-semibold text-muted-foreground mb-1.5">Question *</p>
+        <p className="text-xs font-semibold text-muted-foreground mb-1.5">
+          Question <span className="font-normal text-faint">(optional — skip if question type covers it)</span>
+        </p>
         <textarea
           value={form.question}
           onChange={(e) => set('question', e.target.value)}
           rows={2}
-          placeholder="What was the question?"
+          placeholder="What was the question? (leave blank if question type is self-explanatory)"
           className="w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground placeholder-faint focus:outline-none focus:ring-1 focus:ring-blue-400 resize-y"
         />
       </div>
@@ -369,7 +371,7 @@ function EntryForm({
       <div className="flex items-center gap-3">
         <button
           onClick={handleAnalyse}
-          disabled={isAnalysing || !form.question.trim() || !form.myThought.trim() || !form.actualAnswer.trim()}
+          disabled={isAnalysing || !form.myThought.trim() || !form.actualAnswer.trim()}
           className="rounded-lg bg-violet-600 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-700 disabled:opacity-40 transition-colors"
         >
           {isAnalysing ? 'Analysing…' : 'AI Analyse'}
@@ -506,7 +508,7 @@ function LogCard({
   }
 
   function handleSaveEdit() {
-    if (!editQuestion.trim() || !editMyThought.trim()) return
+    if (!editMyThought.trim()) return
     startTransition(async () => {
       await updateWrongDecisionAction(log.id, {
         questionType: editQuestionType || undefined,
@@ -550,7 +552,11 @@ function LogCard({
             {log.questionType}
           </span>
         )}
-        <p className="flex-1 text-sm font-medium text-foreground line-clamp-2">{log.question}</p>
+        {log.question ? (
+          <p className="flex-1 text-sm font-medium text-foreground line-clamp-2">{log.question}</p>
+        ) : (
+          <p className="flex-1 text-sm text-faint italic line-clamp-1">My thought: {log.myThought}</p>
+        )}
         <div className="flex shrink-0 items-center gap-2 ml-2">
           {log.questionRoles.slice(0, 2).map((role) => {
             const rc = roleColor(role)
@@ -614,7 +620,7 @@ function LogCard({
                 ))}
               </div>
 
-              <p className="text-xs font-bold text-violet-700 dark:text-violet-400">Question *</p>
+              <p className="text-xs font-bold text-violet-700 dark:text-violet-400">Question <span className="font-normal opacity-70">(optional)</span></p>
               <textarea
                 value={editQuestion}
                 onChange={(e) => setEditQuestion(e.target.value)}
@@ -678,7 +684,7 @@ function LogCard({
               <div className="flex gap-2 pt-1">
                 <button
                   onClick={handleSaveEdit}
-                  disabled={isPending || !editQuestion.trim() || !editMyThought.trim()}
+                  disabled={isPending || !editMyThought.trim()}
                   className="rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-violet-700 disabled:opacity-40 transition-colors"
                 >
                   {isPending ? 'Saving…' : 'Save'}
@@ -846,7 +852,7 @@ export function WrongDecisionsView({
       if (search) {
         const q = search.toLowerCase()
         if (
-          !l.question.toLowerCase().includes(q) &&
+          !(l.question ?? '').toLowerCase().includes(q) &&
           !l.myThought.toLowerCase().includes(q) &&
           !l.actualAnswer.toLowerCase().includes(q) &&
           !(l.analytic ?? '').toLowerCase().includes(q)
