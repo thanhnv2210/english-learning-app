@@ -112,7 +112,7 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
   return (
     <div className="flex flex-col gap-6">
       {/* ── Filter bar ── */}
-      <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4">
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
         {/* Search + Sort */}
         <div className="flex gap-2">
           <input
@@ -120,12 +120,12 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search word or definition…"
-            className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm outline-none focus:border-blue-400"
+            className="flex-1 rounded-lg border border-border bg-input text-foreground px-4 py-2 text-sm outline-none focus:border-blue-400 placeholder:text-faint"
           />
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 outline-none focus:border-blue-400 bg-white"
+            className="rounded-lg border border-border bg-input text-foreground px-3 py-2 text-sm outline-none focus:border-blue-400"
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
@@ -156,13 +156,13 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
                 className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                   showMoreDomains || otherDomains.includes(activeDomain ?? '')
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-subtle text-muted-foreground hover:bg-border'
                 }`}
               >
                 ···
               </button>
               {showMoreDomains && (
-                <div className="absolute left-0 top-full mt-1 z-10 w-52 rounded-xl border border-gray-200 bg-white shadow-lg p-2 flex flex-col gap-0.5">
+                <div className="absolute left-0 top-full mt-1 z-10 w-52 rounded-xl border border-border bg-popover shadow-lg p-2 flex flex-col gap-0.5">
                   {otherDomains.map((d) => (
                     <div key={d} className="group flex items-center gap-1">
                       <button
@@ -171,7 +171,7 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
                           setShowMoreDomains(false)
                         }}
                         className={`flex-1 rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors ${
-                          activeDomain === d ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
+                          activeDomain === d ? 'bg-blue-50 text-blue-700' : 'text-foreground hover:bg-muted'
                         }`}
                       >
                         {d}
@@ -179,7 +179,7 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
                       <button
                         onClick={() => handleToggleFavorite(d)}
                         title="Pin to favourites"
-                        className="shrink-0 p-1 text-gray-300 hover:text-amber-400 transition-colors"
+                        className="shrink-0 p-1 text-faint hover:text-amber-400 transition-colors"
                       >
                         ☆
                       </button>
@@ -193,7 +193,7 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
 
         {/* Rank filter chips */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400 shrink-0">Rank</span>
+          <span className="text-xs text-faint shrink-0">Rank</span>
           <div className="flex gap-1.5">
             {[1, 2, 3, 4, 5].map((r) => (
               <button
@@ -203,7 +203,7 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
                 className={`flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
                   activeRank === r
                     ? 'border-amber-400 bg-amber-50 text-amber-700'
-                    : 'border-gray-200 bg-white text-gray-500 hover:border-amber-300 hover:text-amber-600'
+                    : 'border-border bg-card text-muted-foreground hover:border-amber-300 hover:text-amber-600'
                 }`}
               >
                 {'★'.repeat(r)}
@@ -214,15 +214,15 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
       </div>
 
       {/* ── Stats ── */}
-      <p className="text-xs text-gray-400">
-        Showing <span className="font-semibold text-gray-600">{filtered.length}</span> of{' '}
+      <p className="text-xs text-faint">
+        Showing <span className="font-semibold text-muted-foreground">{filtered.length}</span> of{' '}
         {words.length} words
       </p>
 
       {/* ── Word grid ── */}
       {filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-          <p className="text-sm text-gray-400">No words match your filter.</p>
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
+          <p className="text-sm text-faint">No words match your filter.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -312,7 +312,7 @@ export function WordCard({
   const familyEntries = Object.entries(word.familyWords).filter(([, v]) => v)
 
   return (
-    <div className="group relative flex flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="group relative flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm">
       {/* Delete — two-step, only for user-added words */}
       {onDelete && (
         confirmingDelete ? (
@@ -326,7 +326,7 @@ export function WordCard({
             </button>
             <button
               onClick={() => setConfirmingDelete(false)}
-              className="rounded px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+              className="rounded px-2 py-0.5 text-xs font-semibold bg-subtle text-muted-foreground hover:bg-border transition-colors"
             >
               No
             </button>
@@ -344,14 +344,14 @@ export function WordCard({
 
       {/* Header */}
       <div className="mb-2 flex items-start justify-between gap-2 pr-8">
-        <h3 className="text-lg font-bold text-gray-900">{word.word}</h3>
+        <h3 className="text-lg font-bold text-foreground">{word.word}</h3>
         {word.userAdded && (
           <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs text-blue-600 font-medium">
             Added
           </span>
         )}
         {word.domains.length === 0 && !word.userAdded && (
-          <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-500">
+          <span className="shrink-0 rounded-full bg-subtle px-2.5 py-0.5 text-xs text-muted-foreground">
             General
           </span>
         )}
@@ -373,23 +373,23 @@ export function WordCard({
         <div className="mb-2 flex flex-col gap-1.5">
           <div className="flex gap-2">
             <label className="flex items-center gap-1.5">
-              <span className="text-xs font-medium text-gray-400 w-5">UK</span>
+              <span className="text-xs font-medium text-faint w-5">UK</span>
               <input
                 type="text"
                 value={editUk}
                 onChange={(e) => setEditUk(e.target.value)}
                 placeholder="/ɪnˈfluəns/"
-                className="w-36 rounded border border-gray-200 px-2 py-1 font-mono text-xs text-gray-700 outline-none focus:border-blue-400"
+                className="w-36 rounded border border-border bg-input text-foreground px-2 py-1 font-mono text-xs outline-none focus:border-blue-400"
               />
             </label>
             <label className="flex items-center gap-1.5">
-              <span className="text-xs font-medium text-gray-400 w-5">US</span>
+              <span className="text-xs font-medium text-faint w-5">US</span>
               <input
                 type="text"
                 value={editUs}
                 onChange={(e) => setEditUs(e.target.value)}
                 placeholder="/ˈɪnfluəns/"
-                className="w-36 rounded border border-gray-200 px-2 py-1 font-mono text-xs text-gray-700 outline-none focus:border-blue-400"
+                className="w-36 rounded border border-border bg-input text-foreground px-2 py-1 font-mono text-xs outline-none focus:border-blue-400"
               />
             </label>
           </div>
@@ -403,7 +403,7 @@ export function WordCard({
             </button>
             <button
               onClick={() => setEditingPronunciation(false)}
-              className="rounded px-2.5 py-1 text-xs text-gray-500 hover:bg-gray-100 transition-colors"
+              className="rounded px-2.5 py-1 text-xs text-muted-foreground hover:bg-subtle transition-colors"
             >
               Cancel
             </button>
@@ -418,7 +418,7 @@ export function WordCard({
               onClick={handleGeneratePronunciation}
               disabled={isGeneratingPronunciation}
               title="Refresh from dictionary API"
-              className="text-xs text-gray-300 hover:text-blue-400 disabled:opacity-40 transition-colors"
+              className="text-xs text-faint hover:text-blue-400 disabled:opacity-40 transition-colors"
             >
               {isGeneratingPronunciation ? '…' : '↻'}
             </button>
@@ -426,7 +426,7 @@ export function WordCard({
           <button
             onClick={openPronunciationEdit}
             title="Edit pronunciation manually"
-            className="text-xs text-gray-300 hover:text-gray-500 transition-colors"
+            className="text-xs text-faint hover:text-muted-foreground transition-colors"
           >
             ✎
           </button>
@@ -436,14 +436,14 @@ export function WordCard({
           <button
             onClick={handleGeneratePronunciation}
             disabled={isGeneratingPronunciation}
-            className="text-xs text-gray-400 hover:text-blue-500 disabled:opacity-50 transition-colors"
+            className="text-xs text-faint hover:text-blue-500 disabled:opacity-50 transition-colors"
           >
             {isGeneratingPronunciation ? 'Fetching…' : '+ pronunciation'}
           </button>
-          <span className="text-xs text-gray-200">·</span>
+          <span className="text-xs text-faint">·</span>
           <button
             onClick={openPronunciationEdit}
-            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-xs text-faint hover:text-muted-foreground transition-colors"
           >
             enter manually
           </button>
@@ -451,14 +451,14 @@ export function WordCard({
       )}
 
       {/* Definition */}
-      <p className="mb-3 text-sm leading-relaxed text-gray-600">{word.definition}</p>
+      <p className="mb-3 text-sm leading-relaxed text-muted-foreground">{word.definition}</p>
 
       {/* Family words */}
       {familyEntries.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-1.5">
           {familyEntries.map(([pos, form]) => (
-            <span key={pos} className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600">
-              <span className="text-gray-400">{pos}: </span>
+            <span key={pos} className="rounded-full bg-subtle px-2.5 py-0.5 text-xs text-muted-foreground">
+              <span className="text-faint">{pos}: </span>
               {form}
             </span>
           ))}
@@ -467,16 +467,16 @@ export function WordCard({
 
       {/* Synonyms / antonyms */}
       {(synonyms.length > 0 || antonyms.length > 0) && (
-        <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+        <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
           {synonyms.length > 0 && (
             <span>
-              <span className="font-medium text-gray-700">Syn: </span>
+              <span className="font-medium text-foreground">Syn: </span>
               {synonyms.map((s) => s.word).join(', ')}
             </span>
           )}
           {antonyms.length > 0 && (
             <span>
-              <span className="font-medium text-gray-700">Ant: </span>
+              <span className="font-medium text-foreground">Ant: </span>
               {antonyms.map((s) => s.word).join(', ')}
             </span>
           )}
@@ -496,7 +496,7 @@ export function WordCard({
 
       {/* Rank */}
       <div className="flex items-center gap-1.5 mb-2">
-        <span className="text-xs text-gray-400">Rank</span>
+        <span className="text-xs text-faint">Rank</span>
         <div className="flex gap-0.5" onMouseLeave={() => setHoverRank(0)}>
           {[1, 2, 3, 4, 5].map((star) => (
             <button
@@ -506,7 +506,7 @@ export function WordCard({
               title={`Rank ${star}`}
               className="text-base leading-none transition-transform hover:scale-110"
             >
-              <span className={(hoverRank || localRank) >= star ? 'text-amber-400' : 'text-gray-200'}>
+              <span className={(hoverRank || localRank) >= star ? 'text-amber-400' : 'text-border'}>
                 ★
               </span>
             </button>
@@ -524,9 +524,9 @@ export function WordCard({
 
       {expanded && (
         <div className="mt-3 flex flex-col gap-2">
-          <div className="rounded-lg bg-gray-50 p-3">
-            <p className="mb-1 text-xs font-semibold text-gray-500">Speaking</p>
-            <p className="text-xs leading-relaxed text-gray-700 italic">
+          <div className="rounded-lg bg-muted p-3">
+            <p className="mb-1 text-xs font-semibold text-muted-foreground">Speaking</p>
+            <p className="text-xs leading-relaxed text-foreground italic">
               &ldquo;{word.examples.speaking}&rdquo;
             </p>
           </div>
@@ -535,7 +535,7 @@ export function WordCard({
               <p className="mb-1 text-xs font-semibold text-blue-500">
                 Writing Task 2 — example {i + 1}
               </p>
-              <p className="text-xs leading-relaxed text-gray-700 italic">
+              <p className="text-xs leading-relaxed text-foreground italic">
                 &ldquo;{ex}&rdquo;
               </p>
             </div>
@@ -563,14 +563,14 @@ function PronunciationChip({
   }
 
   return (
-    <span className="flex items-center gap-1 text-xs text-gray-500">
-      <span className="font-medium text-gray-400">{label}</span>
-      <span className="font-mono tracking-wide text-gray-700">{ipa}</span>
+    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+      <span className="font-medium text-faint">{label}</span>
+      <span className="font-mono tracking-wide text-foreground">{ipa}</span>
       {audioUrl && (
         <button
           onClick={play}
           title={`Play ${label} pronunciation`}
-          className="ml-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 text-gray-400 hover:bg-blue-50 hover:text-blue-500 transition-colors"
+          className="ml-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-subtle text-faint hover:bg-blue-50 hover:text-blue-500 transition-colors"
         >
           ▶
         </button>
@@ -586,7 +586,7 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
     <button
       onClick={onClick}
       className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-        active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+        active ? 'bg-blue-600 text-white' : 'bg-subtle text-muted-foreground hover:bg-border'
       }`}
     >
       {label}
@@ -615,7 +615,7 @@ function DomainChip({
       <button
         onClick={onSelect}
         className={`rounded-l-full rounded-r-none border-r-0 px-3 py-1 text-xs font-medium transition-colors ${
-          active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          active ? 'bg-blue-600 text-white' : 'bg-subtle text-muted-foreground hover:bg-border'
         } ${pinned ? 'rounded-r-none' : 'rounded-full'}`}
       >
         {label}
@@ -626,7 +626,7 @@ function DomainChip({
         className={`rounded-r-full py-1 pl-1 pr-2 text-xs transition-colors ${
           active
             ? 'bg-blue-600 text-blue-200 hover:text-white'
-            : 'bg-gray-100 text-amber-400 opacity-0 group-hover:opacity-100 hover:text-amber-600'
+            : 'bg-subtle text-amber-400 opacity-0 group-hover:opacity-100 hover:text-amber-600'
         }`}
       >
         ★
