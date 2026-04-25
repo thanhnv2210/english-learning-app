@@ -48,10 +48,10 @@ export function VocabSearch() {
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5">
+    <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
       <div>
-        <h2 className="text-sm font-semibold text-gray-800">Look up a word</h2>
-        <p className="text-xs text-gray-400 mt-0.5">
+        <h2 className="text-sm font-semibold text-foreground">Look up a word</h2>
+        <p className="text-xs text-faint mt-0.5">
           Search any IELTS Academic word — the system will generate a full card and auto-detect its topic domain.
         </p>
       </div>
@@ -63,7 +63,7 @@ export function VocabSearch() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="e.g. mitigate, proliferate, infrastructure…"
-          className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm outline-none focus:border-blue-400"
+          className="flex-1 rounded-lg border border-border bg-input text-foreground px-4 py-2 text-sm outline-none focus:border-blue-400"
         />
         <button
           type="submit"
@@ -81,7 +81,7 @@ export function VocabSearch() {
 
       {/* Spinner */}
       {status === 'searching' && (
-        <p className="text-xs text-gray-400 animate-pulse text-center py-4">
+        <p className="text-xs text-faint animate-pulse text-center py-4">
           Generating vocabulary card…
         </p>
       )}
@@ -102,7 +102,7 @@ export function VocabSearch() {
                   AI generated · not yet saved
                 </span>
                 {card.domains.length > 0 && (
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-faint">
                     Detected domains: {card.domains.join(', ')}
                   </span>
                 )}

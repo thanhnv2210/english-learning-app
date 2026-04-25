@@ -10,9 +10,9 @@ import type { CollocationSearchResponse } from '@/app/api/collocations/search/ro
 const ALL_SKILLS: CollocationSkill[] = ['Writing_1', 'Writing_2', 'Speaking']
 
 const SKILL_COLORS: Record<CollocationSkill, string> = {
-  Writing_1: 'bg-blue-100 text-blue-700 border-blue-200',
-  Writing_2: 'bg-purple-100 text-purple-700 border-purple-200',
-  Speaking: 'bg-green-100 text-green-700 border-green-200',
+  Writing_1: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
+  Writing_2: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800',
+  Speaking: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800',
 }
 
 const SKILL_LABELS: Record<CollocationSkill, string> = {
@@ -99,10 +99,10 @@ export function CollocationSearch() {
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5">
+    <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
       <div>
-        <h2 className="text-sm font-semibold text-gray-800">Search collocations</h2>
-        <p className="text-xs text-gray-400 mt-0.5">
+        <h2 className="text-sm font-semibold text-foreground">Search collocations</h2>
+        <p className="text-xs text-faint mt-0.5">
           Enter a word to find common collocations, or a phrase to check a specific one.
         </p>
       </div>
@@ -115,7 +115,7 @@ export function CollocationSearch() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch('word')}
           placeholder="e.g. risk, significant impact, contribute to…"
-          className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm outline-none focus:border-blue-400"
+          className="flex-1 rounded-lg border border-border bg-input text-foreground px-4 py-2 text-sm outline-none focus:border-blue-400"
         />
         <button
           onClick={() => handleSearch('word')}
@@ -135,7 +135,7 @@ export function CollocationSearch() {
 
       {/* States */}
       {status === 'searching' && (
-        <p className="text-xs text-gray-400 animate-pulse text-center py-4">
+        <p className="text-xs text-faint animate-pulse text-center py-4">
           {mode === 'word' ? 'Finding collocations…' : 'Checking phrase…'}
         </p>
       )}
@@ -156,7 +156,7 @@ export function CollocationSearch() {
       {/* Result cards */}
       {status === 'done' && cards.length > 0 && (
         <div className="flex flex-col gap-3">
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-faint">
             {mode === 'word'
               ? `${cards.length} collocations found — adjust skills then save`
               : 'Valid collocation — adjust skills then save'}
@@ -201,12 +201,12 @@ function CollocationResultCard({
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 flex flex-col gap-3">
+    <div className="rounded-xl border border-border bg-muted p-4 flex flex-col gap-3">
       {/* Header row */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <span className="text-base font-semibold text-gray-900">{card.phrase}</span>
-          <span className="text-xs text-gray-400 bg-gray-100 rounded-full px-2 py-0.5 w-fit">
+          <span className="text-base font-semibold text-foreground">{card.phrase}</span>
+          <span className="text-xs text-faint bg-subtle rounded-full px-2 py-0.5 w-fit">
             {card.type}
           </span>
         </div>
@@ -230,12 +230,12 @@ function CollocationResultCard({
 
       {/* Explanation */}
       {card.explanation && (
-        <p className="text-sm leading-relaxed text-gray-600">{card.explanation}</p>
+        <p className="text-sm leading-relaxed text-muted-foreground">{card.explanation}</p>
       )}
 
       {/* Skill toggles */}
       <div className="flex flex-col gap-1">
-        <p className="text-xs text-gray-400">Skills (AI-suggested — toggle to adjust):</p>
+        <p className="text-xs text-faint">Skills (AI-suggested — toggle to adjust):</p>
         <div className="flex gap-2 flex-wrap">
           {ALL_SKILLS.map((skill) => {
             const active = card.savedSkills.includes(skill)
@@ -247,7 +247,7 @@ function CollocationResultCard({
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                   active
                     ? SKILL_COLORS[skill]
-                    : 'bg-white text-gray-400 border-gray-200 hover:bg-gray-100'
+                    : 'bg-card text-faint border-border hover:bg-subtle'
                 } ${card.inLibrary ? 'cursor-default opacity-70' : 'cursor-pointer'}`}
               >
                 {SKILL_LABELS[skill]}
@@ -269,8 +269,8 @@ function CollocationResultCard({
           {expanded && (
             <div className="flex flex-col gap-2">
               {card.examples.map((ex, i) => (
-                <div key={i} className="rounded-lg bg-white border border-gray-100 p-3">
-                  <p className="text-xs leading-relaxed text-gray-700 italic">&ldquo;{ex}&rdquo;</p>
+                <div key={i} className="rounded-lg bg-card border border-border p-3">
+                  <p className="text-xs leading-relaxed text-foreground italic">&ldquo;{ex}&rdquo;</p>
                 </div>
               ))}
             </div>

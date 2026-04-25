@@ -8,9 +8,9 @@ import type { CollocationSkill } from '@/lib/db/schema'
 const ALL_SKILLS: CollocationSkill[] = ['Writing_1', 'Writing_2', 'Speaking']
 
 const SKILL_COLORS: Record<CollocationSkill, string> = {
-  Writing_1: 'bg-blue-100 text-blue-700',
-  Writing_2: 'bg-purple-100 text-purple-700',
-  Speaking: 'bg-green-100 text-green-700',
+  Writing_1: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  Writing_2: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+  Speaking: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
 }
 
 const SKILL_LABELS: Record<CollocationSkill, string> = {
@@ -97,30 +97,30 @@ export function CollocationList({ initialItems }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-base font-semibold text-gray-800">Saved Collocations</h2>
-        <span className="text-xs text-gray-400">{items.length} saved</span>
+        <h2 className="text-base font-semibold text-foreground">Saved Collocations</h2>
+        <span className="text-xs text-faint">{items.length} saved</span>
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-          <p className="text-sm text-gray-400">No collocations saved yet. Search above to add some.</p>
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
+          <p className="text-sm text-faint">No collocations saved yet. Search above to add some.</p>
         </div>
       ) : (
         <>
           {/* Filter bar */}
-          <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4">
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
             <div className="flex gap-2">
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search phrase, type, or example…"
-                className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm outline-none focus:border-blue-400"
+                className="flex-1 rounded-lg border border-border px-4 py-2 text-sm outline-none focus:border-blue-400"
               />
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as SortKey)}
-                className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 outline-none focus:border-blue-400 bg-white"
+                className="rounded-lg border border-border bg-input text-foreground px-3 py-2 text-sm outline-none focus:border-blue-400"
               >
                 {SORT_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -145,7 +145,7 @@ export function CollocationList({ initialItems }: Props) {
               />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400 shrink-0">Rank</span>
+              <span className="text-xs text-faint shrink-0">Rank</span>
               <div className="flex gap-1.5">
                 {[1, 2, 3, 4, 5].map((r) => (
                   <button
@@ -155,7 +155,7 @@ export function CollocationList({ initialItems }: Props) {
                     className={`flex items-center gap-0.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
                       activeRank === r
                         ? 'border-amber-400 bg-amber-50 text-amber-700'
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-amber-300 hover:text-amber-600'
+                        : 'border-border bg-card text-muted-foreground hover:border-amber-300 hover:text-amber-600'
                     }`}
                   >
                     {'★'.repeat(r)}
@@ -165,13 +165,13 @@ export function CollocationList({ initialItems }: Props) {
             </div>
           </div>
 
-          <p className="text-xs text-gray-400">
-            Showing <span className="font-semibold text-gray-600">{filtered.length}</span> of {items.length}
+          <p className="text-xs text-faint">
+            Showing <span className="font-semibold text-muted-foreground">{filtered.length}</span> of {items.length}
           </p>
 
           {filtered.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center">
-              <p className="text-sm text-gray-400">No collocations match your filter.</p>
+            <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center">
+              <p className="text-sm text-faint">No collocations match your filter.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -225,7 +225,7 @@ function SavedCard({
   }
 
   return (
-    <div className="group relative flex flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm gap-3">
+    <div className="group relative flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm gap-3">
       {/* Delete button — two-step confirmation */}
       {confirmingDelete ? (
         <div className="absolute top-2.5 right-3 flex items-center gap-1.5">
@@ -238,7 +238,7 @@ function SavedCard({
           </button>
           <button
             onClick={() => setConfirmingDelete(false)}
-            className="rounded px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+            className="rounded px-2 py-0.5 text-xs font-semibold bg-subtle text-muted-foreground hover:bg-border transition-colors"
           >
             No
           </button>
@@ -255,20 +255,20 @@ function SavedCard({
 
       {/* Phrase + type */}
       <div className="flex flex-col gap-1 pr-7">
-        <span className="text-base font-semibold text-gray-900">{card.phrase}</span>
-        <span className="text-xs text-gray-400 bg-gray-100 rounded-full px-2 py-0.5 w-fit">
+        <span className="text-base font-semibold text-foreground">{card.phrase}</span>
+        <span className="text-xs text-faint bg-subtle rounded-full px-2 py-0.5 w-fit">
           {card.type}
         </span>
       </div>
 
       {/* Explanation */}
       {card.explanation && (
-        <p className="text-sm leading-relaxed text-gray-600">{card.explanation}</p>
+        <p className="text-sm leading-relaxed text-muted-foreground">{card.explanation}</p>
       )}
 
       {/* Rank */}
       <div className="flex items-center gap-1.5">
-        <span className="text-xs text-gray-400">Rank</span>
+        <span className="text-xs text-faint">Rank</span>
         <div className="flex gap-0.5" onMouseLeave={() => setHoverRank(0)}>
           {[1, 2, 3, 4, 5].map((star) => (
             <button
@@ -278,7 +278,7 @@ function SavedCard({
               title={`Rank ${star}`}
               className="text-base leading-none transition-transform hover:scale-110"
             >
-              <span className={(hoverRank || localRank) >= star ? 'text-amber-400' : 'text-gray-200'}>
+              <span className={(hoverRank || localRank) >= star ? 'text-amber-400' : 'text-border'}>
                 ★
               </span>
             </button>
@@ -291,7 +291,7 @@ function SavedCard({
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5 flex-wrap">
             {card.skills.length === 0 ? (
-              <span className="text-xs text-gray-400 italic">No skills tagged</span>
+              <span className="text-xs text-faint italic">No skills tagged</span>
             ) : (
               localSkills.map((skill) => (
                 <span
@@ -305,7 +305,7 @@ function SavedCard({
           </div>
           <button
             onClick={() => setEditingSkills((v) => !v)}
-            className="shrink-0 text-xs text-gray-400 hover:text-blue-500 transition-colors ml-auto"
+            className="shrink-0 text-xs text-faint hover:text-blue-500 transition-colors ml-auto"
           >
             {editingSkills ? 'Done' : 'Edit'}
           </button>
@@ -322,7 +322,7 @@ function SavedCard({
                   className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                     active
                       ? `${SKILL_COLORS[skill]} border-transparent`
-                      : 'bg-white text-gray-400 border-gray-200 hover:bg-gray-100'
+                      : 'bg-card text-faint border-border hover:bg-subtle'
                   }`}
                 >
                   {SKILL_LABELS[skill]}
@@ -345,8 +345,8 @@ function SavedCard({
           {expanded && (
             <div className="flex flex-col gap-2">
               {card.examples.map((ex, i) => (
-                <div key={i} className="rounded-lg bg-gray-50 p-3">
-                  <p className="text-xs leading-relaxed text-gray-700 italic">
+                <div key={i} className="rounded-lg bg-muted p-3">
+                  <p className="text-xs leading-relaxed text-foreground italic">
                     &ldquo;<HighlightedExample text={ex} phrase={card.phrase} />&rdquo;
                   </p>
                 </div>
@@ -375,7 +375,7 @@ function HighlightedExample({ text, phrase }: { text: string; phrase: string }) 
         part.toLowerCase() === phrase.toLowerCase() ? (
           <mark
             key={i}
-            className="not-italic bg-blue-100 text-blue-800 rounded px-0.5 font-semibold"
+            className="not-italic bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded px-0.5 font-semibold"
           >
             {part}
           </mark>
@@ -408,7 +408,7 @@ function FilterChip({
             : 'bg-blue-600 text-white'
           : highlight
             ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            : 'bg-subtle text-muted-foreground hover:bg-border'
       }`}
     >
       {label}

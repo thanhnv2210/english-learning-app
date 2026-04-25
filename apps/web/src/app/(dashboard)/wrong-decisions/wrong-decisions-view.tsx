@@ -22,10 +22,10 @@ const SKILL_LABELS: Record<string, string> = {
 }
 
 const SKILL_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  reading:   { bg: 'bg-blue-50',   text: 'text-blue-700',   border: 'border-blue-200' },
-  listening: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
-  speaking:  { bg: 'bg-green-50',  text: 'text-green-700',  border: 'border-green-200' },
-  writing:   { bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-200' },
+  reading:   { bg: 'bg-blue-50 dark:bg-blue-900/20',   text: 'text-blue-700 dark:text-blue-400',   border: 'border-blue-200 dark:border-blue-800' },
+  listening: { bg: 'bg-purple-50 dark:bg-purple-900/20', text: 'text-purple-700 dark:text-purple-400', border: 'border-purple-200 dark:border-purple-800' },
+  speaking:  { bg: 'bg-green-50 dark:bg-green-900/20',  text: 'text-green-700 dark:text-green-400',  border: 'border-green-200 dark:border-green-800' },
+  writing:   { bg: 'bg-amber-50 dark:bg-amber-900/20',  text: 'text-amber-700 dark:text-amber-400',  border: 'border-amber-200 dark:border-amber-800' },
 }
 
 const QUESTION_TYPES_BY_SKILL: Record<string, string[]> = {
@@ -89,13 +89,13 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 const ROLE_COLORS: Record<string, { bg: string; text: string }> = {
-  'question-word': { bg: 'bg-blue-100',   text: 'text-blue-800'   },
-  'category':      { bg: 'bg-indigo-100', text: 'text-indigo-800' },
-  'exclusion':     { bg: 'bg-rose-100',   text: 'text-rose-800'   },
-  'hedge':         { bg: 'bg-amber-100',  text: 'text-amber-800'  },
-  'relationship':  { bg: 'bg-purple-100', text: 'text-purple-800' },
-  'target':        { bg: 'bg-green-100',  text: 'text-green-800'  },
-  'time':          { bg: 'bg-gray-100',   text: 'text-gray-700'   },
+  'question-word': { bg: 'bg-blue-100 dark:bg-blue-900/30',   text: 'text-blue-800 dark:text-blue-300'   },
+  'category':      { bg: 'bg-indigo-100 dark:bg-indigo-900/30', text: 'text-indigo-800 dark:text-indigo-300' },
+  'exclusion':     { bg: 'bg-rose-100 dark:bg-rose-900/30',   text: 'text-rose-800 dark:text-rose-300'   },
+  'hedge':         { bg: 'bg-amber-100 dark:bg-amber-900/30',  text: 'text-amber-800 dark:text-amber-300'  },
+  'relationship':  { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-800 dark:text-purple-300' },
+  'target':        { bg: 'bg-green-100 dark:bg-green-900/30',  text: 'text-green-800 dark:text-green-300'  },
+  'time':          { bg: 'bg-subtle',       text: 'text-foreground'   },
 }
 
 function roleColor(role: string) {
@@ -124,9 +124,9 @@ function StatsBar({ stats }: { stats: WrongDecisionStats }) {
         { label: 'Most errors in', value: topSkill ? SKILL_LABELS[topSkill[0]] ?? topSkill[0] : '—' },
         { label: 'Most missed role', value: topRole ? (ROLE_LABELS[topRole.role] ?? topRole.role) : '—' },
       ].map(({ label, value }) => (
-        <div key={label} className="rounded-xl border border-gray-200 bg-white px-5 py-4">
-          <p className="text-xs text-gray-400">{label}</p>
-          <p className="mt-1 text-lg font-bold text-gray-800 truncate">{value}</p>
+        <div key={label} className="rounded-xl border border-border bg-card px-5 py-4">
+          <p className="text-xs text-faint">{label}</p>
+          <p className="mt-1 text-lg font-bold text-foreground truncate">{value}</p>
         </div>
       ))}
     </div>
@@ -138,8 +138,8 @@ function StatsBar({ stats }: { stats: WrongDecisionStats }) {
 function SkillBreakdown({ bySkill, total }: { bySkill: Record<string, number>; total: number }) {
   if (total === 0) return null
   return (
-    <div className="mb-6 rounded-xl border border-gray-200 bg-white p-5">
-      <p className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wide">Errors by skill</p>
+    <div className="mb-6 rounded-xl border border-border bg-card p-5">
+      <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">Errors by skill</p>
       <div className="flex flex-col gap-2">
         {SKILLS.map((skill) => {
           const count = bySkill[skill] ?? 0
@@ -147,14 +147,14 @@ function SkillBreakdown({ bySkill, total }: { bySkill: Record<string, number>; t
           const c = SKILL_COLORS[skill]
           return (
             <div key={skill} className="flex items-center gap-3">
-              <span className="w-20 shrink-0 text-xs font-medium text-gray-600">{SKILL_LABELS[skill]}</span>
-              <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+              <span className="w-20 shrink-0 text-xs font-medium text-muted-foreground">{SKILL_LABELS[skill]}</span>
+              <div className="flex-1 h-2 rounded-full bg-subtle overflow-hidden">
                 <div
                   className={`h-full rounded-full ${c.bg.replace('50', '400')}`}
                   style={{ width: `${pct}%` }}
                 />
               </div>
-              <span className="w-8 text-right text-xs font-semibold text-gray-700">{count}</span>
+              <span className="w-8 text-right text-xs font-semibold text-foreground">{count}</span>
             </div>
           )
         })}
@@ -269,12 +269,12 @@ function EntryForm({
   const canSave = form.question.trim() && form.myThought.trim() && form.actualAnswer.trim()
 
   return (
-    <div className="rounded-xl border border-blue-200 bg-blue-50 p-5 mb-6 space-y-4">
-      <h2 className="text-sm font-bold text-gray-900">Log a wrong decision</h2>
+    <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-5 mb-6 space-y-4">
+      <h2 className="text-sm font-bold text-foreground">Log a wrong decision</h2>
 
       {/* Skill selector */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1.5">Skill *</p>
+        <p className="text-xs font-semibold text-muted-foreground mb-1.5">Skill *</p>
         <div className="flex gap-2 flex-wrap">
           {SKILLS.map((s) => {
             const c = SKILL_COLORS[s]
@@ -283,7 +283,7 @@ function EntryForm({
                 key={s}
                 onClick={() => setForm((prev) => ({ ...prev, skill: s, questionType: '' }))}
                 className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
-                  form.skill === s ? `${c.bg} ${c.text} ${c.border}` : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                  form.skill === s ? `${c.bg} ${c.text} ${c.border}` : 'bg-card text-muted-foreground border-border hover:opacity-70'
                 }`}
               >
                 {SKILL_LABELS[s]}
@@ -295,8 +295,8 @@ function EntryForm({
 
       {/* Question type */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1.5">
-          Question type <span className="font-normal text-gray-400">(optional)</span>
+        <p className="text-xs font-semibold text-muted-foreground mb-1.5">
+          Question type <span className="font-normal text-faint">(optional)</span>
         </p>
         <div className="flex flex-wrap gap-1.5">
           {(QUESTION_TYPES_BY_SKILL[form.skill] ?? []).map((qt) => (
@@ -305,8 +305,8 @@ function EntryForm({
               onClick={() => set('questionType', form.questionType === qt ? '' : qt)}
               className={`rounded-full px-2.5 py-0.5 text-xs font-semibold border transition-colors ${
                 form.questionType === qt
-                  ? 'bg-gray-800 text-white border-gray-800'
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+                  ? 'bg-foreground text-background border-foreground'
+                  : 'bg-card text-muted-foreground border-border hover:opacity-70'
               }`}
             >
               {qt}
@@ -317,51 +317,51 @@ function EntryForm({
 
       {/* Source text */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1.5">
-          Source text <span className="font-normal text-gray-400">(optional — paste passage or transcript)</span>
+        <p className="text-xs font-semibold text-muted-foreground mb-1.5">
+          Source text <span className="font-normal text-faint">(optional — paste passage or transcript)</span>
         </p>
         <textarea
           value={form.sourceText}
           onChange={(e) => set('sourceText', e.target.value)}
           rows={4}
           placeholder="Paste the relevant passage, transcript or context here…"
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 resize-y"
+          className="w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground placeholder-faint focus:outline-none focus:ring-1 focus:ring-blue-400 resize-y"
         />
       </div>
 
       {/* Question */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1.5">Question *</p>
+        <p className="text-xs font-semibold text-muted-foreground mb-1.5">Question *</p>
         <textarea
           value={form.question}
           onChange={(e) => set('question', e.target.value)}
           rows={2}
           placeholder="What was the question?"
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 resize-y"
+          className="w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground placeholder-faint focus:outline-none focus:ring-1 focus:ring-blue-400 resize-y"
         />
       </div>
 
       {/* My thought */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1.5">My thought / answer *</p>
+        <p className="text-xs font-semibold text-muted-foreground mb-1.5">My thought / answer *</p>
         <textarea
           value={form.myThought}
           onChange={(e) => set('myThought', e.target.value)}
           rows={2}
           placeholder="What did you think or answer? Why did it seem right at the time?"
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 resize-y"
+          className="w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground placeholder-faint focus:outline-none focus:ring-1 focus:ring-blue-400 resize-y"
         />
       </div>
 
       {/* Correct answer */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1.5">Correct answer *</p>
+        <p className="text-xs font-semibold text-muted-foreground mb-1.5">Correct answer *</p>
         <input
           type="text"
           value={form.actualAnswer}
           onChange={(e) => set('actualAnswer', e.target.value)}
           placeholder="What was the correct answer?"
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+          className="w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground placeholder-faint focus:outline-none focus:ring-1 focus:ring-blue-400"
         />
       </div>
 
@@ -374,37 +374,37 @@ function EntryForm({
         >
           {isAnalysing ? 'Analysing…' : 'AI Analyse'}
         </button>
-        <p className="text-xs text-gray-400">or fill in analytic and solution manually below</p>
+        <p className="text-xs text-faint">or fill in analytic and solution manually below</p>
       </div>
       {analyseError && <p className="text-xs text-rose-600">{analyseError}</p>}
 
       {/* Analytic */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1.5">Analytic</p>
+        <p className="text-xs font-semibold text-muted-foreground mb-1.5">Analytic</p>
         <textarea
           value={form.analytic}
           onChange={(e) => set('analytic', e.target.value)}
           rows={3}
           placeholder="Why was this answer wrong? What did you misread?"
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 resize-y"
+          className="w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground placeholder-faint focus:outline-none focus:ring-1 focus:ring-blue-400 resize-y"
         />
       </div>
 
       {/* Solution */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1.5">Solution / prevention</p>
+        <p className="text-xs font-semibold text-muted-foreground mb-1.5">Solution / prevention</p>
         <textarea
           value={form.solution}
           onChange={(e) => set('solution', e.target.value)}
           rows={2}
           placeholder="What will you do differently next time?"
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 resize-y"
+          className="w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground placeholder-faint focus:outline-none focus:ring-1 focus:ring-blue-400 resize-y"
         />
       </div>
 
       {/* Question roles */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 mb-1.5">Question roles misread</p>
+        <p className="text-xs font-semibold text-muted-foreground mb-1.5">Question roles misread</p>
         <div className="flex flex-wrap gap-1.5">
           {QUESTION_ROLES.map((role) => {
             const c = roleColor(role)
@@ -416,7 +416,7 @@ function EntryForm({
                 className={`rounded-full px-2.5 py-0.5 text-xs font-semibold border transition-colors ${
                   selected
                     ? `${c.bg} ${c.text} border-transparent`
-                    : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                    : 'bg-card text-faint border-border hover:opacity-70'
                 }`}
               >
                 {ROLE_LABELS[role]}
@@ -431,13 +431,13 @@ function EntryForm({
         <button
           onClick={handleSave}
           disabled={!canSave || isSaving}
-          className="rounded-lg bg-gray-900 px-4 py-2 text-xs font-semibold text-white hover:bg-gray-700 disabled:opacity-40 transition-colors"
+          className="rounded-lg bg-foreground text-background px-4 py-2 text-xs font-semibold hover:opacity-80 disabled:opacity-40 transition-opacity"
         >
           {isSaving ? 'Saving…' : 'Save entry'}
         </button>
         <button
           onClick={onCancel}
-          className="rounded-lg border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+          className="rounded-lg border border-border px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
         >
           Cancel
         </button>
@@ -536,21 +536,21 @@ function LogCard({
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
       {/* Header */}
       <button
         onClick={() => { setIsOpen((o) => !o); setIsEditing(false) }}
-        className="flex w-full items-start gap-3 px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+        className="flex w-full items-start gap-3 px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
       >
         <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold border ${c.bg} ${c.text} ${c.border}`}>
           {SKILL_LABELS[log.skill] ?? log.skill}
         </span>
         {log.questionType && (
-          <span className="shrink-0 rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-[10px] font-semibold text-gray-600">
+          <span className="shrink-0 rounded-full border border-border bg-subtle px-2.5 py-0.5 text-[10px] font-semibold text-foreground">
             {log.questionType}
           </span>
         )}
-        <p className="flex-1 text-sm font-medium text-gray-800 line-clamp-2">{log.question}</p>
+        <p className="flex-1 text-sm font-medium text-foreground line-clamp-2">{log.question}</p>
         <div className="flex shrink-0 items-center gap-2 ml-2">
           {log.questionRoles.slice(0, 2).map((role) => {
             const rc = roleColor(role)
@@ -570,13 +570,13 @@ function LogCard({
 
       {/* Expanded */}
       {isOpen && (
-        <div className="border-t border-gray-100 px-5 pb-5 pt-4 space-y-4">
+        <div className="border-t border-border px-5 pb-5 pt-4 space-y-4">
 
           {/* Source text */}
           {log.sourceText && (
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1">Source text</p>
-              <p className="text-xs leading-relaxed text-gray-600 whitespace-pre-wrap max-h-32 overflow-y-auto rounded bg-gray-50 p-2 border border-gray-100">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-faint mb-1">Source text</p>
+              <p className="text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap max-h-32 overflow-y-auto rounded bg-muted p-2 border border-border">
                 {log.sourceText}
               </p>
             </div>
@@ -584,20 +584,20 @@ function LogCard({
 
           {/* My thought / Correct answer */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2.5">
+            <div className="rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/20 px-3 py-2.5">
               <p className="text-[10px] font-bold uppercase tracking-wide text-rose-400 mb-1">My thought / answer</p>
-              <p className="text-xs text-rose-800">{log.myThought}</p>
+              <p className="text-xs text-rose-800 dark:text-rose-300">{log.myThought}</p>
             </div>
-            <div className="rounded-lg border border-green-200 bg-green-50 px-3 py-2.5">
+            <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-3 py-2.5">
               <p className="text-[10px] font-bold uppercase tracking-wide text-green-500 mb-1">Correct answer</p>
-              <p className="text-xs font-semibold text-green-800">{log.actualAnswer}</p>
+              <p className="text-xs font-semibold text-green-800 dark:text-green-300">{log.actualAnswer}</p>
             </div>
           </div>
 
           {/* Analytic + Solution + Roles — view or edit mode */}
           {isEditing ? (
-            <div className="space-y-3 rounded-lg border border-violet-200 bg-violet-50 p-4">
-              <p className="text-xs font-bold text-violet-700">Question type</p>
+            <div className="space-y-3 rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/20 p-4">
+              <p className="text-xs font-bold text-violet-700 dark:text-violet-400">Question type</p>
               <div className="flex flex-wrap gap-1.5">
                 {(QUESTION_TYPES_BY_SKILL[log.skill] ?? []).map((qt) => (
                   <button
@@ -605,8 +605,8 @@ function LogCard({
                     onClick={() => setEditQuestionType(editQuestionType === qt ? '' : qt)}
                     className={`rounded-full px-2.5 py-0.5 text-xs font-semibold border transition-colors ${
                       editQuestionType === qt
-                        ? 'bg-gray-800 text-white border-gray-800'
-                        : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                        ? 'bg-foreground text-background border-foreground'
+                        : 'bg-card text-faint border-border hover:opacity-70'
                     }`}
                   >
                     {qt}
@@ -614,28 +614,28 @@ function LogCard({
                 ))}
               </div>
 
-              <p className="text-xs font-bold text-violet-700">Question *</p>
+              <p className="text-xs font-bold text-violet-700 dark:text-violet-400">Question *</p>
               <textarea
                 value={editQuestion}
                 onChange={(e) => setEditQuestion(e.target.value)}
                 rows={2}
-                className="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y"
+                className="w-full rounded-lg border border-violet-200 dark:border-violet-700 bg-card px-3 py-2 text-sm text-foreground placeholder-faint focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y"
               />
 
-              <p className="text-xs font-bold text-violet-700">My thought / answer *</p>
+              <p className="text-xs font-bold text-violet-700 dark:text-violet-400">My thought / answer *</p>
               <textarea
                 value={editMyThought}
                 onChange={(e) => setEditMyThought(e.target.value)}
                 rows={2}
-                className="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y"
+                className="w-full rounded-lg border border-violet-200 dark:border-violet-700 bg-card px-3 py-2 text-sm text-foreground placeholder-faint focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y"
               />
 
               <div className="flex items-center justify-between pt-1">
-                <p className="text-xs font-bold text-violet-700">Analytic</p>
+                <p className="text-xs font-bold text-violet-700 dark:text-violet-400">Analytic</p>
                 <button
                   onClick={handleReanalyse}
                   disabled={isReanalysing}
-                  className="text-xs text-violet-600 hover:underline disabled:opacity-40"
+                  className="text-xs text-violet-600 dark:text-violet-400 hover:underline disabled:opacity-40"
                 >
                   {isReanalysing ? 'Analysing…' : '↻ Re-analyse with AI'}
                 </button>
@@ -645,17 +645,17 @@ function LogCard({
                 onChange={(e) => setEditAnalytic(e.target.value)}
                 rows={3}
                 placeholder="Why was this wrong?"
-                className="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y"
+                className="w-full rounded-lg border border-violet-200 dark:border-violet-700 bg-card px-3 py-2 text-sm text-foreground placeholder-faint focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y"
               />
-              <p className="text-xs font-bold text-violet-700">Solution</p>
+              <p className="text-xs font-bold text-violet-700 dark:text-violet-400">Solution</p>
               <textarea
                 value={editSolution}
                 onChange={(e) => setEditSolution(e.target.value)}
                 rows={2}
                 placeholder="How to prevent this?"
-                className="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y"
+                className="w-full rounded-lg border border-violet-200 dark:border-violet-700 bg-card px-3 py-2 text-sm text-foreground placeholder-faint focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y"
               />
-              <p className="text-xs font-bold text-violet-700">Question roles misread</p>
+              <p className="text-xs font-bold text-violet-700 dark:text-violet-400">Question roles misread</p>
               <div className="flex flex-wrap gap-1.5">
                 {QUESTION_ROLES.map((role) => {
                   const rc = roleColor(role)
@@ -667,7 +667,7 @@ function LogCard({
                       className={`rounded-full px-2.5 py-0.5 text-xs font-semibold border transition-colors ${
                         selected
                           ? `${rc.bg} ${rc.text} border-transparent`
-                          : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                          : 'bg-card text-faint border-border hover:opacity-70'
                       }`}
                     >
                       {ROLE_LABELS[role]}
@@ -693,7 +693,7 @@ function LogCard({
                     setEditSolution(log.solution ?? '')
                     setEditRoles(log.questionRoles)
                   }}
-                  className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted transition-colors"
                 >
                   Cancel
                 </button>
@@ -702,17 +702,17 @@ function LogCard({
           ) : (
             <>
               {(log.analytic || log.solution) && (
-                <div className="rounded-lg border border-violet-200 bg-violet-50 p-4 space-y-3">
+                <div className="rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/20 p-4 space-y-3">
                   {log.analytic && (
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-wide text-violet-500 mb-1">Analytic</p>
-                      <p className="text-xs leading-relaxed text-violet-900">{log.analytic}</p>
+                      <p className="text-xs leading-relaxed text-violet-900 dark:text-violet-300">{log.analytic}</p>
                     </div>
                   )}
                   {log.solution && (
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-wide text-violet-500 mb-1">Solution</p>
-                      <p className="text-xs leading-relaxed text-violet-900">{log.solution}</p>
+                      <p className="text-xs leading-relaxed text-violet-900 dark:text-violet-300">{log.solution}</p>
                     </div>
                   )}
                 </div>
@@ -720,7 +720,7 @@ function LogCard({
 
               {log.questionRoles.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1.5">Roles misread</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-faint mb-1.5">Roles misread</p>
                   <div className="flex flex-wrap gap-1.5">
                     {log.questionRoles.map((role) => {
                       const rc = roleColor(role)
@@ -738,10 +738,10 @@ function LogCard({
 
           {/* Card actions */}
           {!isEditing && (
-            <div className="flex items-center gap-3 pt-1 border-t border-gray-100">
+            <div className="flex items-center gap-3 pt-1 border-t border-border">
               <button
                 onClick={() => setIsEditing(true)}
-                className="text-xs text-gray-500 hover:text-gray-800 transition-colors"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 Edit analytic
               </button>
@@ -865,7 +865,7 @@ export function WrongDecisionsView({
       {!showForm && (
         <button
           onClick={() => setShowForm(true)}
-          className="mb-6 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-700 transition-colors"
+          className="mb-6 rounded-lg bg-foreground text-background px-4 py-2.5 text-sm font-semibold hover:opacity-80 transition-opacity"
         >
           + Log a wrong decision
         </button>
@@ -892,8 +892,8 @@ export function WrongDecisionsView({
                     isActive && c
                       ? `${c.bg} ${c.text} ${c.border}`
                       : isActive
-                      ? 'bg-gray-900 text-white border-gray-900'
-                      : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                      ? 'bg-foreground text-background border-foreground'
+                      : 'bg-card text-muted-foreground border-border hover:opacity-70'
                   }`}
                 >
                   {s === 'all' ? 'All skills' : SKILL_LABELS[s]}
@@ -909,8 +909,8 @@ export function WrongDecisionsView({
                 onClick={() => setTypeFilter('all')}
                 className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
                   typeFilter === 'all'
-                    ? 'bg-gray-800 text-white border-gray-800'
-                    : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'bg-card text-muted-foreground border-border hover:opacity-70'
                 }`}
               >
                 All types
@@ -921,8 +921,8 @@ export function WrongDecisionsView({
                   onClick={() => setTypeFilter(typeFilter === qt ? 'all' : qt)}
                   className={`rounded-full px-2.5 py-0.5 text-xs font-semibold border transition-colors ${
                     typeFilter === qt
-                      ? 'bg-gray-800 text-white border-gray-800'
-                      : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                      ? 'bg-foreground text-background border-foreground'
+                      : 'bg-card text-muted-foreground border-border hover:opacity-70'
                   }`}
                 >
                   {qt}
@@ -937,8 +937,8 @@ export function WrongDecisionsView({
               onClick={() => setRoleFilter('all')}
               className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
                 roleFilter === 'all'
-                  ? 'bg-gray-900 text-white border-gray-900'
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                  ? 'bg-foreground text-background border-foreground'
+                  : 'bg-card text-muted-foreground border-border hover:opacity-70'
               }`}
             >
               All roles
@@ -951,7 +951,7 @@ export function WrongDecisionsView({
                   key={role}
                   onClick={() => setRoleFilter(isActive ? 'all' : role)}
                   className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
-                    isActive ? `${rc.bg} ${rc.text} border-transparent` : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                    isActive ? `${rc.bg} ${rc.text} border-transparent` : 'bg-card text-muted-foreground border-border hover:opacity-70'
                   }`}
                 >
                   {ROLE_LABELS[role] ?? role}
@@ -966,24 +966,24 @@ export function WrongDecisionsView({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search question, answer, analytic…"
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground placeholder-faint focus:outline-none focus:ring-1 focus:ring-blue-400"
           />
         </div>
       )}
 
       {/* Log list */}
       {filtered.length === 0 && logs.length === 0 && (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-16 text-center">
-          <p className="text-sm font-medium text-gray-500">No wrong decisions logged yet.</p>
-          <p className="mt-1 text-xs text-gray-400">
+        <div className="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-card p-16 text-center">
+          <p className="text-sm font-medium text-muted-foreground">No wrong decisions logged yet.</p>
+          <p className="mt-1 text-xs text-faint">
             Record a mistake after each practice session to build your error pattern library.
           </p>
         </div>
       )}
 
       {filtered.length === 0 && logs.length > 0 && (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center">
-          <p className="text-sm text-gray-500">No entries match the current filter.</p>
+        <div className="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-card p-8 text-center">
+          <p className="text-sm text-muted-foreground">No entries match the current filter.</p>
         </div>
       )}
 

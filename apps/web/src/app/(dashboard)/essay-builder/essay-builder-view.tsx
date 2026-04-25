@@ -303,8 +303,8 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
       const matchedVocab = words.filter((w) => lower.includes(w.word.toLowerCase())).map((w) => w.word)
       const matchedColloc = collocations.filter((c) => lower.includes(c.phrase.toLowerCase())).map((c) => c.phrase)
       setAnalyseHighlightSets([
-        { phrases: matchedVocab,   className: 'bg-purple-100 text-purple-800' },
-        { phrases: matchedColloc,  className: 'bg-blue-100 text-blue-800' },
+        { phrases: matchedVocab,   className: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' },
+        { phrases: matchedColloc,  className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' },
       ])
     } catch {
       setAnalyseError('Analysis failed. Check that Ollama is running.')
@@ -456,22 +456,22 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
 
   // ── Highlight phrase sets (priority order: selected first) ───────────────
   const highlightSets: PhraseSet[] = [
-    { phrases: Array.from(selectedVocab),  className: 'bg-purple-100 text-purple-800' },
-    { phrases: Array.from(selectedColloc), className: 'bg-blue-100 text-blue-800' },
-    { phrases: bonusVocab,                 className: 'bg-green-100 text-green-800' },
-    { phrases: bonusColloc,                className: 'bg-amber-100 text-amber-800' },
+    { phrases: Array.from(selectedVocab),  className: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' },
+    { phrases: Array.from(selectedColloc), className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' },
+    { phrases: bonusVocab,                 className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' },
+    { phrases: bonusColloc,                className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' },
   ]
 
   return (
     <div className="flex flex-col gap-6">
       {/* Tab switcher */}
-      <div className="flex gap-1 rounded-lg bg-gray-100 p-1 w-fit">
+      <div className="flex gap-1 rounded-lg bg-subtle p-1 w-fit border border-border">
         {(['builder', 'history', 'analyse'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setHistoryTab(tab)}
             className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors capitalize ${
-              historyTab === tab ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              historyTab === tab ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {tab === 'history' ? `History (${history.length})` : tab === 'analyse' ? 'Analyse' : 'Builder'}
@@ -482,14 +482,14 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
       {historyTab === 'analyse' && (
         /* ── Analyse tab ──────────────────────────────────────────────────── */
         <div className="flex flex-col gap-6 max-w-3xl">
-          <div className="rounded-xl border border-gray-200 bg-white p-5 flex flex-col gap-3">
-            <p className="text-xs font-semibold text-gray-700">Paste your text</p>
+          <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-3">
+            <p className="text-xs font-semibold text-foreground">Paste your text</p>
             <textarea
               value={analyseText}
               onChange={(e) => setAnalyseText(e.target.value)}
               rows={10}
               placeholder="Paste an IELTS essay, task response, or speaking transcript here…"
-              className="w-full resize-none rounded-lg border border-gray-200 p-3 text-sm text-gray-700 outline-none focus:border-blue-400 leading-relaxed"
+              className="w-full resize-none rounded-lg border border-border bg-input p-3 text-sm text-foreground outline-none focus:border-blue-400 leading-relaxed"
             />
             <div className="flex items-center gap-3">
               <button
@@ -509,7 +509,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
               <div className="rounded-xl border border-green-200 bg-green-50 p-5 flex flex-col gap-3">
                 <p className="text-xs font-semibold text-green-700 uppercase tracking-wide">Analysis Result</p>
                 <div className="flex flex-wrap gap-2">
-                  <span className="rounded-full bg-white border border-green-200 px-3 py-1 text-xs font-medium text-green-800">
+                  <span className="rounded-full bg-card border border-green-200 px-3 py-1 text-xs font-medium text-green-800">
                     {analyseResult.domain}
                   </span>
                   <span className="rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-medium text-blue-700">
@@ -518,7 +518,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                 </div>
                 <div>
                   <p className="text-xs text-green-600 font-medium mb-1">Suggested question</p>
-                  <p className="text-sm text-gray-800 leading-relaxed">{analyseResult.question}</p>
+                  <p className="text-sm text-foreground leading-relaxed">{analyseResult.question}</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   <button
@@ -539,14 +539,14 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
 
               {/* Highlighted text */}
               {analyseHighlightSets.some((s) => s.phrases.length > 0) && (
-                <div className="rounded-xl border border-gray-200 bg-white p-5 flex flex-col gap-3">
-                  <p className="text-xs font-semibold text-gray-700">Library matches in your text</p>
-                  <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+                <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-3">
+                  <p className="text-xs font-semibold text-foreground">Library matches in your text</p>
+                  <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">
                     {highlight(analyseText, analyseHighlightSets)}
                   </p>
-                  <div className="flex flex-wrap gap-3 text-xs text-gray-500 border-t border-gray-100 pt-3">
-                    <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-purple-100 text-purple-800 font-semibold">word</span> vocab match</span>
-                    <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-blue-100 text-blue-800 font-semibold">phrase</span> collocation match</span>
+                  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground border-t border-border pt-3">
+                    <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 font-semibold">word</span> vocab match</span>
+                    <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 font-semibold">phrase</span> collocation match</span>
                   </div>
                 </div>
               )}
@@ -561,12 +561,12 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
           <div className="flex flex-col gap-5">
 
             {/* Domain */}
-            <div className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4">
-              <p className="text-xs font-semibold text-gray-700">Domain</p>
+            <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4">
+              <p className="text-xs font-semibold text-foreground">Domain</p>
               <select
                 value={domain}
                 onChange={(e) => handleDomainChange(e.target.value)}
-                className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none focus:border-blue-400 bg-white"
+                className="rounded-lg border border-border bg-input text-foreground px-3 py-2 text-sm outline-none focus:border-blue-400"
               >
                 <option value="">Select a domain…</option>
                 {domains.map((d) => (
@@ -576,8 +576,8 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
             </div>
 
             {/* Skill */}
-            <div className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4">
-              <p className="text-xs font-semibold text-gray-700">Skill</p>
+            <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4">
+              <p className="text-xs font-semibold text-foreground">Skill</p>
               <div className="flex gap-2 flex-wrap">
                 {(Object.keys(SKILL_LABELS) as Skill[]).map((s) => (
                   <button
@@ -586,7 +586,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                     className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                       skill === s
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-subtle text-muted-foreground hover:bg-border'
                     }`}
                   >
                     {SKILL_LABELS[s]}
@@ -669,15 +669,15 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
 
             {/* Versions strip */}
             {domain && (
-              <div className="rounded-xl border border-gray-200 bg-white p-3 flex flex-col gap-2">
+              <div className="rounded-xl border border-border bg-card p-3 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold text-gray-600">
+                  <p className="text-xs font-semibold text-muted-foreground">
                     Versions {versions.length > 0 ? `(${versions.length}/5)` : ''}
                   </p>
-                  {isLoadingVersions && <span className="text-xs text-gray-400">Loading…</span>}
+                  {isLoadingVersions && <span className="text-xs text-faint">Loading…</span>}
                 </div>
                 {versions.length === 0 && !isLoadingVersions ? (
-                  <p className="text-xs text-gray-400">No versions yet — click Generate.</p>
+                  <p className="text-xs text-faint">No versions yet — click Generate.</p>
                 ) : (
                   <div className="flex flex-col gap-1">
                     {versions.map((v, i) => (
@@ -699,14 +699,14 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
             {activeVersion ? (
               <>
                 {/* Topic */}
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-semibold text-gray-400 mb-1">Topic</p>
-                  <p className="text-sm text-gray-800 leading-relaxed">{activeVersion.topic}</p>
+                <div className="rounded-xl border border-border bg-card p-4">
+                  <p className="text-xs font-semibold text-faint mb-1">Topic</p>
+                  <p className="text-sm text-foreground leading-relaxed">{activeVersion.topic}</p>
                   <div className="mt-2 flex gap-2 flex-wrap">
                     <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600 font-medium">
                       {SKILL_LABELS[activeVersion.skill] ?? activeVersion.skill}
                     </span>
-                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                    <span className="rounded-full bg-subtle px-2 py-0.5 text-xs text-muted-foreground">
                       {activeVersion.domain}
                     </span>
                     <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
@@ -717,10 +717,10 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
 
                 {/* Selected items summary */}
                 {(selectedVocab.size > 0 || selectedColloc.size > 0) && (
-                  <div className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col gap-2">
+                  <div className="rounded-xl border border-border bg-card p-4 flex flex-col gap-2">
                     {selectedVocab.size > 0 && (
                       <div className="flex flex-wrap gap-1">
-                        <span className="text-xs text-gray-400 mr-1 self-center">Vocab</span>
+                        <span className="text-xs text-faint mr-1 self-center">Vocab</span>
                         {Array.from(selectedVocab).map((w) => (
                           <span key={w} className="rounded-full bg-purple-50 px-2 py-0.5 text-xs text-purple-700">{w}</span>
                         ))}
@@ -728,7 +728,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                     )}
                     {selectedColloc.size > 0 && (
                       <div className="flex flex-wrap gap-1">
-                        <span className="text-xs text-gray-400 mr-1 self-center">Colloc</span>
+                        <span className="text-xs text-faint mr-1 self-center">Colloc</span>
                         {Array.from(selectedColloc).map((c) => (
                           <span key={c} className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">{c}</span>
                         ))}
@@ -738,8 +738,8 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                 )}
 
                 {/* View / Edit tabs */}
-                <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-                  <div className="flex border-b border-gray-100">
+                <div className="rounded-xl border border-border bg-card overflow-hidden">
+                  <div className="flex border-b border-border">
                     {(['view', 'edit'] as const).map((tab) => (
                       <button
                         key={tab}
@@ -747,7 +747,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                         className={`px-4 py-2.5 text-xs font-medium transition-colors capitalize ${
                           activeTab === tab
                             ? 'border-b-2 border-blue-600 text-blue-600'
-                            : 'text-gray-500 hover:text-gray-700'
+                            : 'text-muted-foreground hover:text-foreground'
                         }`}
                       >
                         {tab}
@@ -758,18 +758,18 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                   <div className="p-4">
                     {activeTab === 'view' ? (
                       <div className="flex flex-col gap-4">
-                        <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+                        <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">
                           {highlight(decoratedText, highlightSets)}
                         </p>
-                        <div className="flex flex-wrap gap-3 text-xs text-gray-500 border-t border-gray-100 pt-3">
-                          <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-purple-100 text-purple-800 font-semibold">word</span> selected vocab</span>
-                          <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-blue-100 text-blue-800 font-semibold">phrase</span> selected collocation</span>
-                          <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-green-100 text-green-800 font-semibold">word</span> bonus vocab</span>
-                          <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-amber-100 text-amber-800 font-semibold">phrase</span> bonus collocation</span>
+                        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground border-t border-border pt-3">
+                          <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 font-semibold">word</span> selected vocab</span>
+                          <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 font-semibold">phrase</span> selected collocation</span>
+                          <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 font-semibold">word</span> bonus vocab</span>
+                          <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 font-semibold">phrase</span> bonus collocation</span>
                         </div>
                         {(bonusVocab.length > 0 || bonusColloc.length > 0) && (
-                          <div className="rounded-lg border border-dashed border-gray-200 p-3 flex flex-col gap-2">
-                            <p className="text-xs font-semibold text-gray-500">Also covered — click to add to selection:</p>
+                          <div className="rounded-lg border border-dashed border-border p-3 flex flex-col gap-2">
+                            <p className="text-xs font-semibold text-muted-foreground">Also covered — click to add to selection:</p>
                             <div className="flex flex-wrap gap-1.5">
                               {bonusVocab.map((w) => (
                                 <button key={w} onClick={() => addBonusVocab(w)} className="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs text-green-700 hover:bg-green-100 transition-colors">+ {w}</button>
@@ -786,7 +786,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                         value={decoratedText}
                         onChange={(e) => setDecoratedText(e.target.value)}
                         rows={14}
-                        className="w-full resize-none rounded-lg border border-gray-200 p-3 text-sm text-gray-700 outline-none focus:border-blue-400 leading-relaxed"
+                        className="w-full resize-none rounded-lg border border-border bg-input p-3 text-sm text-foreground outline-none focus:border-blue-400 leading-relaxed"
                       />
                     )}
                   </div>
@@ -818,7 +818,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                           : 'Evaluate essay'}
                       </button>
                       {evalAudit && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           {evalAudit.wordCount} words
                           {evalAudit.notes.length > 0 && ` · ${evalAudit.notes[0]}`}
                         </span>
@@ -830,8 +830,8 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
 
                     {/* Streaming score raw text while scoring */}
                     {evalState === 'scoring' && evalScoreStream && !evalFeedback && (
-                      <div className="rounded-lg bg-gray-50 border border-gray-200 p-3">
-                        <p className="text-xs text-gray-400 font-mono whitespace-pre-wrap leading-relaxed line-clamp-6">
+                      <div className="rounded-lg bg-muted border border-border p-3">
+                        <p className="text-xs text-faint font-mono whitespace-pre-wrap leading-relaxed line-clamp-6">
                           {evalScoreStream}
                         </p>
                       </div>
@@ -842,10 +842,10 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                       <div className="flex flex-col gap-3">
                         {/* Overall band */}
                         <div className={`rounded-xl p-4 ${evalFeedback.overallBand >= evalFeedback.targetBand ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}>
-                          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Overall Band</p>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Overall Band</p>
                           <div className="mt-1 flex items-end gap-2">
-                            <span className="text-3xl font-bold text-gray-900">{evalFeedback.overallBand}</span>
-                            <span className="mb-0.5 text-sm text-gray-500">
+                            <span className="text-3xl font-bold text-foreground">{evalFeedback.overallBand}</span>
+                            <span className="mb-0.5 text-sm text-muted-foreground">
                               / target <strong>{evalFeedback.targetBand}</strong>
                               {evalFeedback.overallBand < evalFeedback.targetBand && (
                                 <span className="ml-2 text-amber-600 font-medium">
@@ -860,9 +860,9 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                           const gap = c.targetScore - c.score
                           const badge = gap <= 0 ? 'bg-green-100 text-green-700' : gap <= 0.5 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
                           return (
-                            <div key={c.criterion} className="rounded-xl border border-gray-200 bg-white p-4">
+                            <div key={c.criterion} className="rounded-xl border border-border bg-card p-4">
                               <div className="flex items-center justify-between">
-                                <p className="text-sm font-semibold text-gray-800">{c.criterion}</p>
+                                <p className="text-sm font-semibold text-foreground">{c.criterion}</p>
                                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${badge}`}>
                                   {c.score} / {c.targetScore}
                                 </span>
@@ -870,7 +870,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                               {c.keyPoints.length > 0 && (
                                 <ul className="mt-3 flex flex-col gap-1.5">
                                   {c.keyPoints.map((pt, i) => (
-                                    <li key={i} className="flex items-start gap-2 text-xs text-gray-600">
+                                    <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
                                       <span className="mt-0.5 shrink-0 text-amber-400">▸</span>
                                       {pt}
                                     </li>
@@ -886,8 +886,8 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                 )}
               </>
             ) : (
-              <div className="flex h-full min-h-64 items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white">
-                <p className="text-sm text-gray-400 text-center px-8">
+              <div className="flex h-full min-h-64 items-center justify-center rounded-xl border border-dashed border-border bg-card">
+                <p className="text-sm text-faint text-center px-8">
                   {domain ? 'Click Generate to create the first version.' : 'Select a domain to get started.'}
                 </p>
               </div>
@@ -900,13 +900,13 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
         /* ── History tab ─────────────────────────────────────────────────── */
         <div className="flex flex-col gap-4">
           {/* Filters */}
-          <div className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-3">
+          <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3">
             <input
               type="text"
               value={historyTopicSearch}
               onChange={(e) => setHistoryTopicSearch(e.target.value)}
               placeholder="Search by topic or domain…"
-              className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+              className="rounded-lg border border-border bg-input text-foreground px-3 py-2 text-sm outline-none focus:border-blue-400"
             />
             <div className="flex gap-1.5 flex-wrap">
               {(['all', 'writing_task1', 'writing_task2', 'speaking'] as const).map((s) => (
@@ -916,7 +916,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                   className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                     historySkillFilter === s
                       ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      : 'bg-subtle text-muted-foreground hover:bg-border'
                   }`}
                 >
                   {s === 'all' ? `All (${history.length})` : SKILL_LABELS[s]}
@@ -926,8 +926,8 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
           </div>
 
           {filteredHistory.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-              <p className="text-sm text-gray-400">
+            <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
+              <p className="text-sm text-faint">
                 {history.length === 0 ? 'No essays yet. Generate one in the Builder tab.' : 'No essays match the current filters.'}
               </p>
             </div>
@@ -969,24 +969,24 @@ function VersionRow({
   return (
     <div
       className={`flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer transition-colors ${
-        isActive ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50 border border-transparent'
+        isActive ? 'bg-blue-50 border border-blue-200' : 'hover:bg-muted border border-transparent'
       }`}
       onClick={onSelect}
     >
-      <span className={`text-xs font-semibold shrink-0 w-5 text-center ${isActive ? 'text-blue-600' : 'text-gray-400'}`}>
+      <span className={`text-xs font-semibold shrink-0 w-5 text-center ${isActive ? 'text-blue-600' : 'text-faint'}`}>
         v{index}
       </span>
-      <span className="text-xs text-gray-700 truncate flex-1">{version.topic}</span>
-      <span className="text-xs text-gray-400 shrink-0">{new Date(version.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+      <span className="text-xs text-foreground truncate flex-1">{version.topic}</span>
+      <span className="text-xs text-faint shrink-0">{new Date(version.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
       {confirmDelete ? (
         <div className="flex gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
           <button onClick={onDelete} className="rounded px-1.5 py-0.5 text-xs bg-red-500 text-white hover:bg-red-600">Yes</button>
-          <button onClick={() => setConfirmDelete(false)} className="rounded px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 hover:bg-gray-200">No</button>
+          <button onClick={() => setConfirmDelete(false)} className="rounded px-1.5 py-0.5 text-xs bg-subtle text-muted-foreground hover:bg-border">No</button>
         </div>
       ) : (
         <button
           onClick={(e) => { e.stopPropagation(); setConfirmDelete(true) }}
-          className="shrink-0 flex h-5 w-5 items-center justify-center rounded-full text-gray-300 hover:bg-red-100 hover:text-red-500 text-xs transition-colors"
+          className="shrink-0 flex h-5 w-5 items-center justify-center rounded-full text-faint hover:bg-red-100 hover:text-red-500 text-xs transition-colors"
         >✕</button>
       )}
     </div>
@@ -1015,14 +1015,14 @@ function SelectionPanel({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4">
+    <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4">
       {/* Header */}
       <div className="flex items-center justify-between min-h-5">
-        <p className="text-xs font-semibold text-gray-700">{title}</p>
+        <p className="text-xs font-semibold text-foreground">{title}</p>
         {selectedChips.length > 0 && (
           <button
             onClick={onClearAll}
-            className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+            className="text-xs text-faint hover:text-red-500 transition-colors"
           >
             Clear all ({selectedChips.length})
           </button>
@@ -1031,11 +1031,11 @@ function SelectionPanel({
 
       {/* Selected chips */}
       {selectedChips.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 rounded-lg bg-gray-50 p-2 border border-gray-100">
+        <div className="flex flex-wrap gap-1.5 rounded-lg bg-muted p-2 border border-border">
           {selectedChips.map(({ label, onRemove }) => (
             <span
               key={label}
-              className="flex items-center gap-1 rounded-full bg-white border border-blue-200 px-2 py-0.5 text-xs text-blue-700 shadow-sm"
+              className="flex items-center gap-1 rounded-full bg-card border border-blue-200 px-2 py-0.5 text-xs text-blue-700 shadow-sm"
             >
               {label}
               <button
@@ -1056,7 +1056,7 @@ function SelectionPanel({
         value={search}
         onChange={(e) => onSearch(e.target.value)}
         placeholder={selectedChips.length > 0 ? `Search to add more…` : placeholder}
-        className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs outline-none focus:border-blue-400"
+        className="rounded-lg border border-border bg-input text-foreground px-3 py-1.5 text-xs outline-none focus:border-blue-400"
       />
 
       {/* List */}
@@ -1082,18 +1082,18 @@ function SelectionRow({
 }) {
   return (
     <label className={`flex items-center gap-2.5 rounded-lg px-2 py-1.5 cursor-pointer transition-colors ${
-      selected ? 'bg-blue-50' : 'hover:bg-gray-50'
+      selected ? 'bg-blue-50' : 'hover:bg-muted'
     }`}>
       <input
         type="checkbox"
         checked={selected}
         onChange={onToggle}
-        className="h-3.5 w-3.5 rounded border-gray-300 accent-blue-600"
+        className="h-3.5 w-3.5 rounded border-border accent-blue-600"
       />
-      <span className={`text-xs font-medium ${selected ? 'text-blue-700' : 'text-gray-800'}`}>
+      <span className={`text-xs font-medium ${selected ? 'text-blue-700' : 'text-foreground'}`}>
         {label}
       </span>
-      <span className="ml-auto text-xs text-gray-400 shrink-0">{sublabel}</span>
+      <span className="ml-auto text-xs text-faint shrink-0">{sublabel}</span>
     </label>
   )
 }
@@ -1154,29 +1154,29 @@ function HistoryCard({
   }
 
   const highlightSets: PhraseSet[] = [
-    { phrases: record.selectedVocabulary,   className: 'bg-purple-100 text-purple-800' },
-    { phrases: record.selectedCollocations, className: 'bg-blue-100 text-blue-800' },
-    { phrases: bonusVocab,                  className: 'bg-green-100 text-green-800' },
-    { phrases: bonusColloc,                 className: 'bg-amber-100 text-amber-800' },
+    { phrases: record.selectedVocabulary,   className: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' },
+    { phrases: record.selectedCollocations, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' },
+    { phrases: bonusVocab,                  className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' },
+    { phrases: bonusColloc,                 className: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' },
   ]
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col gap-3">
+    <div className="rounded-xl border border-border bg-card p-4 flex flex-col gap-3">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1 flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-800 leading-snug">{record.topic}</p>
+          <p className="text-sm font-medium text-foreground leading-snug">{record.topic}</p>
           <div className="flex flex-wrap gap-1.5 mt-0.5">
             <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600 font-medium">
               {SKILL_LABELS[record.skill] ?? record.skill}
             </span>
-            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+            <span className="rounded-full bg-subtle px-2 py-0.5 text-xs text-muted-foreground">
               {record.domain}
             </span>
             <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
               Band {record.targetBand}
             </span>
-            <span className="text-xs text-gray-400 self-center">
+            <span className="text-xs text-faint self-center">
               {new Date(record.createdAt).toLocaleDateString()}
             </span>
           </div>
@@ -1186,14 +1186,14 @@ function HistoryCard({
           <button
             onClick={onToggleFavorite}
             title={record.isFavorite ? 'Unfavourite' : 'Favourite'}
-            className={`text-lg transition-colors ${record.isFavorite ? 'text-amber-400' : 'text-gray-200 hover:text-amber-300'}`}
+            className={`text-lg transition-colors ${record.isFavorite ? 'text-amber-400' : 'text-border hover:text-amber-300'}`}
           >
             ★
           </button>
           {confirmDelete ? (
             <div className="flex items-center gap-1">
               <button onClick={onDelete} className="rounded px-2 py-0.5 text-xs bg-red-500 text-white hover:bg-red-600">Yes</button>
-              <button onClick={() => setConfirmDelete(false)} className="rounded px-2 py-0.5 text-xs bg-gray-100 text-gray-600 hover:bg-gray-200">No</button>
+              <button onClick={() => setConfirmDelete(false)} className="rounded px-2 py-0.5 text-xs bg-subtle text-muted-foreground hover:bg-border">No</button>
             </div>
           ) : (
             <button
@@ -1226,18 +1226,18 @@ function HistoryCard({
       </button>
 
       {expanded && (
-        <div className="rounded-lg bg-gray-50 p-4 flex flex-col gap-3">
+        <div className="rounded-lg bg-muted p-4 flex flex-col gap-3">
           {/* Detect button + save */}
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handleDetect}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              className="rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
             >
               {detected ? '↻ Re-detect vocab & collocations' : 'Detect vocab & collocations'}
             </button>
             {detected && (bonusVocab.length > 0 || bonusColloc.length > 0) && (
               <>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-faint">
                   {bonusVocab.length + bonusColloc.length} extra match{bonusVocab.length + bonusColloc.length !== 1 ? 'es' : ''} found
                 </span>
                 <button
@@ -1250,30 +1250,30 @@ function HistoryCard({
               </>
             )}
             {detected && bonusVocab.length === 0 && bonusColloc.length === 0 && (
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-faint">
                 {selectionsSaved ? 'Selections saved ✓' : 'No additional matches'}
               </span>
             )}
           </div>
 
-          <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+          <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">
             {highlight(record.decoratedText, highlightSets)}
           </p>
 
           {/* Legend */}
           {detected && (
-            <div className="flex flex-wrap gap-3 text-xs text-gray-500 border-t border-gray-200 pt-2">
-              <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-purple-100 text-purple-800 font-semibold">word</span> selected vocab</span>
-              <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-blue-100 text-blue-800 font-semibold">phrase</span> selected collocation</span>
-              {bonusVocab.length > 0 && <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-green-100 text-green-800 font-semibold">word</span> bonus vocab</span>}
-              {bonusColloc.length > 0 && <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-amber-100 text-amber-800 font-semibold">phrase</span> bonus collocation</span>}
+            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground border-t border-border pt-2">
+              <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 font-semibold">word</span> selected vocab</span>
+              <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 font-semibold">phrase</span> selected collocation</span>
+              {bonusVocab.length > 0 && <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 font-semibold">word</span> bonus vocab</span>}
+              {bonusColloc.length > 0 && <span className="flex items-center gap-1"><span className="rounded px-1.5 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 font-semibold">phrase</span> bonus collocation</span>}
             </div>
           )}
 
           {record.decoratedText !== record.originalGeneratedText && (
             <details>
-              <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600">Original (unedited)</summary>
-              <p className="mt-2 text-xs leading-relaxed text-gray-500 italic whitespace-pre-wrap">
+              <summary className="text-xs text-faint cursor-pointer hover:text-muted-foreground">Original (unedited)</summary>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground italic whitespace-pre-wrap">
                 {record.originalGeneratedText}
               </p>
             </details>
