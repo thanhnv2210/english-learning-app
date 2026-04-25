@@ -11,8 +11,8 @@ export async function POST(req: Request) {
   const body = await req.json()
   const { skill, sourceText, question, myThought, actualAnswer } = body
 
-  if (!skill || !question || !myThought || !actualAnswer) {
-    return Response.json({ error: 'skill, question, myThought, and actualAnswer are required' }, { status: 400 })
+  if (!skill || !myThought || !actualAnswer) {
+    return Response.json({ error: 'skill, myThought, and actualAnswer are required' }, { status: 400 })
   }
 
   let raw: string

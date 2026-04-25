@@ -11,7 +11,7 @@ export async function saveWrongDecisionAction(data: {
   skill: string
   questionType?: string
   sourceText?: string
-  question: string
+  question?: string
   myThought: string
   actualAnswer: string
   analytic?: string
