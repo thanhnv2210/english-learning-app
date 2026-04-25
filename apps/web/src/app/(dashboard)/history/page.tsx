@@ -55,8 +55,8 @@ export default async function HistoryPage({
 
   return (
     <div className="mx-auto max-w-2xl xl:max-w-3xl 2xl:max-w-6xl">
-      <h1 className="text-2xl font-bold text-gray-900">History</h1>
-      <p className="mt-1 text-sm text-gray-500">{exams.length} session{exams.length !== 1 ? 's' : ''}</p>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">History</h1>
+      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{exams.length} session{exams.length !== 1 ? 's' : ''}</p>
 
       {/* Filter bar */}
       <div className="mt-5 flex flex-wrap gap-2">
@@ -89,7 +89,7 @@ function FilterChip({ label, href, active }: { label: string; href: string; acti
       className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
         active
           ? 'bg-blue-600 text-white'
-          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
       }`}
     >
       {label}

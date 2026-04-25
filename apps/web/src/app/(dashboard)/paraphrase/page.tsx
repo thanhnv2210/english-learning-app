@@ -6,24 +6,24 @@ export default function ParaphrasePage() {
     <div className="mx-auto max-w-3xl space-y-8 xl:max-w-4xl 2xl:max-w-5xl">
 
       {/* Hero */}
-      <div className="rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-8 py-7">
+      <div className="rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 px-8 py-7">
         <div className="mb-3 flex items-center gap-3">
           <span className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
             Core IELTS skill
           </span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Paraphrase</h1>
-        <p className="mt-2 text-sm leading-relaxed text-gray-600">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Paraphrase</h1>
+        <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
           Paraphrasing means expressing the same idea using different words and structure.
           In IELTS it is not just a writing technique — it is a reading skill, a test-taking
           strategy, and a marking criterion. Every exam question paraphrases the source material.
           Every model answer paraphrases the task prompt.
         </p>
-        <div className="mt-4 rounded-lg border border-indigo-200 bg-indigo-100 px-4 py-3">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-indigo-800">
+        <div className="mt-4 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-100 dark:bg-indigo-900/30 px-4 py-3">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-300">
             Why it matters
           </p>
-          <p className="text-sm text-indigo-900">
+          <p className="text-sm text-indigo-900 dark:text-indigo-200">
             Examiners are trained to penalise copied phrases under Task Achievement and Lexical
             Resource. In Reading, word-matching instead of meaning-matching is the single
             biggest cause of wrong answers. Mastering paraphrase unlocks at least 0.5 band points
@@ -34,7 +34,7 @@ export default function ParaphrasePage() {
 
       {/* Level legend */}
       <section>
-        <h2 className="mb-3 text-base font-bold text-gray-900">Three Levels of Paraphrase</h2>
+        <h2 className="mb-3 text-base font-bold text-gray-900 dark:text-gray-100">Three Levels of Paraphrase</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
             {
@@ -42,21 +42,21 @@ export default function ParaphrasePage() {
               badge: 'Beginner',
               title: 'Synonym Substitution',
               desc: 'Replace individual words with synonyms or change word forms (noun → verb). Same grammar — different vocabulary.',
-              bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', badge_bg: 'bg-green-600',
+              bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-200 dark:border-green-800', text: 'text-green-800 dark:text-green-300', badge_bg: 'bg-green-600',
             },
             {
               level: 2,
               badge: 'Intermediate',
               title: 'Structural Restructuring',
               desc: 'Change the grammar — active ↔ passive, reorder clauses, positive ↔ negative. Same words can appear but the structure is new.',
-              bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-800', badge_bg: 'bg-amber-600',
+              bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-800 dark:text-amber-300', badge_bg: 'bg-amber-600',
             },
             {
               level: 3,
               badge: 'Advanced',
               title: 'Concept-Level Rewrite',
               desc: 'Express the same idea through a completely different lens — change perspective, abstraction level, or merge/split clauses.',
-              bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', badge_bg: 'bg-purple-600',
+              bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-200 dark:border-purple-800', text: 'text-purple-800 dark:text-purple-300', badge_bg: 'bg-purple-600',
             },
           ].map((l) => (
             <div key={l.level} className={`rounded-lg border p-3 ${l.bg} ${l.border}`}>
@@ -75,8 +75,8 @@ export default function ParaphrasePage() {
 
       {/* Cannot paraphrase */}
       <section>
-        <h2 className="mb-1 text-base font-bold text-gray-900">Words You Cannot Paraphrase</h2>
-        <p className="mb-3 text-xs leading-relaxed text-gray-500">
+        <h2 className="mb-1 text-base font-bold text-gray-900 dark:text-gray-100">Words You Cannot Paraphrase</h2>
+        <p className="mb-3 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
           Some words have fixed meanings — replacing them creates a different meaning or sounds unnatural.
           Recognising these saves you from forced synonyms that lower your Lexical Resource score.
         </p>
@@ -137,19 +137,19 @@ export default function ParaphrasePage() {
               trap: '"Most people" ≠ "All people" ≠ "Some people". Swapping quantifiers in a paraphrase creates a logically different claim — a common trap in IELTS Reading.',
             },
           ].map((cat) => (
-            <div key={cat.name} className="rounded-lg border border-gray-200 bg-white p-4 space-y-2">
-              <p className="text-sm font-semibold text-gray-800">{cat.name}</p>
-              <p className="text-xs leading-relaxed text-gray-500">{cat.note}</p>
+            <div key={cat.name} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 space-y-2">
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{cat.name}</p>
+              <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">{cat.note}</p>
               <div className="flex flex-wrap gap-1">
                 {cat.examples.map((ex) => (
-                  <span key={ex} className="rounded bg-gray-100 px-2 py-0.5 font-mono text-[11px] text-gray-700">
+                  <span key={ex} className="rounded bg-gray-100 dark:bg-gray-700 px-2 py-0.5 font-mono text-[11px] text-gray-700 dark:text-gray-300">
                     {ex}
                   </span>
                 ))}
               </div>
-              <div className="rounded border border-rose-100 bg-rose-50 px-3 py-2">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-rose-400 mb-0.5">Watch out</p>
-                <p className="text-xs leading-relaxed text-rose-800">{cat.trap}</p>
+              <div className="rounded border border-rose-100 dark:border-rose-900 bg-rose-50 dark:bg-rose-900/20 px-3 py-2">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-rose-400 dark:text-rose-400 mb-0.5">Watch out</p>
+                <p className="text-xs leading-relaxed text-rose-800 dark:text-rose-300">{cat.trap}</p>
               </div>
             </div>
           ))}
