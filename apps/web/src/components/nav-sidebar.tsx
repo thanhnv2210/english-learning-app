@@ -139,13 +139,13 @@ export function NavSidebar({ targetProfile = 'IELTS_Academic_6.5' }: { targetPro
       ...STANDALONE_BOTTOM,
     ]
     return (
-      <aside className="flex h-screen w-14 shrink-0 flex-col items-center border-r border-gray-200 bg-white py-4 gap-0.5">
+      <aside className="flex h-screen w-14 shrink-0 flex-col items-center border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-4 gap-0.5">
         {/* Expand button — only shown when user manually collapsed (not auto-collapsed by zoom) */}
         {!isNarrow && (
           <button
             onClick={toggleCollapse}
             title="Expand sidebar"
-            className="mb-4 flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            className="mb-4 flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
           >
             <span className="text-sm">›</span>
           </button>
@@ -161,8 +161,8 @@ export function NavSidebar({ targetProfile = 'IELTS_Academic_6.5' }: { targetPro
               title={item.label}
               className={`flex h-9 w-9 items-center justify-center rounded-lg text-base transition-colors ${
                 active
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'
+                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
               {item.icon}
@@ -179,8 +179,8 @@ export function NavSidebar({ targetProfile = 'IELTS_Academic_6.5' }: { targetPro
               title={`Text ${FONT_LEVELS[lvl]}%`}
               className={`flex h-7 w-7 items-center justify-center rounded font-bold transition-colors ${FONT_LEVEL_SIZES[lvl]} ${
                 fontLevel === lvl
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700'
+                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                  : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
               A
@@ -193,17 +193,17 @@ export function NavSidebar({ targetProfile = 'IELTS_Academic_6.5' }: { targetPro
 
   // ── Expanded: full sidebar ───────────────────────────────────────────────────
   return (
-    <aside className="flex h-screen w-52 shrink-0 flex-col border-r border-gray-200 bg-white px-3 py-6 2xl:w-64">
+    <aside className="flex h-screen w-52 shrink-0 flex-col border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-6 2xl:w-64">
       {/* Header row: title + collapse button (only shown at wide viewports) */}
       <div className="mb-6 flex items-center justify-between px-2">
-        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
           {formatTargetLabel(targetProfile)}
         </p>
         {!isNarrow && (
           <button
             onClick={toggleCollapse}
             title="Collapse sidebar"
-            className="flex h-6 w-6 items-center justify-center rounded text-gray-300 hover:bg-gray-100 hover:text-gray-500 transition-colors"
+            className="flex h-6 w-6 items-center justify-center rounded text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-500 dark:hover:text-gray-400 transition-colors"
           >
             <span className="text-xs">‹</span>
           </button>
@@ -227,8 +227,8 @@ export function NavSidebar({ targetProfile = 'IELTS_Academic_6.5' }: { targetPro
                 onClick={() => toggleGroup(group.label)}
                 className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
                   hasActive
-                    ? 'text-blue-600'
-                    : 'text-gray-400 hover:text-gray-600'
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
                 }`}
               >
                 {group.label}
@@ -259,15 +259,15 @@ export function NavSidebar({ targetProfile = 'IELTS_Academic_6.5' }: { targetPro
       </nav>
 
       {/* Footer: target band + font size controls */}
-      <div className="mt-4 space-y-3 rounded-lg bg-gray-50 px-3 py-3">
+      <div className="mt-4 space-y-3 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-3">
         <div>
-          <p className="text-xs text-gray-500">Target</p>
-          <p className="text-sm font-semibold text-gray-800">{formatTargetLabel(targetProfile)}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Target</p>
+          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{formatTargetLabel(targetProfile)}</p>
         </div>
 
         {/* Font size control */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">Text size</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">Text size</span>
           <div className="flex items-center gap-1">
             {([0, 1, 2] as FontLevel[]).map((lvl) => (
               <button
@@ -276,8 +276,8 @@ export function NavSidebar({ targetProfile = 'IELTS_Academic_6.5' }: { targetPro
                 title={`${FONT_LEVELS[lvl]}%`}
                 className={`flex h-6 w-6 items-center justify-center rounded font-bold transition-colors ${FONT_LEVEL_SIZES[lvl]} ${
                   fontLevel === lvl
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700'
+                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
                 A
@@ -307,8 +307,8 @@ function NavLink({
         indent ? 'px-4' : 'px-3'
       } ${
         active
-          ? 'bg-blue-50 text-blue-700'
-          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
       }`}
     >
       <span className="text-base">{item.icon}</span>

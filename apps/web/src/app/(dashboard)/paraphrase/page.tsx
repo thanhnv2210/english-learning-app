@@ -73,6 +73,89 @@ export default function ParaphrasePage() {
         </div>
       </section>
 
+      {/* Cannot paraphrase */}
+      <section>
+        <h2 className="mb-1 text-base font-bold text-gray-900">Words You Cannot Paraphrase</h2>
+        <p className="mb-3 text-xs leading-relaxed text-gray-500">
+          Some words have fixed meanings — replacing them creates a different meaning or sounds unnatural.
+          Recognising these saves you from forced synonyms that lower your Lexical Resource score.
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            {
+              name: 'Proper nouns',
+              note: 'Names of people, places, organisations, and brands are fixed identifiers.',
+              examples: ['UNESCO', 'Amazon', 'Einstein', 'Silicon Valley'],
+              trap: 'Writing "the international educational body" every time instead of "UNESCO" wastes words and reads awkwardly. Use the proper noun directly.',
+            },
+            {
+              name: 'Technical & scientific terms',
+              note: 'Domain-specific words with precise meanings — no synonym carries the same definition.',
+              examples: ['photosynthesis', 'GDP', 'bandwidth', 'mitochondria'],
+              trap: '"Photosynthesis" cannot become "plant food-making". Use the term and demonstrate understanding through context, not synonym.',
+            },
+            {
+              name: 'Numbers & statistics',
+              note: 'Figures, percentages, and quantities are exact — they cannot be changed without changing the fact.',
+              examples: ['75%', '2.5 million', '$300 billion', '1.2°C'],
+              trap: 'Do not round or approximate numbers from a Task 1 chart — "approximately 75%" when the figure is exactly 75% misrepresents the data.',
+            },
+            {
+              name: 'Dates & time references',
+              note: 'Specific dates, years, and periods are fixed facts — rephrasing them alters the information.',
+              examples: ['2023', 'the 1990s', 'Monday', 'three months'],
+              trap: '"The year two thousand and twenty-three" instead of "2023" adds length without value. Keep time references in their standard form.',
+            },
+            {
+              name: 'Acronyms & initialisms',
+              note: 'Abbreviations stand for precise concepts — expanding them once is acceptable, but they are not synonyms for a paraphrase.',
+              examples: ['DNA', 'WHO', 'IELTS', 'CO₂', 'AI'],
+              trap: 'Replacing "DNA" with "genetic material" changes precision. You can expand once ("DNA (deoxyribonucleic acid)"), then use the acronym consistently.',
+            },
+            {
+              name: 'Units of measurement',
+              note: 'Standardised units are internationally fixed — changing them requires a unit conversion, not a paraphrase.',
+              examples: ['kilometres', 'kilograms', 'degrees Celsius', 'litres'],
+              trap: '"A long distance" instead of "500 kilometres" loses specific information. In Task 1, always keep the original unit from the data.',
+            },
+            {
+              name: 'Task keyword (core topic)',
+              note: 'The central concept of a Task 2 question sometimes has no true synonym — forcing one distorts the meaning.',
+              examples: ['climate change', 'social media', 'globalisation', 'mental health'],
+              trap: '"Climate change" → "atmospheric temperature fluctuation" sounds forced and loses clarity. Use the topic term naturally; vary it with light synonyms only when they are genuinely equivalent.',
+            },
+            {
+              name: 'Hedge words & modal nuance',
+              note: 'Words that soften or qualify a claim carry specific logical weight — swapping them changes the strength of the statement.',
+              examples: ['may', 'could', 'suggests', 'appears to', 'tends to'],
+              trap: '"The study suggests…" ≠ "The study proves…". In Reading T/F/NG, changing a hedge to a definitive claim turns a NOT GIVEN into a FALSE.',
+            },
+            {
+              name: 'Quantifier precision',
+              note: 'Words expressing exact scope or proportion are not freely interchangeable.',
+              examples: ['all', 'most', 'some', 'few', 'none', 'a minority'],
+              trap: '"Most people" ≠ "All people" ≠ "Some people". Swapping quantifiers in a paraphrase creates a logically different claim — a common trap in IELTS Reading.',
+            },
+          ].map((cat) => (
+            <div key={cat.name} className="rounded-lg border border-gray-200 bg-white p-4 space-y-2">
+              <p className="text-sm font-semibold text-gray-800">{cat.name}</p>
+              <p className="text-xs leading-relaxed text-gray-500">{cat.note}</p>
+              <div className="flex flex-wrap gap-1">
+                {cat.examples.map((ex) => (
+                  <span key={ex} className="rounded bg-gray-100 px-2 py-0.5 font-mono text-[11px] text-gray-700">
+                    {ex}
+                  </span>
+                ))}
+              </div>
+              <div className="rounded border border-rose-100 bg-rose-50 px-3 py-2">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-rose-400 mb-0.5">Watch out</p>
+                <p className="text-xs leading-relaxed text-rose-800">{cat.trap}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Guide */}
       <ParaphraseGuide guides={PARAPHRASE_GUIDES} />
 
