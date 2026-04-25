@@ -48,10 +48,10 @@ export function HistoryView({ exams }: { exams: Exam[] }) {
         <Modal onClose={() => setSessionExam(null)}>
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
-              <p className="font-semibold text-gray-900 capitalize">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 capitalize">
                 {sessionExam.skill.replace('_', ' ')} — Full Session
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
                 {new Date(sessionExam.createdAt).toLocaleDateString('en-US', {
                   month: 'short', day: 'numeric', year: 'numeric',
                   hour: '2-digit', minute: '2-digit',
@@ -72,10 +72,10 @@ export function HistoryView({ exams }: { exams: Exam[] }) {
         <Modal onClose={() => setFeedbackExam(null)}>
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
-              <p className="font-semibold text-gray-900 capitalize">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 capitalize">
                 {feedbackExam.skill.replace('_', ' ')} — Feedback
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
                 {new Date(feedbackExam.createdAt).toLocaleDateString('en-US', {
                   month: 'short', day: 'numeric', year: 'numeric',
                 })}
@@ -106,7 +106,7 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-6 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="my-8 w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
+      <div className="my-8 w-full max-w-2xl rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-xl">
         {children}
       </div>
     </div>
@@ -138,8 +138,8 @@ function WritingSessionView({ transcript }: { transcript: TranscriptMessage[] })
       {/* Essay topic */}
       <section>
         <Label>Essay Topic</Label>
-        <div className="mt-1 rounded-xl border-2 border-blue-200 bg-blue-50 p-4">
-          <p className="text-sm leading-relaxed text-gray-800">{topic}</p>
+        <div className="mt-1 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4">
+          <p className="text-sm leading-relaxed text-gray-800 dark:text-gray-200">{topic}</p>
         </div>
       </section>
 
@@ -147,7 +147,7 @@ function WritingSessionView({ transcript }: { transcript: TranscriptMessage[] })
       {hasOutline && (
         <section>
           <Label>Outline</Label>
-          <div className="mt-1 flex flex-col gap-2 rounded-xl border border-gray-200 bg-gray-50 p-4">
+          <div className="mt-1 flex flex-col gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
             {[
               { label: 'Introduction thesis', content: outlineIntro },
               { label: 'Body 1 argument', content: outlineBody1 },
@@ -155,18 +155,18 @@ function WritingSessionView({ transcript }: { transcript: TranscriptMessage[] })
               { label: 'Conclusion stance', content: outlineConclusion },
             ].map(({ label, content }) => (
               <div key={label}>
-                <p className="text-xs font-semibold text-gray-400">{label}</p>
-                <p className="text-sm text-gray-700 leading-relaxed">{content}</p>
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500">{label}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{content}</p>
               </div>
             ))}
           </div>
 
           {outlineCritique && (
-            <details className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm">
-              <summary className="cursor-pointer text-xs font-semibold text-amber-700">
+            <details className="mt-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm">
+              <summary className="cursor-pointer text-xs font-semibold text-amber-700 dark:text-amber-400">
                 AI Outline Critique
               </summary>
-              <p className="mt-2 whitespace-pre-wrap leading-relaxed text-gray-700">{outlineCritique}</p>
+              <p className="mt-2 whitespace-pre-wrap leading-relaxed text-gray-700 dark:text-gray-300">{outlineCritique}</p>
             </details>
           )}
         </section>
@@ -180,8 +180,8 @@ function WritingSessionView({ transcript }: { transcript: TranscriptMessage[] })
             {wordCount} words
           </span>
         </div>
-        <div className="mt-1 rounded-xl border border-gray-200 bg-white p-4">
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800">{essay}</p>
+        <div className="mt-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800 dark:text-gray-200">{essay}</p>
         </div>
       </section>
     </div>
@@ -208,7 +208,7 @@ function SpeakingSessionView({ transcript }: { transcript: TranscriptMessage[] }
           <div
             className={`max-w-[85%] rounded-xl px-4 py-2.5 text-sm leading-relaxed ${
               m.role === 'assistant'
-                ? 'bg-gray-100 text-gray-800'
+                ? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
                 : 'bg-blue-600 text-white'
             }`}
           >
@@ -258,14 +258,14 @@ function ExamCard({
   }
 
   return (
-    <div className={`rounded-xl border bg-white p-5 transition-opacity ${isPending ? 'opacity-60' : ''}`}>
+    <div className={`rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 transition-opacity ${isPending ? 'opacity-60' : ''}`}>
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold capitalize text-blue-700">
+          <span className="rounded-full bg-blue-50 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-semibold capitalize text-blue-700 dark:text-blue-400">
             {exam.skill.replace('_', ' ')}
           </span>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-gray-400 dark:text-gray-500">
             {new Date(exam.createdAt).toLocaleDateString('en-US', {
               month: 'short', day: 'numeric', year: 'numeric',
               hour: '2-digit', minute: '2-digit',
@@ -283,8 +283,8 @@ function ExamCard({
       {/* Transcript preview */}
       <div className="mt-3 flex flex-col gap-1.5">
         {preview.map((m) => (
-          <p key={m.id} className="text-xs leading-relaxed text-gray-600">
-            <span className="font-semibold capitalize text-gray-400">{m.role === 'assistant' ? 'Examiner' : 'You'}: </span>
+          <p key={m.id} className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+            <span className="font-semibold capitalize text-gray-400 dark:text-gray-500">{m.role === 'assistant' ? 'Examiner' : 'You'}: </span>
             {m.content.length > 120 ? m.content.slice(0, 120) + '…' : m.content}
           </p>
         ))}
@@ -303,7 +303,7 @@ function ExamCard({
         {exam.examTags.map(({ tag }) => (
           <span
             key={tag.id}
-            className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600"
+            className="flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 text-xs text-gray-600 dark:text-gray-300"
           >
             {tag.name}
             <button
@@ -320,22 +320,22 @@ function ExamCard({
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             placeholder="+ tag"
-            className="w-20 rounded-full border border-dashed border-gray-300 px-2.5 py-0.5 text-xs outline-none transition-all focus:w-28 focus:border-blue-400"
+            className="w-20 rounded-full border border-dashed border-gray-300 dark:border-gray-600 bg-transparent text-gray-700 dark:text-gray-300 px-2.5 py-0.5 text-xs outline-none transition-all focus:w-28 focus:border-blue-400 dark:focus:border-blue-500"
           />
         </form>
       </div>
 
       {/* Actions */}
-      <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-3">
+      <div className="mt-4 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700 pt-3">
         <button
           onClick={() => router.push(continueUrl)}
-          className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50"
+          className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           ↩ Continue
         </button>
         <button
           onClick={onViewSession}
-          className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50"
+          className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           View Session
         </button>
@@ -343,8 +343,8 @@ function ExamCard({
           onClick={onViewFeedback}
           className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
             exam.feedback
-              ? 'border border-blue-200 text-blue-600 hover:bg-blue-50'
-              : 'border border-gray-200 text-gray-400 hover:bg-gray-50'
+              ? 'border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+              : 'border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
           }`}
         >
           {exam.feedback ? '📊 View Feedback' : '📊 No Feedback Yet'}
@@ -357,5 +357,5 @@ function ExamCard({
 // ─── Shared ───────────────────────────────────────────────────────────────────
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">{children}</p>
+  return <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">{children}</p>
 }

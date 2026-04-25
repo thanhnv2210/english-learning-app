@@ -8,8 +8,8 @@ export default async function CollocationPage() {
   return (
     <div className="mx-auto max-w-5xl flex flex-col gap-8 xl:max-w-6xl 2xl:max-w-7xl">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Collocation Library</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Collocation Library</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Search collocations by word or phrase — AI suggests relevant IELTS skills, you can
           adjust before saving.
         </p>
