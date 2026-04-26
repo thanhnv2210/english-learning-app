@@ -68,10 +68,7 @@ Return ONLY valid JSON — no markdown, no explanation:
   ],
   "examples": {
     "speaking": "<one natural conversational sentence an IELTS candidate might say>",
-    "writing": [
-      "<formal IELTS Writing Task 2 sentence>",
-      "<another formal IELTS Writing Task 2 sentence>"
-    ]
+    "writing": ["<formal IELTS Writing Task 2 sentence>", "<another formal IELTS Writing Task 2 sentence>"]
   },
   "pronunciation": {
     "uk": "<British IPA e.g. /ɪnˈfluəns/>",
@@ -80,6 +77,7 @@ Return ONLY valid JSON — no markdown, no explanation:
   "suggestedDomains": ["<domain name from the list above>"]
 }
 
+IMPORTANT: "writing" must be a JSON array with exactly 2 strings — never a plain string.
 Ensure all examples are realistic for IELTS Band 6–7 level.`
 }
 
@@ -118,10 +116,7 @@ Return ONLY valid JSON — no markdown, no explanation:
   ],
   "examples": {
     "speaking": "<one natural conversational sentence an IELTS candidate might say>",
-    "writing": [
-      "<formal IELTS Writing Task 2 sentence>",
-      "<another formal IELTS Writing Task 2 sentence>"
-    ]
+    "writing": ["<formal IELTS Writing Task 2 sentence>", "<another formal IELTS Writing Task 2 sentence>"]
   },
   "pronunciation": {
     "uk": "<British IPA e.g. /ɪnˈfluəns/>",
@@ -129,6 +124,7 @@ Return ONLY valid JSON — no markdown, no explanation:
   }
 }
 
+IMPORTANT: "writing" must be a JSON array with exactly 2 strings — never a plain string.
 Ensure all examples are realistic for IELTS Band 6–7 level.`
 }
 
