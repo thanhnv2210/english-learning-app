@@ -7,6 +7,7 @@ export type WrongDecisionLog = {
   id: number
   skill: string
   questionType: string | null
+  articleStructure: string | null
   sourceText: string | null
   question: string
   myThought: string
@@ -26,6 +27,7 @@ export type WrongDecisionStats = {
 export async function saveWrongDecision(data: {
   skill: string
   questionType?: string
+  articleStructure?: string
   sourceText?: string
   question?: string
   myThought: string
@@ -41,6 +43,7 @@ export async function saveWrongDecision(data: {
       userId: user.id,
       skill: data.skill,
       questionType: data.questionType ?? null,
+      articleStructure: data.articleStructure ?? null,
       sourceText: data.sourceText ?? null,
       question: data.question ?? '',
       myThought: data.myThought,
@@ -66,6 +69,7 @@ export async function updateWrongDecision(
   id: number,
   data: {
     questionType?: string
+    articleStructure?: string
     analytic?: string
     solution?: string
     questionRoles?: string[]

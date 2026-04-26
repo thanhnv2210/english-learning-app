@@ -98,6 +98,16 @@ const ROLE_COLORS: Record<string, { bg: string; text: string }> = {
   'time':          { bg: 'bg-subtle',       text: 'text-foreground'   },
 }
 
+const ARTICLE_STRUCTURES = [
+  'Problem → Solution',
+  'Cause → Effect',
+  'Scientific Discovery / Research Study',
+  'Historical Evolution / Chronological',
+  'Comparison / Contrast',
+  'Argument → Counter-argument → Rebuttal',
+  'General → Specific (Classificatory)',
+]
+
 function roleColor(role: string) {
   return ROLE_COLORS[role] ?? { bg: 'bg-gray-100', text: 'text-gray-700' }
 }
@@ -168,6 +178,7 @@ function SkillBreakdown({ bySkill, total }: { bySkill: Record<string, number>; t
 const EMPTY_FORM = {
   skill: 'reading' as Skill,
   questionType: '',
+  articleStructure: '',
   sourceText: '',
   question: '',
   myThought: '',
@@ -242,6 +253,7 @@ function EntryForm({
       const id = await saveWrongDecisionAction({
         skill: form.skill,
         questionType: form.questionType || undefined,
+        articleStructure: form.articleStructure || undefined,
         sourceText: form.sourceText || undefined,
         question: form.question,
         myThought: form.myThought,
@@ -254,6 +266,7 @@ function EntryForm({
         id,
         skill: form.skill,
         questionType: form.questionType || null,
+        articleStructure: form.articleStructure || null,
         sourceText: form.sourceText || null,
         question: form.question,
         myThought: form.myThought,
@@ -281,7 +294,7 @@ function EntryForm({
             return (
               <button
                 key={s}
-                onClick={() => setForm((prev) => ({ ...prev, skill: s, questionType: '' }))}
+                onClick={() => setForm((prev) => ({ ...prev, skill: s, questionType: '', articleStructure: '' }))}
                 className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
                   form.skill === s ? `${c.bg} ${c.text} ${c.border}` : 'bg-card text-muted-foreground border-border hover:opacity-70'
                 }`}
@@ -314,6 +327,30 @@ function EntryForm({
           ))}
         </div>
       </div>
+
+      {/* Article structure — reading only */}
+      {form.skill === 'reading' && (
+        <div>
+          <p className="text-xs font-semibold text-muted-foreground mb-1.5">
+            Article structure <span className="font-normal text-faint">(optional — helpful for Matching Headings)</span>
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {ARTICLE_STRUCTURES.map((s) => (
+              <button
+                key={s}
+                onClick={() => set('articleStructure', form.articleStructure === s ? '' : s)}
+                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold border transition-colors ${
+                  form.articleStructure === s
+                    ? 'bg-teal-600 text-white border-teal-600'
+                    : 'bg-card text-muted-foreground border-border hover:opacity-70'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Source text */}
       <div>
@@ -466,6 +503,7 @@ function LogCard({
 
   // Edit state
   const [editQuestionType, setEditQuestionType] = useState(log.questionType ?? '')
+  const [editArticleStructure, setEditArticleStructure] = useState(log.articleStructure ?? '')
   const [editQuestion, setEditQuestion] = useState(log.question)
   const [editMyThought, setEditMyThought] = useState(log.myThought)
   const [editAnalytic, setEditAnalytic] = useState(log.analytic ?? '')
@@ -512,6 +550,7 @@ function LogCard({
     startTransition(async () => {
       await updateWrongDecisionAction(log.id, {
         questionType: editQuestionType || undefined,
+        articleStructure: editArticleStructure || undefined,
         question: editQuestion,
         myThought: editMyThought,
         analytic: editAnalytic || undefined,
@@ -520,6 +559,7 @@ function LogCard({
       })
       onUpdate(log.id, {
         questionType: editQuestionType || null,
+        articleStructure: editArticleStructure || null,
         question: editQuestion,
         myThought: editMyThought,
         analytic: editAnalytic || null,
@@ -550,6 +590,11 @@ function LogCard({
         {log.questionType && (
           <span className="shrink-0 rounded-full border border-border bg-subtle px-2.5 py-0.5 text-[10px] font-semibold text-foreground">
             {log.questionType}
+          </span>
+        )}
+        {log.articleStructure && (
+          <span className="shrink-0 rounded-full border border-teal-200 dark:border-teal-800 bg-teal-50 dark:bg-teal-900/20 px-2.5 py-0.5 text-[10px] font-semibold text-teal-700 dark:text-teal-400">
+            {log.articleStructure}
           </span>
         )}
         {log.question ? (
@@ -619,6 +664,27 @@ function LogCard({
                   </button>
                 ))}
               </div>
+
+              {log.skill === 'reading' && (
+                <>
+                  <p className="text-xs font-bold text-violet-700 dark:text-violet-400">Article structure <span className="font-normal opacity-70">(optional)</span></p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {ARTICLE_STRUCTURES.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => setEditArticleStructure(editArticleStructure === s ? '' : s)}
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-semibold border transition-colors ${
+                          editArticleStructure === s
+                            ? 'bg-teal-600 text-white border-teal-600'
+                            : 'bg-card text-faint border-border hover:opacity-70'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
 
               <p className="text-xs font-bold text-violet-700 dark:text-violet-400">Question <span className="font-normal opacity-70">(optional)</span></p>
               <textarea
@@ -693,6 +759,7 @@ function LogCard({
                   onClick={() => {
                     setIsEditing(false)
                     setEditQuestionType(log.questionType ?? '')
+                    setEditArticleStructure(log.articleStructure ?? '')
                     setEditQuestion(log.question)
                     setEditMyThought(log.myThought)
                     setEditAnalytic(log.analytic ?? '')
@@ -853,6 +920,8 @@ export function WrongDecisionsView({
         const q = search.toLowerCase()
         if (
           !(l.question ?? '').toLowerCase().includes(q) &&
+          !(l.questionType ?? '').toLowerCase().includes(q) &&
+          !(l.articleStructure ?? '').toLowerCase().includes(q) &&
           !l.myThought.toLowerCase().includes(q) &&
           !l.actualAnswer.toLowerCase().includes(q) &&
           !(l.analytic ?? '').toLowerCase().includes(q)
