@@ -68,6 +68,19 @@ export async function POST(req: Request) {
     (d) => domainNames.find((n) => n.toLowerCase() === d.toLowerCase()) ?? d
   )
 
+  // Normalize examples.writing — 7B models often return a string instead of [string, string]
+  const rawExamples = parsed.examples ?? { speaking: '', writing: [] }
+  const rawWriting = rawExamples.writing
+  let writingPair: [string, string]
+  if (Array.isArray(rawWriting)) {
+    writingPair = [rawWriting[0] ?? '', rawWriting[1] ?? rawWriting[0] ?? '']
+  } else if (typeof rawWriting === 'string' && rawWriting) {
+    writingPair = [rawWriting, '']
+  } else {
+    writingPair = ['', '']
+  }
+  const normalizedExamples = { speaking: rawExamples.speaking ?? '', writing: writingPair }
+
   const card: VocabularyCard = {
     id: 0,
     originalWord: trimmed,
@@ -76,7 +89,7 @@ export async function POST(req: Request) {
     familyWords: parsed.familyWords ?? {},
     synonyms: parsed.synonyms ?? [],
     collocations: parsed.collocations ?? [],
-    examples: parsed.examples ?? { speaking: '', writing: ['', ''] },
+    examples: normalizedExamples,
     pronunciation: (parsed.pronunciation as VocabPronunciation) ?? null,
     domains: canonicalDomains,
     rank: 3,

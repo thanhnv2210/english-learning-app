@@ -257,7 +257,6 @@ export function WordCard({
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [, startTransition] = useTransition()
   const [pronunciation, setPronunciation] = useState(word.pronunciation)
-  const [isGeneratingPronunciation, setIsGeneratingPronunciation] = useState(false)
   const [editingPronunciation, setEditingPronunciation] = useState(false)
   const [editUk, setEditUk] = useState('')
   const [editUs, setEditUs] = useState('')
@@ -287,23 +286,6 @@ export function WordCard({
       }
     } finally {
       setIsSavingPronunciation(false)
-    }
-  }
-
-  async function handleGeneratePronunciation() {
-    setIsGeneratingPronunciation(true)
-    try {
-      const res = await fetch('/api/vocabulary/pronunciation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wordId: word.id, word: word.word }),
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setPronunciation(data)
-      }
-    } finally {
-      setIsGeneratingPronunciation(false)
     }
   }
 
@@ -413,16 +395,6 @@ export function WordCard({
         <div className="mb-2 flex flex-wrap items-center gap-3">
           <PronunciationChip label="UK" ipa={pronunciation.uk} audioUrl={pronunciation.ukAudio} />
           <PronunciationChip label="US" ipa={pronunciation.us} audioUrl={pronunciation.usAudio} />
-          {!pronunciation.ukAudio && !pronunciation.usAudio && (
-            <button
-              onClick={handleGeneratePronunciation}
-              disabled={isGeneratingPronunciation}
-              title="Refresh from dictionary API"
-              className="text-xs text-faint hover:text-blue-400 disabled:opacity-40 transition-colors"
-            >
-              {isGeneratingPronunciation ? '…' : '↻'}
-            </button>
-          )}
           <button
             onClick={openPronunciationEdit}
             title="Edit pronunciation manually"
@@ -432,20 +404,12 @@ export function WordCard({
           </button>
         </div>
       ) : (
-        <div className="mb-2 flex items-center gap-3">
-          <button
-            onClick={handleGeneratePronunciation}
-            disabled={isGeneratingPronunciation}
-            className="text-xs text-faint hover:text-blue-500 disabled:opacity-50 transition-colors"
-          >
-            {isGeneratingPronunciation ? 'Fetching…' : '+ pronunciation'}
-          </button>
-          <span className="text-xs text-faint">·</span>
+        <div className="mb-2">
           <button
             onClick={openPronunciationEdit}
             className="text-xs text-faint hover:text-muted-foreground transition-colors"
           >
-            enter manually
+            + add pronunciation
           </button>
         </div>
       )}
@@ -524,25 +488,52 @@ export function WordCard({
 
       {expanded && (
         <div className="mt-3 flex flex-col gap-2">
-          <div className="rounded-lg bg-muted p-3">
-            <p className="mb-1 text-xs font-semibold text-muted-foreground">Speaking</p>
-            <p className="text-xs leading-relaxed text-foreground italic">
-              &ldquo;{word.examples.speaking}&rdquo;
-            </p>
-          </div>
-          {word.examples.writing.map((ex, i) => (
-            <div key={i} className="rounded-lg bg-blue-50 p-3">
-              <p className="mb-1 text-xs font-semibold text-blue-500">
-                Writing Task 2 — example {i + 1}
-              </p>
+          {word.examples.speaking && (
+            <div className="rounded-lg bg-muted p-3 flex flex-col gap-1">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-green-600 dark:text-green-400">Speaking</span>
               <p className="text-xs leading-relaxed text-foreground italic">
-                &ldquo;{ex}&rdquo;
+                &ldquo;<HighlightedWord text={word.examples.speaking} word={word.word} />&rdquo;
+              </p>
+            </div>
+          )}
+          {word.examples.writing.filter(Boolean).map((ex, i) => (
+            <div key={i} className="rounded-lg bg-muted p-3 flex flex-col gap-1">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
+                Writing Task 2{word.examples.writing.filter(Boolean).length > 1 ? ` · ${i + 1}` : ''}
+              </span>
+              <p className="text-xs leading-relaxed text-foreground italic">
+                &ldquo;<HighlightedWord text={ex} word={word.word} />&rdquo;
               </p>
             </div>
           ))}
         </div>
       )}
     </div>
+  )
+}
+
+// ── HighlightedWord ───────────────────────────────────────────────────────────
+// Highlights occurrences of the vocabulary word (case-insensitive) in an example sentence.
+
+function HighlightedWord({ text, word }: { text: string; word: string }) {
+  if (!word) return <>{text}</>
+  const regex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+  const parts = text.split(regex)
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === word.toLowerCase() ? (
+          <mark
+            key={i}
+            className="not-italic bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded px-0.5 font-semibold"
+          >
+            {part}
+          </mark>
+        ) : (
+          part
+        ),
+      )}
+    </>
   )
 }
 
