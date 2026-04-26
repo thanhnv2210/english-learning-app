@@ -10,6 +10,7 @@ import { revalidatePath } from 'next/cache'
 export async function saveWrongDecisionAction(data: {
   skill: string
   questionType?: string
+  articleStructure?: string
   sourceText?: string
   question?: string
   myThought: string
@@ -27,6 +28,7 @@ export async function updateWrongDecisionAction(
   id: number,
   data: {
     questionType?: string
+    articleStructure?: string
     analytic?: string
     solution?: string
     questionRoles?: string[]
