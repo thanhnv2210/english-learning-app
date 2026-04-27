@@ -17,13 +17,21 @@ export default async function SentencesPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">
-      {/* Back */}
-      <Link
-        href="/vocabulary"
-        className="self-start text-xs text-faint hover:text-muted-foreground transition-colors"
-      >
-        ← Back to vocabulary
-      </Link>
+      {/* Nav */}
+      <div className="flex items-center justify-between">
+        <Link
+          href="/vocabulary"
+          className="text-xs text-faint hover:text-muted-foreground transition-colors"
+        >
+          ← Back to vocabulary
+        </Link>
+        <Link
+          href="/vocabulary/practice/fill-blank"
+          className="text-xs font-medium text-blue-500 hover:text-blue-700 transition-colors"
+        >
+          ✏️ Practice →
+        </Link>
+      </div>
 
       {/* Word header */}
       <div className="rounded-xl border border-border bg-card p-5">

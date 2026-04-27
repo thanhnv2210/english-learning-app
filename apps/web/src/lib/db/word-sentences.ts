@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { wordSentences, vocabularyWords } from '@/lib/db/schema'
+import { wordSentences, vocabularyWords, sentencePracticeSessions, sentencePracticeResults } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 
 export { SENTENCE_CONTEXTS } from '@/lib/ielts/vocabulary/sentence-contexts'
@@ -50,6 +50,32 @@ export async function addSentence(data: {
 
 export async function deleteSentence(id: number): Promise<void> {
   await db.delete(wordSentences).where(eq(wordSentences.id, id))
+}
+
+export async function createPracticeSession(userId: number, gameType: string): Promise<number> {
+  const [row] = await db
+    .insert(sentencePracticeSessions)
+    .values({ userId, gameType })
+    .returning({ id: sentencePracticeSessions.id })
+  return row.id
+}
+
+export async function logPracticeResult(
+  sessionId: number,
+  sentenceId: number,
+  correct: boolean,
+  timeMs?: number,
+): Promise<void> {
+  await db
+    .insert(sentencePracticeResults)
+    .values({ sessionId, sentenceId, correct, timeMs: timeMs ?? null })
+}
+
+export async function completePracticeSession(sessionId: number, score: number): Promise<void> {
+  await db
+    .update(sentencePracticeSessions)
+    .set({ score, completedAt: new Date() })
+    .where(eq(sentencePracticeSessions.id, sessionId))
 }
 
 /** All sentences across all words — used by games for random sampling. */
