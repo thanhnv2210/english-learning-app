@@ -21,7 +21,7 @@ export default async function CollocationPage() {
         </div>
         {practiceItems.length >= 3 && (
           <Link
-            href="/collocations/practice/fill-blank"
+            href="/collocations/practice"
             className="shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
           >
             ✏️ Practice ({practiceItems.length} sentences)

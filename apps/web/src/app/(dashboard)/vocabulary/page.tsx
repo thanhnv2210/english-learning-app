@@ -33,7 +33,7 @@ export default async function VocabularyPage() {
         </div>
         {sentences.length >= 3 && (
           <Link
-            href="/vocabulary/practice/fill-blank"
+            href="/vocabulary/practice"
             className="shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
           >
             ✏️ Practice ({sentences.length} sentences)
