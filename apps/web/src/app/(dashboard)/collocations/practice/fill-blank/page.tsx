@@ -8,8 +8,8 @@ export default async function CollocFillBlankPage() {
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">
       <div className="flex items-center gap-3">
-        <Link href="/collocations" className="text-xs text-faint hover:text-muted-foreground transition-colors">
-          ← Collocations
+        <Link href="/collocations/practice" className="text-xs text-faint hover:text-muted-foreground transition-colors">
+          ← Practice modes
         </Link>
       </div>
 
@@ -22,8 +22,8 @@ export default async function CollocFillBlankPage() {
 
       <FillBlankGame
         items={items}
-        backHref="/collocations"
-        backLabel="Back to Collocations"
+        backHref="/collocations/practice"
+        backLabel="Back to Practice"
         emptyMessage="Save at least 3 collocations with examples to start practising."
         gameType="colloc_fill_blank"
       />

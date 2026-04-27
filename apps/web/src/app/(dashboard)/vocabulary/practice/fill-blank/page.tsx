@@ -8,8 +8,8 @@ export default async function VocabFillBlankPage() {
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">
       <div className="flex items-center gap-3">
-        <Link href="/vocabulary" className="text-xs text-faint hover:text-muted-foreground transition-colors">
-          ← Vocabulary
+        <Link href="/vocabulary/practice" className="text-xs text-faint hover:text-muted-foreground transition-colors">
+          ← Practice modes
         </Link>
       </div>
 
@@ -22,8 +22,8 @@ export default async function VocabFillBlankPage() {
 
       <FillBlankGame
         items={items}
-        backHref="/vocabulary"
-        backLabel="Back to Vocabulary"
+        backHref="/vocabulary/practice"
+        backLabel="Back to Practice"
         emptyMessage="Save at least 3 sentences from your vocabulary cards to start practising."
         gameType="vocab_fill_blank"
       />
