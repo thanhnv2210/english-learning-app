@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
           id: 0,
           originalWord: original,
           word: parsed.word ?? academic,
+          wordType: parsed.wordType ?? null,
           definition: parsed.definition ?? '',
           familyWords: parsed.familyWords ?? {},
           synonyms: parsed.synonyms ?? [],

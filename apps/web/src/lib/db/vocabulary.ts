@@ -8,6 +8,7 @@ export type VocabularyCard = {
   originalWord: string
   word: string
   definition: string
+  wordType: string | null
   familyWords: VocabWordFamily
   synonyms: VocabSynonym[]
   collocations: string[]
@@ -76,6 +77,7 @@ export async function findWords(words: string[]): Promise<Map<string, Vocabulary
 export async function saveVocabularyWord(data: {
   word: string
   definition: string
+  wordType?: string | null
   familyWords: VocabWordFamily
   synonyms: VocabSynonym[]
   collocations: string[]
@@ -89,6 +91,7 @@ export async function saveVocabularyWord(data: {
     .values({
       word: data.word,
       definition: data.definition,
+      wordType: data.wordType ?? null,
       familyWords: data.familyWords,
       synonyms: data.synonyms,
       collocations: data.collocations,
@@ -131,6 +134,10 @@ export async function saveWordPronunciation(id: number, pronunciation: VocabPron
   await db.update(vocabularyWords).set({ pronunciation }).where(eq(vocabularyWords.id, id))
 }
 
+export async function updateWordType(id: number, wordType: string): Promise<void> {
+  await db.update(vocabularyWords).set({ wordType }).where(eq(vocabularyWords.id, id))
+}
+
 async function getDomainsForWord(wordId: number): Promise<string[]> {
   const rows = await db
     .select({ name: writingDomains.name })
@@ -151,6 +158,7 @@ function toCard(
     originalWord,
     word: row.word,
     definition: row.definition,
+    wordType: row.wordType ?? null,
     familyWords: row.familyWords as VocabWordFamily,
     synonyms: row.synonyms as VocabSynonym[],
     collocations: row.collocations as string[],

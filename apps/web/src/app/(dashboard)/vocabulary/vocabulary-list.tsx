@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useOptimistic, useTransition, useRef, useEffect } from 'react'
-import { deleteVocabularyWordAction, updateVocabularyRankAction, updateWordPronunciationAction } from '@/app/actions/vocabulary'
+import { deleteVocabularyWordAction, updateVocabularyRankAction, updateWordPronunciationAction, updateWordTypeAction, detectWordTypeAction } from '@/app/actions/vocabulary'
 import { toggleVocabFavoriteAction } from '@/app/actions/user-skill-topics'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 
@@ -256,6 +256,9 @@ export function WordCard({
   const [hoverRank, setHoverRank] = useState(0)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [, startTransition] = useTransition()
+  const [localWordType, setLocalWordType] = useState(word.wordType)
+  const [editingWordType, setEditingWordType] = useState(false)
+  const [detectingWordType, setDetectingWordType] = useState(false)
   const [pronunciation, setPronunciation] = useState(word.pronunciation)
   const [editingPronunciation, setEditingPronunciation] = useState(false)
   const [editUk, setEditUk] = useState('')
@@ -287,6 +290,21 @@ export function WordCard({
     } finally {
       setIsSavingPronunciation(false)
     }
+  }
+
+  function handleWordTypeChange(type: string) {
+    setLocalWordType(type)
+    setEditingWordType(false)
+    if (word.id > 0) {
+      startTransition(() => updateWordTypeAction(word.id, type))
+    }
+  }
+
+  async function handleDetectWordType() {
+    setDetectingWordType(true)
+    const { wordType } = await detectWordTypeAction(word.id, word.word, word.definition)
+    if (wordType) setLocalWordType(wordType)
+    setDetectingWordType(false)
   }
 
   const synonyms = word.synonyms.filter((s) => s.type === 'synonym').slice(0, 3)
@@ -326,17 +344,62 @@ export function WordCard({
 
       {/* Header */}
       <div className="mb-2 flex items-start justify-between gap-2 pr-8">
-        <h3 className="text-lg font-bold text-foreground">{word.word}</h3>
-        {word.userAdded && (
-          <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs text-blue-600 font-medium">
-            Added
-          </span>
-        )}
-        {word.domains.length === 0 && !word.userAdded && (
-          <span className="shrink-0 rounded-full bg-subtle px-2.5 py-0.5 text-xs text-muted-foreground">
-            General
-          </span>
-        )}
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <h3 className="text-lg font-bold text-foreground">{word.word}</h3>
+
+          {editingWordType ? (
+            <select
+              autoFocus
+              value={localWordType ?? ''}
+              onChange={(e) => handleWordTypeChange(e.target.value)}
+              onBlur={() => setEditingWordType(false)}
+              className="rounded border border-border bg-input text-foreground px-1.5 py-0.5 text-xs outline-none focus:border-blue-400"
+            >
+              <option value="" disabled>pick type…</option>
+              {['noun', 'verb', 'adjective', 'adverb', 'phrase', 'conjunction', 'preposition'].map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          ) : localWordType ? (
+            <button
+              onClick={() => setEditingWordType(true)}
+              title="Edit word type"
+              className="text-xs font-medium italic text-faint hover:text-muted-foreground transition-colors"
+            >
+              {localWordType}
+            </button>
+          ) : (
+            <button
+              onClick={() => setEditingWordType(true)}
+              className="text-xs text-faint hover:text-muted-foreground transition-colors"
+            >
+              + type
+            </button>
+          )}
+
+          {!editingWordType && (
+            <button
+              onClick={handleDetectWordType}
+              disabled={detectingWordType}
+              title="Detect word type with AI"
+              className="text-xs text-faint hover:text-blue-500 disabled:opacity-40 transition-colors"
+            >
+              {detectingWordType ? '…' : '✦ AI'}
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5">
+          {word.userAdded && (
+            <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs text-blue-600 font-medium">
+              Added
+            </span>
+          )}
+          {word.domains.length === 0 && !word.userAdded && (
+            <span className="shrink-0 rounded-full bg-subtle px-2.5 py-0.5 text-xs text-muted-foreground">
+              General
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Domain tags */}

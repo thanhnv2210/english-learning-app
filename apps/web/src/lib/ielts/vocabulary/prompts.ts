@@ -46,6 +46,7 @@ ${availableDomains.map((d) => `  - ${d}`).join('\n')}
 Return ONLY valid JSON — no markdown, no explanation:
 {
   "word": "${word}",
+  "wordType": "<one of: noun, verb, adjective, adverb, phrase, conjunction, preposition>",
   "definition": "<one clear, simple definition suitable for a non-native speaker>",
   "familyWords": {
     "noun": "<noun form or null>",
@@ -94,6 +95,7 @@ The user originally wrote "${originalWord}" and this word is the recommended aca
 Return ONLY valid JSON — no markdown, no explanation:
 {
   "word": "${word}",
+  "wordType": "<one of: noun, verb, adjective, adverb, phrase, conjunction, preposition>",
   "definition": "<one clear, simple definition suitable for a non-native speaker>",
   "familyWords": {
     "noun": "<noun form or null>",
