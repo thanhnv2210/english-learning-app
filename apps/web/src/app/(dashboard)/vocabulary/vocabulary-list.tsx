@@ -478,7 +478,11 @@ export function WordCard({
       )}
 
       {/* Definition */}
-      <p className="mb-3 text-sm leading-relaxed text-muted-foreground">{word.definition}</p>
+      <div className="mb-3 flex flex-col gap-1">
+        {String(word.definition ?? '').split('\n').map((line, i) => (
+          <p key={i} className="text-sm leading-relaxed text-muted-foreground">{line}</p>
+        ))}
+      </div>
 
       {/* Family words */}
       {familyEntries.length > 0 && (

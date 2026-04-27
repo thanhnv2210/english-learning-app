@@ -47,7 +47,7 @@ Return ONLY valid JSON — no markdown, no explanation:
 {
   "word": "${word}",
   "wordType": "<one of: noun, verb, adjective, adverb, phrase, conjunction, preposition>",
-  "definition": "<one clear, simple definition suitable for a non-native speaker>",
+  "definition": "<top 1–2 most common meanings as a numbered list, e.g. '1. first meaning\\n2. second meaning'. Use only 1 if the word has one dominant meaning. Each definition must be clear and simple for a non-native speaker.>",
   "familyWords": {
     "noun": "<noun form or null>",
     "verb": "<verb form or null>",
@@ -96,7 +96,7 @@ Return ONLY valid JSON — no markdown, no explanation:
 {
   "word": "${word}",
   "wordType": "<one of: noun, verb, adjective, adverb, phrase, conjunction, preposition>",
-  "definition": "<one clear, simple definition suitable for a non-native speaker>",
+  "definition": "<top 1–2 most common meanings as a numbered list, e.g. '1. first meaning\\n2. second meaning'. Use only 1 if the word has one dominant meaning. Each definition must be clear and simple for a non-native speaker.>",
   "familyWords": {
     "noun": "<noun form or null>",
     "verb": "<verb form or null>",
