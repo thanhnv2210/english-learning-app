@@ -37,7 +37,7 @@ const GROUPS: NavGroup[] = [
     label: 'Guides',
     items: [
       { href: '/how-to-answer', label: 'How to Answer', icon: '💡' },
-      { href: '/question-anatomy', label: 'Question Anatomy', icon: '🔍' },
+      { href: '/how-to-answer/question-anatomy', label: 'Question Anatomy', icon: '🔍' },
       { href: '/paraphrase', label: 'Paraphrase', icon: '🔄' },
       { href: '/language-comparison', label: 'Language DNA', icon: '🧬' },
       { href: '/topic-ideas', label: 'Topic Ideas', icon: '🗂️' },
