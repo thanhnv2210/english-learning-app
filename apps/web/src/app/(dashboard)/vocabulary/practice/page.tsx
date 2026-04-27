@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getVocabPracticeItems } from '@/lib/db/word-sentences'
+import { getVocabPracticeItems, getWrongVocabPracticeItems } from '@/lib/db/word-sentences'
 
 const GAMES = [
   {
@@ -23,15 +23,18 @@ const GAMES = [
 ]
 
 export default async function VocabPracticeHub() {
-  const items = await getVocabPracticeItems()
+  const [items, wrongItems] = await Promise.all([
+    getVocabPracticeItems(),
+    getWrongVocabPracticeItems(),
+  ])
+
+  const hasEnough = items.length >= 3
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">
-      <div className="flex items-center gap-3">
-        <Link href="/vocabulary" className="text-xs text-faint hover:text-muted-foreground transition-colors">
-          ← Vocabulary
-        </Link>
-      </div>
+      <Link href="/vocabulary" className="self-start text-xs text-faint hover:text-muted-foreground transition-colors">
+        ← Vocabulary
+      </Link>
 
       <div>
         <h1 className="text-xl font-bold text-foreground">Vocabulary Practice</h1>
@@ -40,13 +43,34 @@ export default async function VocabPracticeHub() {
         </p>
       </div>
 
+      {/* Wrong answers banner */}
+      {wrongItems.length > 0 && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-red-700">
+              {wrongItems.length} wrong answer{wrongItems.length !== 1 ? 's' : ''} to review
+            </p>
+            <p className="text-xs text-red-500 mt-0.5">
+              Practice these until you get them right — they&apos;ll clear automatically.
+            </p>
+          </div>
+          <Link
+            href="/vocabulary/practice/wrong-answers"
+            className="shrink-0 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 transition-colors"
+          >
+            Review now →
+          </Link>
+        </div>
+      )}
+
+      {/* Game modes */}
       <div className="flex flex-col gap-3">
         {GAMES.map((game) => (
           <Link
             key={game.href}
-            href={items.length >= 3 ? game.href : '#'}
+            href={hasEnough ? game.href : '#'}
             className={`rounded-xl border border-border bg-card p-5 flex items-start gap-4 transition-colors ${
-              items.length >= 3 ? 'hover:bg-muted cursor-pointer' : 'opacity-50 cursor-not-allowed'
+              hasEnough ? 'hover:bg-muted cursor-pointer' : 'opacity-50 cursor-not-allowed'
             }`}
           >
             <span className="text-3xl shrink-0">{game.icon}</span>
@@ -58,7 +82,7 @@ export default async function VocabPracticeHub() {
         ))}
       </div>
 
-      {items.length < 3 && (
+      {!hasEnough && (
         <p className="text-xs text-faint text-center">
           Save at least 3 sentences from your vocabulary cards to unlock practice.
         </p>
