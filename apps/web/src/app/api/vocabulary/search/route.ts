@@ -43,6 +43,7 @@ export async function POST(req: Request) {
 
   let parsed: {
     word: string
+    wordType?: string
     definition: string
     familyWords: VocabWordFamily
     synonyms: VocabSynonym[]
@@ -85,6 +86,7 @@ export async function POST(req: Request) {
     id: 0,
     originalWord: trimmed,
     word: parsed.word ?? trimmed,
+    wordType: parsed.wordType ?? null,
     definition: parsed.definition ?? '',
     familyWords: parsed.familyWords ?? {},
     synonyms: parsed.synonyms ?? [],

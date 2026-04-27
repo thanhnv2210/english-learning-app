@@ -136,6 +136,7 @@ export const vocabularyWords = pgTable('vocabulary_words', {
   collocations: jsonb('collocations').notNull().$type<string[]>(),
   examples: jsonb('examples').notNull().$type<VocabExamples>(),
   pronunciation: jsonb('pronunciation').$type<VocabPronunciation>(),
+  wordType: text('word_type'),
   rank: integer('rank').notNull().default(3),
   userAdded: boolean('user_added').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
