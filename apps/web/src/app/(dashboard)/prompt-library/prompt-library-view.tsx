@@ -49,15 +49,15 @@ export function PromptLibraryView({ sections }: { sections: SkillSection[] }) {
   return (
     <div className="flex flex-col gap-6">
       {/* Skill tabs */}
-      <div className="flex gap-1 rounded-xl bg-gray-100 p-1">
+      <div className="flex gap-1 rounded-xl bg-subtle p-1">
         {sections.map((s) => (
           <button
             key={s.skill}
             onClick={() => setActiveSkill(s.skill)}
             className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
               activeSkill === s.skill
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <span className="mr-1.5">{s.icon}</span>
@@ -79,7 +79,7 @@ export function PromptLibraryView({ sections }: { sections: SkillSection[] }) {
                 className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
                   active
                     ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    : 'border-border bg-card text-muted-foreground hover:opacity-80'
                 }`}
               >
                 <span className="text-xs">{meta.icon}</span>
@@ -88,7 +88,7 @@ export function PromptLibraryView({ sections }: { sections: SkillSection[] }) {
             )
           })}
         </div>
-        <p className="text-xs text-gray-400">{PLATFORM_META[activePlatform].tip}</p>
+        <p className="text-xs text-faint">{PLATFORM_META[activePlatform].tip}</p>
       </div>
 
       {/* Prompt cards */}
@@ -134,12 +134,12 @@ function PromptCard({
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 px-4 py-3 border-b border-gray-100">
+      <div className="flex items-start justify-between gap-4 px-4 py-3 border-b border-border">
         <div>
-          <p className="text-sm font-semibold text-gray-900">{title}</p>
-          <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+          <p className="text-sm font-semibold text-foreground">{title}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
         </div>
         <button
           onClick={handleCopy}
@@ -149,7 +149,7 @@ function PromptCard({
               ? 'bg-green-50 text-green-600'
               : allFilled
               ? 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-              : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-800'
+              : 'bg-muted text-muted-foreground hover:bg-subtle hover:text-foreground'
           }`}
         >
           {copied ? <><CheckIcon /> Copied</> : <><CopyIcon /> Copy</>}
@@ -170,7 +170,7 @@ function PromptCard({
                 value={values[token.raw] ?? ''}
                 onChange={(e) => setValue(token.raw, e.target.value)}
                 placeholder={token.placeholder}
-                className="flex-1 rounded-lg border border-amber-200 bg-white px-3 py-1.5 text-xs text-gray-800 placeholder-gray-400 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                className="flex-1 rounded-lg border border-amber-200 bg-card px-3 py-1.5 text-xs text-foreground placeholder:text-faint focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
               />
             </div>
           ))}
@@ -178,7 +178,7 @@ function PromptCard({
       )}
 
       {/* Assembled prompt preview */}
-      <pre className="px-4 py-3 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-mono bg-gray-50 overflow-x-auto">
+      <pre className="px-4 py-3 text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap font-mono bg-muted overflow-x-auto">
         {text.split(TOKEN_RE).map((part, i) => {
           if (part.match(/^\[[^\]]+\]$/)) {
             const filled = values[part]?.trim()

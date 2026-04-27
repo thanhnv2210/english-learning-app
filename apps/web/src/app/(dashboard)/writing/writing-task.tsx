@@ -280,16 +280,16 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 xl:max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Writing — Task 2</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-foreground">Writing — Task 2</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Target band: <span className="font-semibold text-blue-600">{targetBand}</span>
         </p>
       </div>
 
       {/* ── Domain selector ── */}
       {stage === 'select' && (
-        <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-6">
-          <p className="text-sm font-medium text-gray-700">Choose a topic domain:</p>
+        <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6">
+          <p className="text-sm font-medium text-muted-foreground">Choose a topic domain:</p>
           <div className="grid grid-cols-2 gap-2">
             {domains.map((d) => (
               <button
@@ -299,7 +299,7 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
                 className={`relative rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
                   domain === d.name
                     ? 'border-blue-500 bg-blue-50 font-medium text-blue-700'
-                    : 'border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
+                    : 'border-border text-muted-foreground hover:border-blue-300 hover:bg-blue-50'
                 }`}
               >
                 {d.name}
@@ -313,18 +313,18 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
           </div>
 
           {/* Drafting mode toggle */}
-          <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-4 py-3">
+          <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-4 py-3">
             <div
               onClick={() => setDraftingMode((v) => !v)}
-              className={`relative h-5 w-9 rounded-full transition-colors ${draftingMode ? 'bg-blue-600' : 'bg-gray-300'}`}
+              className={`relative h-5 w-9 rounded-full transition-colors ${draftingMode ? 'bg-blue-600' : 'bg-border'}`}
             >
               <span
                 className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${draftingMode ? 'translate-x-4' : 'translate-x-0.5'}`}
               />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-700">Drafting Mode</p>
-              <p className="text-xs text-gray-400">Outline your essay first — AI critiques structure before you write</p>
+              <p className="text-sm font-medium text-muted-foreground">Drafting Mode</p>
+              <p className="text-xs text-faint">Outline your essay first — AI critiques structure before you write</p>
             </div>
           </label>
 
@@ -340,14 +340,14 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
 
       {/* ── Options: Pick from Library / Generate New ── */}
       {stage === 'options' && (
-        <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-gray-700">
+            <p className="text-sm font-medium text-muted-foreground">
               Topic source — <span className="text-blue-600">{domain}</span>
             </p>
             <button
               onClick={() => setStage('select')}
-              className="text-xs text-gray-400 hover:text-gray-600"
+              className="text-xs text-faint hover:text-muted-foreground"
             >
               ← Back
             </button>
@@ -357,10 +357,10 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
             <button
               onClick={handleOpenLibrary}
               disabled={domainCount === 0}
-              className="flex flex-col gap-1 rounded-xl border-2 border-gray-200 px-5 py-4 text-left transition-colors hover:border-blue-400 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex flex-col gap-1 rounded-xl border-2 border-border px-5 py-4 text-left transition-colors hover:border-blue-400 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <span className="text-sm font-semibold text-gray-800">Pick from Library</span>
-              <span className="text-xs text-gray-400">
+              <span className="text-sm font-semibold text-foreground">Pick from Library</span>
+              <span className="text-xs text-faint">
                 {domainCount > 0
                   ? `${domainCount} saved topic${domainCount !== 1 ? 's' : ''} available`
                   : 'No topics saved yet'}
@@ -369,10 +369,10 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
 
             <button
               onClick={handleGenerateTopic}
-              className="flex flex-col gap-1 rounded-xl border-2 border-gray-200 px-5 py-4 text-left transition-colors hover:border-blue-400 hover:bg-blue-50"
+              className="flex flex-col gap-1 rounded-xl border-2 border-border px-5 py-4 text-left transition-colors hover:border-blue-400 hover:bg-blue-50"
             >
-              <span className="text-sm font-semibold text-gray-800">Generate New</span>
-              <span className="text-xs text-gray-400">AI creates a fresh topic and saves it</span>
+              <span className="text-sm font-semibold text-foreground">Generate New</span>
+              <span className="text-xs text-faint">AI creates a fresh topic and saves it</span>
             </button>
           </div>
         </div>
@@ -380,29 +380,29 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
 
       {/* ── Generating topic ── */}
       {stage === 'generating' && (
-        <div className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-10">
-          <p className="animate-pulse text-sm text-gray-400">Generating essay topic…</p>
+        <div className="flex items-center justify-center rounded-xl border border-border bg-card p-10">
+          <p className="animate-pulse text-sm text-faint">Generating essay topic…</p>
         </div>
       )}
 
       {/* ── Loading from library ── */}
       {stage === 'loading' && (
-        <div className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-10">
-          <p className="animate-pulse text-sm text-gray-400">Loading topics from library…</p>
+        <div className="flex items-center justify-center rounded-xl border border-border bg-card p-10">
+          <p className="animate-pulse text-sm text-faint">Loading topics from library…</p>
         </div>
       )}
 
       {/* ── Library browser ── */}
       {stage === 'library' && (
-        <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-gray-700">
+            <p className="text-sm font-medium text-muted-foreground">
               Library — <span className="text-blue-600">{domain}</span>
-              <span className="ml-2 text-xs text-gray-400">{libraryTopics.length} topic{libraryTopics.length !== 1 ? 's' : ''}</span>
+              <span className="ml-2 text-xs text-faint">{libraryTopics.length} topic{libraryTopics.length !== 1 ? 's' : ''}</span>
             </p>
             <button
               onClick={() => setStage('options')}
-              className="text-xs text-gray-400 hover:text-gray-600"
+              className="text-xs text-faint hover:text-muted-foreground"
             >
               ← Back
             </button>
@@ -412,12 +412,12 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
               <button
                 key={t.id}
                 onClick={() => handleSelectLibraryTopic(t)}
-                className="flex flex-col gap-1.5 rounded-lg border border-gray-200 px-4 py-3 text-left transition-colors hover:border-blue-400 hover:bg-blue-50"
+                className="flex flex-col gap-1.5 rounded-lg border border-border px-4 py-3 text-left transition-colors hover:border-blue-400 hover:bg-blue-50"
               >
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500 self-start">
+                <span className="rounded-full bg-subtle px-2 py-0.5 text-[10px] font-semibold text-muted-foreground self-start">
                   {TASK_TYPE_LABELS[t.taskType] ?? t.taskType}
                 </span>
-                <span className="text-sm leading-relaxed text-gray-800">{t.prompt}</span>
+                <span className="text-sm leading-relaxed text-foreground">{t.prompt}</span>
               </button>
             ))}
           </div>
@@ -431,13 +431,13 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
             <TopicCard topic={topic} taskType={taskType} />
             <button
               onClick={() => { setTopic(''); setTaskType(''); setSampleStream(''); setSampleResult(null); setShowSampleEssay(false); setStage('options') }}
-              className="ml-3 shrink-0 text-xs text-gray-400 hover:text-gray-600"
+              className="ml-3 shrink-0 text-xs text-faint hover:text-muted-foreground"
             >
               ← Back
             </button>
           </div>
-          <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-5">
-            <p className="text-sm font-semibold text-gray-800">Your Outline</p>
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5">
+            <p className="text-sm font-semibold text-foreground">Your Outline</p>
             {(
               [
                 { key: 'introduction', label: 'Introduction thesis', placeholder: 'State your position on the topic…' },
@@ -447,14 +447,14 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
               ] as const
             ).map(({ key, label, placeholder }) => (
               <div key={key} className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-gray-500">{label}</label>
+                <label className="text-xs font-medium text-muted-foreground">{label}</label>
                 <textarea
                   value={outline[key]}
                   onChange={(e) => setOutline((o) => ({ ...o, [key]: e.target.value }))}
                   placeholder={placeholder}
                   rows={2}
                   disabled={stage === 'critiquing'}
-                  className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400 disabled:bg-gray-50 disabled:text-gray-400"
+                  className="w-full resize-none rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-blue-400 disabled:bg-muted disabled:text-faint"
                 />
               </div>
             ))}
@@ -477,7 +477,7 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
                 {stage === 'critiquing' && !outlineCritique ? 'Critiquing outline…' : 'Outline Critique'}
               </p>
               {outlineCritique ? (
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800">{outlineCritique}</p>
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{outlineCritique}</p>
               ) : (
                 <p className="animate-pulse text-sm text-amber-400">Analysing structure…</p>
               )}
@@ -501,13 +501,13 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
             <TopicCard topic={topic} taskType={taskType} />
             <button
               onClick={() => { setTopic(''); setTaskType(''); setEssay(''); setSampleStream(''); setSampleResult(null); setShowSampleEssay(false); setStage('options') }}
-              className="ml-3 shrink-0 text-xs text-gray-400 hover:text-gray-600"
+              className="ml-3 shrink-0 text-xs text-faint hover:text-muted-foreground"
             >
               ← Back
             </button>
           </div>
           {draftingMode && outlineCritique && (
-            <details className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-500">
+            <details className="rounded-lg border border-border bg-muted px-4 py-2 text-xs text-muted-foreground">
               <summary className="cursor-pointer font-medium">View outline critique</summary>
               <p className="mt-2 whitespace-pre-wrap leading-relaxed">{outlineCritique}</p>
             </details>
@@ -527,7 +527,7 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
               onChange={(e) => setEssay(e.target.value)}
               placeholder="Write your essay here… (aim for 250–300 words)"
               rows={14}
-              className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-sm leading-relaxed outline-none focus:border-blue-500"
+              className="w-full resize-none rounded-xl border border-border px-4 py-3 text-sm leading-relaxed outline-none focus:border-blue-500"
             />
             <div className="flex items-center justify-between">
               <span className={`text-xs ${wordCount < 250 ? 'text-amber-500' : 'text-green-600'}`}>
@@ -547,8 +547,8 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
 
       {/* ── Multi-pass progress ── */}
       {(stage === 'pass1' || stage === 'pass2') && (
-        <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-6">
-          <p className="text-sm font-semibold text-gray-800">Evaluating your essay</p>
+        <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6">
+          <p className="text-sm font-semibold text-foreground">Evaluating your essay</p>
 
           <div className="flex flex-col gap-3">
             <PassRow
@@ -563,7 +563,7 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
           </div>
 
           {stage === 'pass2' && scoreStream && (
-            <pre className="max-h-48 overflow-y-auto rounded-lg bg-gray-50 p-3 font-mono text-xs text-gray-600 whitespace-pre-wrap">
+            <pre className="max-h-48 overflow-y-auto rounded-lg bg-muted p-3 font-mono text-xs text-muted-foreground whitespace-pre-wrap">
               {scoreStream}
             </pre>
           )}
@@ -581,11 +581,11 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
           {/* Pass 3: band scores */}
           {feedback ? (
             <div className="flex flex-col gap-3">
-              <h2 className="text-base font-semibold text-gray-800">Band Scores</h2>
+              <h2 className="text-base font-semibold text-foreground">Band Scores</h2>
               <FeedbackView feedback={feedback} />
             </div>
           ) : (
-            <pre className="max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 font-mono text-xs text-gray-600 whitespace-pre-wrap">
+            <pre className="max-h-48 overflow-y-auto rounded-lg border border-border bg-card p-4 font-mono text-xs text-muted-foreground whitespace-pre-wrap">
               {scoreStream}
             </pre>
           )}
@@ -616,13 +616,13 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
             <div className="flex gap-2">
               <button
                 onClick={handleReset}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-600 transition-colors hover:bg-gray-50"
+                className="rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted"
               >
                 New Essay
               </button>
               <button
                 onClick={() => router.push('/history')}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-600 transition-colors hover:bg-gray-50"
+                className="rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted"
               >
                 View in History →
               </button>
@@ -647,7 +647,7 @@ function TopicCard({ topic, taskType }: { topic: string; taskType: string }) {
           </span>
         )}
       </div>
-      <p className="text-sm leading-relaxed text-gray-800">{topic}</p>
+      <p className="text-sm leading-relaxed text-foreground">{topic}</p>
     </div>
   )
 }
@@ -668,16 +668,16 @@ function PassRow({
       ? 'text-green-600'
       : status === 'running'
         ? 'text-blue-500 animate-pulse'
-        : 'text-gray-300'
+        : 'text-faint'
 
   return (
     <div className="flex items-center gap-3">
       <span className={`w-4 text-center text-sm font-bold ${color}`}>{icon}</span>
       <div className="flex flex-col">
-        <span className={`text-sm font-medium ${status === 'waiting' ? 'text-gray-400' : 'text-gray-700'}`}>
+        <span className={`text-sm font-medium ${status === 'waiting' ? 'text-faint' : 'text-muted-foreground'}`}>
           {label}
         </span>
-        {result && <span className="text-xs text-gray-400">{result}</span>}
+        {result && <span className="text-xs text-faint">{result}</span>}
       </div>
     </div>
   )
@@ -692,12 +692,12 @@ function AuditPanel({ audit }: { audit: AuditResult }) {
     { label: 'Task fulfilled', value: audit.taskFulfilled ? 'Yes' : 'Partial', ok: audit.taskFulfilled },
   ]
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5">
-      <p className="mb-3 text-sm font-semibold text-gray-800">Structural Audit</p>
+    <div className="rounded-xl border border-border bg-card p-5">
+      <p className="mb-3 text-sm font-semibold text-foreground">Structural Audit</p>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {checks.map(({ label, value, ok }) => (
-          <div key={label} className="flex flex-col rounded-lg bg-gray-50 px-3 py-2">
-            <span className="text-xs text-gray-400">{label}</span>
+          <div key={label} className="flex flex-col rounded-lg bg-muted px-3 py-2">
+            <span className="text-xs text-faint">{label}</span>
             <span className={`text-sm font-semibold ${ok ? 'text-green-600' : 'text-amber-600'}`}>{value}</span>
           </div>
         ))}
@@ -705,7 +705,7 @@ function AuditPanel({ audit }: { audit: AuditResult }) {
       {audit.notes.length > 0 && (
         <ul className="mt-3 flex flex-col gap-1">
           {audit.notes.map((n, i) => (
-            <li key={i} className="text-xs text-gray-500">· {n}</li>
+            <li key={i} className="text-xs text-muted-foreground">· {n}</li>
           ))}
         </ul>
       )}
@@ -729,10 +729,10 @@ function GapPanel({
 }) {
   if (!gapResult && !gapStream && !isLoading) {
     return (
-      <div className="flex items-center justify-between rounded-xl border border-dashed border-gray-300 bg-white p-4">
+      <div className="flex items-center justify-between rounded-xl border border-dashed border-border bg-card p-4">
         <div>
-          <p className="text-sm font-medium text-gray-700">Gap Analysis</p>
-          <p className="text-xs text-gray-400">Exactly what to change to reach Band {targetBand}</p>
+          <p className="text-sm font-medium text-muted-foreground">Gap Analysis</p>
+          <p className="text-xs text-faint">Exactly what to change to reach Band {targetBand}</p>
         </div>
         <button
           onClick={onRequest}
@@ -755,7 +755,7 @@ function GapPanel({
       )}
 
       {isLoading && gapStream && !gapResult && (
-        <pre className="max-h-48 overflow-y-auto rounded-lg bg-white p-3 font-mono text-xs text-gray-600 whitespace-pre-wrap">
+        <pre className="max-h-48 overflow-y-auto rounded-lg bg-card p-3 font-mono text-xs text-muted-foreground whitespace-pre-wrap">
           {gapStream}
         </pre>
       )}
@@ -770,13 +770,13 @@ function GapPanel({
                 <div key={criterion}>
                   <div className="mb-1 flex items-center gap-2">
                     <span className="text-xs font-semibold text-purple-700">{criterion}</span>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-faint">
                       {currentBand} → {tb}
                     </span>
                   </div>
                   <ul className="flex flex-col gap-1">
                     {requiredChanges.map((change, i) => (
-                      <li key={i} className="text-xs leading-relaxed text-gray-700">· {change}</li>
+                      <li key={i} className="text-xs leading-relaxed text-muted-foreground">· {change}</li>
                     ))}
                   </ul>
                 </div>
@@ -811,12 +811,12 @@ function SamplePanel({
   // Not yet requested
   if (!result && !stream && !isLoading) {
     return (
-      <div className="flex items-center justify-between rounded-xl border border-dashed border-gray-300 bg-white p-4">
+      <div className="flex items-center justify-between rounded-xl border border-dashed border-border bg-card p-4">
         <div>
-          <p className="text-sm font-medium text-gray-700">
+          <p className="text-sm font-medium text-muted-foreground">
             {mode === 'reference' ? 'Ideas & Collocations' : 'Model Answer'}
           </p>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-faint">
             {mode === 'reference'
               ? 'See key arguments and reusable phrases for this topic'
               : 'Study a model essay, main ideas, and reusable collocations'}
@@ -840,7 +840,7 @@ function SamplePanel({
           {mode === 'reference' ? 'Ideas & Collocations' : 'Model Answer'}
         </p>
         {stream ? (
-          <pre className="max-h-48 overflow-y-auto rounded-lg bg-white p-3 font-mono text-xs text-gray-600 whitespace-pre-wrap">
+          <pre className="max-h-48 overflow-y-auto rounded-lg bg-card p-3 font-mono text-xs text-muted-foreground whitespace-pre-wrap">
             {stream}
           </pre>
         ) : (
@@ -860,10 +860,10 @@ function SamplePanel({
 
       {/* Main ideas */}
       <div>
-        <p className="mb-2 text-xs font-semibold text-gray-600">Main Ideas</p>
+        <p className="mb-2 text-xs font-semibold text-muted-foreground">Main Ideas</p>
         <ol className="flex flex-col gap-1.5 pl-1">
           {result.mainIdeas.map((idea, i) => (
-            <li key={i} className="flex gap-2 text-sm leading-relaxed text-gray-700">
+            <li key={i} className="flex gap-2 text-sm leading-relaxed text-muted-foreground">
               <span className="mt-0.5 shrink-0 text-xs font-bold text-green-500">{i + 1}.</span>
               {idea}
             </li>
@@ -873,12 +873,12 @@ function SamplePanel({
 
       {/* Collocations */}
       <div>
-        <p className="mb-2 text-xs font-semibold text-gray-600">Reusable Collocations</p>
+        <p className="mb-2 text-xs font-semibold text-muted-foreground">Reusable Collocations</p>
         <div className="flex flex-col gap-2">
           {result.collocations.map(({ phrase, usage }, i) => (
-            <div key={i} className="rounded-lg border border-green-100 bg-white px-3 py-2">
+            <div key={i} className="rounded-lg border border-green-100 bg-card px-3 py-2">
               <p className="text-xs font-semibold text-green-700">{phrase}</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-gray-500 italic">&quot;{usage}&quot;</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground italic">&quot;{usage}&quot;</p>
             </div>
           ))}
         </div>
@@ -893,7 +893,7 @@ function SamplePanel({
           {showEssay ? 'Hide model essay ▲' : 'Reveal model essay ▼'}
         </button>
         {showEssay && (
-          <p className="whitespace-pre-wrap rounded-lg border border-green-100 bg-white px-4 py-3 text-sm leading-relaxed text-gray-800">
+          <p className="whitespace-pre-wrap rounded-lg border border-green-100 bg-card px-4 py-3 text-sm leading-relaxed text-foreground">
             {result.essay}
           </p>
         )}

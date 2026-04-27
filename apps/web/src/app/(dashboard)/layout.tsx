@@ -5,7 +5,7 @@ import { getDefaultUser } from '@/lib/db/user'
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getDefaultUser()
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+    <div className="flex h-screen overflow-hidden bg-background">
       <NavSidebar targetProfile={user.targetProfile} />
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         {process.env.NEXT_PUBLIC_OLLAMA_ENABLED === 'false' && <OllamaDisabledBanner />}

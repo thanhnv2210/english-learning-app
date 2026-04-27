@@ -126,8 +126,8 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
 
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Speaking — Part 2</h1>
-          <p className="mt-1 text-sm text-gray-500">Cue card topic. 1 min prep · 2 min speak.</p>
+          <h1 className="text-2xl font-bold text-foreground">Speaking — Part 2</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Cue card topic. 1 min prep · 2 min speak.</p>
         </div>
         {stage === 'prep' && (
           <TimerControl timer={prepTimer} label="Prep" />
@@ -139,15 +139,15 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
 
       {/* ── Idle ── */}
       {stage === 'idle' && (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-gray-200 bg-white p-10">
-          <p className="text-sm text-gray-500 text-center max-w-sm">
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-10">
+          <p className="text-sm text-muted-foreground text-center max-w-sm">
             The AI will generate a tech-themed cue card. You get 1 minute to prepare, then 2 minutes to speak.
           </p>
           <div className="flex gap-3">
             {topics.length > 0 && (
               <button
                 onClick={handleOpenTopicSelect}
-                className="rounded-lg border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 active:scale-95 transition-all"
+                className="rounded-lg border border-border px-5 py-3 text-sm font-medium text-muted-foreground hover:border-muted-foreground hover:bg-muted active:scale-95 transition-all"
               >
                 Choose Topic
               </button>
@@ -166,8 +166,8 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
       {stage === 'topic-select' && (
         <div className="flex flex-col gap-5">
           <div>
-            <p className="text-sm font-semibold text-gray-700">Choose a topic category</p>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-sm font-semibold text-muted-foreground">Choose a topic category</p>
+            <p className="text-xs text-faint mt-0.5">
               The AI will generate a cue card within this theme. Leave unselected for a random tech topic.
             </p>
           </div>
@@ -180,13 +180,13 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
                 className={`rounded-lg border px-3 py-2.5 text-left transition-colors ${
                   selectedTopic?.id === t.id
                     ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                    : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-muted'
                 }`}
               >
-                <p className={`text-xs font-semibold leading-snug ${selectedTopic?.id === t.id ? 'text-blue-700' : 'text-gray-800'}`}>
+                <p className={`text-xs font-semibold leading-snug ${selectedTopic?.id === t.id ? 'text-blue-700' : 'text-foreground'}`}>
                   {t.name}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5 line-clamp-2 leading-tight">{t.description}</p>
+                <p className="text-xs text-faint mt-0.5 line-clamp-2 leading-tight">{t.description}</p>
               </button>
             ))}
           </div>
@@ -201,8 +201,8 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
             </div>
           )}
 
-          <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-6">
-            <p className="text-sm text-gray-500 max-w-xs">
+          <div className="flex items-center justify-between rounded-xl border border-border bg-card p-6">
+            <p className="text-sm text-muted-foreground max-w-xs">
               {selectedTopic
                 ? `A cue card about "${selectedTopic.name}" will be generated.`
                 : 'No topic selected — a random tech cue card will be generated.'}
@@ -210,7 +210,7 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
             <div className="flex gap-3">
               <button
                 onClick={() => { setSelectedTopic(null); setStage('idle') }}
-                className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                className="rounded-lg border border-border px-4 py-2.5 text-sm text-muted-foreground hover:bg-muted transition-colors"
               >
                 Back
               </button>
@@ -227,8 +227,8 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
 
       {/* ── Generating cue card ── */}
       {stage === 'generating' && (
-        <div className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-10">
-          <p className="text-sm text-gray-400 animate-pulse">Generating cue card…</p>
+        <div className="flex items-center justify-center rounded-xl border border-border bg-card p-10">
+          <p className="text-sm text-faint animate-pulse">Generating cue card…</p>
         </div>
       )}
 
@@ -237,7 +237,7 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
         <div className="flex flex-col gap-4">
           <div className="rounded-xl border-2 border-blue-200 bg-blue-50 p-6">
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-500 mb-3">Cue Card</p>
-            <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">{cueCard.prompt}</p>
+            <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{cueCard.prompt}</p>
           </div>
           <button
             onClick={handleBeginSpeaking}
@@ -253,20 +253,20 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
         <div className="flex flex-col gap-4">
           {/* Cue card reminder (collapsed) */}
           {cueCard && (
-            <details className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-500 cursor-pointer">
+            <details className="rounded-lg border border-border bg-muted px-4 py-2 text-xs text-muted-foreground cursor-pointer">
               <summary className="font-medium">View cue card</summary>
               <p className="mt-2 whitespace-pre-line leading-relaxed">{cueCard.prompt}</p>
             </details>
           )}
 
           {/* Chat */}
-          <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 min-h-48 max-h-[45vh] overflow-y-auto">
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 min-h-48 max-h-[45vh] overflow-y-auto">
             {visibleMessages.map((m) => (
               <div
                 key={m.id}
                 className={`rounded-lg px-4 py-2 text-sm leading-relaxed max-w-[85%] ${
                   m.role === 'assistant'
-                    ? 'self-start bg-gray-100 text-gray-800'
+                    ? 'self-start bg-subtle text-foreground'
                     : 'self-end bg-blue-600 text-white'
                 }`}
                 {...(m.role === 'assistant' ? { 'data-testid': 'ai-message' } : {})}
@@ -275,7 +275,7 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
               </div>
             ))}
             {isLoading && (
-              <p className="self-start text-xs text-gray-400 animate-pulse">Examiner…</p>
+              <p className="self-start text-xs text-faint animate-pulse">Examiner…</p>
             )}
             <div ref={bottomRef} />
           </div>
@@ -292,7 +292,7 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
               <button
                 onClick={handleEndSession}
                 disabled={isSaving || isLoading || visibleMessages.length < 1}
-                className="self-end rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-500 hover:border-red-300 hover:text-red-500 disabled:opacity-30 transition-colors"
+                className="self-end rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:border-red-300 hover:text-red-500 disabled:opacity-30 transition-colors"
               >
                 {isSaving ? 'Saving…' : 'End & Save Session'}
               </button>
@@ -300,10 +300,10 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
           )}
 
           {stage === 'ended' && !feedback && (
-            <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4">
+            <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
               <div>
-                <p className="text-sm font-medium text-gray-800">Session saved ✓</p>
-                <p className="text-xs text-gray-500">Generate AI feedback on your Part 2 response.</p>
+                <p className="text-sm font-medium text-foreground">Session saved ✓</p>
+                <p className="text-xs text-muted-foreground">Generate AI feedback on your Part 2 response.</p>
               </div>
               <div className="flex gap-2">
                 <button
@@ -315,7 +315,7 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
                 </button>
                 <button
                   onClick={() => router.push('/history')}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-600 hover:bg-gray-50"
+                  className="rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:bg-muted"
                 >
                   History →
                 </button>
@@ -325,11 +325,11 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
 
           {stage === 'ended' && feedback && (
             <div className="flex flex-col gap-3">
-              <h2 className="text-base font-semibold text-gray-800">Feedback</h2>
+              <h2 className="text-base font-semibold text-foreground">Feedback</h2>
               <FeedbackView feedback={feedback} />
               <button
                 onClick={() => router.push('/history')}
-                className="self-end rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-600 hover:bg-gray-50"
+                className="self-end rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:bg-muted"
               >
                 View in History →
               </button>

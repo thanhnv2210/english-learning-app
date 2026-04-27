@@ -46,21 +46,21 @@ const LEVEL_COLORS: Record<number, { bg: string; text: string; border: string; a
 
 function ChangeTable({ changes }: { changes: ParaphraseExample['changes'] }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
+    <div className="overflow-x-auto rounded-lg border border-border">
       <table className="w-full text-xs">
         <thead>
-          <tr className="border-b border-gray-200 bg-gray-50">
-            <th className="px-3 py-2 text-left font-semibold text-gray-500 w-1/3">Original</th>
-            <th className="px-3 py-2 text-left font-semibold text-gray-500 w-1/3">Paraphrased</th>
-            <th className="px-3 py-2 text-left font-semibold text-gray-500">Reason</th>
+          <tr className="border-b border-border bg-muted">
+            <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-1/3">Original</th>
+            <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-1/3">Paraphrased</th>
+            <th className="px-3 py-2 text-left font-semibold text-muted-foreground">Reason</th>
           </tr>
         </thead>
         <tbody>
           {changes.map((c, i) => (
-            <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+            <tr key={i} className={i % 2 === 0 ? 'bg-card' : 'bg-muted'}>
               <td className="px-3 py-2 font-mono text-rose-700 align-top">{c.from}</td>
               <td className="px-3 py-2 font-mono text-green-700 align-top">{c.to}</td>
-              <td className="px-3 py-2 text-gray-600 align-top leading-relaxed">{c.reason}</td>
+              <td className="px-3 py-2 text-muted-foreground align-top leading-relaxed">{c.reason}</td>
             </tr>
           ))}
         </tbody>
@@ -75,28 +75,28 @@ function ExampleCard({ ex, accent }: { ex: ParaphraseExample; accent: typeof SKI
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+        className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted transition-colors"
       >
-        <span className="text-sm font-medium text-gray-700">{ex.label}</span>
-        <span className={`text-xs text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▼</span>
+        <span className="text-sm font-medium text-foreground">{ex.label}</span>
+        <span className={`text-xs text-faint transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▼</span>
       </button>
 
       {open && (
         <div className="border-t border-gray-100 px-4 pb-4 pt-3 space-y-3">
           {/* Original */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1">Original</p>
-            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700 leading-relaxed">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-faint mb-1">Original</p>
+            <p className="rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-muted-foreground leading-relaxed">
               {ex.original}
             </p>
           </div>
 
           {/* Paraphrased */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1">Paraphrased</p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-faint mb-1">Paraphrased</p>
             <p className={`rounded-lg border px-3 py-2.5 text-sm leading-relaxed font-medium ${accent.example} ${accent.border}`}>
               {ex.paraphrased}
             </p>
@@ -104,7 +104,7 @@ function ExampleCard({ ex, accent }: { ex: ParaphraseExample; accent: typeof SKI
 
           {/* Change table */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1.5">What changed</p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-faint mb-1.5">What changed</p>
             <ChangeTable changes={ex.changes} />
           </div>
 
@@ -127,8 +127,8 @@ function TechniqueBlock({ technique, accent }: { technique: ParaphraseTechnique;
   return (
     <div className="space-y-3">
       <div>
-        <p className="text-sm font-semibold text-gray-800">{technique.name}</p>
-        <p className="mt-0.5 text-xs leading-relaxed text-gray-500">{technique.description}</p>
+        <p className="text-sm font-semibold text-foreground">{technique.name}</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{technique.description}</p>
       </div>
       <div className="space-y-2">
         {technique.examples.map((ex, i) => (
@@ -188,7 +188,7 @@ export function ParaphraseGuide({ guides }: { guides: ParaphraseSkillGuide[] }) 
   return (
     <div className="space-y-6">
       {/* Skill tabs */}
-      <div className="flex gap-1 border-b border-gray-200">
+      <div className="flex gap-1 border-b border-border">
         {guides.map((g) => {
           const isActive = g.skill === activeSkill
           const a = SKILL_ACCENT[g.skill]
@@ -197,7 +197,7 @@ export function ParaphraseGuide({ guides }: { guides: ParaphraseSkillGuide[] }) 
               key={g.skill}
               onClick={() => { setActiveSkill(g.skill); setActiveLevel(1) }}
               className={`flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-                isActive ? `${a.active} border-current` : `border-transparent text-gray-500 ${a.tab}`
+                isActive ? `${a.active} border-current` : `border-transparent text-muted-foreground ${a.tab}`
               }`}
             >
               <span>{g.icon}</span>
@@ -211,7 +211,7 @@ export function ParaphraseGuide({ guides }: { guides: ParaphraseSkillGuide[] }) 
         <>
           {/* Skill intro + purpose */}
           <div className="space-y-3">
-            <p className="text-sm leading-relaxed text-gray-600">{guide.intro}</p>
+            <p className="text-sm leading-relaxed text-muted-foreground">{guide.intro}</p>
             <div className={`rounded-lg border px-4 py-3 ${accent.example} ${accent.border}`}>
               <p className="text-[10px] font-bold uppercase tracking-wide mb-2 opacity-70">
                 Why paraphrase matters in {guide.label}
@@ -229,7 +229,7 @@ export function ParaphraseGuide({ guides }: { guides: ParaphraseSkillGuide[] }) 
 
           {/* Level pills */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Select level</p>
+            <p className="text-xs font-semibold text-faint mb-2 uppercase tracking-wide">Select level</p>
             <div className="flex gap-2 flex-wrap">
               {guide.levels.map((l) => {
                 const isActive = activeLevel === l.level
@@ -239,7 +239,7 @@ export function ParaphraseGuide({ guides }: { guides: ParaphraseSkillGuide[] }) 
                     key={l.level}
                     onClick={() => setActiveLevel(l.level as 1 | 2 | 3)}
                     className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors ${
-                      isActive ? lc.active : `bg-white ${lc.text} ${lc.border} hover:${lc.bg}`
+                      isActive ? lc.active : `bg-card ${lc.text} ${lc.border} hover:${lc.bg}`
                     }`}
                   >
                     Level {l.level} — {l.badge}

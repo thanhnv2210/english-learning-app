@@ -67,7 +67,7 @@ function TrendDots({ sessions, target }: { sessions: { band: number }[]; target:
               className={`w-3 rounded-sm ${color} transition-all`}
               style={{ height: `${height}%` }}
             />
-            <span className="absolute -top-6 left-1/2 -translate-x-1/2 hidden group-hover:block text-xs bg-gray-800 text-white rounded px-1 py-0.5 whitespace-nowrap z-10">
+            <span className="absolute -top-6 left-1/2 -translate-x-1/2 hidden group-hover:block text-xs bg-foreground text-background rounded px-1 py-0.5 whitespace-nowrap z-10">
               Band {fmt(s.band)}
             </span>
           </div>
@@ -84,18 +84,18 @@ function SkillCard({ stat }: { stat: SkillStats }) {
   const href  = SKILL_PRACTICE_HREF[stat.skill] ?? '/'
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 flex flex-col gap-4">
+    <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-gray-800">{label}</p>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-sm font-semibold text-foreground">{label}</p>
+          <p className="text-xs text-faint mt-0.5">
             {stat.sessionCount} session{stat.sessionCount !== 1 ? 's' : ''} · last {relativeDate(stat.lastPracticed)}
           </p>
         </div>
         <a
           href={href}
-          className="shrink-0 rounded-lg border border-gray-200 px-3 py-1 text-xs text-gray-500 hover:bg-gray-50 transition-colors"
+          className="shrink-0 rounded-lg border border-border px-3 py-1 text-xs text-muted-foreground hover:bg-muted transition-colors"
         >
           Practice →
         </a>
@@ -107,31 +107,31 @@ function SkillCard({ stat }: { stat: SkillStats }) {
           <span className={`text-3xl font-bold tabular-nums ${bandBg(stat.gap)}`}>
             {fmt(stat.avgBand)}
           </span>
-          <span className="text-xs text-gray-400">avg band</span>
+          <span className="text-xs text-faint">avg band</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-xs text-gray-400">target</span>
-          <span className="text-lg font-semibold text-gray-600">{fmt(stat.targetBand)}</span>
+          <span className="text-xs text-faint">target</span>
+          <span className="text-lg font-semibold text-muted-foreground">{fmt(stat.targetBand)}</span>
         </div>
         <div className={`rounded-full border px-3 py-1 text-xs font-semibold ${gapBg(stat.gap)}`}>
           {stat.gap >= 0 ? '+' : ''}{fmt(stat.gap)} gap
         </div>
         <div className="ml-auto">
           <TrendDots sessions={stat.recentSessions} target={stat.targetBand} />
-          <p className="text-xs text-gray-400 text-center mt-1">last {stat.recentSessions.length}</p>
+          <p className="text-xs text-faint text-center mt-1">last {stat.recentSessions.length}</p>
         </div>
       </div>
 
       {/* Criteria breakdown */}
       {stat.criteriaStats.length > 0 && (
-        <div className="rounded-lg bg-gray-50 p-3">
-          <p className="text-xs font-semibold text-gray-500 mb-2">Criteria breakdown</p>
+        <div className="rounded-lg bg-muted p-3">
+          <p className="text-xs font-semibold text-muted-foreground mb-2">Criteria breakdown</p>
           <div className="flex flex-col gap-1.5">
             {stat.criteriaStats.map((c) => (
               <div key={c.criterion} className="flex items-center gap-2">
-                <span className="text-xs text-gray-600 w-40 shrink-0 truncate">{c.criterion}</span>
+                <span className="text-xs text-muted-foreground w-40 shrink-0 truncate">{c.criterion}</span>
                 {/* Bar */}
-                <div className="flex-1 h-1.5 rounded-full bg-gray-200 relative overflow-hidden">
+                <div className="flex-1 h-1.5 rounded-full bg-border relative overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
                       c.gap >= 0 ? 'bg-green-400' : c.gap >= -0.5 ? 'bg-amber-400' : 'bg-red-400'
@@ -140,14 +140,14 @@ function SkillCard({ stat }: { stat: SkillStats }) {
                   />
                   {/* Target marker */}
                   <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-gray-500"
+                    className="absolute top-0 bottom-0 w-0.5 bg-muted-foreground"
                     style={{ left: `${Math.min(100, (c.target / 9) * 100)}%` }}
                   />
                 </div>
                 <span className={`text-xs font-semibold tabular-nums w-8 text-right ${gapColor(c.gap)}`}>
                   {fmt(c.avg)}
                 </span>
-                <span className="text-xs text-gray-400 w-10 text-right">/ {fmt(c.target)}</span>
+                <span className="text-xs text-faint w-10 text-right">/ {fmt(c.target)}</span>
               </div>
             ))}
           </div>
@@ -171,9 +171,9 @@ function SummaryBar({ stats }: { stats: SkillStats[] }) {
         { label: 'Skills at target', value: `${onTarget} / ${stats.length}` },
         { label: 'Strongest skill', value: best ? (SKILL_LABELS[best.skill] ?? best.skill) : '—' },
       ].map(({ label, value }) => (
-        <div key={label} className="rounded-xl border border-gray-200 bg-white px-5 py-4">
-          <p className="text-xs text-gray-400">{label}</p>
-          <p className="mt-1 text-lg font-bold text-gray-800 truncate">{value}</p>
+        <div key={label} className="rounded-xl border border-border bg-card px-5 py-4">
+          <p className="text-xs text-faint">{label}</p>
+          <p className="mt-1 text-lg font-bold text-foreground truncate">{value}</p>
         </div>
       ))}
     </div>
@@ -195,15 +195,15 @@ const ROLE_LABELS: Record<string, string> = {
 function WrongDecisionCard({ wrongStats }: { wrongStats: WrongDecisionStats }) {
   const topRole = wrongStats.byRole[0]
   return (
-    <div className="rounded-xl border border-rose-200 bg-white p-5 flex flex-col gap-3">
+    <div className="rounded-xl border border-rose-200 bg-card p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-gray-800">Wrong Decision Log</p>
-          <p className="text-xs text-gray-400 mt-0.5">{wrongStats.total} mistake{wrongStats.total !== 1 ? 's' : ''} recorded</p>
+          <p className="text-sm font-semibold text-foreground">Wrong Decision Log</p>
+          <p className="text-xs text-faint mt-0.5">{wrongStats.total} mistake{wrongStats.total !== 1 ? 's' : ''} recorded</p>
         </div>
         <a
           href="/wrong-decisions"
-          className="shrink-0 rounded-lg border border-gray-200 px-3 py-1 text-xs text-gray-500 hover:bg-gray-50 transition-colors"
+          className="shrink-0 rounded-lg border border-border px-3 py-1 text-xs text-muted-foreground hover:bg-muted transition-colors"
         >
           View log →
         </a>
@@ -212,20 +212,20 @@ function WrongDecisionCard({ wrongStats }: { wrongStats: WrongDecisionStats }) {
         <div className="flex gap-4">
           {topRole && (
             <div className="flex flex-col">
-              <span className="text-xs text-gray-400">Most missed role</span>
+              <span className="text-xs text-faint">Most missed role</span>
               <span className="text-sm font-semibold text-rose-600">{ROLE_LABELS[topRole.role] ?? topRole.role}</span>
             </div>
           )}
           <div className="flex flex-col">
-            <span className="text-xs text-gray-400">Most errors in</span>
-            <span className="text-sm font-semibold text-gray-700">
+            <span className="text-xs text-faint">Most errors in</span>
+            <span className="text-sm font-semibold text-foreground">
               {Object.entries(wrongStats.bySkill).sort(([, a], [, b]) => b - a)[0]?.[0] ?? '—'}
             </span>
           </div>
         </div>
       )}
       {wrongStats.total === 0 && (
-        <p className="text-xs text-gray-400">No mistakes logged yet. Record your first wrong decision to see patterns here.</p>
+        <p className="text-xs text-faint">No mistakes logged yet. Record your first wrong decision to see patterns here.</p>
       )}
     </div>
   )
@@ -237,9 +237,9 @@ export function AnalyticsView({ stats, wrongDecisionStats }: { stats: SkillStats
   if (stats.length === 0) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-16 text-center">
-          <p className="text-sm font-medium text-gray-500">No graded sessions yet.</p>
-          <p className="mt-1 text-xs text-gray-400">
+        <div className="rounded-xl border border-dashed border-border bg-card p-16 text-center">
+          <p className="text-sm font-medium text-muted-foreground">No graded sessions yet.</p>
+          <p className="mt-1 text-xs text-faint">
             Complete a Speaking, Writing, Reading, or Listening session and request feedback to see your analytics.
           </p>
           <div className="mt-6 flex justify-center gap-3">
@@ -252,7 +252,7 @@ export function AnalyticsView({ stats, wrongDecisionStats }: { stats: SkillStats
               <a
                 key={href}
                 href={href}
-                className="rounded-lg border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                className="rounded-lg border border-border px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
               >
                 {label} →
               </a>

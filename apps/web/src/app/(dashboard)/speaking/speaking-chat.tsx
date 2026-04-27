@@ -31,13 +31,13 @@ function TopicButton({
       className={`rounded-lg border px-3 py-2.5 text-left transition-colors ${
         selected
           ? 'border-blue-500 bg-blue-50 text-blue-700'
-          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+          : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-muted'
       }`}
     >
-      <p className={`text-xs font-semibold leading-snug ${selected ? 'text-blue-700' : 'text-gray-800'}`}>
+      <p className={`text-xs font-semibold leading-snug ${selected ? 'text-blue-700' : 'text-foreground'}`}>
         {topic.name}
       </p>
-      <p className="text-xs text-gray-400 mt-0.5 line-clamp-2 leading-tight">{topic.description}</p>
+      <p className="text-xs text-faint mt-0.5 line-clamp-2 leading-tight">{topic.description}</p>
     </button>
   )
 }
@@ -145,8 +145,8 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
     <div className="mx-auto flex max-w-2xl flex-col gap-6 xl:max-w-3xl">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Speaking — Part 1</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-foreground">Speaking — Part 1</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             {resumeExamId ? 'Resuming session #' + resumeExamId : 'Answer naturally. No help from the examiner.'}
           </p>
         </div>
@@ -161,8 +161,8 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
           {!resumeExamId && topics.length > 0 && (
             <div className="flex flex-col gap-3">
               <div>
-                <p className="text-sm font-semibold text-gray-700">Choose a topic</p>
-                <p className="text-xs text-gray-400 mt-0.5">The examiner will focus on this topic. Leave unselected for a mixed session.</p>
+                <p className="text-sm font-semibold text-muted-foreground">Choose a topic</p>
+                <p className="text-xs text-faint mt-0.5">The examiner will focus on this topic. Leave unselected for a mixed session.</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {pinnedTopics.map((t) => (
@@ -180,13 +180,13 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
                       className={`rounded-lg border px-3 py-2.5 text-xs font-semibold transition-colors ${
                         showMore || otherTopics.some((t) => t.id === selectedTopic?.id)
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                          : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-muted'
                       }`}
                     >
                       ···
                     </button>
                     {showMore && (
-                      <div className="absolute left-0 top-full mt-1 z-10 w-56 rounded-xl border border-gray-200 bg-white shadow-lg p-2 flex flex-col gap-1">
+                      <div className="absolute left-0 top-full mt-1 z-10 w-56 rounded-xl border border-border bg-card shadow-lg p-2 flex flex-col gap-1">
                         {otherTopics.map((t) => (
                           <button
                             key={t.id}
@@ -197,13 +197,13 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
                             className={`w-full rounded-lg px-3 py-2 text-left transition-colors ${
                               selectedTopic?.id === t.id
                                 ? 'bg-blue-50 text-blue-700'
-                                : 'text-gray-700 hover:bg-gray-50'
+                                : 'text-muted-foreground hover:bg-muted'
                             }`}
                           >
-                            <p className={`text-xs font-semibold leading-snug ${selectedTopic?.id === t.id ? 'text-blue-700' : 'text-gray-800'}`}>
+                            <p className={`text-xs font-semibold leading-snug ${selectedTopic?.id === t.id ? 'text-blue-700' : 'text-foreground'}`}>
                               {t.name}
                             </p>
-                            <p className="text-xs text-gray-400 mt-0.5 line-clamp-1 leading-tight">{t.description}</p>
+                            <p className="text-xs text-faint mt-0.5 line-clamp-1 leading-tight">{t.description}</p>
                           </button>
                         ))}
                       </div>
@@ -228,8 +228,8 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
             </div>
           )}
 
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-gray-200 bg-white p-8">
-            <p className="text-sm text-gray-500 text-center max-w-sm">
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card p-8">
+            <p className="text-sm text-muted-foreground text-center max-w-sm">
               {selectedTopic
                 ? `The examiner will ask 4–5 questions about "${selectedTopic.name}".`
                 : resumeExamId
@@ -248,13 +248,13 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
       ) : (
         <div className="flex flex-col gap-4">
           {/* Chat */}
-          <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 min-h-64 max-h-[50vh] overflow-y-auto">
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 min-h-64 max-h-[50vh] overflow-y-auto">
             {visibleMessages.map((m) => (
               <div
                 key={m.id}
                 className={`rounded-lg px-4 py-2 text-sm leading-relaxed max-w-[85%] ${
                   m.role === 'assistant'
-                    ? 'self-start bg-gray-100 text-gray-800'
+                    ? 'self-start bg-subtle text-foreground'
                     : 'self-end bg-blue-600 text-white'
                 }`}
                 {...(m.role === 'assistant' ? { 'data-testid': 'ai-message' } : {})}
@@ -263,7 +263,7 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
               </div>
             ))}
             {isLoading && (
-              <p className="self-start text-xs text-gray-400 animate-pulse">Examiner is speaking…</p>
+              <p className="self-start text-xs text-faint animate-pulse">Examiner is speaking…</p>
             )}
             <div ref={bottomRef} />
           </div>
@@ -279,7 +279,7 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
               <button
                 onClick={handleEndSession}
                 disabled={isSaving || isLoading || visibleMessages.length < 2}
-                className="self-end rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-500 hover:border-red-300 hover:text-red-500 disabled:opacity-30 transition-colors"
+                className="self-end rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:border-red-300 hover:text-red-500 disabled:opacity-30 transition-colors"
               >
                 {isSaving ? 'Saving…' : 'End & Save Session'}
               </button>
@@ -288,10 +288,10 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
             <div className="flex flex-col gap-3">
               {/* Feedback section */}
               {!feedback ? (
-                <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4">
+                <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-800">Session saved ✓</p>
-                    <p className="text-xs text-gray-500">Generate AI feedback based on your transcript.</p>
+                    <p className="text-sm font-medium text-foreground">Session saved ✓</p>
+                    <p className="text-xs text-muted-foreground">Generate AI feedback based on your transcript.</p>
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -303,7 +303,7 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
                     </button>
                     <button
                       onClick={() => router.push('/history')}
-                      className="rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+                      className="rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:bg-muted transition-colors"
                     >
                       History →
                     </button>
@@ -311,11 +311,11 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
-                  <h2 className="text-base font-semibold text-gray-800">Feedback</h2>
+                  <h2 className="text-base font-semibold text-foreground">Feedback</h2>
                   <FeedbackView feedback={feedback} />
                   <button
                     onClick={() => router.push('/history')}
-                    className="self-end rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+                    className="self-end rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:bg-muted transition-colors"
                   >
                     View in History →
                   </button>

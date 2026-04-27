@@ -109,7 +109,7 @@ const ARTICLE_STRUCTURES = [
 ]
 
 function roleColor(role: string) {
-  return ROLE_COLORS[role] ?? { bg: 'bg-gray-100', text: 'text-gray-700' }
+  return ROLE_COLORS[role] ?? { bg: 'bg-subtle', text: 'text-muted-foreground' }
 }
 
 function relativeDate(date: Date): string {
@@ -582,7 +582,7 @@ function LogCard({
       {/* Header */}
       <button
         onClick={() => { setIsOpen((o) => !o); setIsEditing(false) }}
-        className="flex w-full items-start gap-3 px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+        className="flex w-full items-start gap-3 px-5 py-4 text-left hover:bg-muted transition-colors"
       >
         <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold border ${c.bg} ${c.text} ${c.border}`}>
           {SKILL_LABELS[log.skill] ?? log.skill}
@@ -612,10 +612,10 @@ function LogCard({
             )
           })}
           {log.questionRoles.length > 2 && (
-            <span className="text-xs text-gray-400">+{log.questionRoles.length - 2}</span>
+            <span className="text-xs text-faint">+{log.questionRoles.length - 2}</span>
           )}
-          <span className="text-xs text-gray-400 ml-1">{relativeDate(log.createdAt)}</span>
-          <span className={`text-xs text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>▼</span>
+          <span className="text-xs text-faint ml-1">{relativeDate(log.createdAt)}</span>
+          <span className={`text-xs text-faint transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>▼</span>
         </div>
       </button>
 
@@ -824,14 +824,14 @@ function LogCard({
                   <button onClick={handleDelete} disabled={isPending} className="font-semibold text-rose-600 hover:underline disabled:opacity-40">
                     Yes
                   </button>
-                  <button onClick={() => setConfirmDelete(false)} className="text-gray-500 hover:underline">
+                  <button onClick={() => setConfirmDelete(false)} className="text-muted-foreground hover:underline">
                     No
                   </button>
                 </span>
               ) : (
                 <button
                   onClick={() => setConfirmDelete(true)}
-                  className="text-xs text-gray-400 hover:text-rose-500 transition-colors ml-auto"
+                  className="text-xs text-faint hover:text-rose-500 transition-colors ml-auto"
                 >
                   ✕ Delete
                 </button>
@@ -1048,7 +1048,7 @@ export function WrongDecisionsView({
 
       {/* Log list */}
       {filtered.length === 0 && logs.length === 0 && (
-        <div className="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-card p-16 text-center">
+        <div className="rounded-xl border border-dashed border-border bg-card p-16 text-center">
           <p className="text-sm font-medium text-muted-foreground">No wrong decisions logged yet.</p>
           <p className="mt-1 text-xs text-faint">
             Record a mistake after each practice session to build your error pattern library.
@@ -1057,7 +1057,7 @@ export function WrongDecisionsView({
       )}
 
       {filtered.length === 0 && logs.length > 0 && (
-        <div className="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-card p-8 text-center">
+        <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center">
           <p className="text-sm text-muted-foreground">No entries match the current filter.</p>
         </div>
       )}
