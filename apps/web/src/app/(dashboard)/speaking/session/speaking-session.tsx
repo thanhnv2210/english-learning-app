@@ -179,8 +179,8 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Speaking — Full Session</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-foreground">Speaking — Full Session</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             {stage === 'idle' ? 'Part 1 → Part 2 → Part 3, all in one flow.' : STAGE_LABELS[stage]}
           </p>
         </div>
@@ -190,8 +190,8 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
 
       {/* ── Idle ── */}
       {stage === 'idle' && (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-gray-200 bg-white p-10">
-          <p className="text-sm text-gray-500 text-center max-w-sm">
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-10">
+          <p className="text-sm text-muted-foreground text-center max-w-sm">
             A full IELTS Speaking test: 4–5 Part 1 questions, a cue card topic in Part 2, and an analytical discussion in Part 3.
           </p>
           <button
@@ -216,7 +216,7 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
           <button
             onClick={startPart2}
             disabled={part1Chat.isLoading || visibleMessages(part1Chat.messages).length < 4}
-            className="self-end rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-500 hover:border-blue-400 hover:text-blue-600 disabled:opacity-30 transition-colors"
+            className="self-end rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:border-blue-400 hover:text-blue-600 disabled:opacity-30 transition-colors"
           >
             Move to Part 2 →
           </button>
@@ -225,8 +225,8 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
 
       {/* ── Part 2 generating ── */}
       {stage === 'part2_generating' && (
-        <div className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-10">
-          <p className="text-sm text-gray-400 animate-pulse">Generating cue card…</p>
+        <div className="flex items-center justify-center rounded-xl border border-border bg-card p-10">
+          <p className="text-sm text-faint animate-pulse">Generating cue card…</p>
         </div>
       )}
 
@@ -235,7 +235,7 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
         <div className="flex flex-col gap-4">
           <div className="rounded-xl border-2 border-blue-200 bg-blue-50 p-6">
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-500 mb-3">Cue Card</p>
-            <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">{cueCard.prompt}</p>
+            <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{cueCard.prompt}</p>
           </div>
           <button
             onClick={beginPart2Speaking}
@@ -250,7 +250,7 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
       {stage === 'part2_speaking' && (
         <div className="flex flex-col gap-4">
           {cueCard && (
-            <details className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-500 cursor-pointer">
+            <details className="rounded-lg border border-border bg-muted px-4 py-2 text-xs text-muted-foreground cursor-pointer">
               <summary className="font-medium">View cue card</summary>
               <p className="mt-2 whitespace-pre-line leading-relaxed">{cueCard.prompt}</p>
             </details>
@@ -266,7 +266,7 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
           <button
             onClick={startPart3}
             disabled={part2Chat.isLoading || visibleMessages(part2Chat.messages).length < 2}
-            className="self-end rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-500 hover:border-blue-400 hover:text-blue-600 disabled:opacity-30 transition-colors"
+            className="self-end rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:border-blue-400 hover:text-blue-600 disabled:opacity-30 transition-colors"
           >
             Move to Part 3 →
           </button>
@@ -286,7 +286,7 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
           <button
             onClick={handleEndSession}
             disabled={isSaving || part3Chat.isLoading || visibleMessages(part3Chat.messages).length < 4}
-            className="self-end rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-500 hover:border-red-300 hover:text-red-500 disabled:opacity-30 transition-colors"
+            className="self-end rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:border-red-300 hover:text-red-500 disabled:opacity-30 transition-colors"
           >
             {isSaving ? 'Saving…' : 'End & Save Session'}
           </button>
@@ -317,10 +317,10 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
 
           {/* Feedback */}
           {!feedback ? (
-            <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4">
+            <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
               <div>
-                <p className="text-sm font-medium text-gray-800">Session saved ✓</p>
-                <p className="text-xs text-gray-500">Generate AI feedback on all three parts.</p>
+                <p className="text-sm font-medium text-foreground">Session saved ✓</p>
+                <p className="text-xs text-muted-foreground">Generate AI feedback on all three parts.</p>
               </div>
               <div className="flex gap-2">
                 <button
@@ -332,7 +332,7 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
                 </button>
                 <button
                   onClick={() => router.push('/history')}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:bg-muted transition-colors"
                 >
                   History →
                 </button>
@@ -340,11 +340,11 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              <h2 className="text-base font-semibold text-gray-800">Feedback</h2>
+              <h2 className="text-base font-semibold text-foreground">Feedback</h2>
               <FeedbackView feedback={feedback} />
               <button
                 onClick={() => router.push('/history')}
-                className="self-end rounded-lg border border-gray-300 px-4 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+                className="self-end rounded-lg border border-border px-4 py-2 text-xs text-muted-foreground hover:bg-muted transition-colors"
               >
                 View in History →
               </button>
@@ -370,13 +370,13 @@ function ChatBox({
   bottomRef: React.RefObject<HTMLDivElement | null>
 }) {
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 min-h-48 max-h-[45vh] overflow-y-auto">
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 min-h-48 max-h-[45vh] overflow-y-auto">
       {messages.map((m) => (
         <div
           key={m.id}
           className={`rounded-lg px-4 py-2 text-sm leading-relaxed max-w-[85%] ${
             m.role === 'assistant'
-              ? 'self-start bg-gray-100 text-gray-800'
+              ? 'self-start bg-subtle text-foreground'
               : 'self-end bg-blue-600 text-white'
           }`}
         >
@@ -384,7 +384,7 @@ function ChatBox({
         </div>
       ))}
       {isLoading && (
-        <p className="self-start text-xs text-gray-400 animate-pulse">Examiner is speaking…</p>
+        <p className="self-start text-xs text-faint animate-pulse">Examiner is speaking…</p>
       )}
       <div ref={bottomRef} />
     </div>

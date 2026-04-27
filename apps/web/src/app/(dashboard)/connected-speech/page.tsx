@@ -194,15 +194,15 @@ export default function ConnectedSpeechPage() {
     <div className="mx-auto max-w-5xl space-y-6 xl:max-w-6xl 2xl:max-w-7xl">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Connected Speech Analyser</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <h1 className="text-2xl font-bold text-foreground">Connected Speech Analyser</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Paste any English text to identify connected speech phenomena — elision, assimilation,
             catenation, intrusion, weakening, contractions, and gemination.
           </p>
         </div>
         <button
           onClick={openHistory}
-          className="shrink-0 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="shrink-0 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
         >
           History
         </button>
@@ -235,7 +235,7 @@ export default function ConnectedSpeechPage() {
       {(stage === 'input' || stage === 'loading') && (
         <div className="space-y-3">
           <textarea
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-4 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-border bg-card p-4 text-sm text-foreground placeholder:text-faint focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             rows={6}
             placeholder="Paste your English text here…"
             value={text}
@@ -269,7 +269,7 @@ export default function ConnectedSpeechPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={reset}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline"
+              className="text-sm text-muted-foreground hover:text-foreground hover:underline"
             >
               ← Analyse another text
             </button>
@@ -280,7 +280,7 @@ export default function ConnectedSpeechPage() {
                 <button
                   onClick={handleSave}
                   disabled={saveStatus === 'saving'}
-                  className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40"
+                  className="rounded-lg border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-40"
                 >
                   {saveStatus === 'saving' ? 'Saving…' : 'Save to history'}
                 </button>
@@ -291,14 +291,14 @@ export default function ConnectedSpeechPage() {
           {/* Part 1 — side-by-side */}
           <section className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold text-gray-800 dark:text-gray-200">Part 1 — Sound Changes</h2>
-              <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-0.5 text-sm">
+              <h2 className="text-base font-semibold text-foreground">Part 1 — Sound Changes</h2>
+              <div className="flex rounded-lg border border-border bg-muted p-0.5 text-sm">
                 <button
                   onClick={() => setViewStyle('sentence')}
                   className={`rounded-md px-3 py-1 font-medium transition-colors ${
                     viewStyle === 'sentence'
-                      ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   Full sentence
@@ -307,8 +307,8 @@ export default function ConnectedSpeechPage() {
                   onClick={() => setViewStyle('phrase')}
                   className={`rounded-md px-3 py-1 font-medium transition-colors ${
                     viewStyle === 'phrase'
-                      ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   Phrase by phrase
@@ -324,9 +324,9 @@ export default function ConnectedSpeechPage() {
 
           {/* Part 2 — pronunciation tips */}
           <section className="space-y-4">
-            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-200">Part 2 — Pronunciation Tips</h2>
+            <h2 className="text-base font-semibold text-foreground">Part 2 — Pronunciation Tips</h2>
             {result.instances.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400">No connected speech phenomena detected.</p>
+              <p className="text-sm text-muted-foreground">No connected speech phenomena detected.</p>
             ) : (
               <TipsView instances={result.instances} />
             )}
@@ -337,21 +337,21 @@ export default function ConnectedSpeechPage() {
       {/* History panel */}
       {historyOpen && (
         <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/30">
-          <div className="flex h-full w-full max-w-lg flex-col bg-white dark:bg-gray-900 shadow-xl">
+          <div className="flex h-full w-full max-w-lg flex-col bg-card shadow-xl">
             {/* Panel header */}
-            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-5 py-4">
-              <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Analysis History</h2>
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <h2 className="text-base font-semibold text-foreground">Analysis History</h2>
               <button
                 onClick={() => setHistoryOpen(false)}
-                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-faint hover:text-foreground"
               >
                 ✕
               </button>
             </div>
 
             {/* Filter by phenomenon */}
-            <div className="border-b border-gray-100 dark:border-gray-800 px-5 py-3">
-              <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            <div className="border-b border-border px-5 py-3">
+              <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 Filter by phenomenon
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -359,8 +359,8 @@ export default function ConnectedSpeechPage() {
                   onClick={() => loadHistory('all')}
                   className={`rounded-full border px-2 py-0.5 text-xs font-medium transition-colors ${
                     historyFilter === 'all'
-                      ? 'border-gray-400 dark:border-gray-500 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-                      : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                      ? 'border-border bg-subtle text-foreground'
+                      : 'border-border text-muted-foreground hover:opacity-70'
                   }`}
                 >
                   All (recent 20)
@@ -375,7 +375,7 @@ export default function ConnectedSpeechPage() {
                       className={`rounded-full border px-2 py-0.5 text-xs font-medium transition-colors ${
                         isActive
                           ? `${c.bg} ${c.text} ${c.border}`
-                          : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                          : 'border-border text-muted-foreground hover:opacity-70'
                       }`}
                     >
                       {PHENOMENON_LABELS[p]}
@@ -388,25 +388,25 @@ export default function ConnectedSpeechPage() {
             {/* Records list */}
             <div className="flex-1 overflow-y-auto px-5 py-3">
               {historyLoading ? (
-                <p className="py-8 text-center text-sm text-gray-400">Loading…</p>
+                <p className="py-8 text-center text-sm text-faint">Loading…</p>
               ) : historyRecords.length === 0 ? (
-                <p className="py-8 text-center text-sm text-gray-400">No records found.</p>
+                <p className="py-8 text-center text-sm text-faint">No records found.</p>
               ) : (
                 <div className="space-y-2">
                   {historyRecords.map((record) => (
                     <div
                       key={record.id}
-                      className="group relative rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      className="group relative rounded-lg border border-border bg-card p-3 hover:bg-muted transition-colors"
                     >
                       <button
                         onClick={() => loadFromHistory(record)}
                         className="w-full text-left"
                       >
-                        <p className="truncate pr-6 text-sm font-medium text-gray-800 dark:text-gray-200">
+                        <p className="truncate pr-6 text-sm font-medium text-foreground">
                           {record.originalText}
                         </p>
                         <div className="mt-1.5 flex items-center gap-2">
-                          <span className="text-xs text-gray-400 dark:text-gray-500">
+                          <span className="text-xs text-faint">
                             {new Date(record.createdAt).toLocaleDateString()} ·{' '}
                             {record.instances.length} phenomena
                           </span>
@@ -427,7 +427,7 @@ export default function ConnectedSpeechPage() {
                       </button>
                       <button
                         onClick={(e) => handleDelete(record.id, e)}
-                        className="absolute right-2 top-2 hidden rounded p-1 text-gray-300 hover:bg-red-50 hover:text-red-500 group-hover:block"
+                        className="absolute right-2 top-2 hidden rounded p-1 text-faint hover:bg-red-50 hover:text-red-500 group-hover:block"
                         title="Delete"
                       >
                         ✕
@@ -477,8 +477,8 @@ function QuickStartSection({ onSelect }: { onSelect: (phrase: string) => void })
                   <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${c.bg} ${c.text} ${c.border}`}>
                     {cat.tag}
                   </span>
-                  <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{cat.category}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">— {cat.description}</span>
+                  <span className="text-sm font-semibold text-foreground">{cat.category}</span>
+                  <span className="text-xs text-muted-foreground">— {cat.description}</span>
                 </div>
 
                 {/* Phrase chips */}
@@ -488,12 +488,12 @@ function QuickStartSection({ onSelect }: { onSelect: (phrase: string) => void })
                       key={p.original}
                       onClick={() => onSelect(p.original)}
                       title={`Sounds like: ${p.sounds}`}
-                      className="group flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-left transition-colors hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      className="group flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-left transition-colors hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                     >
-                      <span className="text-xs font-medium text-gray-800 dark:text-gray-200 group-hover:text-blue-700 dark:group-hover:text-blue-400">
+                      <span className="text-xs font-medium text-foreground group-hover:text-blue-700 dark:group-hover:text-blue-400">
                         {p.original}
                       </span>
-                      <span className="text-[10px] text-gray-400 dark:text-gray-500 group-hover:text-blue-400 dark:group-hover:text-blue-500">
+                      <span className="text-[10px] text-faint group-hover:text-blue-400 dark:group-hover:text-blue-500">
                         → {p.sounds}
                       </span>
                     </button>
@@ -520,16 +520,16 @@ function ReferenceSection() {
   const c = getPhenomenonColor(active)
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white">
+    <div className="rounded-lg border border-border bg-card">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+        className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-muted"
       >
         <span>Phenomenon reference</span>
-        <span className="text-gray-400 dark:text-gray-500">{open ? '▲' : '▼'}</span>
+        <span className="text-faint">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
-        <div className="border-t border-gray-100 dark:border-gray-700 p-4">
+        <div className="border-t border-border p-4">
           <div className="mb-4 flex flex-wrap gap-2">
             {(Object.keys(PHENOMENON_META) as Phenomenon[]).map((p) => {
               const pc = getPhenomenonColor(p)
@@ -541,7 +541,7 @@ function ReferenceSection() {
                   className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                     isActive
                       ? `${pc.bg} ${pc.text} ${pc.border}`
-                      : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-200'
+                      : 'border-border bg-muted text-muted-foreground hover:opacity-70'
                   }`}
                 >
                   {PHENOMENON_LABELS[p]}
@@ -551,17 +551,17 @@ function ReferenceSection() {
           </div>
           <div className={`rounded-lg border p-4 ${c.bg} ${c.border}`}>
             <h3 className={`mb-2 text-sm font-semibold ${c.text}`}>{meta.label}</h3>
-            <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">{meta.explanation}</p>
+            <p className="mb-4 text-sm text-muted-foreground">{meta.explanation}</p>
             <div className="space-y-2">
               {meta.examples.map((ex, i) => (
                 <div key={i} className="flex items-start gap-3 text-sm">
-                  <span className="w-4 shrink-0 font-mono text-gray-400 dark:text-gray-500">{i + 1}.</span>
-                  <span className="w-32 shrink-0 font-mono text-gray-700 dark:text-gray-300">{ex.original}</span>
-                  <span className="text-gray-400 dark:text-gray-500">→</span>
+                  <span className="w-4 shrink-0 font-mono text-faint">{i + 1}.</span>
+                  <span className="w-32 shrink-0 font-mono text-muted-foreground">{ex.original}</span>
+                  <span className="text-faint">→</span>
                   <span className={`w-32 shrink-0 font-mono font-semibold ${c.text}`}>
                     {ex.transformed}
                   </span>
-                  <span className="text-xs italic text-gray-500 dark:text-gray-400">{ex.note}</span>
+                  <span className="text-xs italic text-muted-foreground">{ex.note}</span>
                 </div>
               ))}
             </div>
@@ -569,10 +569,10 @@ function ReferenceSection() {
               <div className="mt-4 flex gap-2 rounded-md border border-white/60 bg-white/50 px-3 py-2.5">
                 <span className="mt-0.5 shrink-0 text-sm">🎯</span>
                 <div>
-                  <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                     IELTS listening &amp; speaking
                   </p>
-                  <p className="text-xs leading-relaxed text-gray-700 dark:text-gray-300">{meta.grammarTip}</p>
+                  <p className="text-xs leading-relaxed text-muted-foreground">{meta.grammarTip}</p>
                 </div>
               </div>
             )}
@@ -588,17 +588,17 @@ function ReferenceSection() {
 function SentenceView({ original, result }: { original: string; result: AnalysisResult }) {
   return (
     <div className="grid grid-cols-2 gap-4">
-      <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Original</p>
-        <p className="text-sm leading-relaxed text-gray-800 dark:text-gray-200">
+      <div className="rounded-lg border border-border bg-card p-4">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-faint">Original</p>
+        <p className="text-sm leading-relaxed text-foreground">
           <HighlightedText text={original} instances={result.instances} />
         </p>
       </div>
-      <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+      <div className="rounded-lg border border-border bg-muted p-4">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-faint">
           Connected Speech
         </p>
-        <p className="text-sm leading-relaxed text-gray-800 dark:text-gray-200">
+        <p className="text-sm leading-relaxed text-foreground">
           <HighlightedText
             text={result.transformedText}
             instances={result.instances}
@@ -614,7 +614,7 @@ function SentenceView({ original, result }: { original: string; result: Analysis
 
 function PhraseView({ instances }: { instances: ConnectedSpeechInstance[] }) {
   if (instances.length === 0)
-    return <p className="text-sm text-gray-500">No connected speech phenomena detected.</p>
+    return <p className="text-sm text-muted-foreground">No connected speech phenomena detected.</p>
   return (
     <div className="space-y-2">
       {instances.map((inst, i) => {
@@ -622,10 +622,10 @@ function PhraseView({ instances }: { instances: ConnectedSpeechInstance[] }) {
         return (
           <div
             key={i}
-            className="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3"
+            className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3"
           >
-            <span className="w-36 shrink-0 font-mono text-sm text-gray-700 dark:text-gray-300">{inst.original}</span>
-            <span className="text-gray-400 dark:text-gray-500">→</span>
+            <span className="w-36 shrink-0 font-mono text-sm text-muted-foreground">{inst.original}</span>
+            <span className="text-faint">→</span>
             <span className={`w-36 shrink-0 font-mono text-sm font-semibold ${c.text}`}>
               {inst.transformed}
             </span>
@@ -634,7 +634,7 @@ function PhraseView({ instances }: { instances: ConnectedSpeechInstance[] }) {
             >
               {PHENOMENON_LABELS[inst.phenomenon]}
             </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">{inst.description}</span>
+            <span className="text-xs text-muted-foreground">{inst.description}</span>
           </div>
         )
       })}
@@ -674,7 +674,7 @@ function TipsView({ instances }: { instances: ConnectedSpeechInstance[] }) {
                     <span className={`mt-0.5 font-mono font-medium ${c.text}`}>
                       {inst.original} → {inst.transformed}
                     </span>
-                    <span className="text-gray-700 dark:text-gray-300">{inst.tip}</span>
+                    <span className="text-muted-foreground">{inst.tip}</span>
                   </li>
                 ))}
               </ul>

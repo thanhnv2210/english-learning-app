@@ -60,7 +60,7 @@ export function SettingsForm({ currentProfile }: { currentProfile: string }) {
     <div className="flex flex-col gap-8">
       {/* Theme */}
       <section>
-        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Theme</h2>
+        <h2 className="text-sm font-semibold text-foreground mb-3">Theme</h2>
         <div className="flex gap-3">
           {THEMES.map((t) => {
             const active = theme === t.value
@@ -71,7 +71,7 @@ export function SettingsForm({ currentProfile }: { currentProfile: string }) {
                 className={`flex flex-1 items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all ${
                   active
                     ? 'border-transparent ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
-                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                    : 'border-border bg-card text-muted-foreground hover:opacity-80'
                 }`}
               >
                 <span>{t.icon}</span>
@@ -84,7 +84,7 @@ export function SettingsForm({ currentProfile }: { currentProfile: string }) {
 
       {/* Target Profile */}
       <section>
-        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Target Profile</h2>
+        <h2 className="text-sm font-semibold text-foreground mb-3">Target Profile</h2>
         <div className="flex flex-col gap-3">
           {PROFILES.map((p) => {
             const active = currentProfile === p.value
@@ -97,21 +97,21 @@ export function SettingsForm({ currentProfile }: { currentProfile: string }) {
                 className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
                   active
                     ? `border-transparent ring-2 ${c.ring} ${c.bg}`
-                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                    : 'border-border bg-card hover:opacity-80'
                 } disabled:opacity-60`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{p.label}</span>
+                      <span className="text-sm font-semibold text-foreground">{p.label}</span>
                       <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${c.badge}`}>
                         {p.band}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{p.description}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{p.description}</p>
                   </div>
                   <div className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 ${
-                    active ? `border-transparent ${c.dot}` : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
+                    active ? `border-transparent ${c.dot}` : 'border-border bg-card'
                   }`} />
                 </div>
               </button>
@@ -119,7 +119,7 @@ export function SettingsForm({ currentProfile }: { currentProfile: string }) {
           })}
 
           {isPending && (
-            <p className="text-xs text-gray-400 dark:text-gray-500 text-center">Saving…</p>
+            <p className="text-xs text-faint text-center">Saving…</p>
           )}
         </div>
       </section>

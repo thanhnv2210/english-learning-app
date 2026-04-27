@@ -12,7 +12,7 @@ export default function ParaphrasePage() {
             Core IELTS skill
           </span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Paraphrase</h1>
+        <h1 className="text-2xl font-bold text-foreground">Paraphrase</h1>
         <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
           Paraphrasing means expressing the same idea using different words and structure.
           In IELTS it is not just a writing technique — it is a reading skill, a test-taking
@@ -34,7 +34,7 @@ export default function ParaphrasePage() {
 
       {/* Level legend */}
       <section>
-        <h2 className="mb-3 text-base font-bold text-gray-900 dark:text-gray-100">Three Levels of Paraphrase</h2>
+        <h2 className="mb-3 text-base font-bold text-foreground">Three Levels of Paraphrase</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
             {
@@ -75,8 +75,8 @@ export default function ParaphrasePage() {
 
       {/* Cannot paraphrase */}
       <section>
-        <h2 className="mb-1 text-base font-bold text-gray-900 dark:text-gray-100">Words You Cannot Paraphrase</h2>
-        <p className="mb-3 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+        <h2 className="mb-1 text-base font-bold text-foreground">Words You Cannot Paraphrase</h2>
+        <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
           Some words have fixed meanings — replacing them creates a different meaning or sounds unnatural.
           Recognising these saves you from forced synonyms that lower your Lexical Resource score.
         </p>
@@ -137,12 +137,12 @@ export default function ParaphrasePage() {
               trap: '"Most people" ≠ "All people" ≠ "Some people". Swapping quantifiers in a paraphrase creates a logically different claim — a common trap in IELTS Reading.',
             },
           ].map((cat) => (
-            <div key={cat.name} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 space-y-2">
-              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{cat.name}</p>
-              <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">{cat.note}</p>
+            <div key={cat.name} className="rounded-lg border border-border bg-card p-4 space-y-2">
+              <p className="text-sm font-semibold text-foreground">{cat.name}</p>
+              <p className="text-xs leading-relaxed text-muted-foreground">{cat.note}</p>
               <div className="flex flex-wrap gap-1">
                 {cat.examples.map((ex) => (
-                  <span key={ex} className="rounded bg-gray-100 dark:bg-gray-700 px-2 py-0.5 font-mono text-[11px] text-gray-700 dark:text-gray-300">
+                  <span key={ex} className="rounded bg-subtle px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
                     {ex}
                   </span>
                 ))}

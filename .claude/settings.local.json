@@ -75,7 +75,8 @@
       "Read(//Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/**)",
       "Bash(done)",
       "Bash(PORT=3000 pnpm dev:clean:log)",
-      "Bash(ls /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/language-comparison)"
+      "Bash(ls /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/language-comparison)",
+      "Bash(cd /Users/ThanhNguyen/AI_WS/english-learning-app git diff --stat HEAD)"
     ]
   }
 }

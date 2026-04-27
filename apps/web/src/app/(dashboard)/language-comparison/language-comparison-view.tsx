@@ -47,17 +47,17 @@ function CompRow({ row }: { row: ComparisonRow }) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+        className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted transition-colors"
       >
         <div className="flex-1">
-          <p className="text-sm font-semibold text-gray-800">{row.attribute}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{row.description}</p>
+          <p className="text-sm font-semibold text-foreground">{row.attribute}</p>
+          <p className="text-xs text-faint mt-0.5">{row.description}</p>
         </div>
         <RiskBadge risk={row.risk} />
-        <span className={`text-xs text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▼</span>
+        <span className={`text-xs text-faint transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▼</span>
       </button>
 
       {open && (
@@ -151,22 +151,22 @@ export function LanguageComparisonView() {
 
       {/* Transfer risk legend */}
       <div className="flex flex-wrap gap-3 items-center">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Transfer risk to IELTS:</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Transfer risk to IELTS:</p>
         {(Object.entries(RISK_STYLES) as [RiskLevel, typeof RISK_STYLES[RiskLevel]][]).map(([r, s]) => (
           <span key={r} className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${s.bg} ${s.text}`}>
             {s.label}
           </span>
         ))}
-        <p className="text-xs text-gray-400 ml-1">— how hard this difference is to overcome for a Vietnamese IELTS learner</p>
+        <p className="text-xs text-faint ml-1">— how hard this difference is to overcome for a Vietnamese IELTS learner</p>
       </div>
 
       {/* Schema toggle */}
       <div>
         <button
           onClick={() => setShowSchema((s) => !s)}
-          className="flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+          className="flex items-center gap-2 rounded-lg border border-border bg-muted px-4 py-2 text-xs font-semibold text-foreground hover:bg-subtle transition-colors"
         >
-          <span className="font-mono text-gray-500">{'{}'}</span>
+          <span className="font-mono text-muted-foreground">{'{}'}</span>
           {showSchema ? 'Hide language schema' : 'Show language schema'}
         </button>
 
@@ -196,8 +196,8 @@ export function LanguageComparisonView() {
               onClick={() => setActiveDim(d.id)}
               className={`flex shrink-0 items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap ${
                 activeDim === d.id
-                  ? 'border-gray-900 text-gray-900 bg-gray-50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'border-foreground text-foreground bg-muted'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
               <span>{d.icon}</span>
@@ -208,8 +208,8 @@ export function LanguageComparisonView() {
 
         {/* Dimension header */}
         <div>
-          <p className="text-base font-bold text-gray-900">{dimension.label}</p>
-          <p className="text-xs text-gray-500">{dimension.tagline}</p>
+          <p className="text-base font-bold text-foreground">{dimension.label}</p>
+          <p className="text-xs text-muted-foreground">{dimension.tagline}</p>
         </div>
 
         {/* Comparison rows */}
@@ -222,8 +222,8 @@ export function LanguageComparisonView() {
 
       {/* IELTS transfer summary */}
       <div className="space-y-4">
-        <h2 className="text-base font-bold text-gray-900">IELTS Transfer Summary</h2>
-        <p className="text-xs text-gray-500 leading-relaxed">
+        <h2 className="text-base font-bold text-foreground">IELTS Transfer Summary</h2>
+        <p className="text-xs text-muted-foreground leading-relaxed">
           These are the structural differences that directly cost band points. Every item below stems
           from a feature Vietnamese has (or lacks) that English handles the opposite way.
         </p>
@@ -234,7 +234,7 @@ export function LanguageComparisonView() {
             <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${RISK_STYLES.critical.bg} ${RISK_STYLES.critical.text}`}>
               Critical
             </span>
-            <p className="text-xs text-gray-500">Fix these first — they affect every IELTS task</p>
+            <p className="text-xs text-muted-foreground">Fix these first — they affect every IELTS task</p>
           </div>
           {CRITICAL_TRANSFERS.map((item) => (
             <div key={item.area} className="rounded-lg border border-rose-200 bg-rose-50 p-4 space-y-2">
@@ -258,7 +258,7 @@ export function LanguageComparisonView() {
             <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${RISK_STYLES.high.bg} ${RISK_STYLES.high.text}`}>
               High
             </span>
-            <p className="text-xs text-gray-500">Important for Speaking band and grammar accuracy</p>
+            <p className="text-xs text-muted-foreground">Important for Speaking band and grammar accuracy</p>
           </div>
           {HIGH_TRANSFERS.map((item) => (
             <div key={item.area} className="rounded-lg border border-orange-200 bg-orange-50 p-4 space-y-2">

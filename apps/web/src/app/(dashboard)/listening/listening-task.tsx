@@ -216,8 +216,8 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
     return (
       <div className="mx-auto flex max-w-2xl flex-col gap-6 xl:max-w-3xl">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Listening</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-foreground">Listening</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             {stage === 'select' && 'Choose a domain to get started.'}
             {stage === 'options' && `Domain: ${selectedDomain?.name} — how would you like to practice?`}
             {stage === 'generating' && 'Generating conversation and questions…'}
@@ -237,7 +237,7 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
                   className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
                     selectedDomain?.id === d.id
                       ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium'
-                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                      : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-muted'
                   }`}
                 >
                   {d.name}
@@ -261,7 +261,7 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <button
                 onClick={handlePickRandom}
-                className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-5 text-left hover:border-blue-400 hover:shadow-sm transition-all group"
+                className="flex flex-col gap-2 rounded-xl border border-border bg-card p-5 text-left hover:border-blue-400 hover:shadow-sm transition-all group"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-2xl">🎧</span>
@@ -272,26 +272,26 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
                         {count} script{count !== 1 ? 's' : ''}
                       </span>
                     ) : (
-                      <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-400">Empty</span>
+                      <span className="rounded-full bg-subtle px-2.5 py-0.5 text-xs text-faint">Empty</span>
                     )
                   })()}
                 </div>
-                <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-700">Pick from Library</p>
-                <p className="text-xs text-gray-500">Practice with a previously saved conversation in this domain.</p>
+                <p className="text-sm font-semibold text-foreground group-hover:text-blue-700">Pick from Library</p>
+                <p className="text-xs text-muted-foreground">Practice with a previously saved conversation in this domain.</p>
               </button>
 
               <button
                 onClick={handleGenerate}
-                className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-5 text-left hover:border-green-400 hover:shadow-sm transition-all group"
+                className="flex flex-col gap-2 rounded-xl border border-border bg-card p-5 text-left hover:border-green-400 hover:shadow-sm transition-all group"
               >
                 <span className="text-2xl">✨</span>
-                <p className="text-sm font-semibold text-gray-900 group-hover:text-green-700">Generate New</p>
-                <p className="text-xs text-gray-500">Create a fresh conversation with AI and save it to the library.</p>
+                <p className="text-sm font-semibold text-foreground group-hover:text-green-700">Generate New</p>
+                <p className="text-xs text-muted-foreground">Create a fresh conversation with AI and save it to the library.</p>
               </button>
             </div>
             <button
               onClick={() => setStage('select')}
-              className="self-start text-xs text-gray-400 hover:text-gray-600 underline transition-colors"
+              className="self-start text-xs text-faint hover:text-muted-foreground underline transition-colors"
             >
               ← Change domain
             </button>
@@ -299,8 +299,8 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
         )}
 
         {(stage === 'generating' || stage === 'loading') && (
-          <div className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-16">
-            <p className="text-sm text-gray-400 animate-pulse">
+          <div className="flex items-center justify-center rounded-xl border border-border bg-card p-16">
+            <p className="text-sm text-faint animate-pulse">
               {stage === 'generating' ? 'Generating conversation and questions…' : 'Loading from library…'}
             </p>
           </div>
@@ -324,11 +324,11 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3 shrink-0 px-1">
         <div className="min-w-0">
-          <h1 className="text-base font-bold text-gray-900 truncate">{script.title}</h1>
-          <p className="text-xs text-gray-400 mt-0.5">{script.domain}</p>
+          <h1 className="text-base font-bold text-foreground truncate">{script.title}</h1>
+          <p className="text-xs text-faint mt-0.5">{script.domain}</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-faint">
             {answeredCount}/{script.questions.length} answered
           </span>
           {playCount > 0 && (
@@ -351,7 +351,7 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
           {stage === 'submitted' && (
             <button
               onClick={() => router.push('/history')}
-              className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+              className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted transition-colors"
             >
               History →
             </button>
@@ -363,9 +363,9 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
       <div className="flex gap-4 flex-1 min-h-0">
 
         {/* Left — playback + transcript */}
-        <div className="flex-[45] flex flex-col min-w-0 rounded-xl border border-gray-200 bg-white overflow-hidden">
-          <div className="border-b border-gray-100 px-5 py-2 shrink-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Audio</p>
+        <div className="flex-[45] flex flex-col min-w-0 rounded-xl border border-border bg-card overflow-hidden">
+          <div className="border-b border-border px-5 py-2 shrink-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-faint">Audio</p>
           </div>
           <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
 
@@ -386,21 +386,21 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
                     {isPlaying ? (
                       <button
                         onClick={handlePause}
-                        className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-gray-300 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
                       >
                         <span>⏸</span> Pause
                       </button>
                     ) : (
                       <button
                         onClick={handleResume}
-                        className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-gray-300 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
                       >
                         <span>▶</span> Resume
                       </button>
                     )}
                     <button
                       onClick={handleStop}
-                      className="rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+                      className="rounded-xl border border-border px-4 py-3 text-sm text-muted-foreground hover:bg-muted transition-colors"
                     >
                       ■ Stop
                     </button>
@@ -408,7 +408,7 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
                 )}
 
                 {/* IELTS rules reminder */}
-                <p className="text-xs text-gray-400 text-center">
+                <p className="text-xs text-faint text-center">
                   You may play the audio up to 2 times · answer the questions while listening
                 </p>
               </div>
@@ -431,7 +431,7 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
             {/* Transcript — hidden during listening, shown after submit */}
             {stage === 'submitted' && (
               <div className="flex flex-col gap-2">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Transcript</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Transcript</p>
                 {script.transcript.map((turn, i) => (
                   <div key={i} className={`flex gap-2 text-sm ${turn.speaker === 'A' ? '' : 'flex-row-reverse'}`}>
                     <span className={`shrink-0 text-xs font-bold px-2 py-0.5 rounded-full h-fit mt-0.5 ${
@@ -440,7 +440,7 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
                       {turn.speaker === 'A' ? 'Eng' : 'Mgr'}
                     </span>
                     <p className={`rounded-lg px-3 py-2 text-xs leading-relaxed max-w-[85%] ${
-                      turn.speaker === 'A' ? 'bg-gray-100 text-gray-800' : 'bg-purple-50 text-gray-800'
+                      turn.speaker === 'A' ? 'bg-subtle text-foreground' : 'bg-purple-50 text-foreground'
                     }`}>
                       {turn.text}
                     </p>
@@ -452,7 +452,7 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
             {stage === 'listening' && !isPlaying && playCount === 0 && (
               <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
                 <p className="text-4xl">🎧</p>
-                <p className="text-sm text-gray-500 max-w-xs">
+                <p className="text-sm text-muted-foreground max-w-xs">
                   Press Play to start the conversation. Fill in the answers on the right while you listen.
                 </p>
               </div>
@@ -461,15 +461,15 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
         </div>
 
         {/* Right — questions */}
-        <div className="flex-[55] flex flex-col min-w-0 rounded-xl border border-gray-200 bg-white overflow-hidden">
-          <div className="border-b border-gray-100 px-5 py-2 shrink-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+        <div className="flex-[55] flex flex-col min-w-0 rounded-xl border border-border bg-card overflow-hidden">
+          <div className="border-b border-border px-5 py-2 shrink-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-faint">
               Note Completion — Questions 1–{script.questions.length}
             </p>
           </div>
           <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3">
 
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-faint">
               Complete each note using <span className="font-semibold">1–3 words</span> from the conversation.
             </p>
 
@@ -482,11 +482,11 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
                   className={`rounded-lg border p-3 flex flex-col gap-2 transition-colors ${
                     result === true ? 'border-green-200 bg-green-50' :
                     result === false ? 'border-red-200 bg-red-50' :
-                    'border-gray-100 bg-gray-50'
+                    'border-border bg-muted'
                   }`}
                 >
-                  <div className="flex items-baseline gap-1 flex-wrap text-sm text-gray-800 leading-snug">
-                    <span className="text-xs font-semibold text-gray-400 shrink-0 mr-1">{q.id}.</span>
+                  <div className="flex items-baseline gap-1 flex-wrap text-sm text-foreground leading-snug">
+                    <span className="text-xs font-semibold text-faint shrink-0 mr-1">{q.id}.</span>
                     {before && <span>{before}</span>}
                     <input
                       value={userAnswers[q.id] ?? ''}
@@ -494,9 +494,9 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
                       disabled={stage === 'submitted'}
                       placeholder="___"
                       className={`inline-block w-32 rounded border px-2 py-0.5 text-sm outline-none transition-colors
-                        ${result === true ? 'border-green-400 bg-white text-green-700' :
-                          result === false ? 'border-red-400 bg-white text-red-700' :
-                          'border-gray-300 bg-white focus:border-blue-400'}
+                        ${result === true ? 'border-green-400 bg-card text-green-700' :
+                          result === false ? 'border-red-400 bg-card text-red-700' :
+                          'border-border bg-card focus:border-blue-400'}
                         disabled:bg-transparent disabled:border-dashed`}
                     />
                     {after && <span>{after}</span>}
@@ -513,14 +513,14 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
             {/* Results */}
             {stage === 'submitted' && scoreResult && feedback && (
               <>
-                <div className="border-t border-gray-100 mt-2" />
+                <div className="border-t border-border mt-2" />
                 <div className="flex flex-col gap-3">
-                  <div className="rounded-lg bg-gray-50 border border-gray-200 p-3">
-                    <p className="text-sm font-semibold text-gray-800">
+                  <div className="rounded-lg bg-muted border border-border p-3">
+                    <p className="text-sm font-semibold text-foreground">
                       Score: {scoreResult.correct}/{scoreResult.total}
                     </p>
-                    <p className="text-xs text-gray-500 mt-0.5">Estimated band: {scoreResult.band}</p>
-                    {isSaving && <p className="text-xs text-gray-400 mt-1">Saving…</p>}
+                    <p className="text-xs text-muted-foreground mt-0.5">Estimated band: {scoreResult.band}</p>
+                    {isSaving && <p className="text-xs text-faint mt-1">Saving…</p>}
                   </div>
                   <FeedbackView feedback={feedback} />
                 </div>
