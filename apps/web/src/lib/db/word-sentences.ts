@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { wordSentences, vocabularyWords, sentencePracticeSessions, sentencePracticeResults } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
+import type { PracticeItem } from '@/lib/ielts/vocabulary/practice-types'
 
 export { SENTENCE_CONTEXTS } from '@/lib/ielts/vocabulary/sentence-contexts'
 export type { SentenceContext } from '@/lib/ielts/vocabulary/sentence-contexts'
@@ -94,4 +95,18 @@ export async function getAllSentences(): Promise<WordSentenceWithWord[]> {
     .innerJoin(vocabularyWords, eq(wordSentences.wordId, vocabularyWords.id))
     .orderBy(desc(wordSentences.createdAt))
   return rows
+}
+
+/** Convert vocabulary sentences to the shared PracticeItem format. */
+export async function getVocabPracticeItems(): Promise<PracticeItem[]> {
+  const rows = await getAllSentences()
+  return rows.map((r) => ({
+    id: `vocab-${r.id}`,
+    sentence: r.sentence,
+    answer: r.word,
+    hint: r.wordType,
+    context: r.context,
+    source: 'vocabulary' as const,
+    sentenceId: r.id,
+  }))
 }

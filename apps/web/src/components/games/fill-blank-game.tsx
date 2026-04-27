@@ -7,7 +7,7 @@ import {
   logPracticeResultAction,
   completePracticeSessionAction,
 } from '@/app/actions/word-sentences'
-import type { WordSentenceWithWord } from '@/lib/db/word-sentences'
+import type { PracticeItem } from '@/lib/ielts/vocabulary/practice-types'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -20,21 +20,17 @@ function shuffle<T>(arr: T[]): T[] {
   return a
 }
 
-/** Replace the target word in the sentence with a blank, whole-word, case-insensitive. */
-function blankSentence(sentence: string, word: string): string {
-  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const regex = new RegExp(`\\b${escaped}\\b`, 'gi')
+function blankSentence(sentence: string, answer: string): string {
+  const escaped = answer.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp(escaped, 'gi')
   return sentence.replace(regex, '_____')
 }
 
-function isCorrect(input: string, word: string): boolean {
-  return input.trim().toLowerCase() === word.toLowerCase()
+function isCorrect(input: string, answer: string): boolean {
+  return input.trim().toLowerCase() === answer.toLowerCase()
 }
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-type Phase = 'question' | 'result'
-type GamePhase = 'ready' | 'playing' | 'finished'
+// ── Constants ─────────────────────────────────────────────────────────────────
 
 const CONTEXT_COLORS: Record<string, string> = {
   Speaking: 'bg-green-50 text-green-700',
@@ -45,11 +41,27 @@ const CONTEXT_COLORS: Record<string, string> = {
   Other:    'bg-subtle text-muted-foreground',
 }
 
+const SOURCE_LABEL: Record<string, string> = {
+  vocabulary:   'Vocabulary',
+  collocation:  'Collocation',
+}
+
+type GamePhase = 'ready' | 'playing' | 'finished'
+type Phase = 'question' | 'result'
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function FillBlankGame({ sentences }: { sentences: WordSentenceWithWord[] }) {
+type Props = {
+  items: PracticeItem[]
+  backHref: string
+  backLabel?: string
+  emptyMessage?: string
+  gameType: string
+}
+
+export function FillBlankGame({ items, backHref, backLabel = 'Back', emptyMessage, gameType }: Props) {
   const [gamePhase, setGamePhase] = useState<GamePhase>('ready')
-  const [queue, setQueue] = useState<WordSentenceWithWord[]>([])
+  const [queue, setQueue] = useState<PracticeItem[]>([])
   const [index, setIndex] = useState(0)
   const [phase, setPhase] = useState<Phase>('question')
   const [answer, setAnswer] = useState('')
@@ -61,23 +73,20 @@ export function FillBlankGame({ sentences }: { sentences: WordSentenceWithWord[]
 
   const current = queue[index]
 
-  // ── Start ──────────────────────────────────────────────────────────────────
-
   async function startGame() {
-    const shuffled = shuffle(sentences)
+    const shuffled = shuffle(items)
     setQueue(shuffled)
     setIndex(0)
     setScore(0)
     setPhase('question')
     setAnswer('')
     setCorrect(null)
-    const sid = await createPracticeSessionAction('fill_blank')
+    const sid = await createPracticeSessionAction(gameType)
     setSessionId(sid)
     setGamePhase('playing')
     startTimeRef.current = Date.now()
   }
 
-  // Focus input when question phase starts
   useEffect(() => {
     if (gamePhase === 'playing' && phase === 'question') {
       setTimeout(() => inputRef.current?.focus(), 50)
@@ -85,17 +94,16 @@ export function FillBlankGame({ sentences }: { sentences: WordSentenceWithWord[]
     }
   }, [gamePhase, phase, index])
 
-  // ── Submit answer ──────────────────────────────────────────────────────────
-
   const handleSubmit = useCallback(async () => {
     if (!current || phase !== 'question') return
     const timeMs = Date.now() - startTimeRef.current
-    const ok = isCorrect(answer, current.word)
+    const ok = isCorrect(answer, current.answer)
     setCorrect(ok)
     setPhase('result')
     if (ok) setScore((s) => s + 1)
-    if (sessionId) {
-      await logPracticeResultAction(sessionId, current.id, ok, timeMs)
+    // Only log individual results for vocabulary sentences (have sentenceId)
+    if (sessionId && current.sentenceId) {
+      await logPracticeResultAction(sessionId, current.sentenceId, ok, timeMs)
     }
   }, [answer, current, phase, sessionId])
 
@@ -106,14 +114,11 @@ export function FillBlankGame({ sentences }: { sentences: WordSentenceWithWord[]
     }
   }
 
-  // ── Next ───────────────────────────────────────────────────────────────────
-
   async function handleNext() {
     const nextIndex = index + 1
     if (nextIndex >= queue.length) {
-      if (sessionId) {
-        await completePracticeSessionAction(sessionId, score + (correct ? 1 : 0))
-      }
+      const finalScore = score + (correct ? 1 : 0)
+      if (sessionId) await completePracticeSessionAction(sessionId, finalScore)
       setGamePhase('finished')
     } else {
       setIndex(nextIndex)
@@ -125,14 +130,14 @@ export function FillBlankGame({ sentences }: { sentences: WordSentenceWithWord[]
 
   // ── Screens ────────────────────────────────────────────────────────────────
 
-  if (sentences.length < 3) {
+  if (items.length < 3) {
     return (
       <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center flex flex-col gap-3 items-center">
         <p className="text-sm text-muted-foreground">
-          You need at least 3 saved sentences to play.
+          {emptyMessage ?? 'You need at least 3 items to play.'}
         </p>
-        <Link href="/vocabulary" className="text-sm font-medium text-blue-500 hover:text-blue-700">
-          Go save some sentences →
+        <Link href={backHref} className="text-sm font-medium text-blue-500 hover:text-blue-700">
+          {backLabel} →
         </Link>
       </div>
     )
@@ -145,7 +150,7 @@ export function FillBlankGame({ sentences }: { sentences: WordSentenceWithWord[]
         <div>
           <p className="text-base font-semibold text-foreground">Ready to practice?</p>
           <p className="text-sm text-muted-foreground mt-1">
-            {sentences.length} sentences across your vocabulary library.
+            {items.length} sentences to go through.
           </p>
         </div>
         <button
@@ -176,22 +181,20 @@ export function FillBlankGame({ sentences }: { sentences: WordSentenceWithWord[]
             Play Again
           </button>
           <Link
-            href="/vocabulary"
+            href={backHref}
             className="rounded-lg border border-border px-5 py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
           >
-            Back to Vocabulary
+            {backLabel}
           </Link>
         </div>
       </div>
     )
   }
 
-  // ── Playing ────────────────────────────────────────────────────────────────
-
   if (!current) return null
 
-  const blanked = blankSentence(current.sentence, current.word)
-  const progress = ((index) / queue.length) * 100
+  const blanked = blankSentence(current.sentence, current.answer)
+  const progress = (index / queue.length) * 100
 
   return (
     <div className="flex flex-col gap-5">
@@ -208,13 +211,15 @@ export function FillBlankGame({ sentences }: { sentences: WordSentenceWithWord[]
 
       {/* Card */}
       <div className="rounded-xl border border-border bg-card p-6 flex flex-col gap-5">
-        {/* Context + word */}
         <div className="flex items-center justify-between gap-2">
-          <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${CONTEXT_COLORS[current.context] ?? CONTEXT_COLORS.Other}`}>
-            {current.context}
-          </span>
-          {phase === 'result' && (
-            <span className="text-xs text-faint italic">{current.wordType ?? ''}</span>
+          <div className="flex items-center gap-2">
+            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${CONTEXT_COLORS[current.context] ?? CONTEXT_COLORS.Other}`}>
+              {current.context}
+            </span>
+            <span className="text-xs text-faint">{SOURCE_LABEL[current.source]}</span>
+          </div>
+          {phase === 'result' && current.hint && (
+            <span className="text-xs italic text-faint">{current.hint}</span>
           )}
         </div>
 
@@ -222,23 +227,22 @@ export function FillBlankGame({ sentences }: { sentences: WordSentenceWithWord[]
         <p className="text-base leading-relaxed text-foreground">
           {phase === 'question'
             ? blanked
-            : current.sentence.replace(
-                new RegExp(`\\b${current.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'),
-                `<mark>${current.word}</mark>`
-              ).split(/(<mark>.*?<\/mark>)/).map((part, i) =>
-                part.startsWith('<mark>') ? (
-                  <mark key={i} className="bg-transparent font-bold text-blue-600 not-italic">{current.word}</mark>
-                ) : part
-              )
+            : current.sentence
+                .split(new RegExp(`(${current.answer.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'))
+                .map((part, i) =>
+                  part.toLowerCase() === current.answer.toLowerCase()
+                    ? <mark key={i} className="bg-transparent font-bold text-blue-600 not-italic">{part}</mark>
+                    : part
+                )
           }
         </p>
 
-        {/* Answer hint on result */}
+        {/* Result banner */}
         {phase === 'result' && (
           <div className={`rounded-lg px-4 py-2.5 text-sm font-medium flex items-center gap-2 ${
             correct ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
           }`}>
-            {correct ? '✓ Correct!' : `✗ Answer: ${current.word}`}
+            {correct ? '✓ Correct!' : `✗ Answer: ${current.answer}`}
           </div>
         )}
 
@@ -251,7 +255,7 @@ export function FillBlankGame({ sentences }: { sentences: WordSentenceWithWord[]
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type the missing word…"
+              placeholder="Type the missing word or phrase…"
               className="flex-1 rounded-lg border border-border bg-input text-foreground px-4 py-2.5 text-sm outline-none focus:border-blue-400 placeholder:text-faint"
             />
             <button
@@ -274,7 +278,6 @@ export function FillBlankGame({ sentences }: { sentences: WordSentenceWithWord[]
         )}
       </div>
 
-      {/* Score tracker */}
       <p className="text-xs text-faint text-center">
         Score: <span className="font-semibold text-muted-foreground">{score}</span> correct so far
       </p>
