@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useMemo, useOptimistic, useTransition, useRef, useEffect } from 'react'
+import Link from 'next/link'
 import { deleteVocabularyWordAction, updateVocabularyRankAction, updateWordPronunciationAction, updateWordTypeAction, detectWordTypeAction } from '@/app/actions/vocabulary'
+import { addSentenceAction } from '@/app/actions/word-sentences'
 import { toggleVocabFavoriteAction } from '@/app/actions/user-skill-topics'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 
@@ -545,36 +547,104 @@ export function WordCard({
         </div>
       </div>
 
-      {/* Examples toggle */}
-      <button
-        onClick={() => setExpanded((v) => !v)}
-        className="mt-auto self-start text-xs font-medium text-blue-500 hover:text-blue-700"
-      >
-        {expanded ? 'Hide examples ▲' : 'Show examples ▼'}
-      </button>
+      {/* Footer actions */}
+      <div className="mt-auto flex items-center gap-4">
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="text-xs font-medium text-blue-500 hover:text-blue-700"
+        >
+          {expanded ? 'Hide examples ▲' : 'Show examples ▼'}
+        </button>
+        {word.id > 0 && (
+          <Link
+            href={`/vocabulary/${word.id}/sentences`}
+            className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Sentences →
+          </Link>
+        )}
+      </div>
 
       {expanded && (
         <div className="mt-3 flex flex-col gap-2">
           {word.examples.speaking && (
-            <div className="rounded-lg bg-muted p-3 flex flex-col gap-1">
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-green-600 dark:text-green-400">Speaking</span>
-              <p className="text-xs leading-relaxed text-foreground italic">
-                &ldquo;<HighlightedWord text={word.examples.speaking} word={word.word} />&rdquo;
-              </p>
-            </div>
+            <ExampleCard
+              text={word.examples.speaking}
+              word={word.word}
+              context="Speaking"
+              labelClass="text-green-600 dark:text-green-400"
+              wordId={word.id}
+            />
           )}
           {word.examples.writing.filter(Boolean).map((ex, i) => (
-            <div key={i} className="rounded-lg bg-muted p-3 flex flex-col gap-1">
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
-                Writing Task 2{word.examples.writing.filter(Boolean).length > 1 ? ` · ${i + 1}` : ''}
-              </span>
-              <p className="text-xs leading-relaxed text-foreground italic">
-                &ldquo;<HighlightedWord text={ex} word={word.word} />&rdquo;
-              </p>
-            </div>
+            <ExampleCard
+              key={i}
+              text={ex}
+              word={word.word}
+              context="Writing"
+              label={`Writing Task 2${word.examples.writing.filter(Boolean).length > 1 ? ` · ${i + 1}` : ''}`}
+              labelClass="text-blue-600 dark:text-blue-400"
+              wordId={word.id}
+            />
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+// ── ExampleCard ───────────────────────────────────────────────────────────────
+
+function ExampleCard({
+  text,
+  word,
+  context,
+  label,
+  labelClass,
+  wordId,
+}: {
+  text: string
+  word: string
+  context: string
+  label?: string
+  labelClass: string
+  wordId: number
+}) {
+  const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  async function handleSave() {
+    if (wordId <= 0 || saved) return
+    setSaving(true)
+    await addSentenceAction({ wordId, sentence: text, context })
+    setSaving(false)
+    setSaved(true)
+  }
+
+  return (
+    <div className="rounded-lg bg-muted p-3 flex flex-col gap-1">
+      <div className="flex items-center justify-between gap-2">
+        <span className={`text-[10px] font-semibold uppercase tracking-wide ${labelClass}`}>
+          {label ?? context}
+        </span>
+        {wordId > 0 && (
+          <button
+            onClick={handleSave}
+            disabled={saving || saved}
+            title={saved ? 'Saved to sentences' : 'Save to my sentences'}
+            className={`text-[10px] font-medium transition-colors ${
+              saved
+                ? 'text-green-500 cursor-default'
+                : 'text-faint hover:text-blue-500 disabled:opacity-40'
+            }`}
+          >
+            {saved ? '✓ Saved' : saving ? '…' : '+ Save'}
+          </button>
+        )}
+      </div>
+      <p className="text-xs leading-relaxed text-foreground italic">
+        &ldquo;<HighlightedWord text={text} word={word} />&rdquo;
+      </p>
     </div>
   )
 }

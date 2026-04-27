@@ -394,8 +394,66 @@ export const writingDomainsRelations = relations(writingDomains, ({ many }) => (
   vocabularyWordDomains: many(vocabularyWordDomains),
 }))
 
+// ─── Word Sentences ───────────────────────────────────────────────────────────
+
+export const wordSentences = pgTable('word_sentences', {
+  id: serial('id').primaryKey(),
+  wordId: integer('word_id')
+    .notNull()
+    .references(() => vocabularyWords.id, { onDelete: 'cascade' }),
+  sentence: text('sentence').notNull(),
+  context: text('context').notNull(), // 'Speaking' | 'Writing' | 'News' | 'Book' | 'Podcast' | 'Other'
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
+// ─── Sentence Practice (game-agnostic foundation) ─────────────────────────────
+
+export const sentencePracticeSessions = pgTable('sentence_practice_sessions', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  gameType: text('game_type').notNull(), // 'flashcard' | 'fill_blank' | 'multiple_choice' | ...
+  wordId: integer('word_id').references(() => vocabularyWords.id, { onDelete: 'set null' }), // null = all words
+  completedAt: timestamp('completed_at'),
+  score: integer('score'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
+export const sentencePracticeResults = pgTable('sentence_practice_results', {
+  id: serial('id').primaryKey(),
+  sessionId: integer('session_id')
+    .notNull()
+    .references(() => sentencePracticeSessions.id, { onDelete: 'cascade' }),
+  sentenceId: integer('sentence_id')
+    .notNull()
+    .references(() => wordSentences.id, { onDelete: 'cascade' }),
+  correct: boolean('correct'),   // null for non-binary game types
+  timeMs: integer('time_ms'),    // response time in ms (optional)
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
+// ─── Relations ────────────────────────────────────────────────────────────────
+
+export const wordSentencesRelations = relations(wordSentences, ({ one, many }) => ({
+  word: one(vocabularyWords, { fields: [wordSentences.wordId], references: [vocabularyWords.id] }),
+  practiceResults: many(sentencePracticeResults),
+}))
+
+export const sentencePracticeSessionsRelations = relations(sentencePracticeSessions, ({ one, many }) => ({
+  user: one(users, { fields: [sentencePracticeSessions.userId], references: [users.id] }),
+  word: one(vocabularyWords, { fields: [sentencePracticeSessions.wordId], references: [vocabularyWords.id] }),
+  results: many(sentencePracticeResults),
+}))
+
+export const sentencePracticeResultsRelations = relations(sentencePracticeResults, ({ one }) => ({
+  session: one(sentencePracticeSessions, { fields: [sentencePracticeResults.sessionId], references: [sentencePracticeSessions.id] }),
+  sentence: one(wordSentences, { fields: [sentencePracticeResults.sentenceId], references: [wordSentences.id] }),
+}))
+
 export const vocabularyWordsRelations = relations(vocabularyWords, ({ many }) => ({
   domains: many(vocabularyWordDomains),
+  sentences: many(wordSentences),
 }))
 
 export const vocabularyWordDomainsRelations = relations(vocabularyWordDomains, ({ one }) => ({
