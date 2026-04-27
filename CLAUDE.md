@@ -167,8 +167,23 @@ PORT=3000 pnpm dev:clean
 
 ### Target Profile & Nav
 - `updateTargetProfileAction` updates DB + `revalidatePath('/', 'layout')`
-- `DashboardLayout` is `async` — fetches `getDefaultUser()`, passes `targetProfile` to `NavSidebar`
+- `DashboardLayout` is `async` — fetches `getDefaultUser()`, passes `targetProfile` and `favouritePages` to `NavSidebar`
 - Nav groups: **Practice** · **Tools** · **Guides** · standalone top (Dashboard) · standalone bottom (Analytics, Wrong Decisions, History, Settings)
+
+### Favourite Pages
+- `favouritePages jsonb` column on `users` table (`string[]`, default `[]`)
+- `toggleFavouritePage(userId, href)` in `lib/db/user.ts` — reads current array, toggles href, writes back
+- `toggleFavouritePageAction(href)` in `app/actions/favourite-pages.ts` — server action; calls DB helper + `revalidatePath('/', 'layout')`
+- `NavSidebar` accepts `favouritePages?: string[]` prop; uses `useState` for optimistic local toggle (immediate UI update, server action fires in background)
+- **Expanded sidebar**: "★ Favourites" section at very top (amber label + divider) when any items are starred; each `NavLink` shows ☆ on hover → ★ amber when starred (absolute-positioned button, `group`/`group-hover` pattern)
+- **Collapsed icon rail**: starred items shown first above a thin amber divider, then remaining items
+- `ALL_NAV_ITEMS` flat array used to map `href → NavItem` for the Favourites section
+
+### Dark Mode (Semantic Token System)
+- All dashboard pages use semantic CSS tokens instead of hardcoded `gray-*` Tailwind classes
+- Token mapping: `text-foreground`, `text-muted-foreground`, `text-faint`, `bg-card`, `bg-muted`, `bg-subtle`, `border-border`, `bg-input`
+- Applied across: `listening-task.tsx`, `reading-task.tsx`, `speaking-chat.tsx`, `speaking-session.tsx`, `part2-chat.tsx`, `writing-task.tsx`, `question-anatomy-guide.tsx`, `wrong-decisions-view.tsx`, and all static guide/dashboard pages
+- Exception: toggle knob stays `bg-white` (intentional — not a background surface)
 
 ### Shared Patterns
 - `rank` column (1–5, default varies, CHECK constraint) on all library tables; sort: `rank DESC, createdAt DESC`
@@ -183,4 +198,4 @@ PORT=3000 pnpm dev:clean
 | 1.5 | Done | Writing Auditor, multi-pass pipeline |
 | 2 | Done | Speaking simulator, STT, filler detection |
 | 3 | Done | Reading, Listening, Vocab Search, Writing Topics, How to Answer, Topic Ideas, Connected Speech, Collocations, Nav, Target Switcher, AI Prompts, Essay Builder, Analytics |
-| 4 | In progress | Wrong Decision Log ✅ · Paraphrase Guide ✅ · Question Anatomy · Peer Review · Mock Integration |
+| 4 | In progress | Wrong Decision Log ✅ · Paraphrase Guide ✅ · Dark Mode ✅ · Favourite Pages ✅ · Question Anatomy · Peer Review · Mock Integration |
