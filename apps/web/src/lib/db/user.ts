@@ -30,3 +30,18 @@ export async function updateTargetProfile(profile: string): Promise<void> {
     .set({ targetProfile: profile })
     .where(eq(users.email, DEFAULT_EMAIL))
 }
+
+export async function toggleFavouritePage(userId: number, href: string): Promise<void> {
+  const [user] = await db
+    .select({ favouritePages: users.favouritePages })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
+
+  const current = (user?.favouritePages ?? []) as string[]
+  const next = current.includes(href)
+    ? current.filter((p) => p !== href)
+    : [...current, href]
+
+  await db.update(users).set({ favouritePages: next }).where(eq(users.id, userId))
+}

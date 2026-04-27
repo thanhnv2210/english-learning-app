@@ -19,6 +19,7 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   // e.g. 'IELTS_Academic_6.5', 'IELTS_Academic_7.5', 'Business_Fluent'
   targetProfile: text('target_profile').notNull().default('IELTS_Academic_6.5'),
+  favouritePages: jsonb('favourite_pages').$type<string[]>().notNull().default([]),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 

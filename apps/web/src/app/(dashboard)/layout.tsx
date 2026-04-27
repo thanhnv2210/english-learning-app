@@ -6,7 +6,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const user = await getDefaultUser()
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <NavSidebar targetProfile={user.targetProfile} />
+      <NavSidebar targetProfile={user.targetProfile} favouritePages={user.favouritePages ?? []} />
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         {process.env.NEXT_PUBLIC_OLLAMA_ENABLED === 'false' && <OllamaDisabledBanner />}
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-6 lg:p-8 2xl:p-12">{children}</main>
