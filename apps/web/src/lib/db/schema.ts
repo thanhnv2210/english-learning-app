@@ -279,6 +279,38 @@ export const connectedSpeechAnalyses = pgTable('connected_speech_analyses', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
+// ─── Word / phrase comparison library ────────────────────────────────────────
+
+export type ComparisonTerm = {
+  register: string       // 'formal' | 'informal' | 'neutral'
+  ieltsWriting: string   // short note e.g. "Preferred in Task 2", "Avoid — too informal"
+  ieltsSpeaking: string  // short note e.g. "Natural in Part 2/3"
+  intensity?: number     // 1–5 for degree words; omit for others
+  note?: string          // any extra nuance for this term alone
+}
+
+export type ComparisonExamplePair = {
+  context: string   // shared topic e.g. "Discussing economic growth"
+  withA: string     // full sentence using termA
+  withB: string     // full sentence using termB
+}
+
+export const comparisonEntries = pgTable('comparison_entries', {
+  id: serial('id').primaryKey(),
+  termA: text('term_a').notNull(),
+  termB: text('term_b').notNull(),
+  category: text('category').notNull(), // 'adverb' | 'verb' | 'noun' | 'adjective' | 'conjunction' | 'preposition' | 'phrase'
+  keyDifference: text('key_difference').notNull(),
+  dimensionA: jsonb('dimension_a').notNull().$type<ComparisonTerm>(),
+  dimensionB: jsonb('dimension_b').notNull().$type<ComparisonTerm>(),
+  examples: jsonb('examples').notNull().$type<ComparisonExamplePair[]>(),
+  rank: integer('rank').notNull().default(3),
+  isSystem: boolean('is_system').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (t) => [
+  check('comparison_entries_rank_check', sql`${t.rank} between 1 and 5`),
+])
+
 // ─── Idiom entry library ──────────────────────────────────────────────────────
 
 export type IdiomSkill = 'Writing_1' | 'Writing_2' | 'Speaking'
