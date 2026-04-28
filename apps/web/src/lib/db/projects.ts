@@ -84,6 +84,7 @@ export async function createTicket(data: {
   status?: TicketStatus
   priority?: TicketPriority
   type?: TicketType
+  epic?: string | null
   isTemplate?: boolean
 }): Promise<Ticket> {
   const key = await nextTicketKey(data.projectId)
@@ -103,7 +104,7 @@ export async function createTicket(data: {
 
 export async function updateTicket(
   id: number,
-  data: Partial<Pick<Ticket, 'title' | 'description' | 'status' | 'priority' | 'type' | 'sprintId' | 'order'>>,
+  data: Partial<Pick<Ticket, 'title' | 'description' | 'status' | 'priority' | 'type' | 'epic' | 'sprintId' | 'order'>>,
 ): Promise<Ticket> {
   const [row] = await db
     .update(tickets)
@@ -114,7 +115,8 @@ export async function updateTicket(
 }
 
 export async function deleteTicket(id: number): Promise<void> {
-  await db.delete(tickets).where(eq(tickets.id, id))
+  // System tickets are protected — never delete them
+  await db.delete(tickets).where(and(eq(tickets.id, id), eq(tickets.isSystem, false)))
 }
 
 export async function getSprintTickets(sprintId: number): Promise<Ticket[]> {

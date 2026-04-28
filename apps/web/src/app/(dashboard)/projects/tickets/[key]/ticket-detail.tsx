@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { updateTicketAction, addCommentAction, deleteCommentAction } from '@/app/actions/projects'
 import { StatusBadge, PriorityDot, TypeIcon } from '@/components/projects/ticket-badge'
-import { STATUSES, PRIORITIES, TYPES } from '@/lib/projects/constants'
+import { STATUSES, PRIORITIES, TYPES, EPICS } from '@/lib/projects/constants'
 import type { Ticket, Sprint, TicketComment } from '@/lib/db/projects'
 
 type Props = {
@@ -48,6 +48,12 @@ export function TicketDetail({ ticket: initialTicket, initialComments, sprints }
     const sid = sprintId === 'backlog' ? null : Number(sprintId)
     setTicket((prev) => ({ ...prev, sprintId: sid }))
     startTransition(() => updateTicketAction(ticket.id, { sprintId: sid }))
+  }
+
+  function handleEpicChange(epic: string) {
+    const val = epic || null
+    setTicket((prev) => ({ ...prev, epic: val }))
+    startTransition(() => updateTicketAction(ticket.id, { epic: val }))
   }
 
   function handleAddComment(e: React.FormEvent) {
@@ -152,6 +158,19 @@ export function TicketDetail({ ticket: initialTicket, initialComments, sprints }
               className="rounded border border-border bg-input text-xs text-foreground px-2 py-1 outline-none"
             >
               {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
+          </div>
+
+          {/* Epic */}
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-faint">Epic</span>
+            <select
+              value={ticket.epic ?? ''}
+              onChange={(e) => handleEpicChange(e.target.value)}
+              className="rounded border border-border bg-input text-xs text-foreground px-2 py-1 outline-none"
+            >
+              <option value="">— None —</option>
+              {EPICS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
             </select>
           </div>
 

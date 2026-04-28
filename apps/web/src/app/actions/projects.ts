@@ -19,6 +19,7 @@ export async function createTicketAction(data: {
   description?: string
   priority?: TicketPriority
   type?: TicketType
+  epic?: string | null
   isTemplate?: boolean
 }) {
   await createTicket(data)
@@ -27,7 +28,7 @@ export async function createTicketAction(data: {
 
 export async function updateTicketAction(
   id: number,
-  data: Partial<{ title: string; description: string; status: TicketStatus; priority: TicketPriority; type: TicketType; sprintId: number | null; order: number }>,
+  data: Partial<{ title: string; description: string; status: TicketStatus; priority: TicketPriority; type: TicketType; epic: string | null; sprintId: number | null; order: number }>,
 ) {
   await updateTicket(id, data)
   REVALIDATE()

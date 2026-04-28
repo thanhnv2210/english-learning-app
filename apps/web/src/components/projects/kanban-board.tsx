@@ -14,7 +14,7 @@ import {
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { updateTicketAction } from '@/app/actions/projects'
 import { STATUSES, PRIORITIES } from '@/lib/projects/constants'
-import { StatusBadge, PriorityDot, TypeIcon } from './ticket-badge'
+import { StatusBadge, PriorityDot, TypeIcon, EpicBadge } from './ticket-badge'
 import { TicketForm } from './ticket-form'
 import type { Ticket, Sprint } from '@/lib/db/projects'
 
@@ -170,7 +170,8 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
         <PriorityDot priority={ticket.priority} />
       </div>
 
-      {/* Title */}
+      {/* Epic + Title */}
+      {ticket.epic && <EpicBadge epic={ticket.epic} />}
       <Link
         href={`/projects/tickets/${ticket.key}`}
         onPointerDown={(e) => e.stopPropagation()}

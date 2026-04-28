@@ -503,7 +503,9 @@ export const tickets = pgTable('tickets', {
   status: text('status').notNull().default('todo'), // todo | in_progress | in_review | done
   priority: text('priority').notNull().default('medium'), // low | medium | high | critical
   type: text('type').notNull().default('task'),           // task | bug | story
+  epic: text('epic'),                                             // writing | reading | listening | speaking | cross-skill | null
   isTemplate: boolean('is_template').notNull().default(false),
+  isSystem: boolean('is_system').notNull().default(false),
   order: integer('order').notNull().default(0),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
