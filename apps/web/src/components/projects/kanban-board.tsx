@@ -13,7 +13,7 @@ import {
 } from '@dnd-kit/core'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { updateTicketAction } from '@/app/actions/projects'
-import { STATUSES, PRIORITIES } from '@/lib/projects/constants'
+import { STATUSES, PRIORITIES, EPICS } from '@/lib/projects/constants'
 import { StatusBadge, PriorityDot, TypeIcon, EpicBadge } from './ticket-badge'
 import { TicketForm } from './ticket-form'
 import type { Ticket, Sprint } from '@/lib/db/projects'
@@ -32,12 +32,18 @@ export function KanbanBoard({ sprint, initialTickets, projectId }: Props) {
   const [tickets, setTickets] = useState(initialTickets)
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null)
   const [addingToColumn, setAddingToColumn] = useState<string | null>(null)
+  const [activeEpic, setActiveEpic] = useState<string | null>(null)
   const [, startTransition] = useTransition()
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   function getColumnTickets(status: string) {
-    return tickets.filter((t) => t.status === status)
+    return tickets.filter((t) => {
+      if (t.status !== status) return false
+      if (activeEpic === '__none__') return !t.epic
+      if (activeEpic) return t.epic === activeEpic
+      return true
+    })
   }
 
   function handleDragStart({ active }: DragStartEvent) {
@@ -55,8 +61,41 @@ export function KanbanBoard({ sprint, initialTickets, projectId }: Props) {
     startTransition(() => updateTicketAction(ticket.id, { status: newStatus as never }))
   }
 
+  const epicCounts = EPICS.map((e) => ({
+    ...e,
+    count: tickets.filter((t) => t.epic === e.value).length,
+  }))
+  const noneCount = tickets.filter((t) => !t.epic).length
+
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      {/* Epic filter */}
+      <div className="flex flex-wrap gap-2 pb-1">
+        <EpicFilterChip
+          label="All"
+          active={activeEpic === null}
+          color="bg-subtle text-muted-foreground"
+          onClick={() => setActiveEpic(null)}
+        />
+        {epicCounts.map((e) => (
+          <EpicFilterChip
+            key={e.value}
+            label={`${e.label} (${e.count})`}
+            active={activeEpic === e.value}
+            color={e.color}
+            onClick={() => setActiveEpic(activeEpic === e.value ? null : e.value)}
+          />
+        ))}
+        {noneCount > 0 && (
+          <EpicFilterChip
+            label={`No epic (${noneCount})`}
+            active={activeEpic === '__none__'}
+            color="bg-subtle text-faint"
+            onClick={() => setActiveEpic(activeEpic === '__none__' ? null : '__none__')}
+          />
+        )}
+      </div>
+
       <div className="flex gap-4 overflow-x-auto pb-4">
         {STATUSES.map((col) => (
           <Column
@@ -208,6 +247,30 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
         )}
       </div>
     </div>
+  )
+}
+
+// ── EpicFilterChip ────────────────────────────────────────────────────────────
+
+function EpicFilterChip({
+  label, active, color, onClick,
+}: {
+  label: string
+  active: boolean
+  color: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-full px-3 py-1 text-xs font-medium transition-colors border ${
+        active
+          ? `${color} border-transparent ring-2 ring-offset-1 ring-current`
+          : `${color} border-border hover:border-current opacity-70 hover:opacity-100`
+      }`}
+    >
+      {label}
+    </button>
   )
 }
 

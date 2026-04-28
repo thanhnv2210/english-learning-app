@@ -194,6 +194,7 @@ export async function cloneTemplate(templateId: number, sprintId: number | null)
       status: 'todo',
       priority: tmpl.priority,
       type: tmpl.type,
+      epic: tmpl.epic,
       isTemplate: false,
     })
     .returning()

@@ -79,3 +79,30 @@ Rules:
 - Include all skills where this collocation is genuinely useful
 - Return ONLY valid JSON — no markdown, no explanation`
 }
+
+/**
+ * Generate a full IELTS Writing Task 2 essay using all provided collocations.
+ * Uses delimiter format to avoid JSON truncation for long text.
+ */
+export function COLLOCATION_ESSAY_PROMPT(phrases: string[], topic: string): string {
+  const phraseList = phrases.map((p, i) => `${i + 1}. ${p}`).join('\n')
+  return `You are an IELTS Writing Task 2 expert. Write a Band 7 essay on the topic below, naturally incorporating ALL of the provided collocations at least once.
+
+Topic: ${topic}
+
+Collocations to use (all required):
+${phraseList}
+
+Requirements:
+- 4 paragraphs: Introduction, Body 1, Body 2, Conclusion
+- Around 280–320 words
+- Band 7 vocabulary and grammar
+- Each collocation must appear naturally — do not force them
+- Do not add a separate list of collocations used
+
+Output format — use these exact delimiters, no other text outside them:
+---TOPIC---
+${topic}
+---ESSAY---
+<your full essay here>`
+}
