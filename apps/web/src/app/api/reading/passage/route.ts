@@ -1,15 +1,28 @@
 import { generateText } from 'ai'
-import { READING_PASSAGE_PROMPT, type ReadingPassage } from '@/lib/ielts/reading/prompts'
+import {
+  READING_PASSAGE_PROMPT,
+  READING_PASSAGE_HEADINGS_MC_PROMPT,
+  type ReadingPassage,
+  type QuestionStyle,
+} from '@/lib/ielts/reading/prompts'
 import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export async function POST(req: Request) {
   if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
 
-  const { domain } = (await req.json()) as { domain: string }
+  const { domain, questionStyle = 'classic' } = (await req.json()) as {
+    domain: string
+    questionStyle?: QuestionStyle
+  }
+
+  const prompt =
+    questionStyle === 'headings_mc'
+      ? READING_PASSAGE_HEADINGS_MC_PROMPT(domain)
+      : READING_PASSAGE_PROMPT(domain)
 
   let text: string
   try {
-    const result = await generateText({ model: ollamaModel(), prompt: READING_PASSAGE_PROMPT(domain), maxTokens: 2000 })
+    const result = await generateText({ model: ollamaModel(), prompt, maxTokens: 2500 })
     text = result.text
   } catch (err) {
     console.error('[reading/passage] generateText failed:', err)

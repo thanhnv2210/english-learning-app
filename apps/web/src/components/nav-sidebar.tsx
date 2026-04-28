@@ -19,7 +19,8 @@ const GROUPS: NavGroup[] = [
       { href: '/speaking/session', label: 'Speaking (Full)', icon: '🎙' },
       { href: '/speaking', label: 'Speaking Pt 1', icon: '🎤' },
       { href: '/speaking/part2', label: 'Speaking Pt 2', icon: '🎤' },
-      { href: '/writing', label: 'Writing', icon: '✍' },
+      { href: '/writing', label: 'Writing Task 2', icon: '✍' },
+      { href: '/writing/task1', label: 'Writing Task 1', icon: '📊' },
       { href: '/reading', label: 'Reading', icon: '📖' },
       { href: '/listening', label: 'Listening', icon: '🎧' },
     ],
@@ -28,6 +29,7 @@ const GROUPS: NavGroup[] = [
     label: 'Tools',
     items: [
       { href: '/vocabulary', label: 'Vocabulary', icon: '📚' },
+      { href: '/vocabulary/review', label: 'Vocab Review (SRS)', icon: '🔁' },
       { href: '/collocations', label: 'Collocations', icon: '🧩' },
       { href: '/essay-builder', label: 'Essay Builder', icon: '✍️' },
       { href: '/connected-speech', label: 'Connected Speech', icon: '🔗' },

@@ -12,6 +12,7 @@ import {
   estimateBand,
   type ReadingPassage,
   type ReadingQuestion,
+  type QuestionStyle,
 } from '@/lib/ielts/reading/prompts'
 import type { FeedbackResult, TranscriptMessage } from '@/lib/db/schema'
 
@@ -157,6 +158,7 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
 
   const [stage, setStage] = useState<Stage>('select')
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null)
+  const [questionStyle, setQuestionStyle] = useState<QuestionStyle>('classic')
   const [passage, setPassage] = useState<ReadingPassage | null>(null)
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({})
   const [scoreResult, setScoreResult] = useState<{
@@ -185,7 +187,7 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
     const res = await fetch('/api/reading/passage', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ domain: selectedDomain.name }),
+      body: JSON.stringify({ domain: selectedDomain.name, questionStyle }),
     })
     if (!res.ok) { setError('Failed to generate passage. Please try again.'); setStage('options'); return }
     const data: ReadingPassage = await res.json()
@@ -253,34 +255,41 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
     const band = estimateBand(correct, total)
     setScoreResult({ correct, total, perQuestion, band })
 
-    const tfngQs = passage.questions.filter((q) => q.type === 'tfng')
-    const saQs = passage.questions.filter((q) => q.type === 'short_answer')
-    const tfngCorrect = tfngQs.filter((q) => perQuestion[q.id]).length
-    const saCorrect = saQs.filter((q) => perQuestion[q.id]).length
+    type QType = ReadingQuestion['type']
+    const byType = (t: QType) => passage.questions.filter((q) => q.type === t)
+    const scoreGroup = (qs: ReadingQuestion[]) => ({
+      correct: qs.filter((q) => perQuestion[q.id]).length,
+      total: qs.length,
+    })
+
+    const criteriaMap: Record<QType, { label: string; detail: (q: ReadingQuestion) => string }> = {
+      tfng: { label: 'True / False / Not Given', detail: (q) => `Missed: "${q.question.slice(0, 70)}"` },
+      short_answer: { label: 'Short Answer', detail: (q) => `Expected: "${q.answer}"` },
+      multiple_choice: { label: 'Multiple Choice', detail: (q) => `Correct answer: ${q.answer}` },
+      matching_headings: { label: 'Matching Headings', detail: (q) => `Expected: ${q.answer} for "${q.question.slice(0, 50)}"` },
+    }
+
+    const criteriaEntries = (Object.keys(criteriaMap) as QType[])
+      .map((t) => {
+        const qs = byType(t)
+        if (qs.length === 0) return null
+        const { correct: c, total: tot } = scoreGroup(qs)
+        return {
+          criterion: criteriaMap[t].label,
+          score: estimateBand(c, tot),
+          targetScore: targetBand,
+          keyPoints: [
+            `${c} of ${tot} correct`,
+            ...qs.filter((q) => !perQuestion[q.id]).map(criteriaMap[t].detail),
+          ],
+        }
+      })
+      .filter(Boolean) as FeedbackResult['criteria']
 
     const result: FeedbackResult = {
       overallBand: band,
       targetBand,
-      criteria: [
-        {
-          criterion: 'True / False / Not Given',
-          score: estimateBand(tfngCorrect, tfngQs.length),
-          targetScore: targetBand,
-          keyPoints: [
-            `${tfngCorrect} of ${tfngQs.length} correct`,
-            ...tfngQs.filter((q) => !perQuestion[q.id]).map((q) => `Missed: "${q.question.slice(0, 70)}"`),
-          ],
-        },
-        {
-          criterion: 'Short Answer',
-          score: estimateBand(saCorrect, saQs.length),
-          targetScore: targetBand,
-          keyPoints: [
-            `${saCorrect} of ${saQs.length} correct`,
-            ...saQs.filter((q) => !perQuestion[q.id]).map((q) => `Expected: "${q.answer}"`),
-          ],
-        },
-      ],
+      criteria: criteriaEntries,
     }
     setFeedback(result)
     setStage('submitted')
@@ -343,6 +352,31 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
         {stage === 'options' && (
           <div className="flex flex-col gap-4">
             {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+
+            {/* Question style selector */}
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-semibold text-muted-foreground">Question style</p>
+              <div className="flex gap-2">
+                {([
+                  { value: 'classic', label: 'Classic', desc: 'T/F/NG + Short Answer' },
+                  { value: 'headings_mc', label: 'New Types', desc: 'Matching Headings + Multiple Choice' },
+                ] as const).map((s) => (
+                  <button
+                    key={s.value}
+                    onClick={() => setQuestionStyle(s.value)}
+                    className={`flex-1 rounded-lg border px-3 py-2 text-left text-xs transition-colors ${
+                      questionStyle === s.value
+                        ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
+                        : 'border-border bg-card text-muted-foreground hover:border-blue-300'
+                    }`}
+                  >
+                    <p className="font-semibold">{s.label}</p>
+                    <p className="text-faint">{s.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {/* Pick from library */}
               <button
@@ -494,52 +528,50 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
             <p className="text-xs font-semibold uppercase tracking-wide text-faint">Questions</p>
           </div>
           <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-5">
-
-            <div className="flex flex-col gap-3">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground">Questions 1–6 · True / False / Not Given</p>
-                <p className="text-xs text-faint mt-0.5">True = stated · False = contradicted · Not Given = not mentioned</p>
-              </div>
-              {passage.questions.filter((q) => q.type === 'tfng').map((q) => (
-                <TFNGRow
-                  key={q.id}
-                  q={q}
-                  value={userAnswers[q.id] ?? ''}
-                  onChange={(v) => setUserAnswers((prev) => ({ ...prev, [q.id]: v }))}
-                  result={scoreResult?.perQuestion[q.id]}
-                  correctAnswer={stage === 'submitted' ? q.answer : undefined}
-                  disabled={stage === 'submitted'}
-                  highlightMode={highlightMode}
-                  highlights={questionHighlights.filter((h) => h.questionId === q.id)}
-                  onHighlight={(start, end) => addQuestionHighlight(q.id, start, end)}
-                  onRemoveHighlight={removeQuestionHighlight}
-                />
-              ))}
-            </div>
-
-            <div className="border-t border-border" />
-
-            <div className="flex flex-col gap-3">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground">Questions 7–10 · Short Answer</p>
-                <p className="text-xs text-faint mt-0.5">No more than 3 words from the passage</p>
-              </div>
-              {passage.questions.filter((q) => q.type === 'short_answer').map((q) => (
-                <ShortAnswerRow
-                  key={q.id}
-                  q={q}
-                  value={userAnswers[q.id] ?? ''}
-                  onChange={(v) => setUserAnswers((prev) => ({ ...prev, [q.id]: v }))}
-                  result={scoreResult?.perQuestion[q.id]}
-                  correctAnswer={stage === 'submitted' ? q.answer : undefined}
-                  disabled={stage === 'submitted'}
-                  highlightMode={highlightMode}
-                  highlights={questionHighlights.filter((h) => h.questionId === q.id)}
-                  onHighlight={(start, end) => addQuestionHighlight(q.id, start, end)}
-                  onRemoveHighlight={removeQuestionHighlight}
-                />
-              ))}
-            </div>
+            {(
+              [
+                { type: 'tfng', label: 'True / False / Not Given', hint: 'True = stated · False = contradicted · Not Given = not mentioned' },
+                { type: 'matching_headings', label: 'Matching Headings', hint: 'Select the best heading for each paragraph' },
+                { type: 'short_answer', label: 'Short Answer', hint: 'No more than 3 words from the passage' },
+                { type: 'multiple_choice', label: 'Multiple Choice', hint: 'Select the best answer' },
+              ] as const
+            ).map(({ type, label, hint }, sectionIdx) => {
+              const qs = passage.questions.filter((q) => q.type === type)
+              if (qs.length === 0) return null
+              const first = qs[0].id
+              const last = qs[qs.length - 1].id
+              return (
+                <div key={type} className="flex flex-col gap-3">
+                  {sectionIdx > 0 && <div className="border-t border-border" />}
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground">
+                      Questions {first}–{last} · {label}
+                    </p>
+                    <p className="text-xs text-faint mt-0.5">{hint}</p>
+                  </div>
+                  {qs.map((q) => {
+                    const commonProps = {
+                      key: q.id,
+                      q,
+                      value: userAnswers[q.id] ?? '',
+                      onChange: (v: string) => setUserAnswers((prev) => ({ ...prev, [q.id]: v })),
+                      result: scoreResult?.perQuestion[q.id],
+                      correctAnswer: stage === 'submitted' ? q.answer : undefined,
+                      disabled: stage === 'submitted',
+                      highlightMode,
+                      highlights: questionHighlights.filter((h) => h.questionId === q.id),
+                      onHighlight: (start: number, end: number) => addQuestionHighlight(q.id, start, end),
+                      onRemoveHighlight: removeQuestionHighlight,
+                    }
+                    if (q.type === 'tfng') return <TFNGRow {...commonProps} />
+                    if (q.type === 'short_answer') return <ShortAnswerRow {...commonProps} />
+                    if (q.type === 'multiple_choice') return <MultipleChoiceRow {...commonProps} />
+                    if (q.type === 'matching_headings') return <MatchingHeadingsRow {...commonProps} />
+                    return null
+                  })}
+                </div>
+              )
+            })}
 
             {/* Results */}
             {stage === 'submitted' && scoreResult && feedback && (
@@ -667,6 +699,70 @@ function ShortAnswerRow({ q, value, onChange, result, correctAnswer, disabled, h
       />
       {correctAnswer && result === false && (
         <p className="text-xs text-red-600 font-medium select-none">Correct: &ldquo;{correctAnswer}&rdquo;</p>
+      )}
+    </div>
+  )
+}
+
+function MultipleChoiceRow({ q, value, onChange, result, correctAnswer, disabled }: QuestionRowProps) {
+  const options = 'options' in q ? (q.options as string[]) : []
+  return (
+    <div className={`rounded-lg border p-3 flex flex-col gap-2 text-sm transition-colors ${
+      result === true ? 'border-green-200 bg-green-50 dark:border-green-800/40 dark:bg-green-900/10' :
+      result === false ? 'border-red-200 bg-red-50 dark:border-red-800/40 dark:bg-red-900/10' :
+      'border-border bg-muted'
+    }`}>
+      <p className="text-foreground leading-snug select-text">{q.id}. {q.question}</p>
+      <div className="flex flex-col gap-1.5 select-none">
+        {options.map((opt) => {
+          const letter = opt.slice(0, 1)
+          return (
+            <label key={opt} className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name={`q-${q.id}`}
+                value={letter}
+                checked={value === letter}
+                onChange={() => onChange(letter)}
+                disabled={disabled}
+                className="mt-0.5 accent-blue-600"
+              />
+              <span className="text-xs text-muted-foreground leading-snug">{opt}</span>
+            </label>
+          )
+        })}
+      </div>
+      {correctAnswer && result === false && (
+        <p className="text-xs text-red-600 font-medium select-none">Correct: {correctAnswer}</p>
+      )}
+    </div>
+  )
+}
+
+function MatchingHeadingsRow({ q, value, onChange, result, correctAnswer, disabled }: QuestionRowProps) {
+  const options = 'options' in q ? (q.options as string[]) : []
+  return (
+    <div className={`rounded-lg border p-3 flex flex-col gap-2 text-sm transition-colors ${
+      result === true ? 'border-green-200 bg-green-50 dark:border-green-800/40 dark:bg-green-900/10' :
+      result === false ? 'border-red-200 bg-red-50 dark:border-red-800/40 dark:bg-red-900/10' :
+      'border-border bg-muted'
+    }`}>
+      <p className="text-foreground leading-snug select-text">{q.id}. {q.question}</p>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        className="w-full rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground outline-none focus:border-blue-500 disabled:text-muted-foreground"
+      >
+        <option value="">Select a heading…</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt.split('.')[0].trim()}>
+            {opt}
+          </option>
+        ))}
+      </select>
+      {correctAnswer && result === false && (
+        <p className="text-xs text-red-600 font-medium select-none">Correct: {correctAnswer}</p>
       )}
     </div>
   )

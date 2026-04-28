@@ -162,8 +162,9 @@ export const vocabularyWordDomains = pgTable(
 // Inline type — keeps schema.ts free of lib/ielts imports
 export type ReadingQuestionRow = {
   id: number
-  type: 'tfng' | 'short_answer'
+  type: 'tfng' | 'short_answer' | 'multiple_choice' | 'matching_headings'
   question: string
+  options?: string[]  // present for multiple_choice and matching_headings
   answer: string
 }
 
@@ -431,6 +432,23 @@ export const sentencePracticeResults = pgTable('sentence_practice_results', {
   correct: boolean('correct'),   // null for non-binary game types
   timeMs: integer('time_ms'),    // response time in ms (optional)
   createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
+// ─── Spaced Repetition (SM-2) ─────────────────────────────────────────────────
+// One row per word. Tracks SRS state for the single user (single-user app).
+// Rows are created on first review. nextReview defaults to now → due immediately.
+
+export const wordReviewStates = pgTable('word_review_states', {
+  id: serial('id').primaryKey(),
+  wordId: integer('word_id')
+    .notNull()
+    .unique()
+    .references(() => vocabularyWords.id, { onDelete: 'cascade' }),
+  interval: integer('interval').notNull().default(1),       // days until next review
+  easeFactor: real('ease_factor').notNull().default(2.5),   // SM-2 multiplier
+  repetitions: integer('repetitions').notNull().default(0), // consecutive correct streak
+  nextReview: timestamp('next_review').notNull().defaultNow(),
+  lastReview: timestamp('last_review'),
 })
 
 // ─── Relations ────────────────────────────────────────────────────────────────

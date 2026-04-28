@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { deleteVocabularyWordAction, updateVocabularyRankAction, updateWordPronunciationAction, updateWordTypeAction, detectWordTypeAction } from '@/app/actions/vocabulary'
 import { addSentenceAction } from '@/app/actions/word-sentences'
 import { toggleVocabFavoriteAction } from '@/app/actions/user-skill-topics'
+import { enrolWordAction } from '@/app/actions/vocabulary-srs'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 
 // ── Sort ─────────────────────────────────────────────────────────────────────
@@ -257,6 +258,7 @@ export function WordCard({
   const [localRank, setLocalRank] = useState(word.rank)
   const [hoverRank, setHoverRank] = useState(0)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [enrolled, setEnrolled] = useState(false)
   const [, startTransition] = useTransition()
   const [localWordType, setLocalWordType] = useState(word.wordType)
   const [editingWordType, setEditingWordType] = useState(false)
@@ -562,6 +564,15 @@ export function WordCard({
           >
             Sentences →
           </Link>
+        )}
+        {word.id > 0 && (
+          <button
+            onClick={() => { setEnrolled(true); enrolWordAction(word.id) }}
+            disabled={enrolled}
+            className={`text-xs font-medium transition-colors ${enrolled ? 'text-green-600 cursor-default' : 'text-muted-foreground hover:text-blue-600'}`}
+          >
+            {enrolled ? '✓ In review' : '+ Review'}
+          </button>
         )}
       </div>
 

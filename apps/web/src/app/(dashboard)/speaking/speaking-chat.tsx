@@ -9,6 +9,7 @@ import { FeedbackView } from '@/components/feedback-view'
 import { VocabularyDrawer } from '@/components/vocabulary-drawer'
 import { MicInput } from '@/components/mic-input'
 import { useTimer } from '@/lib/ielts/timer/use-timer'
+import { detectFillers, totalFillerCount, type FillerCount } from '@/lib/ielts/feedback/filler-detector'
 import type { TranscriptMessage, FeedbackResult } from '@/lib/db/schema'
 import type { SpeakingTopic } from '@/lib/db/speaking'
 import type { Message } from 'ai'
@@ -88,6 +89,7 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
   const [examId, setExamId] = useState<number | undefined>(resumeExamId)
   const [ended, setEnded] = useState(false)
   const [feedback, setFeedback] = useState<FeedbackResult | null>(null)
+  const [fillers, setFillers] = useState<FillerCount[]>([])
   const [isSaving, startSaveTransition] = useTransition()
   const [isGeneratingFeedback, setIsGeneratingFeedback] = useState(false)
 
@@ -102,6 +104,11 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
 
   function handleEndSession() {
     timer.stop()
+    const userText = visibleMessages
+      .filter((m) => m.role === 'user')
+      .map((m) => m.content)
+      .join(' ')
+    setFillers(detectFillers(userText))
     startSaveTransition(async () => {
       const transcript: TranscriptMessage[] = messages
         .filter((m) => m.content !== '__START__')
@@ -286,6 +293,25 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
             </>
           ) : (
             <div className="flex flex-col gap-3">
+              {/* Filler summary */}
+              {fillers.length > 0 && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-800/40 p-4">
+                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-400 mb-2">
+                    Filler words detected — {totalFillerCount(fillers)} total
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {fillers.map((f) => (
+                      <span key={f.word} className="rounded-full bg-amber-100 dark:bg-amber-900/30 px-3 py-1 text-xs text-amber-700 dark:text-amber-300 font-medium">
+                        &ldquo;{f.word}&rdquo; ×{f.count}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                    Tip: Replace fillers with discourse markers like &ldquo;Furthermore,&rdquo; &ldquo;In addition,&rdquo; or a brief pause.
+                  </p>
+                </div>
+              )}
+
               {/* Feedback section */}
               {!feedback ? (
                 <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
