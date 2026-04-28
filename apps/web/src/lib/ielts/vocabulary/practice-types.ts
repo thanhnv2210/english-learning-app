@@ -10,7 +10,7 @@ export type PracticeItem = {
   /** Context label shown on the card (Speaking, Writing, News, …) */
   context: string
   /** Source section — used for session tracking */
-  source: 'vocabulary' | 'collocation'
+  source: 'vocabulary' | 'collocation' | 'idiom'
   /** Only set for vocabulary sentences — used to log individual results */
   sentenceId?: number
 }

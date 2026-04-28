@@ -31,6 +31,7 @@ const GROUPS: NavGroup[] = [
       { href: '/vocabulary', label: 'Vocabulary', icon: '📚' },
       { href: '/vocabulary/review', label: 'Vocab Review (SRS)', icon: '🔁' },
       { href: '/collocations', label: 'Collocations', icon: '🧩' },
+      { href: '/idioms', label: 'Idioms', icon: '💬' },
       { href: '/essay-builder', label: 'Essay Builder', icon: '✍️' },
       { href: '/connected-speech', label: 'Connected Speech', icon: '🔗' },
     ],

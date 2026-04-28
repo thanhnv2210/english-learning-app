@@ -279,6 +279,26 @@ export const connectedSpeechAnalyses = pgTable('connected_speech_analyses', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
+// ─── Idiom entry library ──────────────────────────────────────────────────────
+
+export type IdiomSkill = 'Writing_1' | 'Writing_2' | 'Speaking'
+export type IdiomContext = 'Speaking' | 'Writing' | 'News' | 'Book' | 'Podcast' | 'Other'
+
+export const idiomEntries = pgTable('idiom_entries', {
+  id: serial('id').primaryKey(),
+  idiom: text('idiom').notNull().unique(),
+  meaning: text('meaning').notNull(),
+  register: text('register').notNull().default('neutral'), // 'formal' | 'informal' | 'neutral'
+  skills: jsonb('skills').notNull().$type<IdiomSkill[]>(),
+  contexts: jsonb('contexts').notNull().$type<IdiomContext[]>(),
+  examples: jsonb('examples').notNull().$type<string[]>(),
+  rank: integer('rank').notNull().default(3),
+  isSystem: boolean('is_system').notNull().default(false), // protected seed data — cannot be deleted
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (t) => [
+  check('idiom_entries_rank_check', sql`${t.rank} between 1 and 5`),
+])
+
 // ─── Collocation entry library ────────────────────────────────────────────────
 
 export type CollocationSkill = 'Writing_1' | 'Writing_2' | 'Speaking'
