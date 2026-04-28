@@ -44,6 +44,19 @@ export async function getActiveSprint(projectId: number): Promise<Sprint | null>
   return rows[0] ?? null
 }
 
+/** Active sprint first, then most recent planning sprint — for the board view. */
+export async function getCurrentSprint(projectId: number): Promise<Sprint | null> {
+  const active = await getActiveSprint(projectId)
+  if (active) return active
+  const rows = await db
+    .select()
+    .from(sprints)
+    .where(and(eq(sprints.projectId, projectId), eq(sprints.status, 'planning')))
+    .orderBy(desc(sprints.createdAt))
+    .limit(1)
+  return rows[0] ?? null
+}
+
 export async function createSprint(data: {
   projectId: number
   name: string
@@ -55,8 +68,20 @@ export async function createSprint(data: {
   return row
 }
 
-export async function updateSprintStatus(id: number, status: SprintStatus): Promise<void> {
-  await db.update(sprints).set({ status }).where(eq(sprints.id, id))
+export async function updateSprintStatus(
+  id: number,
+  status: SprintStatus,
+  dates?: { startDate?: Date; endDate?: Date },
+): Promise<void> {
+  await db.update(sprints).set({ status, ...dates }).where(eq(sprints.id, id))
+}
+
+export async function updateSprint(
+  id: number,
+  data: Partial<Pick<Sprint, 'name' | 'goal' | 'startDate' | 'endDate'>>,
+): Promise<Sprint> {
+  const [row] = await db.update(sprints).set(data).where(eq(sprints.id, id)).returning()
+  return row
 }
 
 export async function deleteSprint(id: number): Promise<void> {

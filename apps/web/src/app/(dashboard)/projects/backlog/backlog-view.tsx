@@ -36,7 +36,14 @@ export function BacklogView({ projectId, initialBacklog, initialTemplates, sprin
   }
 
   function handleCloneTemplate(templateId: number, sprintId: number | null) {
-    startTransition(() => cloneTemplateAction(templateId, sprintId))
+    startTransition(async () => {
+      const cloned = await cloneTemplateAction(templateId, sprintId)
+      if (!cloned) return
+      if (sprintId === null) {
+        setBacklog((prev) => [...prev, cloned])
+      }
+      // if cloned into a sprint, the board will reflect it on next visit — no local state needed
+    })
   }
 
   function handleDeleteTemplate(id: number) {

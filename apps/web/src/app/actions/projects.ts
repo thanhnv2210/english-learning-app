@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import {
   createTicket, updateTicket, deleteTicket, cloneTemplate, reorderTickets,
-  createSprint, updateSprintStatus, deleteSprint,
+  createSprint, updateSprint, updateSprintStatus, deleteSprint,
   addComment, deleteComment,
   type TicketStatus, type TicketPriority, type TicketType, type SprintStatus,
 } from '@/lib/db/projects'
@@ -40,8 +40,9 @@ export async function deleteTicketAction(id: number) {
 }
 
 export async function cloneTemplateAction(templateId: number, sprintId: number | null) {
-  await cloneTemplate(templateId, sprintId)
+  const ticket = await cloneTemplate(templateId, sprintId)
   REVALIDATE()
+  return ticket
 }
 
 export async function reorderTicketsAction(updates: { id: number; order: number }[]) {
@@ -63,8 +64,20 @@ export async function createSprintAction(data: {
   return sprint
 }
 
-export async function updateSprintStatusAction(id: number, status: SprintStatus) {
-  await updateSprintStatus(id, status)
+export async function updateSprintAction(
+  id: number,
+  data: { name?: string; goal?: string | null; startDate?: Date | null; endDate?: Date | null },
+) {
+  await updateSprint(id, data)
+  REVALIDATE()
+}
+
+export async function updateSprintStatusAction(
+  id: number,
+  status: SprintStatus,
+  dates?: { startDate?: Date; endDate?: Date },
+) {
+  await updateSprintStatus(id, status, dates)
   REVALIDATE()
 }
 
