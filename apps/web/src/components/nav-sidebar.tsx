@@ -45,19 +45,22 @@ const GROUPS: NavGroup[] = [
       { href: '/exam-countdown', label: 'Exam Sprint', icon: '⏱️' },
     ],
   },
+  {
+    label: 'Progress',
+    items: [
+      { href: '/analytics', label: 'Analytics', icon: '📊' },
+      { href: '/wrong-decisions', label: 'Wrong Decisions', icon: '❌' },
+      { href: '/history', label: 'History', icon: '🕐' },
+    ],
+  },
 ]
 
-const STANDALONE_BOTTOM: NavItem[] = [
-  { href: '/analytics', label: 'Analytics', icon: '📊' },
-  { href: '/wrong-decisions', label: 'Wrong Decisions', icon: '❌' },
-  { href: '/history', label: 'History', icon: '🕐' },
-  { href: '/settings', label: 'Settings', icon: '⚙️' },
-]
+const SETTINGS_ITEM: NavItem = { href: '/settings', label: 'Settings', icon: '⚙️' }
 
 const ALL_NAV_ITEMS: NavItem[] = [
   ...STANDALONE,
   ...GROUPS.flatMap((g) => g.items),
-  ...STANDALONE_BOTTOM,
+  SETTINGS_ITEM,
 ]
 
 function formatTargetLabel(profile: string): string {
@@ -98,6 +101,7 @@ export function NavSidebar({
   const [isNarrow, setIsNarrow] = useState(false)
   const [fontLevel, setFontLevel] = useState(0)
   const [favs, setFavs] = useState<string[]>(favouritePages)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const isCollapsed = isNarrow || userCollapsed
 
@@ -206,7 +210,18 @@ export function NavSidebar({
           )
         })}
 
-        <div className="mt-auto flex flex-col items-center gap-0.5 pb-2">
+        <div className="mt-auto flex flex-col items-center gap-0.5 pb-2 border-t border-gray-200 dark:border-gray-700 pt-2">
+          <Link
+            href={SETTINGS_ITEM.href}
+            title={SETTINGS_ITEM.label}
+            className={`flex h-9 w-9 items-center justify-center rounded-lg text-base transition-colors ${
+              isActive(SETTINGS_ITEM.href, pathname)
+                ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-gray-200'
+            }`}
+          >
+            {SETTINGS_ITEM.icon}
+          </Link>
           {([0, 1, 2] as FontLevel[]).map((lvl) => (
             <button
               key={lvl}
@@ -318,45 +333,54 @@ export function NavSidebar({
           )
         })}
 
-        {/* Standalone bottom */}
-        <div className="mt-2">
-          {STANDALONE_BOTTOM.map((item) => (
-            <NavLink
-              key={item.href}
-              item={item}
-              pathname={pathname}
-              isFav={favs.includes(item.href)}
-              onToggleFav={handleToggleFav}
-            />
-          ))}
-        </div>
       </nav>
 
-      {/* Footer */}
-      <div className="mt-4 space-y-3 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-3">
-        <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Target</p>
-          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{formatTargetLabel(targetProfile)}</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400 dark:text-gray-500">Text size</span>
-          <div className="flex items-center gap-1">
-            {([0, 1, 2] as FontLevel[]).map((lvl) => (
-              <button
-                key={lvl}
-                onClick={() => setFont(lvl)}
-                title={`${FONT_LEVELS[lvl]}%`}
-                className={`flex h-6 w-6 items-center justify-center rounded font-bold transition-colors ${FONT_LEVEL_SIZES[lvl]} ${
-                  fontLevel === lvl
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                    : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                A
-              </button>
-            ))}
+      {/* Settings — pinned to bottom */}
+      <div className="mt-2 border-t border-gray-200 dark:border-gray-700 pt-2">
+        <button
+          onClick={() => setSettingsOpen((v) => !v)}
+          className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            isActive(SETTINGS_ITEM.href, pathname)
+              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+          }`}
+        >
+          <span className="flex items-center gap-3">
+            <span className="text-base">{SETTINGS_ITEM.icon}</span>
+            {SETTINGS_ITEM.label}
+          </span>
+          <span className={`text-[10px] transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`}>▾</span>
+        </button>
+
+        {settingsOpen && (
+          <div className="mx-3 mt-2 mb-1 flex flex-col gap-2 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-3">
+            <Link
+              href={SETTINGS_ITEM.href}
+              className="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              Open Settings →
+            </Link>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-400 dark:text-gray-500">Text size</span>
+              <div className="flex items-center gap-1">
+                {([0, 1, 2] as FontLevel[]).map((lvl) => (
+                  <button
+                    key={lvl}
+                    onClick={() => setFont(lvl)}
+                    title={`${FONT_LEVELS[lvl]}%`}
+                    className={`flex h-6 w-6 items-center justify-center rounded font-bold transition-colors ${FONT_LEVEL_SIZES[lvl]} ${
+                      fontLevel === lvl
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
+                    }`}
+                  >
+                    A
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </aside>
   )
