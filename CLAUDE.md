@@ -25,22 +25,27 @@ apps/web/src/
 │   │   ├── writing/              # Writing Task 2
 │   │   ├── reading/
 │   │   ├── listening/
-│   │   ├── vocabulary/           # AWL browser
+│   │   ├── vocabulary/           # AWL browser; [id]/sentences/ for sentence library
 │   │   ├── collocations/
 │   │   ├── analytics/
 │   │   ├── essay-builder/        # generate + analyse + history
 │   │   ├── wrong-decisions/      # mistake journal + AI analysis
 │   │   ├── paraphrase/           # static guide, 4 skills × 3 levels
 │   │   ├── history/
-│   │   └── how-to-answer/        # static guides; listening/ subdirectory
-│   ├── actions/                  # server actions (exam, reading, writing, etc.)
+│   │   ├── how-to-answer/        # static guides; listening/ subdirectory
+│   │   └── projects/             # kanban board; backlog/; sprints/; tickets/[key]/
+│   ├── actions/                  # server actions (exam, reading, writing, projects, etc.)
 │   └── api/                      # thin route handlers → lib/ielts/
-├── components/                   # shared React components
+├── components/
+│   ├── projects/                 # kanban-board, ticket-form, ticket-badge
+│   └── games/                   # fill-blank-game, multiple-choice-game, flashcard-game
 ├── lib/
 │   ├── ai-client.ts              # centralised Ollama client
 │   ├── db/                       # PostgreSQL query helpers per feature
+│   │   └── seeds/                # seed scripts (vocabulary, projects, etc.)
 │   ├── guides/                   # static content (listening, reading, writing, speaking, paraphrase)
-│   └── ielts/                    # core domain logic (prompts, scoring, types)
+│   ├── ielts/                    # core domain logic (prompts, scoring, types)
+│   └── projects/                 # constants.ts — client-safe STATUSES, PRIORITIES, TYPES, EPICS
 └── types/
 packages/shared/src/types/        # TargetProfile, FeedbackSchema
 ```
@@ -77,6 +82,7 @@ pnpm db:push
 pnpm db:seed:domains
 pnpm db:seed:vocabulary
 pnpm db:seed:speaking-topics
+pnpm db:seed:projects          # 22 IELTS Academic template tickets (idempotent)
 
 # Kill stale port and restart
 lsof -ti tcp:3000 | xargs kill -9 2>/dev/null
@@ -165,10 +171,29 @@ PORT=3000 pnpm dev:clean
 - **Topic Ideas** (`/topic-ideas`): 10 topics, static content in `lib/topic-ideas/index.ts`
 - **AI Prompt Library** (`/prompt-library`): 5 prompts × 4 skills × 3 platforms; profile-aware interpolation
 
+### Project Management (`/projects`)
+Single-project, single-user kanban tracker. Tables: `projects`, `sprints`, `tickets`, `ticket_comments`.
+
+- **Board** (`/projects`): uses `getCurrentSprint` — shows active sprint, or falls back to most recent planning sprint with yellow banner. Sprint info bar shows name, goal, date range, color-coded countdown pill (blue→orange→red / overdue).
+- **Backlog** (`/projects/backlog`): backlog tickets + template tickets grouped by epic. Filter toggle: All / Custom. "Clone → Backlog" returns cloned ticket for instant optimistic append. System templates (isSystem=true) show no delete button.
+- **Sprints** (`/projects/sprints`): create (name, goal, start date, end date), edit inline, start (inline date confirm), complete, delete. Cards grouped: Active · Planning · Completed (collapsed).
+- **Ticket detail** (`/projects/tickets/[key]`): inline edit title/description, field selectors for status/priority/type/epic/sprint, comments with optimistic add/delete.
+
+**Key schema fields on `tickets`:**
+- `epic`: `writing | reading | listening | speaking | cross-skill | null`
+- `isTemplate`: clone-per-sprint reuse pattern (no junction table)
+- `isSystem`: protected seed data — `deleteTicket()` skips rows where `isSystem = true`
+
+**Client-safe constants** in `lib/projects/constants.ts`: `STATUSES`, `PRIORITIES`, `TYPES`, `EPICS` (each with label + color tokens). Never import from `lib/db/projects` in client components.
+
+**All project actions** call `revalidatePath('/projects', 'layout')`. `createSprintAction` and `cloneTemplateAction` return the created record for optimistic UI.
+
+**Seed**: `pnpm db:seed:projects` — 22 IELTS Academic templates tagged by epic. Idempotent: inserts new, patches `epic` on existing system records missing it.
+
 ### Target Profile & Nav
 - `updateTargetProfileAction` updates DB + `revalidatePath('/', 'layout')`
 - `DashboardLayout` is `async` — fetches `getDefaultUser()`, passes `targetProfile` and `favouritePages` to `NavSidebar`
-- Nav groups: **Practice** · **Tools** · **Guides** · standalone top (Dashboard) · standalone bottom (Analytics, Wrong Decisions, History, Settings)
+- Nav groups: **Practice** · **Tools** · **Guides** · **Progress** (Projects, Analytics, Wrong Decisions, History) · Settings pinned at bottom
 
 ### Favourite Pages
 - `favouritePages jsonb` column on `users` table (`string[]`, default `[]`)
@@ -185,10 +210,23 @@ PORT=3000 pnpm dev:clean
 - Applied across: `listening-task.tsx`, `reading-task.tsx`, `speaking-chat.tsx`, `speaking-session.tsx`, `part2-chat.tsx`, `writing-task.tsx`, `question-anatomy-guide.tsx`, `wrong-decisions-view.tsx`, and all static guide/dashboard pages
 - Exception: toggle knob stays `bg-white` (intentional — not a background surface)
 
+### Vocabulary Sentence Library (`/vocabulary/[id]/sentences`)
+- `word_sentences` table: `id`, `wordId`, `sentence`, `context` (speaking/writing/news/book/podcast/other), `createdAt`
+- `sentence_practice_sessions` + `sentence_practice_results` for game tracking
+- `SENTENCE_CONTEXTS` constant lives in `lib/ielts/vocabulary/sentence-contexts.ts` (client-safe); re-exported from `lib/db/word-sentences.ts`
+- Shared `PracticeItem` type in `lib/ielts/vocabulary/practice-types.ts` — used by all 3 game components
+
+### Practice Games (`/vocabulary/practice`, `/collocations/practice`)
+- Three game modes: Fill-in-the-blank · Multiple Choice · Flashcard
+- All games accept `PracticeItem[]` — source-agnostic (vocabulary sentences or collocation examples)
+- Wrong answer tracking: most recent result per sentence; self-clearing when answered correctly
+- Wrong answers practice hub at `/vocabulary/practice/wrong-answers?mode=<game>`
+
 ### Shared Patterns
 - `rank` column (1–5, default varies, CHECK constraint) on all library tables; sort: `rank DESC, createdAt DESC`
 - `OLLAMA_DEBUG=true` → logs full raw model output; first diagnostic for `generateText` parse failures
 - Safe colour getter: always look up AI-returned strings through a getter with fallback, never direct object indexing
+- Client/server separation: never import `lib/db/*` in client components — extract constants/types to a dedicated client-safe file under `lib/ielts/` or `lib/projects/`
 
 ## Roadmap
 
@@ -198,4 +236,5 @@ PORT=3000 pnpm dev:clean
 | 1.5 | Done | Writing Auditor, multi-pass pipeline |
 | 2 | Done | Speaking simulator, STT, filler detection |
 | 3 | Done | Reading, Listening, Vocab Search, Writing Topics, How to Answer, Topic Ideas, Connected Speech, Collocations, Nav, Target Switcher, AI Prompts, Essay Builder, Analytics |
-| 4 | In progress | Wrong Decision Log ✅ · Paraphrase Guide ✅ · Dark Mode ✅ · Favourite Pages ✅ · Question Anatomy · Peer Review · Mock Integration |
+| 4 | Done | Wrong Decision Log ✅ · Paraphrase Guide ✅ · Dark Mode ✅ · Favourite Pages ✅ · Question Anatomy ✅ · Sentence Library ✅ · Practice Games ✅ · Project Management ✅ |
+| 5 | Pending | Peer Review · Mock Integration · Multi-project support · Epic filter on board |
