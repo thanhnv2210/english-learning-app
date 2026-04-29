@@ -279,6 +279,39 @@ export const connectedSpeechAnalyses = pgTable('connected_speech_analyses', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
+// ─── Vocabulary Banks ─────────────────────────────────────────────────────────
+// Lightweight topic-focused word sets (e.g. "travel", "library", "hospital").
+// Separate from the AWL vocabulary_words catalogue.
+
+export const vocabBanks = pgTable('vocab_banks', {
+  id: serial('id').primaryKey(),
+  topic: text('topic').notNull().unique(),
+  description: text('description').notNull().default(''),
+  isSystem: boolean('is_system').notNull().default(false),
+  rank: integer('rank').notNull().default(3),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (t) => [
+  check('vocab_banks_rank_check', sql`${t.rank} between 1 and 5`),
+])
+
+export const vocabBankWords = pgTable('vocab_bank_words', {
+  id: serial('id').primaryKey(),
+  bankId: integer('bank_id').notNull().references(() => vocabBanks.id, { onDelete: 'cascade' }),
+  word: text('word').notNull(),
+  type: text('type').notNull(), // noun | verb | adjective | adverb | phrase
+  meaning: text('meaning').notNull(),
+  example: text('example').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
+export const vocabBanksRelations = relations(vocabBanks, ({ many }) => ({
+  words: many(vocabBankWords),
+}))
+
+export const vocabBankWordsRelations = relations(vocabBankWords, ({ one }) => ({
+  bank: one(vocabBanks, { fields: [vocabBankWords.bankId], references: [vocabBanks.id] }),
+}))
+
 // ─── Word / phrase comparison library ────────────────────────────────────────
 
 export type ComparisonTerm = {

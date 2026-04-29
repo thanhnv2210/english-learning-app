@@ -33,6 +33,7 @@ const GROUPS: NavGroup[] = [
       { href: '/collocations', label: 'Collocations', icon: '🧩' },
       { href: '/idioms', label: 'Idioms', icon: '💬' },
       { href: '/compare', label: 'Word Compare', icon: '⚖️' },
+      { href: '/vocab-banks', label: 'Vocab Banks', icon: '🏦' },
       { href: '/essay-builder', label: 'Essay Builder', icon: '✍️' },
       { href: '/connected-speech', label: 'Connected Speech', icon: '🔗' },
     ],

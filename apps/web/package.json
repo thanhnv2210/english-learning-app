@@ -21,7 +21,8 @@
     "db:seed:idioms": "dotenv -e .env.local -- tsx src/lib/db/seeds/idioms.ts",
     "db:seed:comparisons": "dotenv -e .env.local -- tsx src/lib/db/seeds/comparisons.ts",
     "db:backfill:word-types": "dotenv -e .env.local -- tsx src/lib/db/seeds/backfill-word-types.ts",
-    "db:seed:projects": "dotenv -e .env.local -- tsx src/lib/db/seeds/projects.ts"
+    "db:seed:projects": "dotenv -e .env.local -- tsx src/lib/db/seeds/projects.ts",
+    "db:seed:vocab-banks": "dotenv -e .env.local -- tsx src/lib/db/seeds/vocab-banks.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
