@@ -5,7 +5,7 @@ import { VOCAB_SEARCH_PROMPT } from '@/lib/ielts/vocabulary/prompts'
 import type { VocabWordFamily, VocabSynonym, VocabExamples, VocabPronunciation } from '@/lib/db/schema'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 import { OLLAMA_ENABLED, getModelForTier, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
-import { auth } from '@/auth'
+import { getUserAIContext } from '@/lib/db/user'
 
 export async function POST(req: Request) {
   if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
@@ -16,8 +16,7 @@ export async function POST(req: Request) {
   }
 
   const trimmed = word.trim()
-  const session = await auth()
-  const tier = session?.user?.tier ?? 'free'
+  const { tier, modelPreference } = await getUserAIContext()
 
   // 1. Check the DB first
   const existing = await findWord(trimmed)
@@ -32,7 +31,7 @@ export async function POST(req: Request) {
   let text: string
   try {
     const result = await generateText({
-      model: getModelForTier(tier, 'fast'),
+      model: getModelForTier(tier, 'fast', modelPreference),
       prompt: VOCAB_SEARCH_PROMPT(trimmed, domainNames),
     })
     text = result.text

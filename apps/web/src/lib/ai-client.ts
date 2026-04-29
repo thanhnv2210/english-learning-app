@@ -80,11 +80,17 @@ export function aiScoringModel() {
  *   const tier = session?.user?.tier ?? 'free'
  *   const model = getModelForTier(tier, 'scoring')
  */
-export function getModelForTier(tier: string, purpose: 'fast' | 'scoring' = 'fast') {
-  if (tier === 'vip') {
+export function getModelForTier(
+  tier: string,
+  purpose: 'fast' | 'scoring' = 'fast',
+  modelPreference: string = 'auto',
+) {
+  // vip with 'free' preference → simulate free tier (Ollama)
+  const effectiveTier = tier === 'vip' && modelPreference === 'free' ? 'free' : tier
+
+  if (effectiveTier === 'vip') {
     return purpose === 'scoring' ? aiScoringModel() : ollamaModel()
   }
-  // free tier always uses local Ollama
   return _ollama(process.env.OLLAMA_MODEL ?? 'qwen2.5-coder:7b')
 }
 

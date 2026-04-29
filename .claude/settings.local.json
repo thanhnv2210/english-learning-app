@@ -85,7 +85,8 @@
       "Bash(sed -i '' 's/model: ollamaModel\\(\\)/model: aiScoringModel\\(\\)/g' \"$file\")",
       "Bash(sed -i '' 's/OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug/OLLAMA_ENABLED, aiScoringModel, ollamaDisabledResponse, ollamaDebug/g' \"$file\")",
       "Bash(openssl rand:*)",
-      "Bash(ADMIN_PASSWORD=admin123 pnpm db:set-password)"
+      "Bash(ADMIN_PASSWORD=admin123 pnpm db:set-password)",
+      "Bash(python3 -m json.tool)"
     ]
   }
 }

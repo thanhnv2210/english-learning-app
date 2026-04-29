@@ -7,7 +7,11 @@ export default async function SettingsPage() {
     <div className="max-w-lg">
       <h1 className="text-2xl font-bold text-foreground mb-1">Settings</h1>
       <p className="text-sm text-muted-foreground mb-8">Customise your theme and study target.</p>
-      <SettingsForm currentProfile={user.targetProfile} />
+      <SettingsForm
+        currentProfile={user.targetProfile}
+        tier={user.tier}
+        modelPreference={(user.modelPreference ?? 'auto') as 'auto' | 'free'}
+      />
     </div>
   )
 }

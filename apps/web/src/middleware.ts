@@ -17,5 +17,6 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ['/((?!api/auth|_next/static|_next/image|favicon.ico).*)'],
+  // Only protect page routes — API routes handle their own auth
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 }

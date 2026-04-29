@@ -18,7 +18,8 @@ export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash'),
-  tier: text('tier').notNull().default('vip'), // 'free' | 'vip'
+  tier: text('tier').notNull().default('vip'),               // 'free' | 'vip'
+  modelPreference: text('model_preference').notNull().default('auto'), // 'auto' | 'free'
   // e.g. 'IELTS_Academic_6.5', 'IELTS_Academic_7.5', 'Business_Fluent'
   targetProfile: text('target_profile').notNull().default('IELTS_Academic_6.5'),
   favouritePages: jsonb('favourite_pages').$type<string[]>().notNull().default([]),

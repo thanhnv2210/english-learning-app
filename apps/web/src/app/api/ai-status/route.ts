@@ -1,21 +1,39 @@
 import { NextResponse } from 'next/server'
 import { OLLAMA_ENABLED, OLLAMA_MODEL } from '@/lib/ai-client'
+import { auth } from '@/auth'
+import { getDefaultUser } from '@/lib/db/user'
 
 export async function GET() {
   const hasAnthropic = !!process.env.ANTHROPIC_API_KEY
   const hasOpenRouter = !hasAnthropic && !!process.env.OPENROUTER_API_KEY
 
-  const provider = hasAnthropic ? 'anthropic' : hasOpenRouter ? 'openrouter' : 'ollama'
+  // Resolve user tier and model preference
+  const session = await auth()
+  const user = await getDefaultUser()
+  const tier = session?.user?.tier ?? user.tier ?? 'free'
+  const modelPreference = (user.modelPreference ?? 'auto') as 'auto' | 'free'
+
+  // Effective provider: vip with 'auto' pref → configured cloud, otherwise → ollama
+  const useCloud = tier === 'vip' && modelPreference === 'auto'
+  const effectiveProvider = useCloud
+    ? (hasAnthropic ? 'anthropic' : hasOpenRouter ? 'openrouter' : 'ollama')
+    : 'ollama'
+
+  const ollamaBase = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/api'
 
   return NextResponse.json({
-    provider,
-    fastModel: OLLAMA_MODEL,
-    scoringModel: hasAnthropic
+    tier,
+    modelPreference,
+    provider: effectiveProvider,
+    fastModel: useCloud ? OLLAMA_MODEL : (process.env.OLLAMA_MODEL ?? 'qwen2.5-coder:7b'),
+    scoringModel: useCloud && hasAnthropic
       ? (process.env.ANTHROPIC_SCORING_MODEL ?? 'claude-sonnet-4-6')
-      : OLLAMA_MODEL,
+      : (process.env.OLLAMA_MODEL ?? 'qwen2.5-coder:7b'),
     enabled: OLLAMA_ENABLED,
-    ...(hasAnthropic && { baseURL: 'https://api.anthropic.com' }),
-    ...(hasOpenRouter && { baseURL: 'https://openrouter.ai/api/v1' }),
-    ...(!hasAnthropic && !hasOpenRouter && { baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/api' }),
+    baseURL: effectiveProvider === 'anthropic'
+      ? 'https://api.anthropic.com'
+      : effectiveProvider === 'openrouter'
+        ? 'https://openrouter.ai/api/v1'
+        : ollamaBase,
   })
 }

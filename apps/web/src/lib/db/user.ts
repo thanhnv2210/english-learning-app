@@ -31,6 +31,22 @@ export async function updateTargetProfile(profile: string): Promise<void> {
     .where(eq(users.email, DEFAULT_EMAIL))
 }
 
+/**
+ * Returns the user's effective AI context (tier + modelPreference).
+ * Use this in API routes instead of calling auth() + getDefaultUser() separately.
+ */
+export async function getUserAIContext(): Promise<{ tier: string; modelPreference: 'auto' | 'free' }> {
+  const user = await getDefaultUser()
+  return {
+    tier: user.tier ?? 'free',
+    modelPreference: (user.modelPreference ?? 'auto') as 'auto' | 'free',
+  }
+}
+
+export async function updateModelPreference(userId: number, preference: 'auto' | 'free'): Promise<void> {
+  await db.update(users).set({ modelPreference: preference }).where(eq(users.id, userId))
+}
+
 export async function toggleFavouritePage(userId: number, href: string): Promise<void> {
   const [user] = await db
     .select({ favouritePages: users.favouritePages })

@@ -1,7 +1,7 @@
 'use client'
 
-import { useTransition } from 'react'
-import { updateTargetProfileAction } from '@/app/actions/user'
+import { useOptimistic, useTransition } from 'react'
+import { updateTargetProfileAction, updateModelPreferenceAction } from '@/app/actions/user'
 import { useTheme } from '@/components/theme-provider'
 
 type TargetProfileValue = 'IELTS_Academic_6.5' | 'IELTS_Academic_7.5' | 'Business_Fluent'
@@ -47,13 +47,43 @@ const THEMES = [
   { value: 'dark'  as const, label: 'Dark',  icon: '🌙' },
 ]
 
-export function SettingsForm({ currentProfile }: { currentProfile: string }) {
+const MODEL_OPTIONS: { value: 'auto' | 'free'; label: string; description: string }[] = [
+  {
+    value: 'auto',
+    label: 'Auto (VIP)',
+    description: 'Use Claude — fast model for generation, Sonnet for scoring.',
+  },
+  {
+    value: 'free',
+    label: 'Simulate Free Tier',
+    description: 'Use local Ollama for all AI calls — same experience as free users.',
+  },
+]
+
+export function SettingsForm({
+  currentProfile,
+  tier,
+  modelPreference,
+}: {
+  currentProfile: string
+  tier: string
+  modelPreference: 'auto' | 'free'
+}) {
   const [isPending, startTransition] = useTransition()
   const { theme, setTheme } = useTheme()
+  const [optimisticPref, setOptimisticPref] = useOptimistic(modelPreference)
 
   function select(profile: TargetProfileValue) {
     if (profile === currentProfile) return
     startTransition(() => updateTargetProfileAction(profile))
+  }
+
+  function selectModelPref(pref: 'auto' | 'free') {
+    if (pref === optimisticPref) return
+    startTransition(async () => {
+      setOptimisticPref(pref)
+      await updateModelPreferenceAction(pref)
+    })
   }
 
   return (
@@ -123,6 +153,43 @@ export function SettingsForm({ currentProfile }: { currentProfile: string }) {
           )}
         </div>
       </section>
+
+      {/* AI Model — VIP only */}
+      {tier === 'vip' && (
+        <section>
+          <h2 className="text-sm font-semibold text-foreground mb-1">AI Model</h2>
+          <p className="text-xs text-muted-foreground mb-3">
+            VIP users can simulate the free tier to verify the free-user experience.
+          </p>
+          <div className="flex flex-col gap-3">
+            {MODEL_OPTIONS.map((opt) => {
+              const active = optimisticPref === opt.value
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => selectModelPref(opt.value)}
+                  disabled={isPending}
+                  className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
+                    active
+                      ? 'border-transparent ring-2 ring-amber-500 bg-amber-50 dark:bg-amber-900/20'
+                      : 'border-border bg-card hover:opacity-80'
+                  } disabled:opacity-60`}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{opt.label}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{opt.description}</p>
+                    </div>
+                    <div className={`h-4 w-4 shrink-0 rounded-full border-2 ${
+                      active ? 'border-transparent bg-amber-500' : 'border-border bg-card'
+                    }`} />
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      )}
     </div>
   )
 }
