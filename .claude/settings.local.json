@@ -77,7 +77,13 @@
       "Bash(PORT=3000 pnpm dev:clean:log)",
       "Bash(ls /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/language-comparison)",
       "Bash(cd /Users/ThanhNguyen/AI_WS/english-learning-app git diff --stat HEAD)",
-      "Bash(npx drizzle-kit:*)"
+      "Bash(npx drizzle-kit:*)",
+      "Bash(for file:*)",
+      "Bash(echo \"=== $file ===\")",
+      "Read(//Users/ThanhNguyen/AI_WS/english-learning-app/**)",
+      "Bash(sed -i '' 's/OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse/OLLAMA_ENABLED, aiScoringModel, ollamaDisabledResponse/g' \"$file\")",
+      "Bash(sed -i '' 's/model: ollamaModel\\(\\)/model: aiScoringModel\\(\\)/g' \"$file\")",
+      "Bash(sed -i '' 's/OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug/OLLAMA_ENABLED, aiScoringModel, ollamaDisabledResponse, ollamaDebug/g' \"$file\")"
     ]
   }
 }

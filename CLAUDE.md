@@ -93,9 +93,12 @@ PORT=3000 pnpm dev:clean
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `OPENROUTER_API_KEY` | — | OpenRouter API key; when set, overrides Ollama |
-| `OPENROUTER_MODEL` | `meta-llama/llama-3.1-8b-instruct:free` | OpenRouter model name |
-| `OLLAMA_BASE_URL` | `http://localhost:11434/api` | Ollama API endpoint (local dev fallback) |
+| `ANTHROPIC_API_KEY` | — | Anthropic API key; highest priority provider |
+| `ANTHROPIC_MODEL` | `claude-haiku-4-5-20251001` | Fast model for vocab/gen tasks |
+| `ANTHROPIC_SCORING_MODEL` | `claude-sonnet-4-6` | Quality model for IELTS scoring/evaluation |
+| `OPENROUTER_API_KEY` | — | OpenRouter key; used if no Anthropic key |
+| `OPENROUTER_MODEL` | `google/gemma-3-12b-it:free` | OpenRouter model name |
+| `OLLAMA_BASE_URL` | `http://localhost:11434/api` | Ollama endpoint (local dev fallback) |
 | `OLLAMA_MODEL` | `qwen2.5-coder:7b` | Ollama model name (local dev fallback) |
 | `NEXT_PUBLIC_OLLAMA_ENABLED` | `true` | Set `false` to disable AI routes; shows amber banner |
 | `OLLAMA_DEBUG` | `false` | Set `true` to log full raw AI response |

@@ -1,6 +1,6 @@
 import { generateText } from 'ai'
 import { AUDIT_PROMPT } from '@/lib/ielts/writing/prompts'
-import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, aiScoringModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export type AuditResult = {
   wordCount: number
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   let text: string
   try {
     const result = await generateText({
-      model: ollamaModel(),
+      model: aiScoringModel(),
       system: AUDIT_PROMPT,
       prompt: `Essay topic: ${topic}\n\nEssay:\n${essay}`,
     })

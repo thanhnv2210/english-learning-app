@@ -1,6 +1,6 @@
 import { streamText } from 'ai'
 import { SCORING_PROMPT } from '@/lib/ielts/writing/prompts'
-import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, aiScoringModel, ollamaDisabledResponse } from '@/lib/ai-client'
 
 export async function POST(req: Request) {
   if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   }
 
   const result = streamText({
-    model: ollamaModel(),
+    model: aiScoringModel(),
     system: SCORING_PROMPT(targetBand),
     prompt: `Essay topic: ${topic}\n\nEssay:\n${essay}`,
   })
