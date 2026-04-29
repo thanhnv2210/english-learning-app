@@ -12,29 +12,56 @@ Goal: move local PostgreSQL data to a managed cloud database.
 
 ### Recommended: Neon (free tier, serverless Postgres, compatible with existing schema)
 
+**Neon connection string format:**
+```
+postgresql://<user>:<password>@ep-<endpoint-id>.<region>.aws.neon.tech/<dbname>?sslmode=require
+```
+Example:
+```
+postgresql://alice:abc123xyz@ep-cool-forest-a1b2c3d4.us-east-2.aws.neon.tech/neondb?sslmode=require
+```
+Find it in Neon dashboard → your project → **Connection Details** → copy the connection string.
+
+**Prerequisite — Postgres client tools:**
+```bash
+pg_dump --version && psql --version
+# if missing on macOS:
+brew install libpq && brew link --force libpq
+```
+
 **Steps:**
 
-1. Create a Neon project at neon.tech → get `DATABASE_URL`
+1. Create a Neon project at neon.tech → copy the connection string
 2. Export local data:
    ```bash
-   pg_dump $LOCAL_DATABASE_URL --no-owner --no-acl -F p -f local_dump.sql
+   # load DATABASE_URL from .env if not already exported
+   export $(grep DATABASE_URL apps/web/.env | xargs)
+   pg_dump $DATABASE_URL --no-owner --no-acl -F p -f local_dump.sql
    ```
-3. Push schema to Neon:
+3. Import directly to Neon — **do NOT run `pnpm db:push` first**:
    ```bash
-   # from apps/web/
-   DATABASE_URL=<neon-url> pnpm db:push
+   psql "<neon-url>" < local_dump.sql 2>&1 | tee tmp/db_migration.log
    ```
-4. Import data:
+   The dump file exports schema → data → constraints in the correct order. Running `db:push` beforehand creates FK constraints before data is loaded, causing FK violation errors on every table that references `users` or other parent tables.
+4. Check the log — you should see only `COPY N`, `CREATE TABLE`, `ALTER TABLE`, `setval`. No errors.
+5. Verify — temporarily point local app at Neon and run:
    ```bash
-   psql $NEON_DATABASE_URL < local_dump.sql
+   # in apps/web/.env, swap DATABASE_URL to <neon-url>, then:
+   pnpm dev
    ```
-5. Re-run seeds to patch any missing/idempotent data:
-   ```bash
-   DATABASE_URL=<neon-url> pnpm db:seed:vocabulary
-   DATABASE_URL=<neon-url> pnpm db:seed:domains
-   DATABASE_URL=<neon-url> pnpm db:seed:speaking-topics
-   DATABASE_URL=<neon-url> pnpm db:seed:projects
-   ```
+   Check vocabulary browser, project board, and wrong decisions history all load with your data.
+
+**If you already ran `db:push` before importing (causes FK errors):**
+
+Reset the Neon schema first, then re-import:
+```sql
+-- run in Neon SQL editor
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+```
+Then repeat from step 3.
+
+> **Note:** Seeds are not needed if the local DB was fully seeded before dumping — all data is already in the dump. Only run seeds manually if you know something is missing.
 
 **Alternatives:**
 | Provider | Free Tier | Notes |
