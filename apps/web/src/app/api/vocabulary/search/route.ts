@@ -4,7 +4,8 @@ import { getAllDomains } from '@/lib/db/domains'
 import { VOCAB_SEARCH_PROMPT } from '@/lib/ielts/vocabulary/prompts'
 import type { VocabWordFamily, VocabSynonym, VocabExamples, VocabPronunciation } from '@/lib/db/schema'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
-import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, getModelForTier, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
+import { auth } from '@/auth'
 
 export async function POST(req: Request) {
   if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
@@ -15,6 +16,8 @@ export async function POST(req: Request) {
   }
 
   const trimmed = word.trim()
+  const session = await auth()
+  const tier = session?.user?.tier ?? 'free'
 
   // 1. Check the DB first
   const existing = await findWord(trimmed)
@@ -29,7 +32,7 @@ export async function POST(req: Request) {
   let text: string
   try {
     const result = await generateText({
-      model: ollamaModel(),
+      model: getModelForTier(tier, 'fast'),
       prompt: VOCAB_SEARCH_PROMPT(trimmed, domainNames),
     })
     text = result.text

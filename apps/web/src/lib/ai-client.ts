@@ -70,6 +70,24 @@ export function aiScoringModel() {
   return _ollama(SCORING_MODEL)
 }
 
+/**
+ * Tier-based model selector.
+ * - vip  → Claude (Anthropic) if configured, otherwise falls back to ollamaModel/aiScoringModel
+ * - free → always local Ollama
+ *
+ * Usage in API routes:
+ *   const session = await auth()
+ *   const tier = session?.user?.tier ?? 'free'
+ *   const model = getModelForTier(tier, 'scoring')
+ */
+export function getModelForTier(tier: string, purpose: 'fast' | 'scoring' = 'fast') {
+  if (tier === 'vip') {
+    return purpose === 'scoring' ? aiScoringModel() : ollamaModel()
+  }
+  // free tier always uses local Ollama
+  return _ollama(process.env.OLLAMA_MODEL ?? 'qwen2.5-coder:7b')
+}
+
 // ── Debug & utils ─────────────────────────────────────────────────────────────
 
 export const OLLAMA_DEBUG = process.env.OLLAMA_DEBUG === 'true'
