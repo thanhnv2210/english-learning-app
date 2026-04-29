@@ -125,7 +125,7 @@ Route requests through openrouter.ai for access to free models (Llama, Mistral, 
 2. Add to Vercel environment variables:
    ```
    OPENROUTER_API_KEY=sk-or-v1-...
-   OPENROUTER_MODEL=meta-llama/llama-3.1-8b-instruct:free
+   OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct:free
    NEXT_PUBLIC_OLLAMA_ENABLED=true
    ```
 3. When `OPENROUTER_API_KEY` is set, the app automatically uses OpenRouter instead of Ollama. No code changes needed.
@@ -133,7 +133,7 @@ Route requests through openrouter.ai for access to free models (Llama, Mistral, 
 **Recommended free models:**
 | Model | Notes |
 |-------|-------|
-| `meta-llama/llama-3.1-8b-instruct:free` | Good general quality, default |
+| `meta-llama/llama-3.3-70b-instruct:free` | Good general quality, default |
 | `google/gemma-3-12b-it:free` | Stronger reasoning |
 | `mistralai/mistral-7b-instruct:free` | Fast, lightweight |
 
