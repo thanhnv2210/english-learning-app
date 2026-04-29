@@ -551,7 +551,6 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
                   </div>
                   {qs.map((q) => {
                     const commonProps = {
-                      key: q.id,
                       q,
                       value: userAnswers[q.id] ?? '',
                       onChange: (v: string) => setUserAnswers((prev) => ({ ...prev, [q.id]: v })),

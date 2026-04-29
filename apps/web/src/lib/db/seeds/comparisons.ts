@@ -12,6 +12,7 @@
 
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/postgres-js'
+import { sql } from 'drizzle-orm'
 import postgres from 'postgres'
 import * as schema from '../schema'
 import type { ComparisonTerm, ComparisonExamplePair } from '../schema'

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { updateTicketAction, addCommentAction, deleteCommentAction } from '@/app/actions/projects'
 import { StatusBadge, PriorityDot, TypeIcon } from '@/components/projects/ticket-badge'
 import { STATUSES, PRIORITIES, TYPES, EPICS } from '@/lib/projects/constants'
-import type { Ticket, Sprint, TicketComment } from '@/lib/db/projects'
+import type { Ticket, Sprint, TicketComment, TicketStatus, TicketPriority, TicketType } from '@/lib/db/projects'
 
 type Props = {
   ticket: Ticket
@@ -30,18 +30,18 @@ export function TicketDetail({ ticket: initialTicket, initialComments, sprints }
   }
 
   function handleStatusChange(status: string) {
-    setTicket((prev) => ({ ...prev, status: status as Ticket['status'] }))
-    startTransition(() => updateTicketAction(ticket.id, { status: status as Ticket['status'] }))
+    setTicket((prev) => ({ ...prev, status: status as TicketStatus }))
+    startTransition(() => updateTicketAction(ticket.id, { status: status as TicketStatus }))
   }
 
   function handlePriorityChange(priority: string) {
-    setTicket((prev) => ({ ...prev, priority: priority as Ticket['priority'] }))
-    startTransition(() => updateTicketAction(ticket.id, { priority: priority as Ticket['priority'] }))
+    setTicket((prev) => ({ ...prev, priority: priority as TicketPriority }))
+    startTransition(() => updateTicketAction(ticket.id, { priority: priority as TicketPriority }))
   }
 
   function handleTypeChange(type: string) {
-    setTicket((prev) => ({ ...prev, type: type as Ticket['type'] }))
-    startTransition(() => updateTicketAction(ticket.id, { type: type as Ticket['type'] }))
+    setTicket((prev) => ({ ...prev, type: type as TicketType }))
+    startTransition(() => updateTicketAction(ticket.id, { type: type as TicketType }))
   }
 
   function handleSprintChange(sprintId: string) {

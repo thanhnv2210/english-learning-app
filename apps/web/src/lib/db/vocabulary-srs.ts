@@ -1,7 +1,7 @@
 import { db } from '@/lib/db'
 import { wordReviewStates, vocabularyWords } from '@/lib/db/schema'
 import { eq, lte, sql } from 'drizzle-orm'
-import { sm2 } from '@/lib/srs'
+import { sm2, type ReviewQuality } from '@/lib/srs'
 
 export type { ReviewQuality } from '@/lib/srs'
 export { sm2 } from '@/lib/srs'

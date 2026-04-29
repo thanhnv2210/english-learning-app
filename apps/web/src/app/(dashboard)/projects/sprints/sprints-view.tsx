@@ -8,7 +8,7 @@ import {
   updateSprintStatusAction,
   deleteSprintAction,
 } from '@/app/actions/projects'
-import type { Sprint } from '@/lib/db/projects'
+import type { Sprint, SprintStatus } from '@/lib/db/projects'
 
 type Props = {
   projectId: number
@@ -44,7 +44,7 @@ export function SprintsView({ projectId, initialSprints }: Props) {
     setShowForm(false)
   }
 
-  function handleStatus(id: number, status: Sprint['status'], dates?: { startDate?: Date; endDate?: Date }) {
+  function handleStatus(id: number, status: SprintStatus, dates?: { startDate?: Date; endDate?: Date }) {
     setSprints((prev) => prev.map((s) => s.id === id ? { ...s, status, ...dates } : s))
     startTransition(() => updateSprintStatusAction(id, status, dates))
   }
@@ -189,7 +189,7 @@ function SprintGroup({
 }: {
   label: string
   sprints: Sprint[]
-  onStatus: (id: number, status: Sprint['status'], dates?: { startDate?: Date; endDate?: Date }) => void
+  onStatus: (id: number, status: SprintStatus, dates?: { startDate?: Date; endDate?: Date }) => void
   onEdit: (id: number, data: EditData) => void
   onDelete: (id: number) => void
   labelClass?: string
@@ -233,7 +233,7 @@ function SprintCard({
   sprint, onStatus, onEdit, onDelete,
 }: {
   sprint: Sprint
-  onStatus: (id: number, status: Sprint['status'], dates?: { startDate?: Date; endDate?: Date }) => void
+  onStatus: (id: number, status: SprintStatus, dates?: { startDate?: Date; endDate?: Date }) => void
   onEdit: (id: number, data: EditData) => void
   onDelete: (id: number) => void
 }) {
