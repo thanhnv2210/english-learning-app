@@ -72,6 +72,7 @@ export async function POST(req: NextRequest) {
           rank: 3,
           userAdded: false,
           source: 'ai',
+          aiModel: null,
         })
       }
     } catch {

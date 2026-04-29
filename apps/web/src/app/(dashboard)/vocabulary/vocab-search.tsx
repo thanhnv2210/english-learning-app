@@ -97,10 +97,15 @@ export function VocabSearch() {
               </span>
             )}
             {status === 'new' && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
                   AI generated · not yet saved
                 </span>
+                {card.aiModel && (
+                  <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                    {card.aiModel}
+                  </span>
+                )}
                 {card.domains.length > 0 && (
                   <span className="text-xs text-faint">
                     Detected domains: {card.domains.join(', ')}

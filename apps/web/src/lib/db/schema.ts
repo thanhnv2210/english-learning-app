@@ -142,6 +142,7 @@ export const vocabularyWords = pgTable('vocabulary_words', {
   wordType: text('word_type'),
   rank: integer('rank').notNull().default(3),
   userAdded: boolean('user_added').notNull().default(false),
+  aiModel: text('ai_model'),  // model that generated this word, null for seeded/manual
   createdAt: timestamp('created_at').notNull().defaultNow(),
 }, (t) => [
   check('vocabulary_words_rank_check', sql`${t.rank} between 1 and 5`),

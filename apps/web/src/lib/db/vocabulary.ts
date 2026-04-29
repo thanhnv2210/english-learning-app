@@ -18,6 +18,7 @@ export type VocabularyCard = {
   rank: number
   userAdded: boolean
   source: 'db' | 'ai'
+  aiModel: string | null  // model that generated this word, null for seeded/manual
 }
 
 /** All words in the catalogue, ordered alphabetically. Uses 2 queries (no N+1). */
@@ -85,6 +86,7 @@ export async function saveVocabularyWord(data: {
   pronunciation?: VocabPronunciation | null
   domainNames: string[]
   userAdded?: boolean
+  aiModel?: string | null
 }): Promise<VocabularyCard | null> {
   const [row] = await db
     .insert(vocabularyWords)
@@ -98,6 +100,7 @@ export async function saveVocabularyWord(data: {
       examples: data.examples,
       pronunciation: data.pronunciation ?? null,
       userAdded: data.userAdded ?? false,
+      aiModel: data.aiModel ?? null,
     })
     .onConflictDoNothing()
     .returning()
@@ -152,6 +155,7 @@ function toCard(
   originalWord: string,
   domains: string[],
   source: 'db' | 'ai',
+  aiModelOverride?: string | null,
 ): VocabularyCard {
   return {
     id: row.id,
@@ -168,5 +172,6 @@ function toCard(
     rank: row.rank,
     userAdded: row.userAdded,
     source,
+    aiModel: aiModelOverride !== undefined ? aiModelOverride : (row.aiModel ?? null),
   }
 }

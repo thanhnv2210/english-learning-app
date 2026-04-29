@@ -27,6 +27,7 @@ export async function addWordToLibrary(card: VocabularyCard): Promise<{ ok: bool
     pronunciation: card.pronunciation,
     domainNames: card.domains,
     userAdded: true,
+    aiModel: card.aiModel ?? null,
   })
   return { ok: result !== null }
 }

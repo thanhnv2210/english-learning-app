@@ -350,6 +350,11 @@ export function WordCard({
       <div className="mb-2 flex items-start justify-between gap-2 pr-8">
         <div className="flex items-baseline gap-2 flex-wrap">
           <h3 className="text-lg font-bold text-foreground">{word.word}</h3>
+          {word.aiModel && (
+            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+              {word.aiModel}
+            </span>
+          )}
 
           {editingWordType ? (
             <select

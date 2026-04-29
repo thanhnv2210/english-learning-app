@@ -4,7 +4,7 @@ import { getAllDomains } from '@/lib/db/domains'
 import { VOCAB_SEARCH_PROMPT } from '@/lib/ielts/vocabulary/prompts'
 import type { VocabWordFamily, VocabSynonym, VocabExamples, VocabPronunciation } from '@/lib/db/schema'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
-import { OLLAMA_ENABLED, getModelForTier, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
+import { OLLAMA_ENABLED, getModelForTier, ollamaDisabledResponse, ollamaDebug, OLLAMA_MODEL } from '@/lib/ai-client'
 import { getUserAIContext } from '@/lib/db/user'
 
 export async function POST(req: Request) {
@@ -17,6 +17,9 @@ export async function POST(req: Request) {
 
   const trimmed = word.trim()
   const { tier, modelPreference } = await getUserAIContext()
+  const activeModel = tier === 'vip' && modelPreference === 'auto'
+    ? OLLAMA_MODEL
+    : (process.env.OLLAMA_MODEL ?? 'qwen2.5-coder:7b')
 
   // 1. Check the DB first
   const existing = await findWord(trimmed)
@@ -99,6 +102,7 @@ export async function POST(req: Request) {
     rank: 3,
     userAdded: false,
     source: 'ai',
+    aiModel: activeModel,
   }
 
   return Response.json({ card, inLibrary: false })
