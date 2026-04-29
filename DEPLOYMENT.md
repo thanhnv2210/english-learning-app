@@ -117,10 +117,27 @@ Replace the Ollama client with Anthropic's API for reliability and quality.
 - Free tier: none (pay-per-token), but cost is low for personal use
 - Model suggestion: `claude-haiku-4-5-20251001` for speed/cost; `claude-sonnet-4-6` for scoring quality
 
-### Option C — OpenRouter (Free-tier models)
+### Option C — OpenRouter (Current: free-tier models)
 Route requests through openrouter.ai for access to free models (Llama, Mistral, etc.).
-- Compatible with Vercel AI SDK's OpenAI-compatible interface
-- Some free models have rate limits and quality trade-offs
+
+**Setup:**
+1. Sign up at openrouter.ai → create an API key
+2. Add to Vercel environment variables:
+   ```
+   OPENROUTER_API_KEY=sk-or-v1-...
+   OPENROUTER_MODEL=meta-llama/llama-3.1-8b-instruct:free
+   NEXT_PUBLIC_OLLAMA_ENABLED=true
+   ```
+3. When `OPENROUTER_API_KEY` is set, the app automatically uses OpenRouter instead of Ollama. No code changes needed.
+
+**Recommended free models:**
+| Model | Notes |
+|-------|-------|
+| `meta-llama/llama-3.1-8b-instruct:free` | Good general quality, default |
+| `google/gemma-3-12b-it:free` | Stronger reasoning |
+| `mistralai/mistral-7b-instruct:free` | Fast, lightweight |
+
+Free models have rate limits (typically 20 req/min). Upgrade to a paid model if you hit limits.
 
 ---
 

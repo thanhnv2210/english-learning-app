@@ -93,10 +93,12 @@ PORT=3000 pnpm dev:clean
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `OLLAMA_BASE_URL` | `http://localhost:11434/api` | Ollama API endpoint |
-| `OLLAMA_MODEL` | `qwen2.5-coder:7b` | Model name |
+| `OPENROUTER_API_KEY` | — | OpenRouter API key; when set, overrides Ollama |
+| `OPENROUTER_MODEL` | `meta-llama/llama-3.1-8b-instruct:free` | OpenRouter model name |
+| `OLLAMA_BASE_URL` | `http://localhost:11434/api` | Ollama API endpoint (local dev fallback) |
+| `OLLAMA_MODEL` | `qwen2.5-coder:7b` | Ollama model name (local dev fallback) |
 | `NEXT_PUBLIC_OLLAMA_ENABLED` | `true` | Set `false` to disable AI routes; shows amber banner |
-| `OLLAMA_DEBUG` | `false` | Set `true` to log full raw Ollama response |
+| `OLLAMA_DEBUG` | `false` | Set `true` to log full raw AI response |
 | `DATABASE_URL` | — | PostgreSQL connection string |
 
 ## Stale Data
