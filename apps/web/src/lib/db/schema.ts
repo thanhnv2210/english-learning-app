@@ -438,6 +438,31 @@ export const userSkillTopics = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.skill, t.topicName] })]
 )
 
+// ─── Grammar Trap entry library ───────────────────────────────────────────────
+// Noun form errors: uncountable nouns, number agreement, false singulars, etc.
+
+export type GrammarTrapCategory =
+  | 'uncountable'       // words with no plural: staff, advice, furniture
+  | 'always_plural'     // words with no singular: scissors, trousers
+  | 'false_singular'    // look plural but are singular: news, economics
+  | 'number_agreement'  // plural required after numbers > 1: "3 dollars" not "3 dollar"
+  | 'collective'        // team, government, committee
+
+export type GrammarTrapExample = { wrong: string; correct: string }
+
+export const grammarTrapEntries = pgTable('grammar_trap_entries', {
+  id: serial('id').primaryKey(),
+  phrase: text('phrase').notNull().unique(),        // trap form e.g. "staffs"
+  correction: text('correction').notNull(),          // correct form e.g. "staff"
+  category: text('category').notNull(),              // GrammarTrapCategory
+  explanation: text('explanation').notNull(),
+  examples: jsonb('examples').notNull().$type<GrammarTrapExample[]>().default([]),
+  rank: integer('rank').notNull().default(3),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (t) => [
+  check('grammar_trap_entries_rank_check', sql`${t.rank} between 1 and 5`),
+])
+
 // ─── Wrong Decision Log ───────────────────────────────────────────────────────
 // Manual journal: learner records a wrong answer, their reasoning, the correct
 // answer, and AI-generated (or hand-written) analytic + prevention strategy.

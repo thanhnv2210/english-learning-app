@@ -232,6 +232,7 @@ Single-project, single-user kanban tracker. Tables: `projects`, `sprints`, `tick
 - `OLLAMA_DEBUG=true` → logs full raw model output; first diagnostic for `generateText` parse failures
 - Safe colour getter: always look up AI-returned strings through a getter with fallback, never direct object indexing
 - Client/server separation: never import `lib/db/*` in client components — extract constants/types to a dedicated client-safe file under `lib/ielts/` or `lib/projects/`
+- **`Module not found: Can't resolve 'fs'`** — means a `'use client'` component imports (directly or transitively) from `lib/db/*`, which pulls in `postgres` (a Node.js-only module). Fix: move the constants/types the client needs into a separate `lib/ielts/<feature>/constants.ts` file with no DB imports, then import from there in the client component. The DB file can re-export from the constants file for server-side convenience.
 
 ## Roadmap
 

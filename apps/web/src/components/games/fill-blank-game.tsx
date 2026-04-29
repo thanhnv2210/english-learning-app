@@ -42,8 +42,10 @@ const CONTEXT_COLORS: Record<string, string> = {
 }
 
 const SOURCE_LABEL: Record<string, string> = {
-  vocabulary:   'Vocabulary',
-  collocation:  'Collocation',
+  vocabulary:    'Vocabulary',
+  collocation:   'Collocation',
+  idiom:         'Idiom',
+  grammar_trap:  'Grammar Trap',
 }
 
 type GamePhase = 'ready' | 'playing' | 'finished'

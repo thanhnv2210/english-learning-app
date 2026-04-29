@@ -23,7 +23,8 @@
     "db:seed:comparisons": "dotenv -e .env.local -- tsx src/lib/db/seeds/comparisons.ts",
     "db:backfill:word-types": "dotenv -e .env.local -- tsx src/lib/db/seeds/backfill-word-types.ts",
     "db:seed:projects": "dotenv -e .env.local -- tsx src/lib/db/seeds/projects.ts",
-    "db:seed:vocab-banks": "dotenv -e .env.local -- tsx src/lib/db/seeds/vocab-banks.ts"
+    "db:seed:vocab-banks": "dotenv -e .env.local -- tsx src/lib/db/seeds/vocab-banks.ts",
+    "db:seed:grammar-traps": "dotenv -e .env.local -- tsx src/lib/db/seeds/grammar-traps.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",
