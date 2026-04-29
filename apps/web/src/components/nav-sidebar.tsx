@@ -165,7 +165,7 @@ export function NavSidebar({
     const orderedItems = [...favouritedItems, ...nonFavItems]
 
     return (
-      <aside className="flex h-screen w-14 shrink-0 flex-col items-center border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-4 gap-0.5">
+      <aside className="hidden sm:flex h-screen w-14 shrink-0 flex-col items-center border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-4 gap-0.5">
         {!isNarrow && (
           <button
             onClick={toggleCollapse}
@@ -249,7 +249,7 @@ export function NavSidebar({
 
   // ── Expanded: full sidebar ───────────────────────────────────────────────────
   return (
-    <aside className="flex h-screen w-52 shrink-0 flex-col border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-6 2xl:w-64">
+    <aside className="hidden sm:flex h-screen w-52 shrink-0 flex-col border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-6 2xl:w-64">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between px-2">
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">

@@ -290,7 +290,7 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
       {stage === 'select' && (
         <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6">
           <p className="text-sm font-medium text-muted-foreground">Choose a topic domain:</p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {domains.map((d) => (
               <button
                 key={d.id}

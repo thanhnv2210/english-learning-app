@@ -96,7 +96,7 @@ export function KanbanBoard({ sprint, initialTickets, projectId }: Props) {
         )}
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
         {STATUSES.map((col) => (
           <Column
             key={col.value}
@@ -137,7 +137,7 @@ function Column({
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
   return (
-    <div className="flex flex-col gap-2 w-64 shrink-0">
+    <div className="flex flex-col gap-2 w-[80vw] sm:w-64 shrink-0 snap-start">
       {/* Column header */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">

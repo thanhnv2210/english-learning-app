@@ -169,23 +169,30 @@ export function CollocationList({ initialItems }: Props) {
         <>
           {/* Filter bar */}
           <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search phrase, type, or example…"
-                className="flex-1 rounded-lg border border-border px-4 py-2 text-sm outline-none focus:border-blue-400"
+                className="flex-1 rounded-lg border border-border bg-input text-foreground px-4 py-2 text-sm outline-none focus:border-blue-400 min-h-[44px]"
               />
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as SortKey)}
-                className="rounded-lg border border-border bg-input text-foreground px-3 py-2 text-sm outline-none focus:border-blue-400"
-              >
-                {SORT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
+              <div className="relative shrink-0">
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as SortKey)}
+                  className="w-full sm:w-auto appearance-none cursor-pointer rounded-lg border border-border bg-input text-foreground pl-3 pr-8 py-2 min-h-[44px] text-sm outline-none focus:border-blue-400"
+                >
+                  {SORT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center">
+                  <svg className="h-4 w-4 text-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
             <div className="flex flex-wrap gap-2">
               <FilterChip label="All" active={activeSkill === null} onClick={() => setActiveSkill(null)} />

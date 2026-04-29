@@ -439,7 +439,7 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
   const answered = Object.keys(userAnswers).length
 
   return (
-    <div className="flex flex-col gap-3" style={{ height: 'calc(100vh - 64px)' }}>
+    <div className="flex flex-col gap-3 lg:h-[calc(100vh-64px)]">
 
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3 shrink-0 px-1">
@@ -502,10 +502,10 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
       )}
 
       {/* Two-panel split */}
-      <div className="flex gap-4 flex-1 min-h-0">
+      <div className="flex flex-col gap-4 lg:flex-row lg:flex-1 lg:min-h-0">
 
         {/* Left — passage */}
-        <div className="flex-[55] flex flex-col min-w-0 rounded-xl border border-border bg-card overflow-hidden">
+        <div className="h-[55vh] lg:h-auto lg:flex-[55] flex flex-col min-w-0 rounded-xl border border-border bg-card overflow-hidden">
           <div className="border-b border-border px-5 py-2 shrink-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-faint">Reading Passage</p>
           </div>
@@ -523,7 +523,7 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
         </div>
 
         {/* Right — questions */}
-        <div className="flex-[45] flex flex-col min-w-0 rounded-xl border border-border bg-card overflow-hidden">
+        <div className="h-[55vh] lg:h-auto lg:flex-[45] flex flex-col min-w-0 rounded-xl border border-border bg-card overflow-hidden">
           <div className="border-b border-border px-5 py-2 shrink-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-faint">Questions</p>
           </div>
