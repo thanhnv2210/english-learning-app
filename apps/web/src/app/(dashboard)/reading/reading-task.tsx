@@ -563,10 +563,10 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
                       onHighlight: (start: number, end: number) => addQuestionHighlight(q.id, start, end),
                       onRemoveHighlight: removeQuestionHighlight,
                     }
-                    if (q.type === 'tfng') return <TFNGRow {...commonProps} />
-                    if (q.type === 'short_answer') return <ShortAnswerRow {...commonProps} />
-                    if (q.type === 'multiple_choice') return <MultipleChoiceRow {...commonProps} />
-                    if (q.type === 'matching_headings') return <MatchingHeadingsRow {...commonProps} />
+                    if (q.type === 'tfng') return <TFNGRow key={q.id} {...commonProps} />
+                    if (q.type === 'short_answer') return <ShortAnswerRow key={q.id} {...commonProps} />
+                    if (q.type === 'multiple_choice') return <MultipleChoiceRow key={q.id} {...commonProps} />
+                    if (q.type === 'matching_headings') return <MatchingHeadingsRow key={q.id} {...commonProps} />
                     return null
                   })}
                 </div>
