@@ -321,6 +321,304 @@ const ENTRIES: SeedEntry[] = [
     ],
     rank: 4,
   },
+
+  // ── More uncountable nouns ─────────────────────────────────────────────
+  {
+    phrase: 'progresses',
+    correction: 'progress',
+    category: 'uncountable',
+    explanation: '"Progress" is uncountable. You cannot say "progresses" as a noun (though "progresses" exists as a verb). Use "progress" or "advances" instead.',
+    examples: [
+      { wrong: 'The country has made many progresses in education.', correct: 'The country has made much progress in education.' },
+      { wrong: 'We can see clear progresses in the student\'s writing.', correct: 'We can see clear progress in the student\'s writing.' },
+      { wrong: 'The report highlights the progresses achieved so far.', correct: 'The report highlights the progress achieved so far.' },
+    ],
+    rank: 5,
+  },
+  {
+    phrase: 'weathers',
+    correction: 'weather',
+    category: 'uncountable',
+    explanation: '"Weather" is uncountable. It has no plural form. Use "weather conditions" or "types of weather" for variety.',
+    examples: [
+      { wrong: 'The weathers in this region are unpredictable.', correct: 'The weather in this region is unpredictable.' },
+      { wrong: 'We experienced different weathers during our trip.', correct: 'We experienced different types of weather during our trip.' },
+      { wrong: 'Extreme weathers are becoming more common due to climate change.', correct: 'Extreme weather is becoming more common due to climate change.' },
+    ],
+    rank: 4,
+  },
+  {
+    phrase: 'educations',
+    correction: 'education',
+    category: 'uncountable',
+    explanation: '"Education" as a system or concept is uncountable. Say "fields of education" or "levels of education" for specific references.',
+    examples: [
+      { wrong: 'Governments must invest more in educations.', correct: 'Governments must invest more in education.' },
+      { wrong: 'She received good educations at a private school.', correct: 'She received a good education at a private school.' },
+      { wrong: 'Access to quality educations remains unequal worldwide.', correct: 'Access to quality education remains unequal worldwide.' },
+    ],
+    rank: 4,
+  },
+  {
+    phrase: 'pollutions',
+    correction: 'pollution',
+    category: 'uncountable',
+    explanation: '"Pollution" as a mass noun is uncountable. Use "types of pollution" (air pollution, water pollution) for different forms.',
+    examples: [
+      { wrong: 'Factories produce many pollutions every day.', correct: 'Factories produce a lot of pollution every day.' },
+      { wrong: 'The city faces serious pollutions from traffic and industry.', correct: 'The city faces serious pollution from traffic and industry.' },
+      { wrong: 'Environmental pollutions are damaging ecosystems.', correct: 'Environmental pollution is damaging ecosystems.' },
+    ],
+    rank: 4,
+  },
+  {
+    phrase: 'a fun',
+    correction: 'fun',
+    category: 'uncountable',
+    explanation: '"Fun" as a noun is uncountable. Never say "a fun" or "funs". Say "great fun", "lots of fun", or use it as an adjective: "a fun activity".',
+    examples: [
+      { wrong: 'The party was a great fun.', correct: 'The party was great fun.' },
+      { wrong: 'We had a lot of funs at the beach.', correct: 'We had a lot of fun at the beach.' },
+      { wrong: 'Learning English can be a fun if done correctly.', correct: 'Learning English can be fun if done correctly.' },
+    ],
+    rank: 3,
+  },
+  {
+    phrase: 'feedbacks',
+    correction: 'feedback',
+    category: 'uncountable',
+    explanation: '"Feedback" is uncountable. Say "pieces of feedback" or "some feedback", never "feedbacks" or "a feedback".',
+    examples: [
+      { wrong: 'The manager gave us several feedbacks after the presentation.', correct: 'The manager gave us some feedback after the presentation.' },
+      { wrong: 'I received positive feedbacks from my clients.', correct: 'I received positive feedback from my clients.' },
+      { wrong: 'Can you give me a feedback on my essay?', correct: 'Can you give me some feedback on my essay?' },
+    ],
+    rank: 5,
+  },
+  {
+    phrase: 'softwares',
+    correction: 'software',
+    category: 'uncountable',
+    explanation: '"Software" is uncountable in standard usage. Say "software applications", "software programs", or "pieces of software" for multiple items.',
+    examples: [
+      { wrong: 'We need to update all our softwares.', correct: 'We need to update all our software.' },
+      { wrong: 'The company develops various softwares for businesses.', correct: 'The company develops various software applications for businesses.' },
+      { wrong: 'He installed three new softwares on his laptop.', correct: 'He installed three new software programs on his laptop.' },
+    ],
+    rank: 4,
+  },
+  {
+    phrase: 'a permission',
+    correction: 'permission',
+    category: 'uncountable',
+    explanation: '"Permission" (meaning authorisation) is uncountable. Say "ask for permission" or "grant permission", not "a permission". The plural "permissions" only applies in computing.',
+    examples: [
+      { wrong: 'You need a permission to enter the building.', correct: 'You need permission to enter the building.' },
+      { wrong: 'She asked for a permission to leave early.', correct: 'She asked for permission to leave early.' },
+      { wrong: 'The government gave a permission for the construction.', correct: 'The government gave permission for the construction.' },
+    ],
+    rank: 4,
+  },
+  {
+    phrase: 'violences',
+    correction: 'violence',
+    category: 'uncountable',
+    explanation: '"Violence" is uncountable. Use "acts of violence" or "incidents of violence" when referring to specific events.',
+    examples: [
+      { wrong: 'The media frequently reports on violences in the city.', correct: 'The media frequently reports on violence in the city.' },
+      { wrong: 'Domestic violences affect millions of families worldwide.', correct: 'Domestic violence affects millions of families worldwide.' },
+      { wrong: 'The government introduced laws to reduce violences.', correct: 'The government introduced laws to reduce violence.' },
+    ],
+    rank: 4,
+  },
+  {
+    phrase: 'a behaviour',
+    correction: 'behaviour',
+    category: 'uncountable',
+    explanation: '"Behaviour" (general conduct) is uncountable. Say "good behaviour", "examples of behaviour". The plural "behaviours" is only used in academic/scientific contexts for distinct behaviour patterns.',
+    examples: [
+      { wrong: 'The child showed a bad behaviour in class.', correct: 'The child showed bad behaviour in class.' },
+      { wrong: 'A rude behaviour is not acceptable in the workplace.', correct: 'Rude behaviour is not acceptable in the workplace.' },
+      { wrong: 'His a strange behaviour worried the teacher.', correct: 'His strange behaviour worried the teacher.' },
+    ],
+    rank: 3,
+  },
+  {
+    phrase: 'moneys',
+    correction: 'money',
+    category: 'uncountable',
+    explanation: '"Money" is uncountable in everyday use. Say "a sum of money", "funds", or "large amounts of money" — not "moneys".',
+    examples: [
+      { wrong: 'She saved a lot of moneys for her studies.', correct: 'She saved a lot of money for her studies.' },
+      { wrong: 'Governments spend moneys on infrastructure every year.', correct: 'Governments spend money on infrastructure every year.' },
+      { wrong: 'He donated moneys to several charities.', correct: 'He donated money to several charities.' },
+    ],
+    rank: 4,
+  },
+
+  // ── More always plural ─────────────────────────────────────────────────
+  {
+    phrase: 'a glass (spectacles)',
+    correction: 'glasses / a pair of glasses',
+    category: 'always_plural',
+    explanation: '"Glasses" (spectacles) is always plural. Use "a pair of glasses" for one item.',
+    examples: [
+      { wrong: 'She wears a glass to read.', correct: 'She wears glasses to read.' },
+      { wrong: 'He lost his glass at the library.', correct: 'He lost his glasses at the library.' },
+      { wrong: 'I need a new glass — my prescription has changed.', correct: 'I need a new pair of glasses — my prescription has changed.' },
+    ],
+    rank: 3,
+  },
+  {
+    phrase: 'a headphone',
+    correction: 'headphones / a pair of headphones',
+    category: 'always_plural',
+    explanation: '"Headphones" is always plural. Use "a pair of headphones" for one set.',
+    examples: [
+      { wrong: 'She bought a new headphone for the office.', correct: 'She bought a new pair of headphones for the office.' },
+      { wrong: 'His headphone is very expensive.', correct: 'His headphones are very expensive.' },
+      { wrong: 'Can I borrow a headphone?', correct: 'Can I borrow a pair of headphones?' },
+    ],
+    rank: 3,
+  },
+  {
+    phrase: 'a clothe',
+    correction: 'clothes',
+    category: 'always_plural',
+    explanation: '"Clothes" has no singular form in modern English. Say "a piece of clothing", "a garment", or "an item of clothing" for one piece.',
+    examples: [
+      { wrong: 'She packed a clothe for the trip.', correct: 'She packed a piece of clothing for the trip.' },
+      { wrong: 'A clothe is hanging on the door.', correct: 'A piece of clothing is hanging on the door.' },
+      { wrong: 'He bought an expensive clothe at the mall.', correct: 'He bought an expensive item of clothing at the mall.' },
+    ],
+    rank: 3,
+  },
+
+  // ── More false singular ────────────────────────────────────────────────
+  {
+    phrase: 'criterias',
+    correction: 'criteria',
+    category: 'false_singular',
+    explanation: '"Criteria" is already the plural of "criterion". Never add an -s to it. Use "criterion" for the singular and "criteria" for plural.',
+    examples: [
+      { wrong: 'The selection criterias are clearly defined.', correct: 'The selection criteria are clearly defined.' },
+      { wrong: 'There are several criterias for admission.', correct: 'There are several criteria for admission.' },
+      { wrong: 'This criterias does not apply to all applicants.', correct: 'This criterion does not apply to all applicants.' },
+    ],
+    rank: 5,
+  },
+  {
+    phrase: 'phenomenons',
+    correction: 'phenomena',
+    category: 'false_singular',
+    explanation: '"Phenomena" is the plural of "phenomenon". Do not add -s. Use "phenomenon" (singular) and "phenomena" (plural).',
+    examples: [
+      { wrong: 'Climate change is one of the most alarming phenomenons of our time.', correct: 'Climate change is one of the most alarming phenomena of our time.' },
+      { wrong: 'Scientists are studying several weather phenomenons.', correct: 'Scientists are studying several weather phenomena.' },
+      { wrong: 'This phenomenons has been observed globally.', correct: 'This phenomenon has been observed globally.' },
+    ],
+    rank: 4,
+  },
+  {
+    phrase: 'medias',
+    correction: 'media',
+    category: 'false_singular',
+    explanation: '"Media" is already the plural of "medium". Do not add -s. It takes a plural verb: "The media are…" (though singular use is now widely accepted).',
+    examples: [
+      { wrong: 'Social medias have changed the way people communicate.', correct: 'Social media has changed the way people communicate.' },
+      { wrong: 'The medias reported the story differently.', correct: 'The media reported the story differently.' },
+      { wrong: 'Various medias were used to spread the message.', correct: 'Various media were used to spread the message.' },
+    ],
+    rank: 4,
+  },
+  {
+    phrase: 'a cattle',
+    correction: 'cattle / a head of cattle',
+    category: 'false_singular',
+    explanation: '"Cattle" is always plural and has no singular form. Say "a head of cattle", "a cow", or "an ox" for one animal.',
+    examples: [
+      { wrong: 'A cattle was grazing in the field.', correct: 'A cow was grazing in the field.' },
+      { wrong: 'The farmer owns a cattle.', correct: 'The farmer owns a head of cattle.' },
+      { wrong: 'A cattle is used for dairy production.', correct: 'Cattle are used for dairy production.' },
+    ],
+    rank: 3,
+  },
+
+  // ── More number agreement ──────────────────────────────────────────────
+  {
+    phrase: 'a 5-years experience',
+    correction: 'a 5-year experience / 5 years of experience',
+    category: 'number_agreement',
+    explanation: 'When a number + noun acts as a compound adjective before another noun, the noun stays singular. "A 5-year plan", "a 10-kilometre race", "a 3-hour meeting".',
+    examples: [
+      { wrong: 'She has a 10-years experience in software engineering.', correct: 'She has 10 years of experience in software engineering.' },
+      { wrong: 'It was a 2-hours journey by train.', correct: 'It was a 2-hour journey by train.' },
+      { wrong: 'The company launched a 5-years plan to expand globally.', correct: 'The company launched a 5-year plan to expand globally.' },
+    ],
+    rank: 5,
+  },
+  {
+    phrase: 'less people',
+    correction: 'fewer people',
+    category: 'number_agreement',
+    explanation: 'Use "fewer" with countable nouns (people, cars, jobs) and "less" with uncountable nouns (money, time, water). This is a very common IELTS mistake.',
+    examples: [
+      { wrong: 'Less people are choosing to live in rural areas.', correct: 'Fewer people are choosing to live in rural areas.' },
+      { wrong: 'There are less cars on the road on weekends.', correct: 'There are fewer cars on the road on weekends.' },
+      { wrong: 'The policy created less jobs than expected.', correct: 'The policy created fewer jobs than expected.' },
+    ],
+    rank: 5,
+  },
+  {
+    phrase: 'the number of student',
+    correction: 'the number of students',
+    category: 'number_agreement',
+    explanation: 'After "the number of", the noun must always be plural. Also note: "the number of" takes a singular verb, while "a number of" takes a plural verb.',
+    examples: [
+      { wrong: 'The number of student applying has increased.', correct: 'The number of students applying has increased.' },
+      { wrong: 'The number of unemployed worker is rising.', correct: 'The number of unemployed workers is rising.' },
+      { wrong: 'A number of country has signed the agreement.', correct: 'A number of countries have signed the agreement.' },
+    ],
+    rank: 5,
+  },
+
+  // ── More collective nouns ──────────────────────────────────────────────
+  {
+    phrase: 'governments',
+    correction: 'the government',
+    category: 'collective',
+    explanation: 'When referring to a single country\'s ruling body, say "the government" (singular). "Governments" is only correct when comparing multiple countries\' governments.',
+    examples: [
+      { wrong: 'Governments has announced new tax reforms this week.', correct: 'The government has announced new tax reforms this week.' },
+      { wrong: 'The governments of this country should do more for the poor.', correct: 'The government of this country should do more for the poor.' },
+      { wrong: 'Governments need to take responsibility for this problem.', correct: 'The government needs to take responsibility for this problem.' },
+    ],
+    rank: 4,
+  },
+  {
+    phrase: 'audiences',
+    correction: 'the audience',
+    category: 'collective',
+    explanation: '"Audience" refers to all viewers/listeners of a single event as one group. Use "the audience" for one gathering. "Audiences" is only for multiple separate gatherings.',
+    examples: [
+      { wrong: 'The audiences were impressed by the performance.', correct: 'The audience was impressed by the performance.' },
+      { wrong: 'Audiences of the show gave it a standing ovation.', correct: 'The audience of the show gave it a standing ovation.' },
+      { wrong: 'The speaker engaged the audiences throughout the talk.', correct: 'The speaker engaged the audience throughout the talk.' },
+    ],
+    rank: 3,
+  },
+  {
+    phrase: 'a group of student',
+    correction: 'a group of students',
+    category: 'number_agreement',
+    explanation: 'After "a group of", the noun must be plural. The same applies to "a team of", "a number of", "a pair of".',
+    examples: [
+      { wrong: 'A group of student visited the museum yesterday.', correct: 'A group of students visited the museum yesterday.' },
+      { wrong: 'A team of engineer designed the bridge.', correct: 'A team of engineers designed the bridge.' },
+      { wrong: 'A number of worker went on strike last week.', correct: 'A number of workers went on strike last week.' },
+    ],
+    rank: 5,
+  },
 ]
 
 async function seed() {
