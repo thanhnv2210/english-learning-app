@@ -565,6 +565,21 @@ export const wordReviewStates = pgTable('word_review_states', {
   lastReview: timestamp('last_review'),
 })
 
+// ─── Speaking Phrase Bank ─────────────────────────────────────────────────────
+// User-curated bank of sentences/phrases to mimic for speaking practice.
+// category: 'opinion' | 'agreeing' | 'disagreeing' | 'buying-time' | 'describing' | 'part2-opener' | 'speculation' | 'example' | 'other'
+
+export const speakingPhrases = pgTable('speaking_phrases', {
+  id: serial('id').primaryKey(),
+  // null for system/seed phrases shared across all users
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  phrase: text('phrase').notNull(),
+  category: text('category').notNull().default('Other'),
+  note: text('note'),
+  isSystem: boolean('is_system').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const wordSentencesRelations = relations(wordSentences, ({ one, many }) => ({

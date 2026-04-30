@@ -37,6 +37,7 @@ const GROUPS: NavGroup[] = [
       { href: '/essay-builder', label: 'Essay Builder', icon: '✍️' },
       { href: '/connected-speech', label: 'Connected Speech', icon: '🔗' },
       { href: '/grammar-traps', label: 'Grammar Traps', icon: '⚠️' },
+      { href: '/speaking/phrases', label: 'Phrase Bank', icon: '🗣️' },
     ],
   },
   {
