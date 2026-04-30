@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useOptimistic, useTransition } from 'react'
-import { addSpeakingPhraseAction, deleteSpeakingPhraseAction } from '@/app/actions/speaking-phrases'
-import { PHRASE_CATEGORIES } from '@/lib/ielts/speaking/phrase-categories'
+import { addPhraseAction, deletePhraseAction } from '@/app/actions/speaking-phrases'
+import { SPEAKING_PHRASE_CATEGORIES, WRITING_PHRASE_CATEGORIES } from '@/lib/ielts/speaking/phrase-categories'
 import type { SpeakingPhrase } from '@/lib/db/speaking-phrases'
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -19,14 +19,16 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 type Props = {
   initialPhrases: SpeakingPhrase[]
+  skill: 'speaking' | 'writing'
 }
 
-export function PhrasesView({ initialPhrases }: Props) {
+export function PhrasesView({ initialPhrases, skill }: Props) {
+  const categories = skill === 'writing' ? WRITING_PHRASE_CATEGORIES : SPEAKING_PHRASE_CATEGORIES
   const [phrases, setPhrasesOptimistic] = useOptimistic(initialPhrases)
   const [, startTransition] = useTransition()
 
   const [phrase, setPhrase] = useState('')
-  const [category, setCategory] = useState<string>(PHRASE_CATEGORIES[0])
+  const [category, setCategory] = useState<string>(categories[0])
   const [note, setNote] = useState('')
   const [isAdding, setIsAdding] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState<number | null>(null)
@@ -41,7 +43,9 @@ export function PhrasesView({ initialPhrases }: Props) {
       userId: 0,
       phrase: phrase.trim(),
       category,
+      skill,
       note: note.trim() || null,
+      isSystem: false,
       createdAt: new Date(),
     }
     startTransition(() => {
@@ -49,7 +53,7 @@ export function PhrasesView({ initialPhrases }: Props) {
     })
     setPhrase('')
     setNote('')
-    await addSpeakingPhraseAction({ phrase: optimistic.phrase, category, note: optimistic.note ?? undefined })
+    await addPhraseAction({ phrase: optimistic.phrase, category, skill, note: optimistic.note ?? undefined })
     setIsAdding(false)
   }
 
@@ -57,7 +61,7 @@ export function PhrasesView({ initialPhrases }: Props) {
     startTransition(() => {
       setPhrasesOptimistic((prev) => prev.filter((p) => p.id !== id))
     })
-    deleteSpeakingPhraseAction(id)
+    deletePhraseAction(id, skill)
     setConfirmingDelete(null)
   }
 
@@ -92,7 +96,7 @@ export function PhrasesView({ initialPhrases }: Props) {
               onChange={(e) => setCategory(e.target.value)}
               className="rounded-lg border border-border bg-input text-foreground px-3 py-2 text-sm outline-none focus:border-blue-400"
             >
-              {PHRASE_CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>

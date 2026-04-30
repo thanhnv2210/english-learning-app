@@ -1,23 +1,23 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { addSpeakingPhrase, deleteSpeakingPhrase } from '@/lib/db/speaking-phrases'
+import { addPhrase, deletePhrase } from '@/lib/db/speaking-phrases'
 import { getDefaultUser } from '@/lib/db/user'
 
-export async function addSpeakingPhraseAction(data: {
+export async function addPhraseAction(data: {
   phrase: string
   category: string
+  skill: 'speaking' | 'writing'
   note?: string
 }): Promise<{ ok: boolean }> {
   if (!data.phrase.trim()) return { ok: false }
   const user = await getDefaultUser()
-  await addSpeakingPhrase({ userId: user.id, ...data })
-  revalidatePath('/speaking/phrases')
+  await addPhrase({ userId: user.id, ...data })
+  revalidatePath(`/${data.skill}/phrases`)
   return { ok: true }
 }
 
-export async function deleteSpeakingPhraseAction(id: number): Promise<void> {
-  const user = await getDefaultUser()
-  await deleteSpeakingPhrase(id)
-  revalidatePath('/speaking/phrases')
+export async function deletePhraseAction(id: number, skill: 'speaking' | 'writing'): Promise<void> {
+  await deletePhrase(id)
+  revalidatePath(`/${skill}/phrases`)
 }

@@ -575,6 +575,7 @@ export const speakingPhrases = pgTable('speaking_phrases', {
   userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   phrase: text('phrase').notNull(),
   category: text('category').notNull().default('Other'),
+  skill: text('skill').notNull().default('speaking'), // 'speaking' | 'writing'
   note: text('note'),
   isSystem: boolean('is_system').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
