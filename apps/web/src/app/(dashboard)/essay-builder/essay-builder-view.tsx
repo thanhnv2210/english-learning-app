@@ -5,6 +5,7 @@ import { saveEssayAction, getVersionsAction, updateDecoratedTextAction, updateEs
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 import type { CollocationCard } from '@/lib/db/collocations'
 import type { EssayBuilderRecord } from '@/lib/db/essay-builder'
+import { buildInflectPattern } from '@/lib/ielts/irregular-verbs'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -20,35 +21,12 @@ const SKILL_LABELS: Record<string, string> = {
 
 type PhraseSet = { phrases: string[]; className: string }
 
-/**
- * Build a regex pattern for a single word that also matches common inflected
- * forms (+s, +es, +ed, +ing, +ly), handling the silent-e drop rule.
- * Only applied to single-word phrases — multi-word collocations use exact match.
- */
-function inflectPattern(word: string): string {
-  const w = word.toLowerCase()
-  const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
-  // Silent-e drop: utilize → utiliz(e|es|ed|ing|ation|ations)
-  if (w.length > 3 && w.endsWith('e') && !/[aeiou]e$/.test(w)) {
-    const stem = esc.slice(0, -1)
-    return `\\b${stem}(?:e|es|ed|er|ing|ely|ation|ations)?\\b`
-  }
-
-  // Words ending in -y: vary → varies/varied (y→i)
-  if (w.length > 3 && w.endsWith('y') && !/[aeiou]y$/.test(w)) {
-    const stem = esc.slice(0, -1)
-    return `\\b(?:${esc}|${stem}(?:ies|ied|ier|iest))\\b`
-  }
-
-  // Default: word + common suffixes
-  return `\\b${esc}(?:s|es|ed|er|ing|ly|ment|ments|tion|tions)?\\b`
-}
+// inflectPattern is imported as buildInflectPattern from @/lib/ielts/irregular-verbs
 
 function buildPattern(phrase: string): string {
   const words = phrase.trim().split(/\s+/)
   // Only inflect single-word phrases; keep multi-word phrases as exact match
-  if (words.length === 1) return inflectPattern(phrase)
+  if (words.length === 1) return buildInflectPattern(phrase)
   return phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
@@ -81,7 +59,7 @@ function highlight(text: string, phraseSets: PhraseSet[]) {
           const baseWords = base.split(/\s+/)
           if (baseWords.length === 1) {
             // Single word: check if part is an inflected form of the base
-            const pat = new RegExp(`^${inflectPattern(base)}$`, 'i')
+            const pat = new RegExp(`^${buildInflectPattern(base)}$`, 'i')
             if (pat.test(part)) { cls = className; break }
           } else {
             // Multi-word: exact case-insensitive match

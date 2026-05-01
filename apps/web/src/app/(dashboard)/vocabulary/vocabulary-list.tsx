@@ -7,6 +7,7 @@ import { addSentenceAction } from '@/app/actions/word-sentences'
 import { toggleVocabFavoriteAction } from '@/app/actions/user-skill-topics'
 import { enrolWordAction } from '@/app/actions/vocabulary-srs'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
+import { buildInflectPattern } from '@/lib/ielts/irregular-verbs'
 
 // ── Sort ─────────────────────────────────────────────────────────────────────
 
@@ -674,21 +675,7 @@ function ExampleCard({
 
 // ── HighlightedWord ───────────────────────────────────────────────────────────
 // Highlights occurrences of the vocabulary word (case-insensitive) in an example sentence.
-// Uses inflected matching so "implement" also highlights "implementing", "implemented", etc.
-
-function buildInflectPattern(word: string): string {
-  const w = word.toLowerCase()
-  const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  if (w.length > 3 && w.endsWith('e') && !/[aeiou]e$/.test(w)) {
-    const stem = esc.slice(0, -1)
-    return `\\b${stem}(?:e|es|ed|er|ing|ely|ation|ations)?\\b`
-  }
-  if (w.length > 3 && w.endsWith('y') && !/[aeiou]y$/.test(w)) {
-    const stem = esc.slice(0, -1)
-    return `\\b(?:${esc}|${stem}(?:ies|ied|ier|iest))\\b`
-  }
-  return `\\b${esc}(?:s|es|ed|er|ing|ly|ment|ments|tion|tions)?\\b`
-}
+// Uses inflected + irregular matching via shared buildInflectPattern from lib/ielts/irregular-verbs.
 
 function HighlightedWord({ text, word }: { text: string; word: string }) {
   if (!word) return <>{text}</>
