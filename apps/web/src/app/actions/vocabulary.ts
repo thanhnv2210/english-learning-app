@@ -29,22 +29,27 @@ export async function addWordToLibrary(card: VocabularyCard): Promise<{ ok: bool
     userAdded: true,
     aiModel: card.aiModel ?? null,
   })
+  revalidatePath('/vocabulary')
+  revalidatePath('/essay-builder')
   return { ok: result !== null }
 }
 
 export async function deleteVocabularyWordAction(id: number): Promise<void> {
   await deleteVocabularyWord(id)
   revalidatePath('/vocabulary')
+  revalidatePath('/essay-builder')
 }
 
 export async function updateVocabularyRankAction(id: number, rank: number): Promise<void> {
   await updateVocabularyRank(id, rank)
   revalidatePath('/vocabulary')
+  revalidatePath('/essay-builder')
 }
 
 export async function updateWordTypeAction(id: number, wordType: string): Promise<void> {
   await updateWordType(id, wordType)
   revalidatePath('/vocabulary')
+  revalidatePath('/essay-builder')
 }
 
 export async function detectWordTypeAction(

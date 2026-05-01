@@ -18,12 +18,14 @@ export async function addSentenceAction(data: {
   if (!data.sentence.trim() || !data.context) return { ok: false }
   await addSentence(data)
   revalidatePath(`/vocabulary/${data.wordId}/sentences`)
+  revalidatePath('/vocabulary/practice', 'layout')
   return { ok: true }
 }
 
 export async function deleteSentenceAction(id: number, wordId: number): Promise<void> {
   await deleteSentence(id)
   revalidatePath(`/vocabulary/${wordId}/sentences`)
+  revalidatePath('/vocabulary/practice', 'layout')
 }
 
 export async function createPracticeSessionAction(gameType: string): Promise<number> {

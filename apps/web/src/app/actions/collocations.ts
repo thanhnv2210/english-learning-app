@@ -18,7 +18,11 @@ export async function saveCollocationAction(data: {
   skills: CollocationSkill[]
   examples: string[]
 }): Promise<CollocationCard | null> {
-  return saveCollocation(data)
+  const result = await saveCollocation(data)
+  revalidatePath('/collocations')
+  revalidatePath('/collocations/practice', 'layout')
+  revalidatePath('/essay-builder')
+  return result
 }
 
 export async function listCollocationAction(): Promise<CollocationCard[]> {
@@ -29,15 +33,22 @@ export async function updateCollocationSkillsAction(
   id: number,
   skills: CollocationSkill[],
 ): Promise<void> {
-  return updateCollocationSkills(id, skills)
+  await updateCollocationSkills(id, skills)
+  revalidatePath('/collocations')
+  revalidatePath('/collocations/practice', 'layout')
+  revalidatePath('/essay-builder')
 }
 
 export async function updateCollocationRankAction(id: number, rank: number): Promise<void> {
   await updateCollocationRank(id, rank)
   revalidatePath('/collocations')
+  revalidatePath('/collocations/practice', 'layout')
+  revalidatePath('/essay-builder')
 }
 
 export async function deleteCollocationAction(id: number): Promise<void> {
   await deleteCollocation(id)
   revalidatePath('/collocations')
+  revalidatePath('/collocations/practice', 'layout')
+  revalidatePath('/essay-builder')
 }

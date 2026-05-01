@@ -21,6 +21,7 @@ export async function saveWrongDecisionAction(data: {
 }): Promise<number> {
   const id = await saveWrongDecision(data)
   revalidatePath('/wrong-decisions')
+  revalidatePath('/analytics')
   return id
 }
 
@@ -40,9 +41,11 @@ export async function updateWrongDecisionAction(
 ): Promise<void> {
   await updateWrongDecision(id, data)
   revalidatePath('/wrong-decisions')
+  revalidatePath('/analytics')
 }
 
 export async function deleteWrongDecisionAction(id: number): Promise<void> {
   await deleteWrongDecision(id)
   revalidatePath('/wrong-decisions')
+  revalidatePath('/analytics')
 }
