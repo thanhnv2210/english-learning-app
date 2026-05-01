@@ -60,6 +60,7 @@ export function CollocationList({ initialItems }: Props) {
   const [activeSkill, setActiveSkill] = useState<CollocationSkill | 'all_skills' | null>(null)
   const [activeRank, setActiveRank] = useState<number | null>(null)
   const [sort, setSort] = useState<SortKey>('rank_desc')
+  const [showDesc, setShowDesc] = useState(false)
 
   // Essay generator state
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
@@ -111,15 +112,27 @@ export function CollocationList({ initialItems }: Props) {
     }
     if (search.trim()) {
       const q = search.toLowerCase()
-      result = result.filter(
-        (c) =>
-          c.phrase.toLowerCase().includes(q) ||
-          c.type.toLowerCase().includes(q) ||
-          c.examples.some((e) => e.toLowerCase().includes(q)),
+      const primary = result.filter(
+        (c) => c.phrase.toLowerCase().includes(q) || c.type.toLowerCase().includes(q)
       )
+      const secondary = result.filter(
+        (c) => !c.phrase.toLowerCase().includes(q) && !c.type.toLowerCase().includes(q) &&
+          c.examples.some((e) => e.toLowerCase().includes(q))
+      )
+      return [...applySort(primary, sort), ...applySort(secondary, sort)]
     }
     return applySort(result, sort)
   }, [items, activeSkill, activeRank, search, sort])
+
+  const secondaryMatchIds = useMemo(() => {
+    if (!search.trim()) return new Set<number>()
+    const q = search.toLowerCase()
+    return new Set(
+      items
+        .filter((c) => !c.phrase.toLowerCase().includes(q) && !c.type.toLowerCase().includes(q) && c.examples.some((e) => e.toLowerCase().includes(q)))
+        .map((c) => c.id)
+    )
+  }, [items, search])
 
   function handleDelete(id: number) {
     setItems((prev) => prev.filter((c) => c.id !== id))
@@ -145,6 +158,15 @@ export function CollocationList({ initialItems }: Props) {
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-base font-semibold text-foreground">Saved Collocations</h2>
         <div className="flex items-center gap-3">
+          <label className="flex items-center gap-1.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showDesc}
+              onChange={(e) => setShowDesc(e.target.checked)}
+              className="rounded border-border accent-blue-600 w-3.5 h-3.5"
+            />
+            <span className="text-xs font-medium text-muted-foreground">Show descriptions</span>
+          </label>
           <span className="text-xs text-faint">{items.length} saved</span>
           {items.length >= 2 && (
             <button
@@ -302,6 +324,8 @@ export function CollocationList({ initialItems }: Props) {
                   selectMode={selectMode}
                   selected={selectedIds.has(card.id)}
                   onToggleSelect={() => toggleSelect(card.id)}
+                  isSecondaryMatch={secondaryMatchIds.has(card.id)}
+                  showDesc={showDesc}
                 />
               ))}
             </div>
@@ -320,6 +344,8 @@ function SavedCard({
   selectMode = false,
   selected = false,
   onToggleSelect,
+  isSecondaryMatch = false,
+  showDesc = false,
 }: {
   card: CollocationCard
   onDelete: () => void
@@ -328,6 +354,8 @@ function SavedCard({
   selectMode?: boolean
   selected?: boolean
   onToggleSelect?: () => void
+  isSecondaryMatch?: boolean
+  showDesc?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
   const [editingSkills, setEditingSkills] = useState(false)
@@ -408,7 +436,7 @@ function SavedCard({
       </div>
 
       {/* Explanation */}
-      {card.explanation && (
+      {showDesc && card.explanation && (
         <p className="text-sm leading-relaxed text-muted-foreground">{card.explanation}</p>
       )}
 
@@ -500,6 +528,9 @@ function SavedCard({
             </div>
           )}
         </>
+      )}
+      {isSecondaryMatch && (
+        <p className="text-xs text-faint italic">↳ matched in example</p>
       )}
     </div>
   )

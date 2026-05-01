@@ -113,15 +113,27 @@ export function GrammarTrapsView({ initialEntries }: { initialEntries: GrammarTr
     if (activeCategory) result = result.filter((e) => e.category === activeCategory)
     if (search.trim()) {
       const q = search.trim().toLowerCase()
-      result = result.filter(
-        (e) =>
-          e.phrase.toLowerCase().includes(q) ||
-          e.correction.toLowerCase().includes(q) ||
-          e.explanation.toLowerCase().includes(q),
+      const primary = result.filter(
+        (e) => e.phrase.toLowerCase().includes(q) || e.correction.toLowerCase().includes(q)
       )
+      const secondary = result.filter(
+        (e) => !e.phrase.toLowerCase().includes(q) && !e.correction.toLowerCase().includes(q) &&
+          e.explanation.toLowerCase().includes(q)
+      )
+      return [...primary, ...secondary]
     }
     return result
   }, [entries, activeCategory, search])
+
+  const secondaryMatchIds = useMemo(() => {
+    if (!search.trim()) return new Set<number>()
+    const q = search.trim().toLowerCase()
+    return new Set(
+      entries
+        .filter((e) => !e.phrase.toLowerCase().includes(q) && !e.correction.toLowerCase().includes(q) && e.explanation.toLowerCase().includes(q))
+        .map((e) => e.id)
+    )
+  }, [entries, search])
 
   const categoryCounts = useMemo(
     () => Object.fromEntries(ALL_CATEGORIES.map((c) => [c, entries.filter((e) => e.category === c).length])),
@@ -279,6 +291,7 @@ export function GrammarTrapsView({ initialEntries }: { initialEntries: GrammarTr
                 entry={entry}
                 onDelete={handleDelete}
                 onRank={handleRank}
+                isSecondaryMatch={secondaryMatchIds.has(entry.id)}
               />
             ))}
           </div>
@@ -331,10 +344,12 @@ function TrapCard({
   entry,
   onDelete,
   onRank,
+  isSecondaryMatch = false,
 }: {
   entry: GrammarTrapCard
   onDelete: (id: number) => void
   onRank: (id: number, rank: number) => void
+  isSecondaryMatch?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
 
@@ -358,6 +373,9 @@ function TrapCard({
         <span className={`text-[10px] text-faint transition-transform duration-200 shrink-0 ${expanded ? 'rotate-180' : ''}`}>▾</span>
       </button>
 
+      {isSecondaryMatch && (
+        <p className="px-5 pb-2 text-xs text-faint italic">↳ matched in explanation</p>
+      )}
       {/* Expanded body */}
       {expanded && (
         <div className="border-t border-border px-5 py-4 flex flex-col gap-4">

@@ -48,6 +48,7 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
   const [activeDomain, setActiveDomain] = useState<string | null>(null)
   const [activeRank, setActiveRank] = useState<number | null>(null)
   const [sort, setSort] = useState<SortKey>('alpha_asc')
+  const [showDesc, setShowDesc] = useState(false)
 
   // Favourite domain management
   const [localFavorites, setLocalFavorites] = useState<string[]>(favoriteDomains ?? [])
@@ -91,15 +92,25 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
 
     if (search.trim()) {
       const q = search.toLowerCase()
-      result = result.filter(
-        (w) =>
-          w.word.toLowerCase().includes(q) ||
-          w.definition.toLowerCase().includes(q),
+      const primary = result.filter((w) => w.word.toLowerCase().includes(q))
+      const secondary = result.filter(
+        (w) => !w.word.toLowerCase().includes(q) && w.definition.toLowerCase().includes(q)
       )
+      return [...applySort(primary, sort), ...applySort(secondary, sort)]
     }
 
     return applySort(result, sort)
   }, [items, activeDomain, activeRank, search, sort])
+
+  const secondaryMatchIds = useMemo(() => {
+    if (!search.trim()) return new Set<number>()
+    const q = search.toLowerCase()
+    return new Set(
+      items
+        .filter((w) => !w.word.toLowerCase().includes(q) && w.definition.toLowerCase().includes(q))
+        .map((w) => w.id)
+    )
+  }, [items, search])
 
   function handleDelete(id: number) {
     setItems((prev) => prev.filter((w) => w.id !== id))
@@ -225,10 +236,21 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
       </div>
 
       {/* ── Stats ── */}
-      <p className="text-xs text-faint">
-        Showing <span className="font-semibold text-muted-foreground">{filtered.length}</span> of{' '}
-        {words.length} words
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs text-faint">
+          Showing <span className="font-semibold text-muted-foreground">{filtered.length}</span> of{' '}
+          {words.length} words
+        </p>
+        <label className="flex items-center gap-1.5 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={showDesc}
+            onChange={(e) => setShowDesc(e.target.checked)}
+            className="rounded border-border accent-blue-600 w-3.5 h-3.5"
+          />
+          <span className="text-xs font-medium text-muted-foreground">Show definitions</span>
+        </label>
+      </div>
 
       {/* ── Word grid ── */}
       {filtered.length === 0 ? (
@@ -243,6 +265,8 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
               word={word}
               onDelete={word.userAdded ? () => handleDelete(word.id) : undefined}
               onRankUpdate={(rank) => handleRankUpdate(word.id, rank)}
+              isSecondaryMatch={secondaryMatchIds.has(word.id)}
+              showDesc={showDesc}
             />
           ))}
         </div>
@@ -257,10 +281,14 @@ export function WordCard({
   word,
   onDelete,
   onRankUpdate,
+  isSecondaryMatch = false,
+  showDesc = false,
 }: {
   word: VocabularyCard
   onDelete?: () => void
   onRankUpdate?: (rank: number) => void
+  isSecondaryMatch?: boolean
+  showDesc?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
   const [localRank, setLocalRank] = useState(word.rank)
@@ -495,11 +523,16 @@ export function WordCard({
       )}
 
       {/* Definition */}
-      <div className="mb-3 flex flex-col gap-1">
-        {String(word.definition ?? '').split('\n').map((line, i) => (
-          <p key={i} className="text-sm leading-relaxed text-muted-foreground">{line}</p>
-        ))}
-      </div>
+      {showDesc && (
+        <div className="mb-3 flex flex-col gap-1">
+          {String(word.definition ?? '').split('\n').map((line, i) => (
+            <p key={i} className="text-sm leading-relaxed text-muted-foreground">{line}</p>
+          ))}
+          {isSecondaryMatch && (
+            <p className="text-xs text-faint italic">↳ matched in definition</p>
+          )}
+        </div>
+      )}
 
       {/* Family words */}
       {familyEntries.length > 0 && (

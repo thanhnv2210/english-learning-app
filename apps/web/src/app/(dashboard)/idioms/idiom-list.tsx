@@ -72,15 +72,27 @@ export function IdiomList({ initialItems }: { initialItems: IdiomCard[] }) {
     if (activeRank !== null) result = result.filter((c) => c.rank === activeRank)
     if (search.trim()) {
       const q = search.toLowerCase()
-      result = result.filter(
-        (c) =>
-          c.idiom.toLowerCase().includes(q) ||
-          c.meaning.toLowerCase().includes(q) ||
-          c.examples.some((e) => e.toLowerCase().includes(q)),
+      const primary = result.filter(
+        (c) => c.idiom.toLowerCase().includes(q) || c.meaning.toLowerCase().includes(q)
       )
+      const secondary = result.filter(
+        (c) => !c.idiom.toLowerCase().includes(q) && !c.meaning.toLowerCase().includes(q) &&
+          c.examples.some((e) => e.toLowerCase().includes(q))
+      )
+      return [...applySort(primary, sort), ...applySort(secondary, sort)]
     }
     return applySort(result, sort)
   }, [items, activeSkill, activeContext, activeRank, search, sort])
+
+  const secondaryMatchIds = useMemo(() => {
+    if (!search.trim()) return new Set<number>()
+    const q = search.toLowerCase()
+    return new Set(
+      items
+        .filter((c) => !c.idiom.toLowerCase().includes(q) && !c.meaning.toLowerCase().includes(q) && c.examples.some((e) => e.toLowerCase().includes(q)))
+        .map((c) => c.id)
+    )
+  }, [items, search])
 
   function handleDelete(id: number) {
     setItems((prev) => prev.filter((c) => c.id !== id))
@@ -212,6 +224,7 @@ export function IdiomList({ initialItems }: { initialItems: IdiomCard[] }) {
                   onSkillsUpdate={(skills) => handleSkillsUpdate(card.id, skills)}
                   onContextsUpdate={(contexts) => handleContextsUpdate(card.id, contexts)}
                   onRankUpdate={(rank) => handleRankUpdate(card.id, rank)}
+                  isSecondaryMatch={secondaryMatchIds.has(card.id)}
                 />
               ))}
             </div>
@@ -228,12 +241,14 @@ function IdiomCard({
   onSkillsUpdate,
   onContextsUpdate,
   onRankUpdate,
+  isSecondaryMatch = false,
 }: {
   card: IdiomCard
   onDelete: () => void
   onSkillsUpdate: (skills: IdiomSkill[]) => void
   onContextsUpdate: (contexts: IdiomContext[]) => void
   onRankUpdate: (rank: number) => void
+  isSecondaryMatch?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
   const [editingSkills, setEditingSkills] = useState(false)
@@ -428,6 +443,9 @@ function IdiomCard({
             </div>
           )}
         </>
+      )}
+      {isSecondaryMatch && (
+        <p className="text-xs text-faint italic">↳ matched in example</p>
       )}
     </div>
   )

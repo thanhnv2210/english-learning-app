@@ -54,15 +54,27 @@ export function ComparisonList({ initialItems }: { initialItems: ComparisonCard[
     if (activeRank !== null) result = result.filter((c) => c.rank === activeRank)
     if (search.trim()) {
       const q = search.toLowerCase()
-      result = result.filter(
-        (c) =>
-          c.termA.toLowerCase().includes(q) ||
-          c.termB.toLowerCase().includes(q) ||
-          c.keyDifference.toLowerCase().includes(q),
+      const primary = result.filter(
+        (c) => c.termA.toLowerCase().includes(q) || c.termB.toLowerCase().includes(q)
       )
+      const secondary = result.filter(
+        (c) => !c.termA.toLowerCase().includes(q) && !c.termB.toLowerCase().includes(q) &&
+          c.keyDifference.toLowerCase().includes(q)
+      )
+      return [...applySort(primary, sort), ...applySort(secondary, sort)]
     }
     return applySort(result, sort)
   }, [items, activeCategory, activeRank, search, sort])
+
+  const secondaryMatchIds = useMemo(() => {
+    if (!search.trim()) return new Set<number>()
+    const q = search.toLowerCase()
+    return new Set(
+      items
+        .filter((c) => !c.termA.toLowerCase().includes(q) && !c.termB.toLowerCase().includes(q) && c.keyDifference.toLowerCase().includes(q))
+        .map((c) => c.id)
+    )
+  }, [items, search])
 
   function handleDelete(id: number) {
     setItems((prev) => prev.filter((c) => c.id !== id))
@@ -153,6 +165,7 @@ export function ComparisonList({ initialItems }: { initialItems: ComparisonCard[
                 card={card}
                 onDelete={() => handleDelete(card.id)}
                 onRankUpdate={(rank) => handleRankUpdate(card.id, rank)}
+                isSecondaryMatch={secondaryMatchIds.has(card.id)}
               />
             ))}
           </div>
@@ -166,10 +179,12 @@ function ComparisonCard({
   card,
   onDelete,
   onRankUpdate,
+  isSecondaryMatch = false,
 }: {
   card: ComparisonCard
   onDelete: () => void
   onRankUpdate: (rank: number) => void
+  isSecondaryMatch?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
   const [localRank, setLocalRank] = useState(card.rank)
@@ -212,6 +227,9 @@ function ComparisonCard({
 
       {/* Key difference */}
       <p className="text-sm leading-relaxed text-muted-foreground">{card.keyDifference}</p>
+      {isSecondaryMatch && (
+        <p className="text-xs text-faint italic">↳ matched in key difference</p>
+      )}
 
       {/* Register chips */}
       <div className="flex gap-2 flex-wrap">
