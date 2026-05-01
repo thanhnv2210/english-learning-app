@@ -48,7 +48,7 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
   const [activeDomain, setActiveDomain] = useState<string | null>(null)
   const [activeRank, setActiveRank] = useState<number | null>(null)
   const [sort, setSort] = useState<SortKey>('alpha_asc')
-  const [showDesc, setShowDesc] = useState(false)
+  const [showDesc, setShowDesc] = useState(true)
 
   // Favourite domain management
   const [localFavorites, setLocalFavorites] = useState<string[]>(favoriteDomains ?? [])

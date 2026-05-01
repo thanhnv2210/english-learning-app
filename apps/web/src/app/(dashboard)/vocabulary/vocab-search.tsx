@@ -139,7 +139,7 @@ export function VocabSearch() {
             )}
           </div>
 
-          <WordCard word={card} />
+          <WordCard word={card} showDesc={true} />
         </div>
       )}
       </div>}

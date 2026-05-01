@@ -60,7 +60,7 @@ export function CollocationList({ initialItems }: Props) {
   const [activeSkill, setActiveSkill] = useState<CollocationSkill | 'all_skills' | null>(null)
   const [activeRank, setActiveRank] = useState<number | null>(null)
   const [sort, setSort] = useState<SortKey>('rank_desc')
-  const [showDesc, setShowDesc] = useState(false)
+  const [showDesc, setShowDesc] = useState(true)
 
   // Essay generator state
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
