@@ -1,10 +1,10 @@
 import { getPhrases } from '@/lib/db/speaking-phrases'
-import { getDefaultUser } from '@/lib/db/user'
+import { getCurrentUser } from '@/lib/db/user'
 import { PhrasesView } from './phrases-view'
 import Link from 'next/link'
 
 export default async function SpeakingPhrasesPage() {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   const phrases = await getPhrases(user.id, 'speaking')
 
   return (

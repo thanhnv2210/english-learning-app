@@ -1,17 +1,20 @@
 import { NextResponse } from 'next/server'
 import { OLLAMA_ENABLED, OLLAMA_MODEL } from '@/lib/ai-client'
-import { auth } from '@/auth'
-import { getDefaultUser } from '@/lib/db/user'
+import { getCurrentUser } from '@/lib/db/user'
 
 export async function GET() {
   const hasAnthropic = !!process.env.ANTHROPIC_API_KEY
   const hasOpenRouter = !hasAnthropic && !!process.env.OPENROUTER_API_KEY
 
-  // Resolve user tier and model preference
-  const session = await auth()
-  const user = await getDefaultUser()
-  const tier = session?.user?.tier ?? user.tier ?? 'free'
-  const modelPreference = (user.modelPreference ?? 'auto') as 'auto' | 'free'
+  let tier = 'free'
+  let modelPreference: 'auto' | 'free' = 'auto'
+  try {
+    const user = await getCurrentUser()
+    tier = user.tier ?? 'free'
+    modelPreference = (user.modelPreference ?? 'auto') as 'auto' | 'free'
+  } catch {
+    // unauthenticated — fall back to free defaults
+  }
 
   // Effective provider: vip with 'auto' pref → configured cloud, otherwise → ollama
   const useCloud = tier === 'vip' && modelPreference === 'auto'

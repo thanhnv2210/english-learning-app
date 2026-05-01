@@ -1,8 +1,8 @@
-import { getDefaultUser } from '@/lib/db/user'
+import { getCurrentUser } from '@/lib/db/user'
 import { SettingsForm } from './settings-form'
 
 export default async function SettingsPage() {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   return (
     <div className="max-w-lg">
       <h1 className="text-2xl font-bold text-foreground mb-1">Settings</h1>

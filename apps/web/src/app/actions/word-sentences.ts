@@ -8,7 +8,7 @@ import {
   logPracticeResult,
   completePracticeSession,
 } from '@/lib/db/word-sentences'
-import { getDefaultUser } from '@/lib/db/user'
+import { getCurrentUser } from '@/lib/db/user'
 
 export async function addSentenceAction(data: {
   wordId: number
@@ -29,7 +29,7 @@ export async function deleteSentenceAction(id: number, wordId: number): Promise<
 }
 
 export async function createPracticeSessionAction(gameType: string): Promise<number> {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   return createPracticeSession(user.id, gameType)
 }
 

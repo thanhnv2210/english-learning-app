@@ -1,12 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { updateTargetProfile, updateModelPreference, getDefaultUser } from '@/lib/db/user'
+import { updateTargetProfile, updateModelPreference, getCurrentUser } from '@/lib/db/user'
 
 const VALID_PROFILES = ['IELTS_Academic_6.5', 'IELTS_Academic_7.5', 'Business_Fluent'] as const
 
 export async function updateModelPreferenceAction(preference: 'auto' | 'free'): Promise<void> {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   if (user.tier !== 'vip') return // only vip can switch
   await updateModelPreference(user.id, preference)
   revalidatePath('/settings')
@@ -16,6 +16,7 @@ export async function updateTargetProfileAction(
   profile: (typeof VALID_PROFILES)[number],
 ): Promise<void> {
   if (!VALID_PROFILES.includes(profile)) return
-  await updateTargetProfile(profile)
+  const user = await getCurrentUser()
+  await updateTargetProfile(user.id, profile)
   revalidatePath('/', 'layout')
 }

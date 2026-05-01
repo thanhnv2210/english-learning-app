@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { getDefaultUser } from '@/lib/db/user'
+import { getCurrentUser } from '@/lib/db/user'
 import { addWordPair, deleteWordPair, updateWordPairRank, type WordPair } from '@/lib/db/word-pairs'
 
 export async function addWordPairAction(data: {
@@ -11,7 +11,7 @@ export async function addWordPairAction(data: {
   examples: string[]
   category: string
 }): Promise<WordPair> {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   const result = await addWordPair({ ...data, userId: user.id })
   revalidatePath('/word-pairs')
   return result

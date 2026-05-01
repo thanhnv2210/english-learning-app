@@ -2,7 +2,7 @@ import { generateText } from 'ai'
 import { WORD_PAIRS_SEARCH_PROMPT } from '@/lib/ielts/word-pairs/prompts'
 import type { WordPairResult } from '@/lib/ielts/word-pairs/prompts'
 import { getWordPairsForWord, findWordPair } from '@/lib/db/word-pairs'
-import { getDefaultUser } from '@/lib/db/user'
+import { getCurrentUser } from '@/lib/db/user'
 import { OLLAMA_ENABLED, OLLAMA_MODEL, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export type DbPairEntry = {
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   }
 
   const normalized = query.trim().toLowerCase()
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
 
   // 1. Check DB first
   const dbRows = await getWordPairsForWord(user.id, normalized)

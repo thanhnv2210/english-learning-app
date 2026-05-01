@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { aiGeneratedContent, essayBuilderConfigs } from '@/lib/db/schema'
-import { getDefaultUser } from '@/lib/db/user'
+import { getCurrentUser } from '@/lib/db/user'
 import { and, desc, eq } from 'drizzle-orm'
 
 // ── Essay Builder selection config ────────────────────────────────────────────
@@ -14,7 +14,7 @@ export async function getEssayBuilderConfig(
   domain: string,
   skill: string,
 ): Promise<EssayBuilderConfig | null> {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   const [row] = await db
     .select()
     .from(essayBuilderConfigs)
@@ -39,7 +39,7 @@ export async function upsertEssayBuilderConfig(
   selectedVocabulary: string[],
   selectedCollocations: string[],
 ): Promise<void> {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   await db
     .insert(essayBuilderConfigs)
     .values({ userId: user.id, domain, skill, selectedVocabulary, selectedCollocations, updatedAt: new Date() })

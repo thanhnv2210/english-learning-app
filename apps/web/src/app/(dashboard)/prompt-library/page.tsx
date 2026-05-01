@@ -1,9 +1,9 @@
-import { getDefaultUser, parseTargetBand } from '@/lib/db/user'
+import { getCurrentUser, parseTargetBand } from '@/lib/db/user'
 import { getPromptLibrary } from '@/lib/prompt-library'
 import { PromptLibraryView } from './prompt-library-view'
 
 export default async function PromptLibraryPage() {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   const targetBand = parseTargetBand(user.targetProfile)
   const sections = getPromptLibrary(targetBand, user.targetProfile)
 

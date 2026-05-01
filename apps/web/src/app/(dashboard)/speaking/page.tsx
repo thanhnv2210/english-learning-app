@@ -2,7 +2,7 @@ import { db } from '@/lib/db'
 import { mockExams } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { SpeakingChat } from './speaking-chat'
-import { getDefaultUser, parseTargetBand } from '@/lib/db/user'
+import { getCurrentUser, parseTargetBand } from '@/lib/db/user'
 import { getAllSpeakingTopics } from '@/lib/db/speaking'
 import type { TranscriptMessage } from '@/lib/db/schema'
 
@@ -24,7 +24,7 @@ export default async function SpeakingPage({
     }
   }
 
-  const [user, topics] = await Promise.all([getDefaultUser(), getAllSpeakingTopics()])
+  const [user, topics] = await Promise.all([getCurrentUser(), getAllSpeakingTopics()])
   const targetBand = parseTargetBand(user.targetProfile)
 
   return (

@@ -1,7 +1,7 @@
 import { db } from '@/lib/db'
 import { userSkillTopics } from '@/lib/db/schema'
 import { and, eq } from 'drizzle-orm'
-import { getDefaultUser } from '@/lib/db/user'
+import { getCurrentUser } from '@/lib/db/user'
 
 // Default pinned topics per skill — used to seed on first fetch
 const SKILL_DEFAULTS: Record<string, string[]> = {
@@ -10,7 +10,7 @@ const SKILL_DEFAULTS: Record<string, string[]> = {
 }
 
 export async function getSkillFavorites(skill: string): Promise<string[]> {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
 
   const rows = await db
     .select({ topicName: userSkillTopics.topicName })
@@ -31,7 +31,7 @@ export async function getSkillFavorites(skill: string): Promise<string[]> {
 }
 
 export async function toggleSkillFavorite(skill: string, topicName: string): Promise<void> {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
 
   const existing = await db
     .select()

@@ -1,7 +1,7 @@
 import { db } from '@/lib/db'
 import { wrongDecisionLogs } from '@/lib/db/schema'
 import { desc, eq } from 'drizzle-orm'
-import { getDefaultUser } from '@/lib/db/user'
+import { getCurrentUser } from '@/lib/db/user'
 
 export type WrongDecisionLog = {
   id: number
@@ -36,7 +36,7 @@ export async function saveWrongDecision(data: {
   solution?: string
   questionRoles: string[]
 }): Promise<number> {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   const [row] = await db
     .insert(wrongDecisionLogs)
     .values({
@@ -57,7 +57,7 @@ export async function saveWrongDecision(data: {
 }
 
 export async function getAllWrongDecisions(): Promise<WrongDecisionLog[]> {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   return db
     .select()
     .from(wrongDecisionLogs)
@@ -94,7 +94,7 @@ export async function deleteWrongDecision(id: number): Promise<void> {
 }
 
 export async function getWrongDecisionStats(): Promise<WrongDecisionStats> {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   const rows = (await db
     .select()
     .from(wrongDecisionLogs)

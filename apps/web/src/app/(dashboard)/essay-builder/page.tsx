@@ -2,13 +2,13 @@ import { getAllVocabularyWords } from '@/lib/db/vocabulary'
 import { getAllCollocations } from '@/lib/db/collocations'
 import { getAllDomains } from '@/lib/db/domains'
 import { getAllEssayBuilderRecords } from '@/lib/db/essay-builder'
-import { getDefaultUser } from '@/lib/db/user'
+import { getCurrentUser } from '@/lib/db/user'
 import { parseTargetBand } from '@/lib/db/user'
 import { EssayBuilderView } from './essay-builder-view'
 
 export default async function EssayBuilderPage() {
   const [user, words, collocations, domains, history] = await Promise.all([
-    getDefaultUser(),
+    getCurrentUser(),
     getAllVocabularyWords(),
     getAllCollocations(),
     getAllDomains(),

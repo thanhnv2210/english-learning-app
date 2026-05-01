@@ -1,9 +1,9 @@
-import { getDefaultUser } from '@/lib/db/user'
+import { getCurrentUser } from '@/lib/db/user'
 import { getWordPairs } from '@/lib/db/word-pairs'
 import { WordPairsView } from './word-pairs-view'
 
 export default async function WordPairsPage() {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   const pairs = await getWordPairs(user.id)
   return (
     <div className="mx-auto max-w-3xl flex flex-col gap-8">

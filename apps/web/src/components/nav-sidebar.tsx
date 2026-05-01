@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { signOut } from 'next-auth/react'
 import { toggleFavouritePageAction, reorderFavouritePagesAction } from '@/app/actions/favourite-pages'
 
 type NavItem = { href: string; label: string; icon: string }
@@ -102,9 +103,15 @@ function groupContainsActive(group: NavGroup, pathname: string) {
 export function NavSidebar({
   targetProfile = 'IELTS_Academic_6.5',
   favouritePages = [],
+  userEmail,
+  userName,
+  userImage,
 }: {
   targetProfile?: string
   favouritePages?: string[]
+  userEmail?: string
+  userName?: string
+  userImage?: string
 }) {
   const pathname = usePathname()
 
@@ -312,6 +319,22 @@ export function NavSidebar({
               A
             </button>
           ))}
+          {userEmail && (
+            <button
+              onClick={() => signOut({ callbackUrl: '/login' })}
+              title={`Sign out (${userName || userEmail})`}
+              className="flex h-8 w-8 items-center justify-center rounded-full hover:ring-2 hover:ring-red-400 transition-all overflow-hidden"
+            >
+              {userImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={userImage} alt="" className="h-8 w-8 rounded-full" />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center">
+                  {(userName || userEmail)[0].toUpperCase()}
+                </div>
+              )}
+            </button>
+          )}
         </div>
       </aside>
     )
@@ -435,8 +458,32 @@ export function NavSidebar({
 
       </nav>
 
+      {/* User row — always visible at bottom */}
+      {userEmail && (
+        <div className="mt-2 border-t border-gray-200 dark:border-gray-700 pt-2 px-2">
+          <div className="flex items-center gap-2 rounded-lg px-2 py-1.5">
+            {userImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={userImage} alt="" className="h-7 w-7 rounded-full shrink-0 ring-1 ring-border" />
+            ) : (
+              <div className="h-7 w-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                {(userName || userEmail)[0].toUpperCase()}
+              </div>
+            )}
+            <span className="text-xs text-muted-foreground truncate flex-1 min-w-0">{userName || userEmail}</span>
+            <button
+              onClick={() => signOut({ callbackUrl: '/login' })}
+              title="Sign out"
+              className="shrink-0 rounded p-1 text-xs text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-colors"
+            >
+              ↩
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Settings — pinned to bottom */}
-      <div className="mt-2 border-t border-gray-200 dark:border-gray-700 pt-2">
+      <div className="mt-1 border-t border-gray-200 dark:border-gray-700 pt-2">
         <button
           onClick={() => setSettingsOpen((v) => !v)}
           className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors ${

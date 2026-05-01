@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { addPhrase, deletePhrase } from '@/lib/db/speaking-phrases'
-import { getDefaultUser } from '@/lib/db/user'
+import { getCurrentUser } from '@/lib/db/user'
 
 export async function addPhraseAction(data: {
   phrase: string
@@ -11,7 +11,7 @@ export async function addPhraseAction(data: {
   note?: string
 }): Promise<{ ok: boolean }> {
   if (!data.phrase.trim()) return { ok: false }
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   await addPhrase({ userId: user.id, ...data })
   revalidatePath(`/${data.skill}/phrases`)
   return { ok: true }

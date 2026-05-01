@@ -2,8 +2,22 @@ import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { seedDefaultDomains } from '@/lib/db/domains'
+import { auth } from '@/auth'
 
 const DEFAULT_EMAIL = 'default@local.dev'
+
+/**
+ * Returns the currently authenticated user from the NextAuth session.
+ * Throws if not authenticated. Use this in server actions and pages.
+ */
+export async function getCurrentUser() {
+  const session = await auth()
+  if (!session?.user?.id) throw new Error('Unauthorized')
+  const userId = parseInt(session.user.id)
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+  if (!user) throw new Error('User not found')
+  return user
+}
 
 export async function getDefaultUser() {
   const existing = await db.select().from(users).where(eq(users.email, DEFAULT_EMAIL)).limit(1)
@@ -24,19 +38,19 @@ export function parseTargetBand(profile: string): number {
   return match ? parseFloat(match[1]) : 6.5
 }
 
-export async function updateTargetProfile(profile: string): Promise<void> {
+export async function updateTargetProfile(userId: number, profile: string): Promise<void> {
   await db
     .update(users)
     .set({ targetProfile: profile })
-    .where(eq(users.email, DEFAULT_EMAIL))
+    .where(eq(users.id, userId))
 }
 
 /**
  * Returns the user's effective AI context (tier + modelPreference).
- * Use this in API routes instead of calling auth() + getDefaultUser() separately.
+ * Use this in API routes instead of calling auth() + getCurrentUser() separately.
  */
 export async function getUserAIContext(): Promise<{ tier: string; modelPreference: 'auto' | 'free' }> {
-  const user = await getDefaultUser()
+  const user = await getCurrentUser()
   return {
     tier: user.tier ?? 'free',
     modelPreference: (user.modelPreference ?? 'auto') as 'auto' | 'free',
