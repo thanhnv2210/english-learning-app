@@ -87,7 +87,8 @@
       "Bash(openssl rand:*)",
       "Bash(ADMIN_PASSWORD=admin123 pnpm db:set-password)",
       "Bash(python3 -m json.tool)",
-      "Bash(source /Users/ThanhNguyen/.zshrc)"
+      "Bash(source /Users/ThanhNguyen/.zshrc)",
+      "Bash(ls /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/admin)"
     ]
   }
 }

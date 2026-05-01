@@ -66,6 +66,12 @@ const GROUPS: NavGroup[] = [
       { href: '/history', label: 'History', icon: '🕐' },
     ],
   },
+  {
+    label: 'Admin',
+    items: [
+      { href: '/admin/users', label: 'Users', icon: '👥' },
+    ],
+  },
 ]
 
 const SETTINGS_ITEM: NavItem = { href: '/settings', label: 'Settings', icon: '⚙️' }
