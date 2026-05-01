@@ -674,15 +674,32 @@ function ExampleCard({
 
 // ── HighlightedWord ───────────────────────────────────────────────────────────
 // Highlights occurrences of the vocabulary word (case-insensitive) in an example sentence.
+// Uses inflected matching so "implement" also highlights "implementing", "implemented", etc.
+
+function buildInflectPattern(word: string): string {
+  const w = word.toLowerCase()
+  const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  if (w.length > 3 && w.endsWith('e') && !/[aeiou]e$/.test(w)) {
+    const stem = esc.slice(0, -1)
+    return `\\b${stem}(?:e|es|ed|er|ing|ely|ation|ations)?\\b`
+  }
+  if (w.length > 3 && w.endsWith('y') && !/[aeiou]y$/.test(w)) {
+    const stem = esc.slice(0, -1)
+    return `\\b(?:${esc}|${stem}(?:ies|ied|ier|iest))\\b`
+  }
+  return `\\b${esc}(?:s|es|ed|er|ing|ly|ment|ments|tion|tions)?\\b`
+}
 
 function HighlightedWord({ text, word }: { text: string; word: string }) {
   if (!word) return <>{text}</>
-  const regex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
-  const parts = text.split(regex)
+  const pattern = buildInflectPattern(word)
+  const splitRegex = new RegExp(`(${pattern})`, 'gi')
+  const testRegex = new RegExp(`^(?:${pattern})$`, 'i')
+  const parts = text.split(splitRegex)
   return (
     <>
       {parts.map((part, i) =>
-        part.toLowerCase() === word.toLowerCase() ? (
+        testRegex.test(part) ? (
           <mark
             key={i}
             className="not-italic bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded px-0.5 font-semibold"
