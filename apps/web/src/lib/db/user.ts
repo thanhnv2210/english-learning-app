@@ -61,3 +61,7 @@ export async function toggleFavouritePage(userId: number, href: string): Promise
 
   await db.update(users).set({ favouritePages: next }).where(eq(users.id, userId))
 }
+
+export async function reorderFavouritePages(userId: number, orderedPages: string[]): Promise<void> {
+  await db.update(users).set({ favouritePages: orderedPages }).where(eq(users.id, userId))
+}

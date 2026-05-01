@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { toggleFavouritePageAction } from '@/app/actions/favourite-pages'
+import { toggleFavouritePageAction, reorderFavouritePagesAction } from '@/app/actions/favourite-pages'
 
 type NavItem = { href: string; label: string; icon: string }
 type NavGroup = { label: string; items: NavItem[] }
@@ -45,6 +45,7 @@ const GROUPS: NavGroup[] = [
   {
     label: 'Guides',
     items: [
+      { href: '/cheat-sheet', label: 'Cheat Sheet', icon: '🗺️' },
       { href: '/how-to-answer', label: 'How to Answer', icon: '💡' },
       { href: '/irregular-verbs', label: 'Irregular Verbs', icon: '🔀' },
       { href: '/how-to-answer/question-anatomy', label: 'Question Anatomy', icon: '🔍' },
@@ -113,6 +114,9 @@ export function NavSidebar({
   const [fontLevel, setFontLevel] = useState(0)
   const [favs, setFavs] = useState<string[]>(favouritePages)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [favsExpanded, setFavsExpanded] = useState(false)
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dropIndex, setDropIndex] = useState<number | null>(null)
 
   const isCollapsed = isNarrow || userCollapsed
 
@@ -162,7 +166,47 @@ export function NavSidebar({
     toggleFavouritePageAction(href)
   }
 
-  const favouritedItems = ALL_NAV_ITEMS.filter((item) => favs.includes(item.href))
+  function handleDragStart(index: number) {
+    setDragIndex(index)
+  }
+
+  function handleDragOver(index: number) {
+    if (dragIndex !== null && dragIndex !== index) setDropIndex(index)
+  }
+
+  function handleDrop() {
+    if (dragIndex === null || dropIndex === null || dragIndex === dropIndex) {
+      setDragIndex(null)
+      setDropIndex(null)
+      return
+    }
+    const newOrder = [...favs]
+    const [moved] = newOrder.splice(dragIndex, 1)
+    newOrder.splice(dropIndex, 0, moved)
+    setFavs(newOrder)
+    reorderFavouritePagesAction(newOrder)
+    setDragIndex(null)
+    setDropIndex(null)
+  }
+
+  function handleDragEnd() {
+    setDragIndex(null)
+    setDropIndex(null)
+  }
+
+  function handleMoveToTop(href: string) {
+    const newOrder = [href, ...favs.filter((f) => f !== href)]
+    setFavs(newOrder)
+    reorderFavouritePagesAction(newOrder)
+  }
+
+  // Preserve order from favs array (order matters for drag-to-reorder)
+  const favouritedItems = favs
+    .map((href) => ALL_NAV_ITEMS.find((item) => item.href === href))
+    .filter((item): item is NavItem => item !== undefined)
+
+  const VISIBLE_COUNT = 5
+  const hasMore = favouritedItems.length > VISIBLE_COUNT
 
   // ── Collapsed: icon-only rail ────────────────────────────────────────────────
   if (isCollapsed) {
@@ -276,17 +320,37 @@ export function NavSidebar({
         {/* Favourites section */}
         {favouritedItems.length > 0 && (
           <div className="mb-2">
-            <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-amber-500 dark:text-amber-400">
-              ★ Favourites
-            </p>
-            <div className="flex flex-col gap-0.5">
-              {favouritedItems.map((item) => (
-                <NavLink
+            <div className="flex items-center justify-between px-3 pb-1">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-500 dark:text-amber-400">
+                ★ Favourites
+              </p>
+              {hasMore && (
+                <button
+                  onClick={() => setFavsExpanded((v) => !v)}
+                  title={favsExpanded ? 'Show less' : `Show all ${favouritedItems.length}`}
+                  className="text-[10px] text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 transition-colors"
+                >
+                  {favsExpanded ? '▲ less' : `▼ +${favouritedItems.length - VISIBLE_COUNT}`}
+                </button>
+              )}
+            </div>
+            <div
+              className={`flex flex-col gap-0.5 overflow-y-auto ${!favsExpanded ? 'max-h-[185px]' : ''}`}
+            >
+              {favouritedItems.map((item, index) => (
+                <FavDragItem
                   key={item.href}
                   item={item}
+                  index={index}
                   pathname={pathname}
-                  isFav
                   onToggleFav={handleToggleFav}
+                  dragIndex={dragIndex}
+                  dropIndex={dropIndex}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  onDragEnd={handleDragEnd}
+                  onMoveToTop={handleMoveToTop}
                 />
               ))}
             </div>
@@ -394,6 +458,83 @@ export function NavSidebar({
         )}
       </div>
     </aside>
+  )
+}
+
+function FavDragItem({
+  item,
+  index,
+  pathname,
+  onToggleFav,
+  dragIndex,
+  dropIndex,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  onMoveToTop,
+}: {
+  item: NavItem
+  index: number
+  pathname: string
+  onToggleFav: (href: string) => void
+  dragIndex: number | null
+  dropIndex: number | null
+  onDragStart: (i: number) => void
+  onDragOver: (i: number) => void
+  onDrop: () => void
+  onDragEnd: () => void
+  onMoveToTop: (href: string) => void
+}) {
+  const active = isActive(item.href, pathname)
+  const isDragging = dragIndex === index
+  const isDropTarget = dropIndex === index && dragIndex !== null && dragIndex !== index
+
+  return (
+    <div
+      draggable
+      onDragStart={() => onDragStart(index)}
+      onDragOver={(e) => { e.preventDefault(); onDragOver(index) }}
+      onDrop={(e) => { e.preventDefault(); onDrop() }}
+      onDragEnd={onDragEnd}
+      className={`group relative transition-opacity ${isDragging ? 'opacity-40' : ''} ${isDropTarget ? 'border-t-2 border-amber-400' : ''}`}
+    >
+      <Link
+        href={item.href}
+        className={`flex items-center gap-2 rounded-lg py-2 px-3 text-sm font-medium transition-colors pr-7 ${
+          active
+            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+        }`}
+      >
+        <span
+          className="cursor-grab active:cursor-grabbing text-faint text-xs shrink-0 select-none"
+          title="Drag to reorder"
+        >
+          ⠿
+        </span>
+        <span className="text-base shrink-0">{item.icon}</span>
+        {item.label}
+      </Link>
+      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
+        {index > 0 && (
+          <button
+            onClick={() => onMoveToTop(item.href)}
+            title="Move to top"
+            className="rounded p-0.5 text-xs leading-none text-faint hover:text-amber-500 transition-colors"
+          >
+            ⇑
+          </button>
+        )}
+        <button
+          onClick={() => onToggleFav(item.href)}
+          title="Remove from favourites"
+          className="rounded p-0.5 text-sm leading-none text-amber-400 hover:text-red-400 transition-colors"
+        >
+          ★
+        </button>
+      </div>
+    </div>
   )
 }
 
