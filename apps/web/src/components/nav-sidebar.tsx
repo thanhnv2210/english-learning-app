@@ -88,6 +88,8 @@ type FontLevel = 0 | 1 | 2
 const FONT_LEVEL_SIZES  = ['text-xs', 'text-sm', 'text-base']
 const FONT_STORAGE = 'ielts-font-scale'
 const COLLAPSE_STORAGE = 'ielts-sidebar-collapsed'
+const NAV_GROUPS_STORAGE = 'ielts-nav-groups'
+const NAV_FAVS_EXPANDED_STORAGE = 'ielts-nav-favs-expanded'
 
 function isActive(href: string, pathname: string) {
   return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
@@ -106,8 +108,8 @@ export function NavSidebar({
 }) {
   const pathname = usePathname()
 
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(GROUPS.map((g) => [g.label, groupContainsActive(g, pathname)])),
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(
+    () => Object.fromEntries(GROUPS.map((g) => [g.label, false])),
   )
   const [userCollapsed, setUserCollapsed] = useState(false)
   const [isNarrow, setIsNarrow] = useState(false)
@@ -133,6 +135,21 @@ export function NavSidebar({
       }
     }
 
+    try {
+      const groupsStored = localStorage.getItem(NAV_GROUPS_STORAGE)
+      if (groupsStored) {
+        const parsed = JSON.parse(groupsStored) as Record<string, boolean>
+        setOpenGroups((prev) => ({ ...prev, ...parsed }))
+      } else {
+        // No saved config — open the group that contains the active page
+        setOpenGroups((prev) =>
+          Object.fromEntries(GROUPS.map((g) => [g.label, prev[g.label] || groupContainsActive(g, pathname)]))
+        )
+      }
+      const favsStored = localStorage.getItem(NAV_FAVS_EXPANDED_STORAGE)
+      if (favsStored !== null) setFavsExpanded(favsStored === 'true')
+    } catch { /* ignore malformed storage */ }
+
     const mq = window.matchMedia('(max-width: 1023px)')
     setIsNarrow(mq.matches)
     const handler = (e: MediaQueryListEvent) => setIsNarrow(e.matches)
@@ -141,7 +158,11 @@ export function NavSidebar({
   }, [])
 
   function toggleGroup(label: string) {
-    setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }))
+    setOpenGroups((prev) => {
+      const next = { ...prev, [label]: !prev[label] }
+      try { localStorage.setItem(NAV_GROUPS_STORAGE, JSON.stringify(next)) } catch { }
+      return next
+    })
   }
 
   function toggleCollapse() {
@@ -326,7 +347,11 @@ export function NavSidebar({
               </p>
               {hasMore && (
                 <button
-                  onClick={() => setFavsExpanded((v) => !v)}
+                  onClick={() => setFavsExpanded((v) => {
+                    const next = !v
+                    try { localStorage.setItem(NAV_FAVS_EXPANDED_STORAGE, String(next)) } catch { }
+                    return next
+                  })}
                   title={favsExpanded ? 'Show less' : `Show all ${favouritedItems.length}`}
                   className="text-[10px] text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 transition-colors"
                 >
