@@ -18,6 +18,7 @@ type Stage =
   | 'library'
   | 'generating'
   | 'loading'
+  | 'custom'
   | 'drafting'
   | 'critiquing'
   | 'writing'
@@ -56,6 +57,10 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
   const [taskType, setTaskType] = useState('')
   const [essay, setEssay] = useState('')
   const [libraryTopics, setLibraryTopics] = useState<LibraryTopic[]>([])
+
+  // ── Custom topic input ──
+  const [customTopicInput, setCustomTopicInput] = useState('')
+  const [customTaskType, setCustomTaskType] = useState('')
 
   // ── Outline (drafting mode) ──
   const [outline, setOutline] = useState({ introduction: '', body1: '', body2: '', conclusion: '' })
@@ -138,6 +143,14 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
   function handleSelectLibraryTopic(selected: LibraryTopic) {
     setTopic(selected.prompt)
     setTaskType(selected.taskType)
+    setStage(draftingMode ? 'drafting' : 'writing')
+  }
+
+  // ── Confirm custom topic ──
+  function handleConfirmCustomTopic() {
+    if (!customTopicInput.trim()) return
+    setTopic(customTopicInput.trim())
+    setTaskType(customTaskType)
     setStage(draftingMode ? 'drafting' : 'writing')
   }
 
@@ -271,6 +284,8 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
     setSampleResult(null)
     setShowSampleEssay(false)
     setLibraryTopics([])
+    setCustomTopicInput('')
+    setCustomTaskType('')
   }
 
   const wordCount = essay.trim() ? essay.trim().split(/\s+/).length : 0
@@ -353,7 +368,7 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <button
               onClick={handleOpenLibrary}
               disabled={domainCount === 0}
@@ -374,6 +389,14 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
               <span className="text-sm font-semibold text-foreground">Generate New</span>
               <span className="text-xs text-faint">AI creates a fresh topic and saves it</span>
             </button>
+
+            <button
+              onClick={() => { setCustomTopicInput(''); setCustomTaskType(''); setStage('custom') }}
+              className="flex flex-col gap-1 rounded-xl border-2 border-border px-5 py-4 text-left transition-colors hover:border-blue-400 hover:bg-blue-50"
+            >
+              <span className="text-sm font-semibold text-foreground">Enter Your Own</span>
+              <span className="text-xs text-faint">Paste or type any IELTS question</span>
+            </button>
           </div>
         </div>
       )}
@@ -389,6 +412,61 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
       {stage === 'loading' && (
         <div className="flex items-center justify-center rounded-xl border border-border bg-card p-10">
           <p className="animate-pulse text-sm text-faint">Loading topics from library…</p>
+        </div>
+      )}
+
+      {/* ── Custom topic input ── */}
+      {stage === 'custom' && (
+        <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">
+              Your question — <span className="text-blue-600">{domain}</span>
+            </p>
+            <button
+              onClick={() => setStage('options')}
+              className="text-xs text-faint hover:text-muted-foreground"
+            >
+              ← Back
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-muted-foreground">Essay question</label>
+            <textarea
+              value={customTopicInput}
+              onChange={(e) => setCustomTopicInput(e.target.value)}
+              placeholder="Paste or type the IELTS Task 2 question here…"
+              rows={4}
+              className="w-full resize-none rounded-lg border border-border px-3 py-2 text-sm leading-relaxed outline-none focus:border-blue-400"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-muted-foreground">Task type (optional)</label>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(TASK_TYPE_LABELS).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setCustomTaskType((prev) => (prev === key ? '' : key))}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                    customTaskType === key
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-subtle text-muted-foreground hover:bg-border'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={handleConfirmCustomTopic}
+            disabled={!customTopicInput.trim()}
+            className="self-end rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-40"
+          >
+            {draftingMode ? 'Plan My Outline →' : 'Write Essay →'}
+          </button>
         </div>
       )}
 
