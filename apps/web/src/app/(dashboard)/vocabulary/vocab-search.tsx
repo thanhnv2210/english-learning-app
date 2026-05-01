@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useLocalBoolean } from '@/lib/hooks/use-local-boolean'
 import { addWordToLibrary } from '@/app/actions/vocabulary'
 import { WordCard } from './vocabulary-list'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
@@ -8,6 +9,7 @@ import type { VocabularyCard } from '@/lib/db/vocabulary'
 type Status = 'idle' | 'searching' | 'found' | 'new' | 'added' | 'error'
 
 export function VocabSearch() {
+  const [open, setOpen] = useLocalBoolean('vocabulary:search-open', false)
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<Status>('idle')
   const [card, setCard] = useState<VocabularyCard | null>(null)
@@ -48,13 +50,20 @@ export function VocabSearch() {
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
-      <div>
-        <h2 className="text-sm font-semibold text-foreground">Look up a word</h2>
-        <p className="text-xs text-faint mt-0.5">
-          Search any IELTS Academic word — the system will generate a full card and auto-detect its topic domain.
-        </p>
-      </div>
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-subtle transition-colors"
+      >
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Look up a word</h2>
+          <p className="text-xs text-faint mt-0.5">
+            Search any IELTS Academic word — AI generates a full card and auto-detects the topic domain.
+          </p>
+        </div>
+        <span className="text-faint text-xs shrink-0">{open ? '▲' : '▼'}</span>
+      </button>
+      {open && <div className="px-5 pb-5 flex flex-col gap-4">
 
       {/* Search input */}
       <form onSubmit={handleSearch} className="flex gap-2">
@@ -133,6 +142,7 @@ export function VocabSearch() {
           <WordCard word={card} />
         </div>
       )}
+      </div>}
     </div>
   )
 }

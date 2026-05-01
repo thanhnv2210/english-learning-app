@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLocalBoolean } from '@/lib/hooks/use-local-boolean'
 import { saveIdiomAction } from '@/app/actions/idioms'
 import type { IdiomSkill, IdiomContext } from '@/lib/db/schema'
 import type { IdiomLookupResult } from '@/lib/ielts/idioms/prompts'
@@ -37,6 +38,7 @@ type Status = 'idle' | 'searching' | 'done' | 'invalid' | 'error'
 
 export function IdiomSearch() {
   const router = useRouter()
+  const [open, setOpen] = useLocalBoolean('idioms:search-open', false)
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<Status>('idle')
   const [card, setCard] = useState<CardState | null>(null)
@@ -96,13 +98,20 @@ export function IdiomSearch() {
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
-      <div>
-        <h2 className="text-sm font-semibold text-foreground">Look up an idiom</h2>
-        <p className="text-xs text-faint mt-0.5">
-          Enter an idiom phrase — AI will fill in the meaning, register, and example sentences.
-        </p>
-      </div>
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-subtle transition-colors"
+      >
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Look up an idiom</h2>
+          <p className="text-xs text-faint mt-0.5">
+            Enter an idiom phrase — AI will fill in the meaning, register, and example sentences.
+          </p>
+        </div>
+        <span className="text-faint text-xs shrink-0">{open ? '▲' : '▼'}</span>
+      </button>
+      {open && <div className="px-5 pb-5 flex flex-col gap-4">
 
       <div className="flex gap-2">
         <input
@@ -141,6 +150,7 @@ export function IdiomSearch() {
           onSaved={markSaved}
         />
       )}
+      </div>}
     </div>
   )
 }

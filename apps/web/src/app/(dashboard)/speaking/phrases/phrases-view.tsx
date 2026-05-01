@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useOptimistic, useTransition } from 'react'
+import { useLocalBoolean } from '@/lib/hooks/use-local-boolean'
 import { addPhraseAction, deletePhraseAction } from '@/app/actions/speaking-phrases'
 import { SPEAKING_PHRASE_CATEGORIES, WRITING_PHRASE_CATEGORIES } from '@/lib/ielts/speaking/phrase-categories'
 import type { SpeakingPhrase } from '@/lib/db/speaking-phrases'
@@ -23,6 +24,7 @@ type Props = {
 }
 
 export function PhrasesView({ initialPhrases, skill }: Props) {
+  const [addOpen, setAddOpen] = useLocalBoolean(`${skill}-phrases:add-form-open`, false)
   const categories = skill === 'writing' ? WRITING_PHRASE_CATEGORIES : SPEAKING_PHRASE_CATEGORIES
   const [phrases, setPhrasesOptimistic] = useOptimistic(initialPhrases)
   const [, startTransition] = useTransition()
@@ -74,8 +76,15 @@ export function PhrasesView({ initialPhrases, skill }: Props) {
   return (
     <div className="flex flex-col gap-6">
       {/* Add form */}
-      <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-foreground">Add a phrase</h2>
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <button
+          onClick={() => setAddOpen(!addOpen)}
+          className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-subtle transition-colors"
+        >
+          <h2 className="text-sm font-semibold text-foreground">Add a phrase</h2>
+          <span className="text-faint text-xs shrink-0">{addOpen ? '▲' : '▼'}</span>
+        </button>
+        {addOpen && <div className="px-5 pb-5 flex flex-col gap-3">
         <form onSubmit={handleAdd} className="flex flex-col gap-3">
           <textarea
             value={phrase}
@@ -109,6 +118,7 @@ export function PhrasesView({ initialPhrases, skill }: Props) {
             </button>
           </div>
         </form>
+        </div>}
       </div>
 
       {/* Category filter chips */}

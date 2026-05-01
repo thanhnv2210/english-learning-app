@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useTransition } from 'react'
+import { useLocalBoolean } from '@/lib/hooks/use-local-boolean'
 import Link from 'next/link'
 import { deleteGrammarTrapAction, updateGrammarTrapRankAction } from '@/app/actions/grammar-traps'
 import type { GrammarTrapCard } from '@/lib/db/grammar-traps'
@@ -26,6 +27,9 @@ type GenerateState =
 export function GrammarTrapsView({ initialEntries }: { initialEntries: GrammarTrapCard[] }) {
   const [entries, setEntries] = useState(initialEntries)
   const [, startTransition] = useTransition()
+
+  // Collapsible sections
+  const [checkerOpen, setCheckerOpen] = useLocalBoolean('grammar-traps:quick-checker-open', false)
 
   // Quick Checker state
   const [checkInput, setCheckInput] = useState('')
@@ -155,11 +159,18 @@ export function GrammarTrapsView({ initialEntries }: { initialEntries: GrammarTr
       </div>
 
       {/* ── Quick Checker ── */}
-      <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5">
-        <div>
-          <h2 className="text-sm font-semibold text-foreground">Quick Checker</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">Type a phrase or sentence to check for noun form errors.</p>
-        </div>
+      <section className="rounded-xl border border-border bg-card overflow-hidden">
+        <button
+          onClick={() => setCheckerOpen(!checkerOpen)}
+          className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-subtle transition-colors"
+        >
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Quick Checker</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Type a phrase or sentence to check for noun form errors.</p>
+          </div>
+          <span className="text-faint text-xs shrink-0">{checkerOpen ? '▲' : '▼'}</span>
+        </button>
+        {checkerOpen && <div className="px-5 pb-5 flex flex-col gap-3">
         <form onSubmit={handleCheck} className="flex gap-2 flex-col sm:flex-row">
           <input
             type="text"
@@ -183,6 +194,7 @@ export function GrammarTrapsView({ initialEntries }: { initialEntries: GrammarTr
         {checkState.status === 'error' && (
           <p className="text-xs text-red-500">{checkState.message}</p>
         )}
+        </div>}
       </section>
 
       {/* ── Generate & Add ── */}

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLocalBoolean } from '@/lib/hooks/use-local-boolean'
 import { saveCollocationAction } from '@/app/actions/collocations'
 import type { CollocationSkill } from '@/lib/db/schema'
 import type { CollocationResult } from '@/lib/ielts/collocations/prompts'
@@ -27,6 +28,7 @@ type Status = 'idle' | 'searching' | 'done' | 'invalid' | 'error'
 
 export function CollocationSearch() {
   const router = useRouter()
+  const [open, setOpen] = useLocalBoolean('collocations:search-open', false)
   const [query, setQuery] = useState('')
   const [mode, setMode] = useState<'word' | 'phrase'>('word')
   const [status, setStatus] = useState<Status>('idle')
@@ -99,13 +101,20 @@ export function CollocationSearch() {
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
-      <div>
-        <h2 className="text-sm font-semibold text-foreground">Search collocations</h2>
-        <p className="text-xs text-faint mt-0.5">
-          Enter a word to find common collocations, or a phrase to check a specific one.
-        </p>
-      </div>
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-subtle transition-colors"
+      >
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Search collocations</h2>
+          <p className="text-xs text-faint mt-0.5">
+            Enter a word to find common collocations, or a phrase to check a specific one.
+          </p>
+        </div>
+        <span className="text-faint text-xs shrink-0">{open ? '▲' : '▼'}</span>
+      </button>
+      {open && <div className="px-5 pb-5 flex flex-col gap-4">
 
       {/* Input + buttons */}
       <div className="flex gap-2">
@@ -171,6 +180,7 @@ export function CollocationSearch() {
           ))}
         </div>
       )}
+      </div>}
     </div>
   )
 }

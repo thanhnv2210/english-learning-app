@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useOptimistic, useTransition } from 'react'
+import { useLocalBoolean } from '@/lib/hooks/use-local-boolean'
 import { addSentenceAction, deleteSentenceAction } from '@/app/actions/word-sentences'
 import { SENTENCE_CONTEXTS } from '@/lib/ielts/vocabulary/sentence-contexts'
 import type { WordSentence } from '@/lib/db/word-sentences'
@@ -20,6 +21,7 @@ type Props = {
 }
 
 export function SentencesView({ wordId, initialSentences }: Props) {
+  const [addOpen, setAddOpen] = useLocalBoolean('sentences:add-form-open', false)
   const [sentences, setSentences] = useOptimistic(initialSentences)
   const [, startTransition] = useTransition()
   const [text, setText] = useState('')
@@ -57,8 +59,15 @@ export function SentencesView({ wordId, initialSentences }: Props) {
   return (
     <div className="flex flex-col gap-6">
       {/* Add form */}
-      <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-foreground">Add a sentence</h2>
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <button
+          onClick={() => setAddOpen(!addOpen)}
+          className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-subtle transition-colors"
+        >
+          <h2 className="text-sm font-semibold text-foreground">Add a sentence</h2>
+          <span className="text-faint text-xs shrink-0">{addOpen ? '▲' : '▼'}</span>
+        </button>
+        {addOpen && <div className="px-5 pb-5 flex flex-col gap-3">
         <form onSubmit={handleAdd} className="flex flex-col gap-3">
           <textarea
             value={text}
@@ -86,6 +95,7 @@ export function SentencesView({ wordId, initialSentences }: Props) {
             </button>
           </div>
         </form>
+        </div>}
       </div>
 
       {/* Sentence list */}

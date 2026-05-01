@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useOptimistic, useTransition } from 'react'
+import { useLocalBoolean } from '@/lib/hooks/use-local-boolean'
 import { addWordPairAction, deleteWordPairAction } from '@/app/actions/word-pairs'
 import { WORD_PAIR_CATEGORIES, CATEGORY_COLORS } from '@/lib/ielts/word-pairs/categories'
 import type { WordPair } from '@/lib/db/word-pairs'
@@ -66,6 +67,10 @@ function buildSearchEntries(
 export function WordPairsView({ initialPairs }: Props) {
   const [pairs, setPairsOptimistic] = useOptimistic(initialPairs)
   const [, startTransition] = useTransition()
+
+  // Collapsible sections (persisted in localStorage, default closed)
+  const [aiSearchOpen, setAiSearchOpen] = useLocalBoolean('word-pairs:ai-search-open', false)
+  const [addFormOpen, setAddFormOpen] = useLocalBoolean('word-pairs:add-form-open', false)
 
   // Manual add form
   const [wordA, setWordA] = useState('')
@@ -223,11 +228,18 @@ export function WordPairsView({ initialPairs }: Props) {
     <div className="flex flex-col gap-6">
 
       {/* ── AI Search ─────────────────────────────────────────────────────── */}
-      <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-foreground">AI Search</h2>
-          <span className="text-xs text-faint">— checks your library first, then asks AI</span>
-        </div>
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <button
+          onClick={() => setAiSearchOpen(!aiSearchOpen)}
+          className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-subtle transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-foreground">AI Search</h2>
+            <span className="text-xs text-faint">— checks your library first, then asks AI</span>
+          </div>
+          <span className="text-faint text-xs shrink-0">{aiSearchOpen ? '▲' : '▼'}</span>
+        </button>
+        {aiSearchOpen && <div className="px-5 pb-5 flex flex-col gap-4">
         <form onSubmit={handleSearch} className="flex gap-2">
           <input
             value={searchQuery}
@@ -345,11 +357,19 @@ export function WordPairsView({ initialPairs }: Props) {
             })()}
           </div>
         )}
+        </div>}
       </div>
 
       {/* ── Manual add form ───────────────────────────────────────────────── */}
-      <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-foreground">Add a word pair</h2>
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <button
+          onClick={() => setAddFormOpen(!addFormOpen)}
+          className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-subtle transition-colors"
+        >
+          <h2 className="text-sm font-semibold text-foreground">Add a word pair</h2>
+          <span className="text-faint text-xs shrink-0">{addFormOpen ? '▲' : '▼'}</span>
+        </button>
+        {addFormOpen && <div className="px-5 pb-5 flex flex-col gap-3">
         <form onSubmit={handleAdd} className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-3">
             <input
@@ -391,9 +411,10 @@ export function WordPairsView({ initialPairs }: Props) {
             </button>
           </div>
         </form>
+        </div>}
       </div>
 
-      {/* ── Library search ───────────────────────────────────────────────── */}
+      {/* ── Library search ───────────────────────────────��───────────────── */}
       {pairs.length > 0 && (
         <div className="relative">
           <input

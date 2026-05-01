@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useTransition } from 'react'
+import { useLocalBoolean } from '@/lib/hooks/use-local-boolean'
 import type { WrongDecisionLog, WrongDecisionStats } from '@/lib/db/wrong-decisions'
 import type { WrongDecisionAnalysis } from '@/app/api/wrong-decisions/analyse/route'
 import {
@@ -855,7 +856,7 @@ export function WrongDecisionsView({
 }) {
   const [logs, setLogs] = useState<WrongDecisionLog[]>(initialLogs)
   const [stats, setStats] = useState<WrongDecisionStats>(initialStats)
-  const [showForm, setShowForm] = useState(false)
+  const [showForm, setShowForm] = useLocalBoolean('wrong-decisions:log-form-open', false)
   const [skillFilter, setSkillFilter] = useState<string>('all')
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [roleFilter, setRoleFilter] = useState<string>('all')
