@@ -25,7 +25,8 @@
     "db:seed:projects": "dotenv -e .env.local -- tsx src/lib/db/seeds/projects.ts",
     "db:seed:vocab-banks": "dotenv -e .env.local -- tsx src/lib/db/seeds/vocab-banks.ts",
     "db:seed:grammar-traps": "dotenv -e .env.local -- tsx src/lib/db/seeds/grammar-traps.ts",
-    "db:seed:speaking-phrases": "dotenv -e .env.local -- tsx src/lib/db/seeds/speaking-phrases.ts"
+    "db:seed:speaking-phrases": "dotenv -e .env.local -- tsx src/lib/db/seeds/speaking-phrases.ts",
+    "db:seed:word-pairs": "dotenv -e .env.local -- tsx src/lib/db/seeds/word-pairs.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",

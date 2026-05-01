@@ -39,6 +39,7 @@ const GROUPS: NavGroup[] = [
       { href: '/grammar-traps', label: 'Grammar Traps', icon: '⚠️' },
       { href: '/speaking/phrases', label: 'Speaking Phrases', icon: '🗣️' },
       { href: '/writing/phrases', label: 'Writing Phrases', icon: '✍️' },
+      { href: '/word-pairs', label: 'Word Pairs', icon: '⇄' },
     ],
   },
   {

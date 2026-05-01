@@ -566,6 +566,23 @@ export const wordReviewStates = pgTable('word_review_states', {
 })
 
 // ─── Speaking Phrase Bank ─────────────────────────────────────────────────────
+// ─── Word Pairs ───────────────────────────────────────────────────────────────
+// Interchangeable word pairs with explanation of difference.
+// category: 'regional' | 'register' | 'formality' | 'spelling' | 'context' | 'other'
+
+export const wordPairs = pgTable('word_pairs', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  wordA: text('word_a').notNull(),
+  wordB: text('word_b').notNull(),
+  explanation: text('explanation').notNull(),
+  examples: jsonb('examples').$type<string[]>().notNull().default([]),
+  category: text('category').notNull().default('Other'),
+  isSystem: boolean('is_system').notNull().default(false),
+  rank: integer('rank').notNull().default(3),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // User-curated bank of sentences/phrases to mimic for speaking practice.
 // category: 'opinion' | 'agreeing' | 'disagreeing' | 'buying-time' | 'describing' | 'part2-opener' | 'speculation' | 'example' | 'other'
 
