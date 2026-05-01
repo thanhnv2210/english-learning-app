@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { listTopicsByDomain } from '@/app/actions/writing'
+import { listTopicsByDomain, saveTopicToLibrary } from '@/app/actions/writing'
 import type { LibraryTopic } from '@/lib/db/writing'
 import { saveExam, saveFeedback } from '@/app/actions/exam'
 import { FeedbackView } from '@/components/feedback-view'
@@ -146,12 +146,16 @@ export function WritingTask({ targetBand = 6.5, domains, libraryCounts }: Props)
     setStage(draftingMode ? 'drafting' : 'writing')
   }
 
-  // ── Confirm custom topic ──
-  function handleConfirmCustomTopic() {
+  // ── Confirm custom topic (auto-saves to library) ──
+  async function handleConfirmCustomTopic() {
     if (!customTopicInput.trim()) return
-    setTopic(customTopicInput.trim())
+    const prompt = customTopicInput.trim()
+    setTopic(prompt)
     setTaskType(customTaskType)
     setStage(draftingMode ? 'drafting' : 'writing')
+    saveTopicToLibrary({ domain, prompt, taskType: customTaskType }).then(() => {
+      setLocalCounts((prev) => ({ ...prev, [domain]: (prev[domain] ?? 0) + 1 }))
+    })
   }
 
   // ── Outline critique ──
