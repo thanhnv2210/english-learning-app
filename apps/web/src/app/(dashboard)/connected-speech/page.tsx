@@ -502,7 +502,7 @@ function QuickStartSection({ onSelect }: { onSelect: (phrase: string) => void })
               </div>
             )
           })}
-          <p className="text-xs text-blue-600 pt-1">
+          <p className="text-xs text-blue-600 dark:text-blue-400 pt-1">
             💡 Hover over a chip to see how it sounds. Click to load it into the analyser.
           </p>
         </div>

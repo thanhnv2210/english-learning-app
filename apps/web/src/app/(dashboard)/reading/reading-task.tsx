@@ -330,7 +330,7 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
                   onClick={() => setSelectedDomain(d)}
                   className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
                     selectedDomain?.id === d.id
-                      ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium dark:bg-blue-900/20 dark:text-blue-300'
                       : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-muted'
                   }`}
                 >
@@ -388,7 +388,7 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
                   {(() => {
                     const count = libraryCounts[selectedDomain?.name ?? ''] ?? 0
                     return count > 0 ? (
-                      <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                      <span className="rounded-full bg-blue-100 dark:bg-blue-900/20 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-300">
                         {count} passage{count !== 1 ? 's' : ''}
                       </span>
                     ) : (
@@ -455,7 +455,7 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
             title={highlightMode ? 'Highlighting on' : 'Highlight text in passage or questions'}
             className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
               highlightMode
-                ? 'border-yellow-400 bg-yellow-100 text-yellow-800'
+                ? 'border-yellow-400 bg-yellow-100 text-yellow-800 dark:border-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-300'
                 : 'border-border bg-card text-muted-foreground hover:bg-muted'
             }`}
           >
@@ -496,7 +496,7 @@ export function ReadingTask({ domains, targetBand = 6.5, libraryCounts = {} }: P
 
       {/* Hint bar */}
       {highlightMode && (
-        <p className="shrink-0 text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-1.5">
+        <p className="shrink-0 text-xs text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg px-3 py-1.5">
           Select any text in the passage or questions to highlight it. Click a highlight to remove it.
         </p>
       )}
@@ -638,8 +638,8 @@ function TFNGRow({ q, value, onChange, result, correctAnswer, disabled, highligh
 
   return (
     <div className={`rounded-lg border p-3 flex flex-col gap-2 text-sm transition-colors ${
-      result === true ? 'border-green-200 bg-green-50' :
-      result === false ? 'border-red-200 bg-red-50' :
+      result === true ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' :
+      result === false ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20' :
       'border-border bg-muted'
     }`}>
       <p
@@ -678,8 +678,8 @@ function ShortAnswerRow({ q, value, onChange, result, correctAnswer, disabled, h
 
   return (
     <div className={`rounded-lg border p-3 flex flex-col gap-2 text-sm transition-colors ${
-      result === true ? 'border-green-200 bg-green-50' :
-      result === false ? 'border-red-200 bg-red-50' :
+      result === true ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' :
+      result === false ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20' :
       'border-border bg-muted'
     }`}>
       <p

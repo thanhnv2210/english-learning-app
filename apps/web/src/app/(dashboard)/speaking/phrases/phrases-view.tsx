@@ -7,14 +7,14 @@ import { SPEAKING_PHRASE_CATEGORIES, WRITING_PHRASE_CATEGORIES } from '@/lib/iel
 import type { SpeakingPhrase } from '@/lib/db/speaking-phrases'
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Opinion':       'bg-blue-50 text-blue-700',
-  'Agreeing':      'bg-green-50 text-green-700',
-  'Disagreeing':   'bg-red-50 text-red-700',
-  'Buying Time':   'bg-yellow-50 text-yellow-700',
-  'Describing':    'bg-purple-50 text-purple-700',
-  'Part 2 Opener': 'bg-indigo-50 text-indigo-700',
-  'Speculation':   'bg-orange-50 text-orange-700',
-  'Example':       'bg-teal-50 text-teal-700',
+  'Opinion':       'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
+  'Agreeing':      'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300',
+  'Disagreeing':   'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300',
+  'Buying Time':   'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300',
+  'Describing':    'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300',
+  'Part 2 Opener': 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300',
+  'Speculation':   'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300',
+  'Example':       'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-300',
   'Other':         'bg-subtle text-muted-foreground',
 }
 

@@ -13,10 +13,10 @@ import type { RiskLevel, ComparisonRow } from '@/lib/guides/language-comparison'
 // ── Risk badge ────────────────────────────────────────────────────────────────
 
 const RISK_STYLES: Record<RiskLevel, { bg: string; text: string; label: string }> = {
-  critical: { bg: 'bg-rose-100',   text: 'text-rose-700',   label: 'Critical' },
-  high:     { bg: 'bg-orange-100', text: 'text-orange-700', label: 'High' },
-  medium:   { bg: 'bg-amber-100',  text: 'text-amber-700',  label: 'Medium' },
-  low:      { bg: 'bg-green-100',  text: 'text-green-700',  label: 'Low' },
+  critical: { bg: 'bg-rose-100 dark:bg-rose-900/30',     text: 'text-rose-700 dark:text-rose-300',     label: 'Critical' },
+  high:     { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-300', label: 'High' },
+  medium:   { bg: 'bg-amber-100 dark:bg-amber-900/30',   text: 'text-amber-700 dark:text-amber-300',   label: 'Medium' },
+  low:      { bg: 'bg-green-100 dark:bg-green-900/30',   text: 'text-green-700 dark:text-green-300',   label: 'Low' },
 }
 
 function RiskBadge({ risk }: { risk: RiskLevel }) {
@@ -61,18 +61,18 @@ function CompRow({ row }: { row: ComparisonRow }) {
       </button>
 
       {open && (
-        <div className="border-t border-gray-100 px-4 pb-4 pt-3 space-y-3">
+        <div className="border-t border-border px-4 pb-4 pt-3 space-y-3">
           {/* Side-by-side values */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {/* Vietnamese */}
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-600 mb-1">Vietnamese</p>
-              <p className="text-xs font-semibold text-emerald-900 mb-1">{row.vi.label}</p>
-              <p className="text-xs leading-relaxed text-emerald-800">{row.vi.detail}</p>
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400 mb-1">Vietnamese</p>
+              <p className="text-xs font-semibold text-emerald-900 dark:text-emerald-200 mb-1">{row.vi.label}</p>
+              <p className="text-xs leading-relaxed text-emerald-800 dark:text-emerald-300">{row.vi.detail}</p>
               {row.vi.examples && row.vi.examples.length > 0 && (
                 <ul className="mt-2 space-y-0.5">
                   {row.vi.examples.map((ex, i) => (
-                    <li key={i} className="text-[11px] font-mono text-emerald-700 bg-emerald-100 rounded px-2 py-0.5">
+                    <li key={i} className="text-[11px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/30 rounded px-2 py-0.5">
                       {ex}
                     </li>
                   ))}
@@ -81,14 +81,14 @@ function CompRow({ row }: { row: ComparisonRow }) {
             </div>
 
             {/* English */}
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600 mb-1">English</p>
-              <p className="text-xs font-semibold text-blue-900 mb-1">{row.en.label}</p>
-              <p className="text-xs leading-relaxed text-blue-800">{row.en.detail}</p>
+            <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600 dark:text-blue-400 mb-1">English</p>
+              <p className="text-xs font-semibold text-blue-900 dark:text-blue-200 mb-1">{row.en.label}</p>
+              <p className="text-xs leading-relaxed text-blue-800 dark:text-blue-300">{row.en.detail}</p>
               {row.en.examples && row.en.examples.length > 0 && (
                 <ul className="mt-2 space-y-0.5">
                   {row.en.examples.map((ex, i) => (
-                    <li key={i} className="text-[11px] font-mono text-blue-700 bg-blue-100 rounded px-2 py-0.5">
+                    <li key={i} className="text-[11px] font-mono text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 rounded px-2 py-0.5">
                       {ex}
                     </li>
                   ))}
@@ -99,9 +99,9 @@ function CompRow({ row }: { row: ComparisonRow }) {
 
           {/* IELTS tip */}
           {row.ieltsTip && (
-            <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2.5">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-indigo-500 mb-1">IELTS tip</p>
-              <p className="text-xs leading-relaxed text-indigo-900">{row.ieltsTip}</p>
+            <div className="rounded-lg border border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-900/20 px-3 py-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-indigo-500 dark:text-indigo-400 mb-1">IELTS tip</p>
+              <p className="text-xs leading-relaxed text-indigo-900 dark:text-indigo-300">{row.ieltsTip}</p>
             </div>
           )}
         </div>
@@ -189,7 +189,7 @@ export function LanguageComparisonView() {
       {/* Dimension tabs + rows */}
       <div className="space-y-4">
         {/* Tab strip */}
-        <div className="flex gap-1 border-b border-gray-200 overflow-x-auto">
+        <div className="flex gap-1 border-b border-border overflow-x-auto">
           {LANGUAGE_DIMENSIONS.map((d) => (
             <button
               key={d.id}
@@ -237,12 +237,12 @@ export function LanguageComparisonView() {
             <p className="text-xs text-muted-foreground">Fix these first — they affect every IELTS task</p>
           </div>
           {CRITICAL_TRANSFERS.map((item) => (
-            <div key={item.area} className="rounded-lg border border-rose-200 bg-rose-50 p-4 space-y-2">
-              <p className="text-sm font-bold text-rose-800">{item.area}</p>
-              <p className="text-xs text-rose-700 leading-relaxed">{item.impact}</p>
+            <div key={item.area} className="rounded-lg border border-rose-200 bg-rose-50 dark:border-rose-800 dark:bg-rose-900/20 p-4 space-y-2">
+              <p className="text-sm font-bold text-rose-800 dark:text-rose-300">{item.area}</p>
+              <p className="text-xs text-rose-700 dark:text-rose-400 leading-relaxed">{item.impact}</p>
               <ul className="space-y-1 pt-1">
                 {item.fixes.map((fix, i) => (
-                  <li key={i} className="flex gap-2 text-xs text-rose-900">
+                  <li key={i} className="flex gap-2 text-xs text-rose-900 dark:text-rose-300">
                     <span className="shrink-0 text-rose-400 mt-0.5">→</span>
                     {fix}
                   </li>
@@ -261,12 +261,12 @@ export function LanguageComparisonView() {
             <p className="text-xs text-muted-foreground">Important for Speaking band and grammar accuracy</p>
           </div>
           {HIGH_TRANSFERS.map((item) => (
-            <div key={item.area} className="rounded-lg border border-orange-200 bg-orange-50 p-4 space-y-2">
-              <p className="text-sm font-bold text-orange-800">{item.area}</p>
-              <p className="text-xs text-orange-700 leading-relaxed">{item.impact}</p>
+            <div key={item.area} className="rounded-lg border border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/20 p-4 space-y-2">
+              <p className="text-sm font-bold text-orange-800 dark:text-orange-300">{item.area}</p>
+              <p className="text-xs text-orange-700 dark:text-orange-400 leading-relaxed">{item.impact}</p>
               <ul className="space-y-1 pt-1">
                 {item.fixes.map((fix, i) => (
-                  <li key={i} className="flex gap-2 text-xs text-orange-900">
+                  <li key={i} className="flex gap-2 text-xs text-orange-900 dark:text-orange-300">
                     <span className="shrink-0 text-orange-400 mt-0.5">→</span>
                     {fix}
                   </li>

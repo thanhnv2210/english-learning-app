@@ -24,11 +24,11 @@ function blankSentence(sentence: string, answer: string): string {
 }
 
 const CONTEXT_COLORS: Record<string, string> = {
-  Speaking: 'bg-green-50 text-green-700',
-  Writing:  'bg-blue-50 text-blue-700',
-  News:     'bg-orange-50 text-orange-700',
-  Book:     'bg-purple-50 text-purple-700',
-  Podcast:  'bg-pink-50 text-pink-700',
+  Speaking: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300',
+  Writing:  'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
+  News:     'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300',
+  Book:     'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300',
+  Podcast:  'bg-pink-50 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300',
   Other:    'bg-subtle text-muted-foreground',
 }
 
@@ -215,13 +215,13 @@ export function FlashcardGame({ items, backHref, backLabel = 'Back', emptyMessag
           <div className="flex gap-3">
             <button
               onClick={() => handleRate(false)}
-              className="flex-1 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors"
+              className="flex-1 rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20 px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
             >
               ✗ Didn&apos;t know
             </button>
             <button
               onClick={() => handleRate(true)}
-              className="flex-1 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-semibold text-green-600 hover:bg-green-100 transition-colors"
+              className="flex-1 rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20 px-4 py-2.5 text-sm font-semibold text-green-600 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
             >
               ✓ Knew it
             </button>

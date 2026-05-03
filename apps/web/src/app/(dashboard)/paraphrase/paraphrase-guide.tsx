@@ -8,38 +8,38 @@ import type { ParaphraseSkillGuide, ParaphraseLevel, ParaphraseTechnique, Paraph
 const SKILL_ACCENT: Record<string, { tab: string; active: string; badge: string; example: string; border: string }> = {
   writing: {
     tab:     'hover:text-amber-600',
-    active:  'border-amber-500 text-amber-700 bg-amber-50',
+    active:  'border-amber-500 text-amber-700 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-300',
     badge:   'bg-amber-600',
-    example: 'bg-amber-50 border-amber-200 text-amber-900',
-    border:  'border-amber-300',
+    example: 'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-200',
+    border:  'border-amber-300 dark:border-amber-700',
   },
   reading: {
     tab:     'hover:text-blue-600',
-    active:  'border-blue-500 text-blue-700 bg-blue-50',
+    active:  'border-blue-500 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-300',
     badge:   'bg-blue-600',
-    example: 'bg-blue-50 border-blue-200 text-blue-900',
-    border:  'border-blue-300',
+    example: 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200',
+    border:  'border-blue-300 dark:border-blue-700',
   },
   speaking: {
     tab:     'hover:text-green-600',
-    active:  'border-green-500 text-green-700 bg-green-50',
+    active:  'border-green-500 text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-300',
     badge:   'bg-green-600',
-    example: 'bg-green-50 border-green-200 text-green-900',
-    border:  'border-green-300',
+    example: 'bg-green-50 border-green-200 text-green-900 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200',
+    border:  'border-green-300 dark:border-green-700',
   },
   listening: {
     tab:     'hover:text-purple-600',
-    active:  'border-purple-500 text-purple-700 bg-purple-50',
+    active:  'border-purple-500 text-purple-700 bg-purple-50 dark:bg-purple-900/20 dark:text-purple-300',
     badge:   'bg-purple-600',
-    example: 'bg-purple-50 border-purple-200 text-purple-900',
-    border:  'border-purple-300',
+    example: 'bg-purple-50 border-purple-200 text-purple-900 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-200',
+    border:  'border-purple-300 dark:border-purple-700',
   },
 }
 
 const LEVEL_COLORS: Record<number, { bg: string; text: string; border: string; active: string }> = {
-  1: { bg: 'bg-green-50',  text: 'text-green-700',  border: 'border-green-200', active: 'bg-green-600 text-white border-green-600' },
-  2: { bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-200', active: 'bg-amber-600 text-white border-amber-600' },
-  3: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200', active: 'bg-purple-600 text-white border-purple-600' },
+  1: { bg: 'bg-green-50 dark:bg-green-900/20',   text: 'text-green-700 dark:text-green-300',   border: 'border-green-200 dark:border-green-800',   active: 'bg-green-600 text-white border-green-600' },
+  2: { bg: 'bg-amber-50 dark:bg-amber-900/20',   text: 'text-amber-700 dark:text-amber-300',   border: 'border-amber-200 dark:border-amber-800',   active: 'bg-amber-600 text-white border-amber-600' },
+  3: { bg: 'bg-purple-50 dark:bg-purple-900/20', text: 'text-purple-700 dark:text-purple-300', border: 'border-purple-200 dark:border-purple-800', active: 'bg-purple-600 text-white border-purple-600' },
 }
 
 // ── Change table ──────────────────────────────────────────────────────────────
@@ -85,7 +85,7 @@ function ExampleCard({ ex, accent }: { ex: ParaphraseExample; accent: typeof SKI
       </button>
 
       {open && (
-        <div className="border-t border-gray-100 px-4 pb-4 pt-3 space-y-3">
+        <div className="border-t border-border px-4 pb-4 pt-3 space-y-3">
           {/* Original */}
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wide text-faint mb-1">Original</p>
@@ -110,9 +110,9 @@ function ExampleCard({ ex, accent }: { ex: ParaphraseExample; accent: typeof SKI
 
           {/* Trap */}
           {ex.trap && (
-            <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2.5">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-rose-500 mb-1">Common trap</p>
-              <p className="text-xs leading-relaxed text-rose-800">{ex.trap}</p>
+            <div className="rounded-lg border border-rose-200 bg-rose-50 dark:border-rose-800 dark:bg-rose-900/20 px-3 py-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-rose-500 dark:text-rose-400 mb-1">Common trap</p>
+              <p className="text-xs leading-relaxed text-rose-800 dark:text-rose-300">{ex.trap}</p>
             </div>
           )}
         </div>
@@ -167,9 +167,9 @@ function LevelPanel({ level, accent }: { level: ParaphraseLevel; accent: typeof 
       </div>
 
       {/* Exam tip */}
-      <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-        <p className="text-[10px] font-bold uppercase tracking-wide text-blue-500 mb-1">Exam tip</p>
-        <p className="text-xs leading-relaxed text-blue-900">{level.examTip}</p>
+      <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20 px-4 py-3">
+        <p className="text-[10px] font-bold uppercase tracking-wide text-blue-500 dark:text-blue-400 mb-1">Exam tip</p>
+        <p className="text-xs leading-relaxed text-blue-900 dark:text-blue-300">{level.examTip}</p>
       </div>
     </div>
   )

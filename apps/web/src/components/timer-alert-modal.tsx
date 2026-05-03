@@ -17,9 +17,9 @@ export function TimerAlertModal({ timer, partLabel = 'Next Part', onMoveOn }: Pr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
-        <p className="text-lg font-bold text-gray-900">Time&apos;s up!</p>
-        <p className="mt-1 text-sm text-gray-500">
+      <div className="mx-4 w-full max-w-sm rounded-2xl bg-card p-6 shadow-xl">
+        <p className="text-lg font-bold text-foreground">Time&apos;s up!</p>
+        <p className="mt-1 text-sm text-muted-foreground">
           Your 2-minute slot has ended. Would you like to continue or move on?
         </p>
 
@@ -32,7 +32,7 @@ export function TimerAlertModal({ timer, partLabel = 'Next Part', onMoveOn }: Pr
           </button>
           <button
             onClick={onMoveOn}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            className="w-full rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
           >
             Move to {partLabel}
           </button>

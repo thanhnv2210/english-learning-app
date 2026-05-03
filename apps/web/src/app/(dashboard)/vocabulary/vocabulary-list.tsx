@@ -193,7 +193,7 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
                           setShowMoreDomains(false)
                         }}
                         className={`flex-1 rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors ${
-                          activeDomain === d ? 'bg-blue-50 text-blue-700' : 'text-foreground hover:bg-muted'
+                          activeDomain === d ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' : 'text-foreground hover:bg-muted'
                         }`}
                       >
                         {d}
@@ -224,7 +224,7 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
                 title={`Filter by rank ${r}`}
                 className={`flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
                   activeRank === r
-                    ? 'border-amber-400 bg-amber-50 text-amber-700'
+                    ? 'border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'
                     : 'border-border bg-card text-muted-foreground hover:border-amber-300 hover:text-amber-600'
                 }`}
               >
@@ -435,7 +435,7 @@ export function WordCard({
         </div>
         <div className="flex items-center gap-1.5">
           {word.userAdded && (
-            <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs text-blue-600 font-medium">
+            <span className="shrink-0 rounded-full bg-blue-50 dark:bg-blue-900/20 px-2.5 py-0.5 text-xs text-blue-600 dark:text-blue-300 font-medium">
               Added
             </span>
           )}
@@ -451,7 +451,7 @@ export function WordCard({
       {word.domains.length > 0 && (
         <div className="mb-2 flex flex-wrap gap-1">
           {word.domains.map((d) => (
-            <span key={d} className="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
+            <span key={d} className="rounded-full bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300">
               {d}
             </span>
           ))}
@@ -568,7 +568,7 @@ export function WordCard({
       {word.collocations.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-1.5">
           {word.collocations.map((c, i) => (
-            <span key={i} className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
+            <span key={i} className="rounded bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-300">
               {c}
             </span>
           ))}
@@ -758,7 +758,7 @@ function PronunciationChip({
         <button
           onClick={play}
           title={`Play ${label} pronunciation`}
-          className="ml-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-subtle text-faint hover:bg-blue-50 hover:text-blue-500 transition-colors"
+          className="ml-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-subtle text-faint hover:bg-blue-50 hover:text-blue-500 dark:hover:bg-blue-900/20 dark:hover:text-blue-400 transition-colors"
         >
           ▶
         </button>

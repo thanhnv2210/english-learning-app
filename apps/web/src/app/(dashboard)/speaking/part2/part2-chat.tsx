@@ -179,11 +179,11 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
                 onClick={() => setSelectedTopic((prev) => prev?.id === t.id ? null : t)}
                 className={`rounded-lg border px-3 py-2.5 text-left transition-colors ${
                   selectedTopic?.id === t.id
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
                     : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-muted'
                 }`}
               >
-                <p className={`text-xs font-semibold leading-snug ${selectedTopic?.id === t.id ? 'text-blue-700' : 'text-foreground'}`}>
+                <p className={`text-xs font-semibold leading-snug ${selectedTopic?.id === t.id ? 'text-blue-700 dark:text-blue-300' : 'text-foreground'}`}>
                   {t.name}
                 </p>
                 <p className="text-xs text-faint mt-0.5 line-clamp-2 leading-tight">{t.description}</p>
@@ -193,9 +193,9 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
 
           {/* Selected topic preview */}
           {selectedTopic && (
-            <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
-              <p className="text-xs font-semibold text-blue-700 mb-1.5">Example cue card — {selectedTopic.name}</p>
-              <p className="text-xs text-blue-600 leading-relaxed whitespace-pre-line">
+            <div className="rounded-lg border border-blue-100 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20 px-4 py-3">
+              <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1.5">Example cue card — {selectedTopic.name}</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 leading-relaxed whitespace-pre-line">
                 {selectedTopic.examplePrompts[0]}
               </p>
             </div>
@@ -235,8 +235,8 @@ export function Part2Chat({ initialMessages, resumeExamId, initialCueCard, targe
       {/* ── Prep phase ── */}
       {stage === 'prep' && cueCard && (
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl border-2 border-blue-200 bg-blue-50 p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-500 mb-3">Cue Card</p>
+          <div className="rounded-xl border-2 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20 p-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-blue-500 dark:text-blue-400 mb-3">Cue Card</p>
             <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{cueCard.prompt}</p>
           </div>
           <button

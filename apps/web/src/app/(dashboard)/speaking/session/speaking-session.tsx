@@ -233,8 +233,8 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
       {/* ── Part 2 prep ── */}
       {stage === 'part2_prep' && cueCard && (
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl border-2 border-blue-200 bg-blue-50 p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-500 mb-3">Cue Card</p>
+          <div className="rounded-xl border-2 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20 p-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-blue-500 dark:text-blue-400 mb-3">Cue Card</p>
             <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{cueCard.prompt}</p>
           </div>
           <button
@@ -298,18 +298,18 @@ export function SpeakingSession({ targetBand = 6.5 }: { targetBand?: number }) {
         <div className="flex flex-col gap-4">
           {/* Filler summary */}
           {fillers.length > 0 && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <p className="text-sm font-semibold text-amber-800 mb-2">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20 p-4">
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2">
                 Filler words detected — {totalFillerCount(fillers)} total
               </p>
               <div className="flex flex-wrap gap-2">
                 {fillers.map((f) => (
-                  <span key={f.word} className="rounded-full bg-amber-100 px-3 py-1 text-xs text-amber-700 font-medium">
+                  <span key={f.word} className="rounded-full bg-amber-100 dark:bg-amber-900/30 px-3 py-1 text-xs text-amber-700 dark:text-amber-300 font-medium">
                     &ldquo;{f.word}&rdquo; ×{f.count}
                   </span>
                 ))}
               </div>
-              <p className="mt-2 text-xs text-amber-600">
+              <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
                 Tip: Replace fillers with discourse markers like &ldquo;Furthermore,&rdquo; &ldquo;In addition,&rdquo; or a brief pause.
               </p>
             </div>

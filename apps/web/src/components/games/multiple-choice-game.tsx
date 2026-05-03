@@ -41,11 +41,11 @@ function pickDistractors(correct: string, pool: PracticeItem[]): string[] {
 }
 
 const CONTEXT_COLORS: Record<string, string> = {
-  Speaking: 'bg-green-50 text-green-700',
-  Writing:  'bg-blue-50 text-blue-700',
-  News:     'bg-orange-50 text-orange-700',
-  Book:     'bg-purple-50 text-purple-700',
-  Podcast:  'bg-pink-50 text-pink-700',
+  Speaking: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300',
+  Writing:  'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
+  News:     'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300',
+  Book:     'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300',
+  Podcast:  'bg-pink-50 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300',
   Other:    'bg-subtle text-muted-foreground',
 }
 
@@ -241,8 +241,8 @@ export function MultipleChoiceGame({ items, backHref, backLabel = 'Back', emptyM
           {options.options.map((opt) => {
             let style = 'border-border bg-card text-foreground hover:bg-muted'
             if (phase === 'result') {
-              if (isCorrect(opt)) style = 'border-green-400 bg-green-50 text-green-700'
-              else if (opt === selected) style = 'border-red-400 bg-red-50 text-red-700'
+              if (isCorrect(opt)) style = 'border-green-400 bg-green-50 text-green-700 dark:border-green-600 dark:bg-green-900/20 dark:text-green-300'
+              else if (opt === selected) style = 'border-red-400 bg-red-50 text-red-700 dark:border-red-600 dark:bg-red-900/20 dark:text-red-300'
               else style = 'border-border bg-card text-faint opacity-50'
             }
             return (

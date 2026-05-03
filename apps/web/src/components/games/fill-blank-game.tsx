@@ -33,11 +33,11 @@ function isCorrect(input: string, answer: string): boolean {
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const CONTEXT_COLORS: Record<string, string> = {
-  Speaking: 'bg-green-50 text-green-700',
-  Writing:  'bg-blue-50 text-blue-700',
-  News:     'bg-orange-50 text-orange-700',
-  Book:     'bg-purple-50 text-purple-700',
-  Podcast:  'bg-pink-50 text-pink-700',
+  Speaking: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300',
+  Writing:  'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
+  News:     'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300',
+  Book:     'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300',
+  Podcast:  'bg-pink-50 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300',
   Other:    'bg-subtle text-muted-foreground',
 }
 
@@ -242,7 +242,7 @@ export function FillBlankGame({ items, backHref, backLabel = 'Back', emptyMessag
         {/* Result banner */}
         {phase === 'result' && (
           <div className={`rounded-lg px-4 py-2.5 text-sm font-medium flex items-center gap-2 ${
-            correct ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+            correct ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300' : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'
           }`}>
             {correct ? '✓ Correct!' : `✗ Answer: ${current.answer}`}
           </div>

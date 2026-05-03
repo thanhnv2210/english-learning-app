@@ -13,10 +13,10 @@ type Props = {
 export function TimerControl({ timer, label = 'Timer', onStart }: Props) {
   const { fmt, active, enabled, remaining, start, stop, toggleEnabled } = timer
 
-  const urgentColor = remaining <= 30 ? 'text-red-500' : remaining <= 60 ? 'text-amber-500' : 'text-gray-700'
+  const urgentColor = remaining <= 30 ? 'text-red-500' : remaining <= 60 ? 'text-amber-500' : 'text-foreground'
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm shadow-sm">
+    <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-2 text-sm shadow-sm">
       {/* Enable toggle */}
       <button
         onClick={toggleEnabled}
@@ -35,7 +35,7 @@ export function TimerControl({ timer, label = 'Timer', onStart }: Props) {
           {!active ? (
             <button
               onClick={() => { start(); onStart?.() }}
-              className="rounded px-2 py-0.5 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+              className="rounded px-2 py-0.5 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/30 transition-colors"
             >
               {remaining === 0 ? 'Restart' : 'Start'}
             </button>

@@ -236,7 +236,7 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
                   onClick={() => setSelectedDomain(d)}
                   className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
                     selectedDomain?.id === d.id
-                      ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium dark:bg-blue-900/20 dark:text-blue-300'
                       : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-muted'
                   }`}
                 >
@@ -268,7 +268,7 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
                   {(() => {
                     const count = libraryCounts[selectedDomain?.name ?? ''] ?? 0
                     return count > 0 ? (
-                      <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                      <span className="rounded-full bg-blue-100 dark:bg-blue-900/20 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-300">
                         {count} script{count !== 1 ? 's' : ''}
                       </span>
                     ) : (
@@ -333,7 +333,7 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
           </span>
           {playCount > 0 && (
             <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-              playCount >= 2 ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700'
+              playCount >= 2 ? 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'
             }`}>
               Play {playCount}/2
             </span>
@@ -416,13 +416,13 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
 
             {/* Speaker indicator during playback */}
             {isPlaying && currentTurnIdx >= 0 && (
-              <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-2.5 flex items-center gap-3">
+              <div className="rounded-lg border border-blue-100 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20 px-4 py-2.5 flex items-center gap-3">
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                   currentSpeaker === 'A' ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white'
                 }`}>
                   {currentSpeaker === 'A' ? 'Engineer' : 'Manager'}
                 </span>
-                <p className="text-xs text-blue-700 italic line-clamp-2">
+                <p className="text-xs text-blue-700 dark:text-blue-300 italic line-clamp-2">
                   {script.transcript[currentTurnIdx]?.text}
                 </p>
               </div>
@@ -435,12 +435,12 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
                 {script.transcript.map((turn, i) => (
                   <div key={i} className={`flex gap-2 text-sm ${turn.speaker === 'A' ? '' : 'flex-row-reverse'}`}>
                     <span className={`shrink-0 text-xs font-bold px-2 py-0.5 rounded-full h-fit mt-0.5 ${
-                      turn.speaker === 'A' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                      turn.speaker === 'A' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300'
                     }`}>
                       {turn.speaker === 'A' ? 'Eng' : 'Mgr'}
                     </span>
                     <p className={`rounded-lg px-3 py-2 text-xs leading-relaxed max-w-[85%] ${
-                      turn.speaker === 'A' ? 'bg-subtle text-foreground' : 'bg-purple-50 text-foreground'
+                      turn.speaker === 'A' ? 'bg-subtle text-foreground' : 'bg-purple-50 dark:bg-purple-900/20 text-foreground'
                     }`}>
                       {turn.text}
                     </p>
@@ -480,8 +480,8 @@ export function ListeningTask({ domains, targetBand = 6.5, libraryCounts = {} }:
                 <div
                   key={q.id}
                   className={`rounded-lg border p-3 flex flex-col gap-2 transition-colors ${
-                    result === true ? 'border-green-200 bg-green-50' :
-                    result === false ? 'border-red-200 bg-red-50' :
+                    result === true ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' :
+                    result === false ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20' :
                     'border-border bg-muted'
                   }`}
                 >

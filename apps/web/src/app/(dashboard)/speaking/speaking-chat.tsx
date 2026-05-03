@@ -31,11 +31,11 @@ function TopicButton({
       onClick={onClick}
       className={`rounded-lg border px-3 py-2.5 text-left transition-colors ${
         selected
-          ? 'border-blue-500 bg-blue-50 text-blue-700'
+          ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
           : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-muted'
       }`}
     >
-      <p className={`text-xs font-semibold leading-snug ${selected ? 'text-blue-700' : 'text-foreground'}`}>
+      <p className={`text-xs font-semibold leading-snug ${selected ? 'text-blue-700 dark:text-blue-300' : 'text-foreground'}`}>
         {topic.name}
       </p>
       <p className="text-xs text-faint mt-0.5 line-clamp-2 leading-tight">{topic.description}</p>
@@ -186,7 +186,7 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
                       onClick={() => setShowMore((v) => !v)}
                       className={`rounded-lg border px-3 py-2.5 text-xs font-semibold transition-colors ${
                         showMore || otherTopics.some((t) => t.id === selectedTopic?.id)
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
                           : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-muted'
                       }`}
                     >
@@ -203,11 +203,11 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
                             }}
                             className={`w-full rounded-lg px-3 py-2 text-left transition-colors ${
                               selectedTopic?.id === t.id
-                                ? 'bg-blue-50 text-blue-700'
+                                ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
                                 : 'text-muted-foreground hover:bg-muted'
                             }`}
                           >
-                            <p className={`text-xs font-semibold leading-snug ${selectedTopic?.id === t.id ? 'text-blue-700' : 'text-foreground'}`}>
+                            <p className={`text-xs font-semibold leading-snug ${selectedTopic?.id === t.id ? 'text-blue-700 dark:text-blue-300' : 'text-foreground'}`}>
                               {t.name}
                             </p>
                             <p className="text-xs text-faint mt-0.5 line-clamp-1 leading-tight">{t.description}</p>
@@ -221,12 +221,12 @@ export function SpeakingChat({ initialMessages, resumeExamId, targetBand = 6.5, 
 
               {/* Selected topic preview */}
               {selectedTopic && (
-                <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
-                  <p className="text-xs font-semibold text-blue-700 mb-1.5">Example questions — {selectedTopic.name}</p>
+                <div className="rounded-lg border border-blue-100 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20 px-4 py-3">
+                  <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1.5">Example questions — {selectedTopic.name}</p>
                   <ul className="flex flex-col gap-1">
                     {selectedTopic.exampleQuestions.map((q, i) => (
-                      <li key={i} className="text-xs text-blue-600 flex gap-1.5">
-                        <span className="shrink-0 text-blue-300">·</span>{q}
+                      <li key={i} className="text-xs text-blue-600 dark:text-blue-400 flex gap-1.5">
+                        <span className="shrink-0 text-blue-300 dark:text-blue-600">·</span>{q}
                       </li>
                     ))}
                   </ul>

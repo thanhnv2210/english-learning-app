@@ -78,7 +78,7 @@ export function PromptLibraryView({ sections }: { sections: SkillSection[] }) {
                 onClick={() => setActivePlatform(p)}
                 className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
                   active
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
                     : 'border-border bg-card text-muted-foreground hover:opacity-80'
                 }`}
               >
@@ -146,9 +146,9 @@ function PromptCard({
           title={copied ? 'Copied!' : 'Copy prompt'}
           className={`mt-0.5 shrink-0 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
             copied
-              ? 'bg-green-50 text-green-600'
+              ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-300'
               : allFilled
-              ? 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+              ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/30'
               : 'bg-muted text-muted-foreground hover:bg-subtle hover:text-foreground'
           }`}
         >
@@ -158,11 +158,11 @@ function PromptCard({
 
       {/* Input fields for each token */}
       {tokens.length > 0 && (
-        <div className="px-4 py-3 bg-amber-50 border-b border-amber-100 flex flex-col gap-2">
-          <p className="text-xs font-medium text-amber-700 mb-1">Fill in your details</p>
+        <div className="px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/40 flex flex-col gap-2">
+          <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-1">Fill in your details</p>
           {tokens.map((token) => (
             <div key={token.raw} className="flex items-center gap-2">
-              <label className="w-28 shrink-0 text-xs font-medium text-amber-800">
+              <label className="w-28 shrink-0 text-xs font-medium text-amber-800 dark:text-amber-300">
                 {token.label}
               </label>
               <input
@@ -183,11 +183,11 @@ function PromptCard({
           if (part.match(/^\[[^\]]+\]$/)) {
             const filled = values[part]?.trim()
             return filled ? (
-              <mark key={i} className="bg-blue-100 text-blue-800 rounded px-0.5 not-italic">
+              <mark key={i} className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded px-0.5 not-italic">
                 {filled}
               </mark>
             ) : (
-              <mark key={i} className="bg-amber-100 text-amber-700 rounded px-0.5 not-italic">
+              <mark key={i} className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 rounded px-0.5 not-italic">
                 {part}
               </mark>
             )

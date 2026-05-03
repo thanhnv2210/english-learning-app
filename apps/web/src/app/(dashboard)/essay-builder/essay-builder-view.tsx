@@ -530,13 +530,13 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
           {analyseResult && (
             <>
               {/* Detected metadata */}
-              <div className="rounded-xl border border-green-200 bg-green-50 p-5 flex flex-col gap-3">
-                <p className="text-xs font-semibold text-green-700 uppercase tracking-wide">Analysis Result</p>
+              <div className="rounded-xl border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20 p-5 flex flex-col gap-3">
+                <p className="text-xs font-semibold text-green-700 dark:text-green-300 uppercase tracking-wide">Analysis Result</p>
                 <div className="flex flex-wrap gap-2">
-                  <span className="rounded-full bg-card border border-green-200 px-3 py-1 text-xs font-medium text-green-800">
+                  <span className="rounded-full bg-card border border-green-200 dark:border-green-800 px-3 py-1 text-xs font-medium text-green-800 dark:text-green-300">
                     {analyseResult.domain}
                   </span>
-                  <span className="rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-medium text-blue-700">
+                  <span className="rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300">
                     {SKILL_LABELS[analyseResult.skill] ?? analyseResult.skill}
                   </span>
                 </div>
@@ -727,13 +727,13 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                   <p className="text-xs font-semibold text-faint mb-1">Topic</p>
                   <p className="text-sm text-foreground leading-relaxed">{activeVersion.topic}</p>
                   <div className="mt-2 flex gap-2 flex-wrap">
-                    <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600 font-medium">
+                    <span className="rounded-full bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 text-xs text-blue-600 dark:text-blue-300 font-medium">
                       {SKILL_LABELS[activeVersion.skill] ?? activeVersion.skill}
                     </span>
                     <span className="rounded-full bg-subtle px-2 py-0.5 text-xs text-muted-foreground">
                       {activeVersion.domain}
                     </span>
-                    <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
+                    <span className="rounded-full bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300">
                       Band {activeVersion.targetBand}
                     </span>
                   </div>
@@ -746,7 +746,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                       <div className="flex flex-wrap gap-1">
                         <span className="text-xs text-faint mr-1 self-center">Vocab</span>
                         {Array.from(selectedVocab).map((w) => (
-                          <span key={w} className="rounded-full bg-purple-50 px-2 py-0.5 text-xs text-purple-700">{w}</span>
+                          <span key={w} className="rounded-full bg-purple-50 dark:bg-purple-900/20 px-2 py-0.5 text-xs text-purple-700 dark:text-purple-300">{w}</span>
                         ))}
                       </div>
                     )}
@@ -754,7 +754,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                       <div className="flex flex-wrap gap-1">
                         <span className="text-xs text-faint mr-1 self-center">Colloc</span>
                         {Array.from(selectedColloc).map((c) => (
-                          <span key={c} className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">{c}</span>
+                          <span key={c} className="rounded-full bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-300">{c}</span>
                         ))}
                       </div>
                     )}
@@ -796,10 +796,10 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                             <p className="text-xs font-semibold text-muted-foreground">Also covered — click to add to selection:</p>
                             <div className="flex flex-wrap gap-1.5">
                               {bonusVocab.map((w) => (
-                                <button key={w} onClick={() => addBonusVocab(w)} className="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs text-green-700 hover:bg-green-100 transition-colors">+ {w}</button>
+                                <button key={w} onClick={() => addBonusVocab(w)} className="rounded-full border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 text-xs text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors">+ {w}</button>
                               ))}
                               {bonusColloc.map((c) => (
-                                <button key={c} onClick={() => addBonusColloc(c)} className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs text-amber-700 hover:bg-amber-100 transition-colors">+ {c}</button>
+                                <button key={c} onClick={() => addBonusColloc(c)} className="rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">+ {c}</button>
                               ))}
                             </div>
                           </div>
@@ -865,7 +865,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                     {evalFeedback && (
                       <div className="flex flex-col gap-3">
                         {/* Overall band */}
-                        <div className={`rounded-xl p-4 ${evalFeedback.overallBand >= evalFeedback.targetBand ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}>
+                        <div className={`rounded-xl p-4 ${evalFeedback.overallBand >= evalFeedback.targetBand ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800'}`}>
                           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Overall Band</p>
                           <div className="mt-1 flex items-end gap-2">
                             <span className="text-3xl font-bold text-foreground">{evalFeedback.overallBand}</span>
@@ -882,7 +882,7 @@ export function EssayBuilderView({ words, collocations, domains, history: initia
                         {/* Criteria */}
                         {evalFeedback.criteria.map((c) => {
                           const gap = c.targetScore - c.score
-                          const badge = gap <= 0 ? 'bg-green-100 text-green-700' : gap <= 0.5 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                          const badge = gap <= 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : gap <= 0.5 ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
                           return (
                             <div key={c.criterion} className="rounded-xl border border-border bg-card p-4">
                               <div className="flex items-center justify-between">
@@ -993,7 +993,7 @@ function VersionRow({
   return (
     <div
       className={`flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer transition-colors ${
-        isActive ? 'bg-blue-50 border border-blue-200' : 'hover:bg-muted border border-transparent'
+        isActive ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : 'hover:bg-muted border border-transparent'
       }`}
       onClick={onSelect}
     >
@@ -1059,12 +1059,12 @@ function SelectionPanel({
           {selectedChips.map(({ label, onRemove }) => (
             <span
               key={label}
-              className="flex items-center gap-1 rounded-full bg-card border border-blue-200 px-2 py-0.5 text-xs text-blue-700 shadow-sm"
+              className="flex items-center gap-1 rounded-full bg-card border border-blue-200 dark:border-blue-800 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-300 shadow-sm"
             >
               {label}
               <button
                 onClick={onRemove}
-                className="ml-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-blue-400 hover:bg-blue-100 hover:text-blue-700 transition-colors leading-none"
+                className="ml-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-colors leading-none"
                 aria-label={`Remove ${label}`}
               >
                 ×
@@ -1106,7 +1106,7 @@ function SelectionRow({
 }) {
   return (
     <label className={`flex items-center gap-2.5 rounded-lg px-2 py-1.5 cursor-pointer transition-colors ${
-      selected ? 'bg-blue-50' : 'hover:bg-muted'
+      selected ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-muted'
     }`}>
       <input
         type="checkbox"
@@ -1114,7 +1114,7 @@ function SelectionRow({
         onChange={onToggle}
         className="h-3.5 w-3.5 rounded border-border accent-blue-600"
       />
-      <span className={`text-xs font-medium ${selected ? 'text-blue-700' : 'text-foreground'}`}>
+      <span className={`text-xs font-medium ${selected ? 'text-blue-700 dark:text-blue-300' : 'text-foreground'}`}>
         {label}
       </span>
       <span className="ml-auto text-xs text-faint shrink-0">{sublabel}</span>
@@ -1191,13 +1191,13 @@ function HistoryCard({
         <div className="flex flex-col gap-1 flex-1 min-w-0">
           <p className="text-sm font-medium text-foreground leading-snug">{record.topic}</p>
           <div className="flex flex-wrap gap-1.5 mt-0.5">
-            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600 font-medium">
+            <span className="rounded-full bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 text-xs text-blue-600 dark:text-blue-300 font-medium">
               {SKILL_LABELS[record.skill] ?? record.skill}
             </span>
             <span className="rounded-full bg-subtle px-2 py-0.5 text-xs text-muted-foreground">
               {record.domain}
             </span>
-            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
+            <span className="rounded-full bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300">
               Band {record.targetBand}
             </span>
             <span className="text-xs text-faint self-center">
@@ -1233,10 +1233,10 @@ function HistoryCard({
       {(record.selectedVocabulary.length > 0 || record.selectedCollocations.length > 0) && (
         <div className="flex flex-wrap gap-1">
           {record.selectedVocabulary.map((w) => (
-            <span key={w} className="rounded-full bg-purple-50 px-2 py-0.5 text-xs text-purple-700">{w}</span>
+            <span key={w} className="rounded-full bg-purple-50 dark:bg-purple-900/20 px-2 py-0.5 text-xs text-purple-700 dark:text-purple-300">{w}</span>
           ))}
           {record.selectedCollocations.map((c) => (
-            <span key={c} className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">{c}</span>
+            <span key={c} className="rounded-full bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-300">{c}</span>
           ))}
         </div>
       )}

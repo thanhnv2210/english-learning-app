@@ -57,19 +57,19 @@ export function VocabularyDrawer({ text }: Props) {
 
       {/* ── Drawer panel ── */}
       <div
-        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-2xl transition-transform duration-300 ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-card shadow-2xl transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div>
-            <h2 className="text-base font-bold text-gray-900">Vocabulary Builder</h2>
-            <p className="text-xs text-gray-400">Words you can upgrade for a higher band score</p>
+            <h2 className="text-base font-bold text-foreground">Vocabulary Builder</h2>
+            <p className="text-xs text-faint">Words you can upgrade for a higher band score</p>
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-2 text-faint transition-colors hover:bg-muted hover:text-muted-foreground"
           >
             ✕
           </button>
@@ -79,15 +79,15 @@ export function VocabularyDrawer({ text }: Props) {
         <div className="flex-1 overflow-y-auto px-6 py-5">
           {isLoading && (
             <div className="flex flex-col items-center justify-center gap-3 py-20">
-              <p className="animate-pulse text-sm text-gray-400">Analysing vocabulary…</p>
+              <p className="animate-pulse text-sm text-faint">Analysing vocabulary…</p>
             </div>
           )}
 
           {!isLoading && cards !== null && cards.length === 0 && (
             <div className="flex flex-col items-center justify-center gap-2 py-20 text-center">
               <p className="text-2xl">🎯</p>
-              <p className="text-sm font-medium text-gray-700">Strong vocabulary detected</p>
-              <p className="text-xs text-gray-400">No significant improvements found — well done!</p>
+              <p className="text-sm font-medium text-foreground">Strong vocabulary detected</p>
+              <p className="text-xs text-faint">No significant improvements found — well done!</p>
             </div>
           )}
 
@@ -112,19 +112,19 @@ function WordCard({ card }: { card: VocabularyCard }) {
   const familyEntries = Object.entries(card.familyWords).filter(([, v]) => v)
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
       {/* Word header */}
       <div className="mb-3 flex items-start justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded bg-red-100 px-2 py-0.5 font-mono text-xs text-red-700">
+          <span className="rounded bg-red-100 dark:bg-red-900/20 px-2 py-0.5 font-mono text-xs text-red-700 dark:text-red-300">
             {card.originalWord}
           </span>
-          <span className="text-xs text-gray-400">→</span>
-          <span className="rounded bg-emerald-100 px-2 py-0.5 font-mono text-sm font-semibold text-emerald-800">
+          <span className="text-xs text-faint">→</span>
+          <span className="rounded bg-emerald-100 dark:bg-emerald-900/20 px-2 py-0.5 font-mono text-sm font-semibold text-emerald-800 dark:text-emerald-300">
             {card.word}
           </span>
           {card.source === 'ai' && (
-            <span className="rounded bg-purple-100 px-1.5 py-0.5 text-xs text-purple-600">
+            <span className="rounded bg-purple-100 dark:bg-purple-900/20 px-1.5 py-0.5 text-xs text-purple-600 dark:text-purple-300">
               AI
             </span>
           )}
@@ -132,14 +132,14 @@ function WordCard({ card }: { card: VocabularyCard }) {
       </div>
 
       {/* Definition */}
-      <p className="mb-3 text-sm leading-relaxed text-gray-700">{card.definition}</p>
+      <p className="mb-3 text-sm leading-relaxed text-foreground">{card.definition}</p>
 
       {/* Family words */}
       {familyEntries.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {familyEntries.map(([pos, form]) => (
-            <span key={pos} className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600">
-              <span className="text-gray-400">{pos}: </span>
+            <span key={pos} className="rounded-full bg-subtle px-2.5 py-0.5 text-xs text-muted-foreground">
+              <span className="text-faint">{pos}: </span>
               {form}
             </span>
           ))}
@@ -150,14 +150,14 @@ function WordCard({ card }: { card: VocabularyCard }) {
       {(synonyms.length > 0 || antonyms.length > 0) && (
         <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
           {synonyms.length > 0 && (
-            <span className="text-gray-500">
-              <span className="font-medium text-gray-700">Synonyms: </span>
+            <span className="text-muted-foreground">
+              <span className="font-medium text-foreground">Synonyms: </span>
               {synonyms.map((s) => s.word).join(', ')}
             </span>
           )}
           {antonyms.length > 0 && (
-            <span className="text-gray-500">
-              <span className="font-medium text-gray-700">Antonyms: </span>
+            <span className="text-muted-foreground">
+              <span className="font-medium text-foreground">Antonyms: </span>
               {antonyms.map((s) => s.word).join(', ')}
             </span>
           )}
@@ -170,7 +170,7 @@ function WordCard({ card }: { card: VocabularyCard }) {
           <p className="mb-1 text-xs font-medium text-gray-600">Common collocations</p>
           <div className="flex flex-wrap gap-1.5">
             {card.collocations.map((c, i) => (
-              <span key={i} className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
+              <span key={i} className="rounded bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-300">
                 {c}
               </span>
             ))}
@@ -182,7 +182,7 @@ function WordCard({ card }: { card: VocabularyCard }) {
       {card.domains.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-1.5">
           {card.domains.map((d) => (
-            <span key={d} className="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
+            <span key={d} className="rounded-full bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300">
               {d}
             </span>
           ))}
@@ -199,14 +199,14 @@ function WordCard({ card }: { card: VocabularyCard }) {
 
       {showExamples && (
         <div className="mt-3 flex flex-col gap-2">
-          <div className="rounded-lg bg-gray-50 p-3">
-            <p className="mb-1 text-xs font-semibold text-gray-500">Speaking (informal)</p>
-            <p className="text-xs leading-relaxed text-gray-700 italic">&ldquo;{card.examples.speaking}&rdquo;</p>
+          <div className="rounded-lg bg-subtle p-3">
+            <p className="mb-1 text-xs font-semibold text-muted-foreground">Speaking (informal)</p>
+            <p className="text-xs leading-relaxed text-foreground italic">&ldquo;{card.examples.speaking}&rdquo;</p>
           </div>
           {card.examples.writing.map((ex, i) => (
-            <div key={i} className="rounded-lg bg-blue-50 p-3">
-              <p className="mb-1 text-xs font-semibold text-blue-500">Writing Task 2 ({i === 0 ? 'example 1' : 'example 2'})</p>
-              <p className="text-xs leading-relaxed text-gray-700 italic">&ldquo;{ex}&rdquo;</p>
+            <div key={i} className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3">
+              <p className="mb-1 text-xs font-semibold text-blue-500 dark:text-blue-400">Writing Task 2 ({i === 0 ? 'example 1' : 'example 2'})</p>
+              <p className="text-xs leading-relaxed text-foreground italic">&ldquo;{ex}&rdquo;</p>
             </div>
           ))}
         </div>
