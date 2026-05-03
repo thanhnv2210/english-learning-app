@@ -101,11 +101,11 @@ export function MobileHeader({
   return (
     <>
       {/* Fixed top bar — hidden on sm+ where the sidebar takes over */}
-      <header className="sm:hidden fixed top-0 inset-x-0 z-40 flex h-12 items-center justify-between bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4">
+      <header className="sm:hidden fixed top-0 inset-x-0 z-40 flex h-12 items-center justify-between bg-card border-b border-border px-4">
         <span className="text-sm font-semibold text-foreground">IELTS 6.5</span>
         <button
           onClick={() => setOpen(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-subtle transition-colors"
           aria-label="Open navigation"
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,16 +118,16 @@ export function MobileHeader({
       {open && (
         <div className="sm:hidden fixed inset-0 z-50 flex">
           {/* Drawer panel — h-screen so it's always scrollable */}
-          <div className="w-72 max-w-[85vw] h-[100dvh] bg-white dark:bg-gray-900 flex flex-col border-r border-gray-200 dark:border-gray-700">
+          <div className="w-72 max-w-[85vw] h-[100dvh] bg-card flex flex-col border-r border-border">
 
             {/* Drawer header — fixed, never scrolls */}
-            <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4">
-              <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
+              <span className="text-xs font-semibold uppercase tracking-widest text-faint">
                 {formatTarget(targetProfile)}
               </span>
               <button
                 onClick={handleClose}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-faint hover:bg-subtle transition-colors"
                 aria-label="Close menu"
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,7 +163,7 @@ export function MobileHeader({
               {hasPins && (
                 <button
                   onClick={() => setAllPagesOpen((v) => !v)}
-                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors min-h-[44px]"
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wider text-faint hover:text-muted-foreground transition-colors min-h-[44px]"
                 >
                   All Pages
                   <span className={`text-[10px] transition-transform duration-200 ${allPagesOpen ? 'rotate-180' : ''}`}>▾</span>
@@ -182,7 +182,7 @@ export function MobileHeader({
                   />
                   {GROUPS.map((group) => (
                     <div key={group.label} className="mt-3">
-                      <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                      <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-faint">
                         {group.label}
                       </p>
                       {group.items.map((item) => (
@@ -203,7 +203,7 @@ export function MobileHeader({
             </nav>
 
             {/* Settings — pinned to bottom, never scrolls */}
-            <div className="shrink-0 border-t border-gray-200 dark:border-gray-700 px-3 py-2">
+            <div className="shrink-0 border-t border-border px-3 py-2">
               <DrawerLink
                 item={{ href: '/settings', label: 'Settings', icon: '⚙️' }}
                 pathname={pathname}
@@ -248,7 +248,7 @@ function DrawerLink({
         } ${
           active
             ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+            : 'text-muted-foreground hover:bg-subtle hover:text-foreground'
         }`}
       >
         <span className="text-base">{item.icon}</span>
@@ -260,7 +260,7 @@ function DrawerLink({
         className={`absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-sm leading-none transition-all ${
           isFav
             ? 'text-amber-400 opacity-100'
-            : 'text-gray-300 dark:text-gray-600 opacity-0 group-hover:opacity-100'
+            : 'text-faint opacity-0 group-hover:opacity-100'
         }`}
       >
         {isFav ? '★' : '☆'}

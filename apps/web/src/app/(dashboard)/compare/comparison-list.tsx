@@ -7,7 +7,7 @@ import type { ComparisonCard } from '@/lib/db/comparisons'
 const REGISTER_COLORS: Record<string, string> = {
   formal:   'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
   informal: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-  neutral:  'bg-gray-100 text-gray-600 dark:bg-gray-800/60 dark:text-gray-400',
+  neutral:  'bg-subtle text-muted-foreground',
 }
 
 const CATEGORY_COLORS: Record<string, string> = {

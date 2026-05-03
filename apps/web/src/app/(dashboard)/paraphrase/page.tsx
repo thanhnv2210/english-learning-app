@@ -13,7 +13,7 @@ export default function ParaphrasePage() {
           </span>
         </div>
         <h1 className="text-2xl font-bold text-foreground">Paraphrase</h1>
-        <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+        <p className="mt-2 text-sm leading-relaxed text-foreground">
           Paraphrasing means expressing the same idea using different words and structure.
           In IELTS it is not just a writing technique — it is a reading skill, a test-taking
           strategy, and a marking criterion. Every exam question paraphrases the source material.

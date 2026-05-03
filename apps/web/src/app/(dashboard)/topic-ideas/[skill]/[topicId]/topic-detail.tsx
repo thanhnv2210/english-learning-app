@@ -20,7 +20,7 @@ function renderPassageWithLabels(passage: string) {
           return (
             <span
               key={i}
-              className="ml-1 inline-block rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700"
+              className="ml-1 inline-block rounded bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700 dark:text-blue-300"
             >
               {match[1]}
             </span>
@@ -114,7 +114,7 @@ export function TopicDetail({ topic, skill }: Props) {
                       {step.vocabulary.map((word) => (
                         <span
                           key={word}
-                          className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800"
+                          className="rounded-full bg-amber-100 dark:bg-amber-900/30 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-300"
                         >
                           {word}
                         </span>
@@ -201,7 +201,7 @@ export function TopicDetail({ topic, skill }: Props) {
                 <p className="mb-3 text-xs text-muted-foreground italic">
                   {activeFramework.examples.reading.context}
                 </p>
-                <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm leading-relaxed text-foreground">
+                <div className="rounded-lg border border-blue-100 dark:border-blue-900/40 bg-blue-50 dark:bg-blue-900/20 p-4 text-sm leading-relaxed text-foreground">
                   {renderPassageWithLabels(activeFramework.examples.reading.passage)}
                 </div>
               </div>
@@ -212,7 +212,7 @@ export function TopicDetail({ topic, skill }: Props) {
                 <p className="mb-3 text-xs text-muted-foreground italic">
                   {activeFramework.examples.writing.context}
                 </p>
-                <span className="mb-3 inline-block rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700">
+                <span className="mb-3 inline-block rounded-full bg-purple-100 dark:bg-purple-900/30 px-2.5 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-300">
                   {activeFramework.examples.writing.taskType}
                 </span>
                 <blockquote className="mb-4 rounded-lg border-l-4 border-border bg-muted px-4 py-3 text-sm italic text-muted-foreground">

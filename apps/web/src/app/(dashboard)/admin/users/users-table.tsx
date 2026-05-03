@@ -40,7 +40,7 @@ function TierBadge({
       className={`rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors disabled:opacity-50 ${
         optimistic === 'vip'
           ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-800/40'
-          : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+          : 'bg-subtle text-muted-foreground hover:bg-subtle/80'
       }`}
     >
       {optimistic === 'vip' ? '★ VIP' : 'Free'}
@@ -72,7 +72,7 @@ function ModelBadge({
       className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors disabled:opacity-50 ${
         optimistic === 'auto'
           ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
-          : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+          : 'bg-subtle text-muted-foreground hover:bg-subtle/80'
       }`}
     >
       {optimistic === 'auto' ? 'Cloud' : 'Ollama'}
@@ -122,7 +122,7 @@ export function UsersTable({ users }: { users: UserRow[] }) {
                 </td>
                 <td className="px-4 py-3">
                   <span className={`inline-flex items-center gap-1 text-xs font-medium ${
-                    u.authProvider === 'google' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+                    u.authProvider === 'google' ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'
                   }`}>
                     {u.authProvider === 'google' ? (
                       <>

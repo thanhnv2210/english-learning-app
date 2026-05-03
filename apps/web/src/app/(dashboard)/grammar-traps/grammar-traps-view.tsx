@@ -406,7 +406,7 @@ function TrapCard({
                 <button
                   key={r}
                   onClick={() => onRank(entry.id, r)}
-                  className={`text-sm transition-colors ${r <= entry.rank ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600 hover:text-amber-300'}`}
+                  className={`text-sm transition-colors ${r <= entry.rank ? 'text-amber-400' : 'text-faint hover:text-amber-300'}`}
                   title={`Set rank ${r}`}
                 >
                   ★

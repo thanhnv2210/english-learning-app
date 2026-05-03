@@ -45,7 +45,7 @@ export default function ExamCountdownPage() {
           {WEEK_PLANS.map((week) => (
             <div
               key={week.week}
-              className="rounded-xl border border-amber-200 dark:border-amber-800 bg-white dark:bg-gray-800 p-5"
+              className="rounded-xl border border-amber-200 dark:border-amber-800 bg-card p-5"
             >
               <div className="mb-4 flex items-center gap-3">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-500 text-sm font-bold text-white">
@@ -127,7 +127,7 @@ export default function ExamCountdownPage() {
           <span className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
             🇻🇳 Vietnamese Tech Engineer
           </span>
-          <span className="rounded-full border border-indigo-200 dark:border-indigo-700 bg-white dark:bg-gray-800 px-3 py-1 text-xs font-medium text-indigo-700 dark:text-indigo-400">
+          <span className="rounded-full border border-indigo-200 dark:border-indigo-700 bg-card px-3 py-1 text-xs font-medium text-indigo-700 dark:text-indigo-400">
             Previous score: 5.5 all skills → Target: 6.5
           </span>
         </div>
@@ -157,7 +157,7 @@ export default function ExamCountdownPage() {
             ][item.rank - 1]
 
             return (
-              <div key={item.skill} className="rounded-xl border border-indigo-100 dark:border-indigo-800 bg-white dark:bg-gray-800 p-5">
+              <div key={item.skill} className="rounded-xl border border-indigo-100 dark:border-indigo-800 bg-card p-5">
                 {/* Row 1: rank + skill + badges */}
                 <div className="mb-3 flex flex-wrap items-center gap-2">
                   <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${rankColor}`}>
@@ -221,7 +221,7 @@ export default function ExamCountdownPage() {
             </div>
           ))}
         </div>
-        <p className="mt-3 text-xs text-gray-400 dark:text-gray-500">
+        <p className="mt-3 text-xs text-faint">
           For deeper topic breakdowns, frameworks, and vocabulary examples →{' '}
           <Link href="/topic-ideas" className="text-blue-500 hover:underline">
             Topic Ideas
@@ -280,7 +280,7 @@ export default function ExamCountdownPage() {
               </div>
               <div className="mb-3 rounded-lg border-l-4 border-amber-400 bg-amber-50 dark:bg-amber-900/20 px-4 py-3">
                 <p className="mb-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">Example</p>
-                <p className="text-sm italic text-gray-800 dark:text-gray-200">{g.example}</p>
+                <p className="text-sm italic text-foreground">{g.example}</p>
               </div>
               <p className="text-xs leading-relaxed text-muted-foreground">{g.whyItWorks}</p>
             </div>

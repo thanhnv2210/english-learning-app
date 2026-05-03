@@ -248,12 +248,12 @@ export function NavSidebar({
     const orderedItems = [...favouritedItems, ...nonFavItems]
 
     return (
-      <aside className="hidden sm:flex h-screen w-14 shrink-0 flex-col items-center border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-4 gap-0.5">
+      <aside className="hidden sm:flex h-screen w-14 shrink-0 flex-col items-center border-r border-border bg-card py-4 gap-0.5">
         {!isNarrow && (
           <button
             onClick={toggleCollapse}
             title="Expand sidebar"
-            className="mb-4 flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+            className="mb-4 flex h-8 w-8 items-center justify-center rounded-lg text-faint hover:bg-subtle hover:text-muted-foreground transition-colors"
           >
             <span className="text-sm">›</span>
           </button>
@@ -271,7 +271,7 @@ export function NavSidebar({
                   className={`flex h-9 w-9 items-center justify-center rounded-lg text-base transition-colors ${
                     active
                       ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-gray-200'
+                      : 'text-muted-foreground hover:bg-subtle hover:text-foreground'
                   }`}
                 >
                   {item.icon}
@@ -291,7 +291,7 @@ export function NavSidebar({
               className={`flex h-9 w-9 items-center justify-center rounded-lg text-base transition-colors ${
                 active
                   ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-gray-200'
+                  : 'text-muted-foreground hover:bg-subtle hover:text-foreground'
               }`}
             >
               {item.icon}
@@ -299,14 +299,14 @@ export function NavSidebar({
           )
         })}
 
-        <div className="mt-auto flex flex-col items-center gap-0.5 pb-2 border-t border-gray-200 dark:border-gray-700 pt-2">
+        <div className="mt-auto flex flex-col items-center gap-0.5 pb-2 border-t border-border pt-2">
           <Link
             href={SETTINGS_ITEM.href}
             title={SETTINGS_ITEM.label}
             className={`flex h-9 w-9 items-center justify-center rounded-lg text-base transition-colors ${
               isActive(SETTINGS_ITEM.href, pathname)
                 ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-gray-200'
+                : 'text-muted-foreground hover:bg-subtle hover:text-foreground'
             }`}
           >
             {SETTINGS_ITEM.icon}
@@ -319,7 +319,7 @@ export function NavSidebar({
               className={`flex h-7 w-7 items-center justify-center rounded font-bold transition-colors ${FONT_LEVEL_SIZES[lvl]} ${
                 fontLevel === lvl
                   ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                  : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300'
+                  : 'text-faint hover:bg-subtle hover:text-muted-foreground'
               }`}
             >
               A
@@ -348,17 +348,17 @@ export function NavSidebar({
 
   // ── Expanded: full sidebar ───────────────────────────────────────────────────
   return (
-    <aside className="hidden sm:flex h-screen w-52 shrink-0 flex-col border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-6 2xl:w-64">
+    <aside className="hidden sm:flex h-screen w-52 shrink-0 flex-col border-r border-border bg-card px-3 py-6 2xl:w-64">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between px-2">
-        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+        <p className="text-xs font-semibold uppercase tracking-widest text-faint">
           {formatTargetLabel(targetProfile)}
         </p>
         {!isNarrow && (
           <button
             onClick={toggleCollapse}
             title="Collapse sidebar"
-            className="flex h-6 w-6 items-center justify-center rounded text-gray-300 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-500 dark:hover:text-gray-400 transition-colors"
+            className="flex h-6 w-6 items-center justify-center rounded text-faint hover:bg-subtle hover:text-muted-foreground transition-colors"
           >
             <span className="text-xs">‹</span>
           </button>
@@ -435,7 +435,7 @@ export function NavSidebar({
                 className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
                   hasActive
                     ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+                    : 'text-faint hover:text-muted-foreground'
                 }`}
               >
                 {group.label}
@@ -466,7 +466,7 @@ export function NavSidebar({
 
       {/* User row — always visible at bottom */}
       {userEmail && (
-        <div className="mt-2 border-t border-gray-200 dark:border-gray-700 pt-2 px-2">
+        <div className="mt-2 border-t border-border pt-2 px-2">
           <div className="flex items-center gap-2 rounded-lg px-2 py-1.5">
             {userImage ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -480,7 +480,7 @@ export function NavSidebar({
             <button
               onClick={() => signOut({ callbackUrl: '/login' })}
               title="Sign out"
-              className="shrink-0 rounded p-1 text-xs text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-colors"
+              className="shrink-0 rounded p-1 text-xs text-faint hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-colors"
             >
               ↩
             </button>
@@ -489,13 +489,13 @@ export function NavSidebar({
       )}
 
       {/* Settings — pinned to bottom */}
-      <div className="mt-1 border-t border-gray-200 dark:border-gray-700 pt-2">
+      <div className="mt-1 border-t border-border pt-2">
         <button
           onClick={() => setSettingsOpen((v) => !v)}
           className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
             isActive(SETTINGS_ITEM.href, pathname)
               ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+              : 'text-muted-foreground hover:bg-subtle hover:text-foreground'
           }`}
         >
           <span className="flex items-center gap-3">
@@ -506,15 +506,15 @@ export function NavSidebar({
         </button>
 
         {settingsOpen && (
-          <div className="mx-3 mt-2 mb-1 flex flex-col gap-2 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-3">
+          <div className="mx-3 mt-2 mb-1 flex flex-col gap-2 rounded-lg bg-muted px-3 py-3">
             <Link
               href={SETTINGS_ITEM.href}
-              className="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="text-xs font-medium text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               Open Settings →
             </Link>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-400 dark:text-gray-500">Text size</span>
+              <span className="text-xs text-faint">Text size</span>
               <div className="flex items-center gap-1">
                 {([0, 1, 2] as FontLevel[]).map((lvl) => (
                   <button
@@ -524,7 +524,7 @@ export function NavSidebar({
                     className={`flex h-6 w-6 items-center justify-center rounded font-bold transition-colors ${FONT_LEVEL_SIZES[lvl]} ${
                       fontLevel === lvl
                         ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                        : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
+                        : 'text-faint hover:bg-subtle hover:text-muted-foreground'
                     }`}
                   >
                     A
@@ -582,7 +582,7 @@ function FavDragItem({
         className={`flex items-center gap-2 rounded-lg py-2 px-3 text-sm font-medium transition-colors pr-7 ${
           active
             ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+            : 'text-muted-foreground hover:bg-subtle hover:text-foreground'
         }`}
       >
         <span
@@ -639,7 +639,7 @@ function NavLink({
         } ${
           active
             ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+            : 'text-muted-foreground hover:bg-subtle hover:text-foreground'
         }`}
       >
         <span className="text-base">{item.icon}</span>

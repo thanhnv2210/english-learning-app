@@ -252,7 +252,7 @@ function SprintCard({
   const statusColors: Record<Sprint['status'], string> = {
     planning:  'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400',
     active:    'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400',
-    completed: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+    completed: 'bg-subtle text-muted-foreground',
   }
 
   function formatDate(d: Date | string | null) {
