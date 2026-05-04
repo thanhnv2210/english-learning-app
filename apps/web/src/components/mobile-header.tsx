@@ -3,64 +3,17 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { signOut } from 'next-auth/react'
 import { toggleFavouritePageAction } from '@/app/actions/favourite-pages'
+import {
+  type NavItem,
+  STANDALONE,
+  NAV_GROUPS,
+  ADMIN_GROUP,
+  ALL_NAV_ITEMS,
+} from '@/lib/nav-config'
 
-type NavItem = { href: string; label: string; icon: string }
-type NavGroup = { label: string; items: NavItem[] }
-
-const STANDALONE: NavItem = { href: '/', label: 'Dashboard', icon: '⊞' }
-
-const GROUPS: NavGroup[] = [
-  {
-    label: 'Practice',
-    items: [
-      { href: '/speaking/session', label: 'Speaking (Full)', icon: '🎙' },
-      { href: '/speaking', label: 'Speaking Pt 1', icon: '🎤' },
-      { href: '/speaking/part2', label: 'Speaking Pt 2', icon: '🎤' },
-      { href: '/writing', label: 'Writing Task 2', icon: '✍' },
-      { href: '/writing/task1', label: 'Writing Task 1', icon: '📊' },
-      { href: '/reading', label: 'Reading', icon: '📖' },
-      { href: '/listening', label: 'Listening', icon: '🎧' },
-    ],
-  },
-  {
-    label: 'Tools',
-    items: [
-      { href: '/vocabulary', label: 'Vocabulary', icon: '📚' },
-      { href: '/vocabulary/review', label: 'Vocab Review (SRS)', icon: '🔁' },
-      { href: '/collocations', label: 'Collocations', icon: '🧩' },
-      { href: '/idioms', label: 'Idioms', icon: '💬' },
-      { href: '/compare', label: 'Word Compare', icon: '⚖️' },
-      { href: '/vocab-banks', label: 'Vocab Banks', icon: '🏦' },
-      { href: '/essay-builder', label: 'Essay Builder', icon: '✍️' },
-      { href: '/connected-speech', label: 'Connected Speech', icon: '🔗' },
-      { href: '/grammar-traps', label: 'Grammar Traps', icon: '⚠️' },
-    ],
-  },
-  {
-    label: 'Guides',
-    items: [
-      { href: '/how-to-answer', label: 'How to Answer', icon: '💡' },
-      { href: '/how-to-answer/question-anatomy', label: 'Question Anatomy', icon: '🔍' },
-      { href: '/paraphrase', label: 'Paraphrase', icon: '🔄' },
-      { href: '/language-comparison', label: 'Language DNA', icon: '🧬' },
-      { href: '/topic-ideas', label: 'Topic Ideas', icon: '🗂️' },
-      { href: '/prompt-library', label: 'AI Prompts', icon: '🤖' },
-      { href: '/exam-countdown', label: 'Exam Sprint', icon: '⏱️' },
-    ],
-  },
-  {
-    label: 'Progress',
-    items: [
-      { href: '/projects', label: 'Projects', icon: '📋' },
-      { href: '/analytics', label: 'Analytics', icon: '📊' },
-      { href: '/wrong-decisions', label: 'Wrong Decisions', icon: '❌' },
-      { href: '/history', label: 'History', icon: '🕐' },
-    ],
-  },
-]
-
-const ALL_ITEMS: NavItem[] = [STANDALONE, ...GROUPS.flatMap((g) => g.items)]
+const ALL_ITEMS: NavItem[] = ALL_NAV_ITEMS
 
 function isActive(href: string, pathname: string) {
   return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
@@ -75,17 +28,30 @@ function formatTarget(profile: string): string {
 export function MobileHeader({
   targetProfile = 'IELTS_Academic_6.5',
   favouritePages = [],
+  isAdmin = false,
+  userEmail,
+  userName,
+  userImage,
 }: {
   targetProfile?: string
   favouritePages?: string[]
+  isAdmin?: boolean
+  userEmail?: string
+  userName?: string
+  userImage?: string
 }) {
   const [open, setOpen] = useState(false)
   const [favs, setFavs] = useState<string[]>(favouritePages)
   const [allPagesOpen, setAllPagesOpen] = useState(false)
   const pathname = usePathname()
 
+  const visibleGroups = isAdmin ? [...NAV_GROUPS, ADMIN_GROUP] : NAV_GROUPS
+  const visibleItems = isAdmin
+    ? ALL_NAV_ITEMS
+    : ALL_NAV_ITEMS.filter((item) => !item.href.startsWith('/admin'))
+
   const hasPins = favs.length > 0
-  const pinnedItems = ALL_ITEMS.filter((item) => favs.includes(item.href))
+  const pinnedItems = visibleItems.filter((item) => favs.includes(item.href))
 
   function handleToggleFav(href: string) {
     setFavs((prev) =>
@@ -174,13 +140,13 @@ export function MobileHeader({
               {(!hasPins || allPagesOpen) && (
                 <>
                   <DrawerLink
-                    item={STANDALONE}
+                    item={STANDALONE[0]}
                     pathname={pathname}
-                    isFav={favs.includes(STANDALONE.href)}
+                    isFav={favs.includes(STANDALONE[0].href)}
                     onToggleFav={handleToggleFav}
                     onClose={handleClose}
                   />
-                  {GROUPS.map((group) => (
+                  {visibleGroups.map((group) => (
                     <div key={group.label} className="mt-3">
                       <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-faint">
                         {group.label}
@@ -202,8 +168,8 @@ export function MobileHeader({
               )}
             </nav>
 
-            {/* Settings — pinned to bottom, never scrolls */}
-            <div className="shrink-0 border-t border-border px-3 py-2">
+            {/* Bottom: Settings + user row */}
+            <div className="shrink-0 border-t border-border px-3 py-2 flex flex-col gap-1">
               <DrawerLink
                 item={{ href: '/settings', label: 'Settings', icon: '⚙️' }}
                 pathname={pathname}
@@ -211,6 +177,28 @@ export function MobileHeader({
                 onToggleFav={handleToggleFav}
                 onClose={handleClose}
               />
+              {userEmail && (
+                <div className="flex items-center gap-2 rounded-lg px-3 py-2 mt-1">
+                  {userImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={userImage} alt="" className="h-7 w-7 rounded-full shrink-0 ring-1 ring-border" />
+                  ) : (
+                    <div className="h-7 w-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                      {(userName || userEmail)[0].toUpperCase()}
+                    </div>
+                  )}
+                  <span className="text-xs text-muted-foreground truncate flex-1 min-w-0">
+                    {userName || userEmail}
+                  </span>
+                  <button
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    title="Sign out"
+                    className="shrink-0 rounded p-1 text-xs text-faint hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-colors"
+                  >
+                    ↩
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

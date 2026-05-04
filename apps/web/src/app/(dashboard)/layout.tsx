@@ -11,7 +11,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <>
       {/* MobileHeader must live outside the overflow-hidden container —
           iOS Safari clips position:fixed children of overflow:hidden parents */}
-      <MobileHeader targetProfile={user.targetProfile} favouritePages={user.favouritePages ?? []} />
+      <MobileHeader
+        targetProfile={user.targetProfile}
+        favouritePages={user.favouritePages ?? []}
+        isAdmin={user.role === 'admin'}
+        userEmail={user.email}
+        userName={user.name ?? undefined}
+        userImage={user.image ?? undefined}
+      />
 
       <div className="flex h-screen overflow-hidden bg-background">
         <NavSidebar
