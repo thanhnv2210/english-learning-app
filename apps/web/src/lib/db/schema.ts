@@ -564,6 +564,20 @@ export const sentencePracticeResults = pgTable('sentence_practice_results', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
+// ─── User Vocabulary (personal saved words) ──────────────────────────────────
+// Junction table: tracks which vocabulary_words each user has saved.
+// vocabulary_words is a shared catalogue; this table scopes it per user.
+
+export const userVocabulary = pgTable(
+  'user_vocabulary',
+  {
+    userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    wordId: integer('word_id').notNull().references(() => vocabularyWords.id, { onDelete: 'cascade' }),
+    savedAt: timestamp('saved_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.wordId] })]
+)
+
 // ─── Spaced Repetition (SM-2) ─────────────────────────────────────────────────
 // One row per word. Tracks SRS state for the single user (single-user app).
 // Rows are created on first review. nextReview defaults to now → due immediately.

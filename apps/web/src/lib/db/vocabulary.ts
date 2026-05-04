@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { vocabularyWords, vocabularyWordDomains, writingDomains } from '@/lib/db/schema'
+import { vocabularyWords, vocabularyWordDomains, writingDomains, userVocabulary } from '@/lib/db/schema'
 import { asc, eq, inArray, sql, and } from 'drizzle-orm'
 import type { VocabWordFamily, VocabSynonym, VocabExamples, VocabPronunciation } from '@/lib/db/schema'
 
@@ -22,9 +22,17 @@ export type VocabularyCard = {
 }
 
 /** All words in the catalogue, ordered alphabetically. Uses 2 queries (no N+1).
- *  When showSystemData=false (and not admin), only user-added words are returned. */
-export async function getAllVocabularyWords(isAdmin = true, showSystemData = true): Promise<VocabularyCard[]> {
-  const filter = (!isAdmin && !showSystemData) ? eq(vocabularyWords.userAdded, true) : undefined
+ *  When showSystemData=false (and not admin), only words the user has saved to
+ *  their user_vocabulary are returned. */
+export async function getAllVocabularyWords(isAdmin = true, showSystemData = true, userId?: number): Promise<VocabularyCard[]> {
+  let filter: ReturnType<typeof inArray> | undefined
+  if (!isAdmin && !showSystemData && userId !== undefined) {
+    const savedIds = db
+      .select({ wordId: userVocabulary.wordId })
+      .from(userVocabulary)
+      .where(eq(userVocabulary.userId, userId))
+    filter = inArray(vocabularyWords.id, savedIds)
+  }
   const rows = await db.select().from(vocabularyWords).where(filter).orderBy(asc(vocabularyWords.word))
   if (rows.length === 0) return []
 
@@ -141,6 +149,24 @@ export async function saveWordPronunciation(id: number, pronunciation: VocabPron
 
 export async function updateWordType(id: number, wordType: string): Promise<void> {
   await db.update(vocabularyWords).set({ wordType }).where(eq(vocabularyWords.id, id))
+}
+
+/** Save a word to a user's personal vocabulary list. No-op if already saved. */
+export async function saveToUserVocabulary(userId: number, wordId: number): Promise<void> {
+  await db
+    .insert(userVocabulary)
+    .values({ userId, wordId })
+    .onConflictDoNothing()
+}
+
+/** Check if a word is in the user's personal vocabulary list. */
+export async function isInUserVocabulary(userId: number, wordId: number): Promise<boolean> {
+  const rows = await db
+    .select({ wordId: userVocabulary.wordId })
+    .from(userVocabulary)
+    .where(and(eq(userVocabulary.userId, userId), eq(userVocabulary.wordId, wordId)))
+    .limit(1)
+  return rows.length > 0
 }
 
 async function getDomainsForWord(wordId: number): Promise<string[]> {

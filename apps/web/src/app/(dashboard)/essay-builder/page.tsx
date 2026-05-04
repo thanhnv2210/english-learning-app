@@ -9,7 +9,7 @@ import { EssayBuilderView } from './essay-builder-view'
 export default async function EssayBuilderPage() {
   const user = await getCurrentUser()
   const [words, collocations, domains, history] = await Promise.all([
-    getAllVocabularyWords(user.role === 'admin', user.showSystemData),
+    getAllVocabularyWords(user.role === 'admin', user.showSystemData, user.id),
     getAllCollocations(user.id, user.role === 'admin', user.showSystemData),
     getAllDomains(),
     getAllEssayBuilderRecords(),

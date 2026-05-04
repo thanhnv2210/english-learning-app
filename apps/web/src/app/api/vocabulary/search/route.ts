@@ -1,11 +1,11 @@
 import { generateText } from 'ai'
-import { findWord } from '@/lib/db/vocabulary'
+import { findWord, isInUserVocabulary } from '@/lib/db/vocabulary'
 import { getAllDomains } from '@/lib/db/domains'
 import { VOCAB_SEARCH_PROMPT } from '@/lib/ielts/vocabulary/prompts'
 import type { VocabWordFamily, VocabSynonym, VocabExamples, VocabPronunciation } from '@/lib/db/schema'
 import type { VocabularyCard } from '@/lib/db/vocabulary'
 import { OLLAMA_ENABLED, getModelForTier, ollamaDisabledResponse, ollamaDebug, OLLAMA_MODEL } from '@/lib/ai-client'
-import { getUserAIContext } from '@/lib/db/user'
+import { getUserAIContext, getCurrentUser } from '@/lib/db/user'
 
 export async function POST(req: Request) {
   if (!OLLAMA_ENABLED) return ollamaDisabledResponse()
@@ -16,7 +16,10 @@ export async function POST(req: Request) {
   }
 
   const trimmed = word.trim()
-  const { tier, modelPreference } = await getUserAIContext()
+  const [{ tier, modelPreference }, user] = await Promise.all([
+    getUserAIContext(),
+    getCurrentUser(),
+  ])
   const activeModel = tier === 'vip' && modelPreference === 'auto'
     ? OLLAMA_MODEL
     : (process.env.OLLAMA_MODEL ?? 'qwen2.5-coder:7b')
@@ -24,7 +27,8 @@ export async function POST(req: Request) {
   // 1. Check the DB first
   const existing = await findWord(trimmed)
   if (existing) {
-    return Response.json({ card: existing, inLibrary: true })
+    const inLibrary = await isInUserVocabulary(user.id, existing.id)
+    return Response.json({ card: existing, inLibrary })
   }
 
   // 2. Not in DB — generate with AI

@@ -5,18 +5,24 @@ import { generateText } from 'ai'
 import { ollamaModel, OLLAMA_ENABLED } from '@/lib/ai-client'
 import {
   saveVocabularyWord,
+  findWord,
+  saveToUserVocabulary,
   deleteVocabularyWord,
   updateVocabularyRank,
   saveWordPronunciation,
   updateWordType,
   type VocabularyCard,
 } from '@/lib/db/vocabulary'
+import { getCurrentUser } from '@/lib/db/user'
 import type { VocabPronunciation } from '@/lib/db/schema'
 
 const VALID_TYPES = ['noun', 'verb', 'adjective', 'adverb', 'phrase', 'conjunction', 'preposition']
 
 export async function addWordToLibrary(card: VocabularyCard): Promise<{ ok: boolean }> {
-  const result = await saveVocabularyWord({
+  const user = await getCurrentUser()
+
+  // Save to shared catalogue (no-op if already exists)
+  const saved = await saveVocabularyWord({
     word: card.word,
     definition: card.definition,
     wordType: card.wordType,
@@ -29,9 +35,14 @@ export async function addWordToLibrary(card: VocabularyCard): Promise<{ ok: bool
     userAdded: true,
     aiModel: card.aiModel ?? null,
   })
+
+  // Resolve wordId — either newly inserted or already in catalogue
+  const wordId = saved?.id ?? (await findWord(card.word))?.id
+  if (wordId) await saveToUserVocabulary(user.id, wordId)
+
   revalidatePath('/vocabulary')
   revalidatePath('/essay-builder')
-  return { ok: result !== null }
+  return { ok: true }
 }
 
 export async function deleteVocabularyWordAction(id: number): Promise<void> {

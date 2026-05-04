@@ -9,7 +9,7 @@ import { VocabSearch } from './vocab-search'
 export default async function VocabularyPage() {
   const user = await getCurrentUser()
   const [words, favoriteDomains, sentences] = await Promise.all([
-    getAllVocabularyWords(user.role === 'admin', user.showSystemData),
+    getAllVocabularyWords(user.role === 'admin', user.showSystemData, user.id),
     getSkillFavorites('vocabulary'),
     getAllSentences(),
   ])
