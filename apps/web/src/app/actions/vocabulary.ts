@@ -8,6 +8,8 @@ import {
   findWord,
   saveToUserVocabulary,
   deleteVocabularyWord,
+  removeFromUserVocabulary,
+  getUserCountForWord,
   updateVocabularyRank,
   updateUserVocabularyRank,
   saveWordPronunciation,
@@ -46,8 +48,17 @@ export async function addWordToLibrary(card: VocabularyCard): Promise<{ ok: bool
   return { ok: true }
 }
 
+export async function getWordUserCountAction(id: number): Promise<number> {
+  return getUserCountForWord(id)
+}
+
 export async function deleteVocabularyWordAction(id: number): Promise<void> {
-  await deleteVocabularyWord(id)
+  const user = await getCurrentUser()
+  if (user.role === 'admin') {
+    await deleteVocabularyWord(id)
+  } else {
+    await removeFromUserVocabulary(user.id, id)
+  }
   revalidatePath('/vocabulary')
   revalidatePath('/essay-builder')
 }

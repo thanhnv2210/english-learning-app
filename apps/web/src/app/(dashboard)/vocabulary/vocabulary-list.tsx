@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useOptimistic, useTransition, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { deleteVocabularyWordAction, updateVocabularyRankAction, updateWordPronunciationAction, updateWordTypeAction, detectWordTypeAction } from '@/app/actions/vocabulary'
+import { deleteVocabularyWordAction, getWordUserCountAction, updateVocabularyRankAction, updateWordPronunciationAction, updateWordTypeAction, detectWordTypeAction } from '@/app/actions/vocabulary'
 import { addSentenceAction } from '@/app/actions/word-sentences'
 import { toggleVocabFavoriteAction } from '@/app/actions/user-skill-topics'
 import { enrolWordAction } from '@/app/actions/vocabulary-srs'
@@ -40,9 +40,10 @@ type Props = {
   words: VocabularyCard[]
   domains: string[]
   favoriteDomains: string[]
+  isAdmin?: boolean
 }
 
-export function VocabularyList({ words, domains, favoriteDomains }: Props) {
+export function VocabularyList({ words, domains, favoriteDomains, isAdmin = false }: Props) {
   const [items, setItems] = useOptimistic(words)
   const [search, setSearch] = useState('')
   const [activeDomain, setActiveDomain] = useState<string | null>(null)
@@ -263,10 +264,11 @@ export function VocabularyList({ words, domains, favoriteDomains }: Props) {
             <WordCard
               key={word.word}
               word={word}
-              onDelete={word.userAdded ? () => handleDelete(word.id) : undefined}
+              onDelete={word.userAdded || isAdmin ? () => handleDelete(word.id) : undefined}
               onRankUpdate={(rank) => handleRankUpdate(word.id, rank)}
               isSecondaryMatch={secondaryMatchIds.has(word.id)}
               showDesc={showDesc}
+              isAdmin={isAdmin}
             />
           ))}
         </div>
@@ -283,17 +285,21 @@ export function WordCard({
   onRankUpdate,
   isSecondaryMatch = false,
   showDesc = false,
+  isAdmin = false,
 }: {
   word: VocabularyCard
   onDelete?: () => void
   onRankUpdate?: (rank: number) => void
   isSecondaryMatch?: boolean
   showDesc?: boolean
+  isAdmin?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
   const [localRank, setLocalRank] = useState(word.rank)
   const [hoverRank, setHoverRank] = useState(0)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [userCount, setUserCount] = useState<number | null>(null)
+  const [loadingCount, setLoadingCount] = useState(false)
   const [enrolled, setEnrolled] = useState(false)
   const [, startTransition] = useTransition()
   const [localWordType, setLocalWordType] = useState(word.wordType)
@@ -353,19 +359,29 @@ export function WordCard({
 
   return (
     <div className="group relative flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm">
-      {/* Delete — two-step, only for user-added words */}
+      {/* Delete — two-step */}
       {onDelete && (
         confirmingDelete ? (
-          <div className="absolute top-3 right-4 flex items-center gap-1.5">
+          <div className="absolute top-3 right-4 flex items-center gap-1.5 flex-wrap justify-end max-w-[200px]">
+            {isAdmin && (
+              <span className="w-full text-right text-xs text-red-500">
+                {loadingCount
+                  ? 'Checking…'
+                  : userCount === 0
+                  ? 'No users have this word.'
+                  : `${userCount} user${userCount === 1 ? '' : 's'} have this saved.`}
+              </span>
+            )}
             <span className="text-xs text-red-600 font-medium">Delete?</span>
             <button
               onClick={onDelete}
-              className="rounded px-2 py-0.5 text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors"
+              disabled={isAdmin && loadingCount}
+              className="rounded px-2 py-0.5 text-xs font-semibold bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
             >
               Yes
             </button>
             <button
-              onClick={() => setConfirmingDelete(false)}
+              onClick={() => { setConfirmingDelete(false); setUserCount(null) }}
               className="rounded px-2 py-0.5 text-xs font-semibold bg-subtle text-muted-foreground hover:bg-border transition-colors"
             >
               No
@@ -373,7 +389,15 @@ export function WordCard({
           </div>
         ) : (
           <button
-            onClick={() => setConfirmingDelete(true)}
+            onClick={async () => {
+              setConfirmingDelete(true)
+              if (isAdmin) {
+                setLoadingCount(true)
+                const n = await getWordUserCountAction(word.id)
+                setUserCount(n)
+                setLoadingCount(false)
+              }
+            }}
             className="absolute top-4 right-4 hidden group-hover:flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-500 hover:bg-red-200 text-xs transition-colors"
             title="Delete"
           >

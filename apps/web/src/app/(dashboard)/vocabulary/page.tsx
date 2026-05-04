@@ -50,7 +50,7 @@ export default async function VocabularyPage() {
           No personal words yet. Enable system data in Settings to browse the AWL catalogue, or search above to add your first word.
         </p>
       )}
-      <VocabularyList words={words} domains={domains} favoriteDomains={favoriteDomains} />
+      <VocabularyList words={words} domains={domains} favoriteDomains={favoriteDomains} isAdmin={user.role === 'admin'} />
     </div>
   )
 }

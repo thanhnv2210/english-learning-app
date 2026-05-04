@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { vocabularyWords, vocabularyWordDomains, writingDomains, userVocabulary } from '@/lib/db/schema'
-import { asc, desc, eq, inArray, sql, and } from 'drizzle-orm'
+import { asc, desc, eq, inArray, sql, and, count } from 'drizzle-orm'
 import type { VocabWordFamily, VocabSynonym, VocabExamples, VocabPronunciation } from '@/lib/db/schema'
 
 export type VocabularyCard = {
@@ -158,8 +158,25 @@ export async function saveVocabularyWord(data: {
   return toCard(row, row.word, data.domainNames, 'db')
 }
 
+/** Returns how many users have this word saved in user_vocabulary. */
+export async function getUserCountForWord(wordId: number): Promise<number> {
+  const [{ value }] = await db
+    .select({ value: count() })
+    .from(userVocabulary)
+    .where(eq(userVocabulary.wordId, wordId))
+  return value
+}
+
+/** Admin-only: hard-delete the word from the shared catalogue. */
 export async function deleteVocabularyWord(id: number): Promise<void> {
   await db.delete(vocabularyWords).where(eq(vocabularyWords.id, id))
+}
+
+/** User: remove the word from their personal saved list only. */
+export async function removeFromUserVocabulary(userId: number, wordId: number): Promise<void> {
+  await db
+    .delete(userVocabulary)
+    .where(and(eq(userVocabulary.userId, userId), eq(userVocabulary.wordId, wordId)))
 }
 
 /** Admin-only: update the global rank on the shared catalogue. */
