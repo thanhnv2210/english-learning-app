@@ -357,7 +357,7 @@ export function NavSidebar({
     <aside className="hidden sm:flex h-screen w-52 shrink-0 flex-col border-r border-border bg-card px-3 py-6 2xl:w-64">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between px-2">
-        <p className="text-xs font-semibold uppercase tracking-widest text-faint">
+        <p data-tour="target-profile" className="text-xs font-semibold uppercase tracking-widest text-faint">
           {formatTargetLabel(targetProfile)}
         </p>
         {!isNarrow && (
@@ -426,6 +426,7 @@ export function NavSidebar({
             pathname={pathname}
             isFav={favs.includes(item.href)}
             onToggleFav={handleToggleFav}
+            tourId={item.href === '/' ? 'pin-page' : undefined}
           />
         ))}
 
@@ -438,6 +439,7 @@ export function NavSidebar({
             <div key={group.label} className="mt-2">
               <button
                 onClick={() => toggleGroup(group.label)}
+                data-tour={group.label === 'Guides' ? 'cheat-sheet' : undefined}
                 className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
                   hasActive
                     ? 'text-blue-600 dark:text-blue-400'
@@ -484,6 +486,7 @@ export function NavSidebar({
             )}
             <span className="text-xs text-muted-foreground truncate flex-1 min-w-0">{userName || userEmail}</span>
             <button
+              data-tour="sign-out"
               onClick={() => signOut({ callbackUrl: '/' })}
               title="Sign out"
               className="shrink-0 rounded p-1 text-xs text-faint hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-colors"
@@ -628,16 +631,18 @@ function NavLink({
   indent = false,
   isFav,
   onToggleFav,
+  tourId,
 }: {
   item: NavItem
   pathname: string
   indent?: boolean
   isFav: boolean
   onToggleFav: (href: string) => void
+  tourId?: string
 }) {
   const active = isActive(item.href, pathname)
   return (
-    <div className="group relative">
+    <div className="group relative" data-tour={tourId}>
       <Link
         href={item.href}
         className={`flex items-center gap-3 rounded-lg py-2 text-sm font-medium transition-colors pr-7 ${

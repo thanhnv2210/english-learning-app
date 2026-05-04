@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { CheatSheetBanner } from '@/components/cheat-sheet-banner'
+import { OnboardingTour } from '@/components/onboarding-tour'
 import { getCurrentUser } from '@/lib/db/user'
 import { getAnalyticsStats } from '@/lib/db/analytics'
 import { db } from '@/lib/db'
@@ -111,6 +112,7 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8">
 
+      <OnboardingTour />
       <CheatSheetBanner />
 
       {/* ── Welcome header ──────────────────────────────────────────────────── */}
