@@ -37,12 +37,16 @@ export async function listIdiomAction(): Promise<IdiomCard[]> {
 }
 
 export async function updateIdiomSkillsAction(id: number, skills: IdiomSkill[]): Promise<void> {
+  const user = await getCurrentUser()
+  if (user.role !== 'admin') return
   await updateIdiomSkills(id, skills)
   revalidatePath('/idioms')
   revalidatePath('/idioms/practice', 'layout')
 }
 
 export async function updateIdiomContextsAction(id: number, contexts: IdiomContext[]): Promise<void> {
+  const user = await getCurrentUser()
+  if (user.role !== 'admin') return
   await updateIdiomContexts(id, contexts)
   revalidatePath('/idioms')
   revalidatePath('/idioms/practice', 'layout')

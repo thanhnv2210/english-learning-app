@@ -76,6 +76,8 @@ export async function updateVocabularyRankAction(id: number, rank: number): Prom
 }
 
 export async function updateWordTypeAction(id: number, wordType: string): Promise<void> {
+  const user = await getCurrentUser()
+  if (user.role !== 'admin') return
   await updateWordType(id, wordType)
   revalidatePath('/vocabulary')
   revalidatePath('/essay-builder')
@@ -86,6 +88,8 @@ export async function detectWordTypeAction(
   word: string,
   definition: string,
 ): Promise<{ wordType: string | null; error?: string }> {
+  const user = await getCurrentUser()
+  if (user.role !== 'admin') return { wordType: null, error: 'Admin only' }
   if (!OLLAMA_ENABLED) return { wordType: null, error: 'AI is disabled' }
 
   const prompt = `What is the primary part of speech for the English word "${word}"?
@@ -115,6 +119,8 @@ export async function updateWordPronunciationAction(
   us: string,
   existing: VocabPronunciation | null,
 ): Promise<void> {
+  const user = await getCurrentUser()
+  if (user.role !== 'admin') return
   const pronunciation: VocabPronunciation = {
     uk,
     us,

@@ -416,7 +416,7 @@ export function WordCard({
             </span>
           )}
 
-          {editingWordType ? (
+          {isAdmin && editingWordType ? (
             <select
               autoFocus
               value={localWordType ?? ''}
@@ -431,22 +431,22 @@ export function WordCard({
             </select>
           ) : localWordType ? (
             <button
-              onClick={() => setEditingWordType(true)}
-              title="Edit word type"
-              className="text-xs font-medium italic text-faint hover:text-muted-foreground transition-colors"
+              onClick={isAdmin ? () => setEditingWordType(true) : undefined}
+              title={isAdmin ? 'Edit word type' : undefined}
+              className={`text-xs font-medium italic text-faint ${isAdmin ? 'hover:text-muted-foreground transition-colors' : 'cursor-default'}`}
             >
               {localWordType}
             </button>
-          ) : (
+          ) : isAdmin ? (
             <button
               onClick={() => setEditingWordType(true)}
               className="text-xs text-faint hover:text-muted-foreground transition-colors"
             >
               + type
             </button>
-          )}
+          ) : null}
 
-          {!editingWordType && (
+          {isAdmin && !editingWordType && (
             <button
               onClick={handleDetectWordType}
               disabled={detectingWordType}
@@ -527,15 +527,17 @@ export function WordCard({
         <div className="mb-2 flex flex-wrap items-center gap-3">
           <PronunciationChip label="UK" ipa={pronunciation.uk} audioUrl={pronunciation.ukAudio} />
           <PronunciationChip label="US" ipa={pronunciation.us} audioUrl={pronunciation.usAudio} />
-          <button
-            onClick={openPronunciationEdit}
-            title="Edit pronunciation manually"
-            className="text-xs text-faint hover:text-muted-foreground transition-colors"
-          >
-            ✎
-          </button>
+          {isAdmin && (
+            <button
+              onClick={openPronunciationEdit}
+              title="Edit pronunciation manually"
+              className="text-xs text-faint hover:text-muted-foreground transition-colors"
+            >
+              ✎
+            </button>
+          )}
         </div>
-      ) : (
+      ) : isAdmin ? (
         <div className="mb-2">
           <button
             onClick={openPronunciationEdit}
@@ -544,7 +546,7 @@ export function WordCard({
             + add pronunciation
           </button>
         </div>
-      )}
+      ) : null}
 
       {/* Definition */}
       {showDesc && (

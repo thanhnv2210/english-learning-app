@@ -374,14 +374,16 @@ function IdiomCard({
               ))
             )}
           </div>
-          <button
-            onClick={() => setEditingSkills((v) => !v)}
-            className="shrink-0 text-xs text-faint hover:text-blue-500 transition-colors ml-auto"
-          >
-            {editingSkills ? 'Done' : 'Edit'}
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setEditingSkills((v) => !v)}
+              className="shrink-0 text-xs text-faint hover:text-blue-500 transition-colors ml-auto"
+            >
+              {editingSkills ? 'Done' : 'Edit'}
+            </button>
+          )}
         </div>
-        {editingSkills && (
+        {isAdmin && editingSkills && (
           <div className="flex gap-2 flex-wrap mt-1">
             {ALL_SKILLS.map((skill) => {
               const active = localSkills.includes(skill)
@@ -415,14 +417,16 @@ function IdiomCard({
               ))
             )}
           </div>
-          <button
-            onClick={() => setEditingContexts((v) => !v)}
-            className="shrink-0 text-xs text-faint hover:text-blue-500 transition-colors ml-auto"
-          >
-            {editingContexts ? 'Done' : 'Edit'}
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setEditingContexts((v) => !v)}
+              className="shrink-0 text-xs text-faint hover:text-blue-500 transition-colors ml-auto"
+            >
+              {editingContexts ? 'Done' : 'Edit'}
+            </button>
+          )}
         </div>
-        {editingContexts && (
+        {isAdmin && editingContexts && (
           <div className="flex gap-2 flex-wrap mt-1">
             {ALL_CONTEXTS.map((ctx) => {
               const active = localContexts.includes(ctx)

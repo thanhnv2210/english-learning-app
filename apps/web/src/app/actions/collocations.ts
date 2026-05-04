@@ -39,6 +39,8 @@ export async function updateCollocationSkillsAction(
   id: number,
   skills: CollocationSkill[],
 ): Promise<void> {
+  const user = await getCurrentUser()
+  if (user.role !== 'admin') return
   await updateCollocationSkills(id, skills)
   revalidatePath('/collocations')
   revalidatePath('/collocations/practice', 'layout')

@@ -498,15 +498,17 @@ function SavedCard({
               ))
             )}
           </div>
-          <button
-            onClick={() => setEditingSkills((v) => !v)}
-            className="shrink-0 text-xs text-faint hover:text-blue-500 transition-colors ml-auto"
-          >
-            {editingSkills ? 'Done' : 'Edit'}
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setEditingSkills((v) => !v)}
+              className="shrink-0 text-xs text-faint hover:text-blue-500 transition-colors ml-auto"
+            >
+              {editingSkills ? 'Done' : 'Edit'}
+            </button>
+          )}
         </div>
 
-        {editingSkills && (
+        {isAdmin && editingSkills && (
           <div className="flex gap-2 flex-wrap mt-1">
             {ALL_SKILLS.map((skill) => {
               const active = localSkills.includes(skill)
