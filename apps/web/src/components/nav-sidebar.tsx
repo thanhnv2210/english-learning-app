@@ -112,12 +112,14 @@ export function NavSidebar({
   userEmail,
   userName,
   userImage,
+  isAdmin = false,
 }: {
   targetProfile?: string
   favouritePages?: string[]
   userEmail?: string
   userName?: string
   userImage?: string
+  isAdmin?: boolean
 }) {
   const pathname = usePathname()
 
@@ -234,9 +236,13 @@ export function NavSidebar({
     reorderFavouritePagesAction(newOrder)
   }
 
+  const visibleNavItems = isAdmin
+    ? ALL_NAV_ITEMS
+    : ALL_NAV_ITEMS.filter((item) => !item.href.startsWith('/admin'))
+
   // Preserve order from favs array (order matters for drag-to-reorder)
   const favouritedItems = favs
-    .map((href) => ALL_NAV_ITEMS.find((item) => item.href === href))
+    .map((href) => visibleNavItems.find((item) => item.href === href))
     .filter((item): item is NavItem => item !== undefined)
 
   const VISIBLE_COUNT = 5
@@ -244,7 +250,7 @@ export function NavSidebar({
 
   // ── Collapsed: icon-only rail ────────────────────────────────────────────────
   if (isCollapsed) {
-    const nonFavItems = ALL_NAV_ITEMS.filter((item) => !favs.includes(item.href))
+    const nonFavItems = visibleNavItems.filter((item) => !favs.includes(item.href))
     const orderedItems = [...favouritedItems, ...nonFavItems]
 
     return (
@@ -424,7 +430,7 @@ export function NavSidebar({
         ))}
 
         {/* Collapsible groups */}
-        {GROUPS.map((group) => {
+        {GROUPS.filter((group) => group.label !== 'Admin' || isAdmin).map((group) => {
           const open = openGroups[group.label] ?? false
           const hasActive = groupContainsActive(group, pathname)
 

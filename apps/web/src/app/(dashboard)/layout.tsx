@@ -18,6 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           userEmail={user.email}
           userName={user.name ?? undefined}
           userImage={user.image ?? undefined}
+          isAdmin={user.role === 'admin'}
         />
         <div className="flex flex-1 flex-col overflow-hidden min-w-0">
           {process.env.NEXT_PUBLIC_OLLAMA_ENABLED === 'false' && <OllamaDisabledBanner />}

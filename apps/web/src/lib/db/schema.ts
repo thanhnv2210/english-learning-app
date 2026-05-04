@@ -20,6 +20,7 @@ export const users = pgTable('users', {
   name: text('name'),
   image: text('image'),
   passwordHash: text('password_hash'),
+  role: text('role').notNull().default('student'),            // 'student' | 'admin'
   tier: text('tier').notNull().default('vip'),               // 'free' | 'vip'
   modelPreference: text('model_preference').notNull().default('auto'), // 'auto' | 'free'
   // e.g. 'IELTS_Academic_6.5', 'IELTS_Academic_7.5', 'Business_Fluent'
