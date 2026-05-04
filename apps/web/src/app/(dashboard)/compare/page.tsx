@@ -1,9 +1,11 @@
 import { getAllComparisons } from '@/lib/db/comparisons'
+import { getCurrentUser } from '@/lib/db/user'
 import { ComparisonSearch } from './comparison-search'
 import { ComparisonList } from './comparison-list'
 
 export default async function ComparePage() {
-  const saved = await getAllComparisons()
+  const user = await getCurrentUser()
+  const saved = await getAllComparisons(user.id, user.role === 'admin', user.showSystemData)
 
   return (
     <div className="mx-auto max-w-5xl flex flex-col gap-8 xl:max-w-6xl 2xl:max-w-7xl">
@@ -16,6 +18,11 @@ export default async function ComparePage() {
 
       <ComparisonSearch />
 
+      {saved.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          No comparisons saved yet.{!user.showSystemData && ' Enable system data in Settings to see built-in comparisons, or'} Search above to add your first comparison.
+        </p>
+      )}
       <ComparisonList initialItems={saved} />
     </div>
   )

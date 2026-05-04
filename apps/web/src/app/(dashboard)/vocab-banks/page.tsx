@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { getAllBanks } from '@/lib/db/vocab-banks'
+import { getCurrentUser } from '@/lib/db/user'
 import { BankList } from './bank-list'
 
 export default async function VocabBanksPage() {
-  const banks = await getAllBanks()
+  const user = await getCurrentUser()
+  const banks = await getAllBanks(user.id, user.role === 'admin', user.showSystemData)
 
   return (
     <div className="mx-auto max-w-5xl flex flex-col gap-8 xl:max-w-6xl 2xl:max-w-7xl">
@@ -22,6 +24,11 @@ export default async function VocabBanksPage() {
         </Link>
       </div>
 
+      {banks.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          No vocabulary banks yet.{!user.showSystemData && ' Enable system data in Settings to browse the built-in banks, or'} Create your first bank with the button above.
+        </p>
+      )}
       <BankList initialBanks={banks} />
     </div>
   )

@@ -16,16 +16,18 @@ export type SpeakingPhrase = {
   createdAt: Date
 }
 
-/** Returns system phrases + phrases owned by the given user for a given skill, newest first. */
-export async function getPhrases(userId: number, skill: 'speaking' | 'writing'): Promise<SpeakingPhrase[]> {
+export async function getPhrases(userId: number, isAdmin: boolean, showSystemData: boolean, skill: 'speaking' | 'writing'): Promise<SpeakingPhrase[]> {
+  const visibilityFilter = isAdmin
+    ? undefined
+    : showSystemData
+      ? or(eq(speakingPhrases.isSystem, true), eq(speakingPhrases.userId, userId))
+      : and(eq(speakingPhrases.isSystem, false), eq(speakingPhrases.userId, userId))
+
   return db
     .select()
     .from(speakingPhrases)
     .where(
-      and(
-        eq(speakingPhrases.skill, skill),
-        or(eq(speakingPhrases.userId, userId), eq(speakingPhrases.isSystem, true)),
-      )
+      and(eq(speakingPhrases.skill, skill), visibilityFilter)
     )
     .orderBy(desc(speakingPhrases.createdAt))
 }

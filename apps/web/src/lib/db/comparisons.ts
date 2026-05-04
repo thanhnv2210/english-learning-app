@@ -5,6 +5,7 @@ import type { ComparisonTerm, ComparisonExamplePair } from '@/lib/db/schema'
 
 export type ComparisonCard = {
   id: number
+  userId: number | null
   termA: string
   termB: string
   category: string
@@ -34,6 +35,7 @@ export async function findComparison(termA: string, termB: string): Promise<Comp
 }
 
 export async function saveComparison(data: {
+  userId: number
   termA: string
   termB: string
   category: string
@@ -44,16 +46,23 @@ export async function saveComparison(data: {
 }): Promise<ComparisonCard | null> {
   const [row] = await db
     .insert(comparisonEntries)
-    .values({ ...data, termA: data.termA.toLowerCase(), termB: data.termB.toLowerCase() })
+    .values({ ...data, termA: data.termA.toLowerCase(), termB: data.termB.toLowerCase(), isSystem: false })
     .onConflictDoNothing()
     .returning()
   return (row as ComparisonCard) ?? null
 }
 
-export async function getAllComparisons(): Promise<ComparisonCard[]> {
+export async function getAllComparisons(userId: number, isAdmin: boolean, showSystemData: boolean): Promise<ComparisonCard[]> {
+  const visibilityFilter = isAdmin
+    ? undefined
+    : showSystemData
+      ? or(eq(comparisonEntries.isSystem, true), eq(comparisonEntries.userId, userId))
+      : and(eq(comparisonEntries.isSystem, false), eq(comparisonEntries.userId, userId))
+
   return db
     .select()
     .from(comparisonEntries)
+    .where(visibilityFilter)
     .orderBy(desc(comparisonEntries.rank), desc(comparisonEntries.createdAt)) as Promise<ComparisonCard[]>
 }
 
@@ -61,8 +70,9 @@ export async function updateComparisonRank(id: number, rank: number): Promise<vo
   await db.update(comparisonEntries).set({ rank }).where(eq(comparisonEntries.id, id))
 }
 
-export async function deleteComparison(id: number): Promise<void> {
-  await db.delete(comparisonEntries).where(
-    and(eq(comparisonEntries.id, id), eq(comparisonEntries.isSystem, false))
-  )
+export async function deleteComparison(id: number, userId: number, isAdmin: boolean): Promise<void> {
+  const condition = isAdmin
+    ? eq(comparisonEntries.id, id)
+    : and(eq(comparisonEntries.id, id), eq(comparisonEntries.isSystem, false), eq(comparisonEntries.userId, userId))
+  await db.delete(comparisonEntries).where(condition)
 }

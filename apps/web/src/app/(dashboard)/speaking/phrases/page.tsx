@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export default async function SpeakingPhrasesPage() {
   const user = await getCurrentUser()
-  const phrases = await getPhrases(user.id, 'speaking')
+  const phrases = await getPhrases(user.id, user.role === 'admin', user.showSystemData, 'speaking')
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">

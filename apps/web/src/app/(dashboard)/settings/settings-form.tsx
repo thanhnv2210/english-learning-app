@@ -1,7 +1,7 @@
 'use client'
 
 import { useOptimistic, useTransition } from 'react'
-import { updateTargetProfileAction, updateModelPreferenceAction } from '@/app/actions/user'
+import { updateTargetProfileAction, updateModelPreferenceAction, updateShowSystemDataAction } from '@/app/actions/user'
 import { useTheme } from '@/components/theme-provider'
 
 type TargetProfileValue = 'IELTS_Academic_6.5' | 'IELTS_Academic_7.5' | 'Business_Fluent'
@@ -64,14 +64,17 @@ export function SettingsForm({
   currentProfile,
   tier,
   modelPreference,
+  showSystemData,
 }: {
   currentProfile: string
   tier: string
   modelPreference: 'auto' | 'free'
+  showSystemData: boolean
 }) {
   const [isPending, startTransition] = useTransition()
   const { theme, setTheme } = useTheme()
   const [optimisticPref, setOptimisticPref] = useOptimistic(modelPreference)
+  const [optimisticSystemData, setOptimisticSystemData] = useOptimistic(showSystemData)
 
   function select(profile: TargetProfileValue) {
     if (profile === currentProfile) return
@@ -83,6 +86,13 @@ export function SettingsForm({
     startTransition(async () => {
       setOptimisticPref(pref)
       await updateModelPreferenceAction(pref)
+    })
+  }
+
+  function toggleSystemData() {
+    startTransition(async () => {
+      setOptimisticSystemData(!optimisticSystemData)
+      await updateShowSystemDataAction(!optimisticSystemData)
     })
   }
 
@@ -152,6 +162,33 @@ export function SettingsForm({
             <p className="text-xs text-faint text-center">Saving…</p>
           )}
         </div>
+      </section>
+
+      {/* Content Visibility */}
+      <section>
+        <h2 className="text-sm font-semibold text-foreground mb-1">Content Visibility</h2>
+        <p className="text-xs text-muted-foreground mb-3">
+          Show system-provided data alongside your personal entries in libraries (vocab banks, collocations, idioms, etc.).
+        </p>
+        <button
+          onClick={toggleSystemData}
+          disabled={isPending}
+          className="w-full rounded-xl border-2 border-border bg-card p-4 text-left transition-all hover:opacity-80 disabled:opacity-60"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Show system data</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {optimisticSystemData
+                  ? 'Showing system + personal entries'
+                  : 'Showing personal entries only'}
+              </p>
+            </div>
+            <div className={`relative h-6 w-11 rounded-full transition-colors ${optimisticSystemData ? 'bg-blue-500' : 'bg-muted'}`}>
+              <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform ${optimisticSystemData ? 'translate-x-6' : 'translate-x-1'}`} />
+            </div>
+          </div>
+        </button>
       </section>
 
       {/* AI Model — VIP only */}

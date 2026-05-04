@@ -27,6 +27,7 @@ export const users = pgTable('users', {
   // e.g. 'IELTS_Academic_6.5', 'IELTS_Academic_7.5', 'Business_Fluent'
   targetProfile: text('target_profile').notNull().default('IELTS_Academic_6.5'),
   favouritePages: jsonb('favourite_pages').$type<string[]>().notNull().default([]),
+  showSystemData: boolean('show_system_data').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
@@ -293,6 +294,7 @@ export const connectedSpeechAnalyses = pgTable('connected_speech_analyses', {
 
 export const vocabBanks = pgTable('vocab_banks', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   topic: text('topic').notNull().unique(),
   description: text('description').notNull().default(''),
   isSystem: boolean('is_system').notNull().default(false),
@@ -338,6 +340,7 @@ export type ComparisonExamplePair = {
 
 export const comparisonEntries = pgTable('comparison_entries', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   termA: text('term_a').notNull(),
   termB: text('term_b').notNull(),
   category: text('category').notNull(), // 'adverb' | 'verb' | 'noun' | 'adjective' | 'conjunction' | 'preposition' | 'phrase'
@@ -359,6 +362,7 @@ export type IdiomContext = 'Speaking' | 'Writing' | 'News' | 'Book' | 'Podcast' 
 
 export const idiomEntries = pgTable('idiom_entries', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   idiom: text('idiom').notNull().unique(),
   meaning: text('meaning').notNull(),
   register: text('register').notNull().default('neutral'), // 'formal' | 'informal' | 'neutral'
@@ -378,12 +382,14 @@ export type CollocationSkill = 'Writing_1' | 'Writing_2' | 'Speaking'
 
 export const collocationEntries = pgTable('collocation_entries', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   phrase: text('phrase').notNull().unique(),
   type: text('type').notNull(),
   explanation: text('explanation'),
   skills: jsonb('skills').notNull().$type<CollocationSkill[]>(),
   examples: jsonb('examples').notNull().$type<string[]>(),
   rank: integer('rank').notNull().default(3),
+  isSystem: boolean('is_system').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 }, (t) => [
   check('collocation_entries_rank_check', sql`${t.rank} between 1 and 5`),

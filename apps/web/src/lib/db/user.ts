@@ -79,3 +79,7 @@ export async function toggleFavouritePage(userId: number, href: string): Promise
 export async function reorderFavouritePages(userId: number, orderedPages: string[]): Promise<void> {
   await db.update(users).set({ favouritePages: orderedPages }).where(eq(users.id, userId))
 }
+
+export async function updateShowSystemData(userId: number, showSystemData: boolean): Promise<void> {
+  await db.update(users).set({ showSystemData }).where(eq(users.id, userId))
+}

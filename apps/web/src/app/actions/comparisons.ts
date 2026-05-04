@@ -9,6 +9,7 @@ import {
   type ComparisonCard,
 } from '@/lib/db/comparisons'
 import type { ComparisonTerm, ComparisonExamplePair } from '@/lib/db/schema'
+import { getCurrentUser } from '@/lib/db/user'
 
 export async function saveComparisonAction(data: {
   termA: string
@@ -19,11 +20,13 @@ export async function saveComparisonAction(data: {
   dimensionB: ComparisonTerm
   examples: ComparisonExamplePair[]
 }): Promise<ComparisonCard | null> {
-  return saveComparison(data)
+  const user = await getCurrentUser()
+  return saveComparison({ ...data, userId: user.id })
 }
 
 export async function listComparisonAction(): Promise<ComparisonCard[]> {
-  return getAllComparisons()
+  const user = await getCurrentUser()
+  return getAllComparisons(user.id, user.role === 'admin', user.showSystemData)
 }
 
 export async function updateComparisonRankAction(id: number, rank: number): Promise<void> {
@@ -32,6 +35,7 @@ export async function updateComparisonRankAction(id: number, rank: number): Prom
 }
 
 export async function deleteComparisonAction(id: number): Promise<void> {
-  await deleteComparison(id)
+  const user = await getCurrentUser()
+  await deleteComparison(id, user.id, user.role === 'admin')
   revalidatePath('/compare')
 }

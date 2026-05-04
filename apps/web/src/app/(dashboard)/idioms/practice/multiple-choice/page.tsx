@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { getIdiomPracticeItems } from '@/lib/db/idioms'
+import { getCurrentUser } from '@/lib/db/user'
 import { MultipleChoiceGame } from '@/components/games/multiple-choice-game'
 
 export default async function IdiomMultipleChoicePage() {
-  const items = await getIdiomPracticeItems()
+  const user = await getCurrentUser()
+  const items = await getIdiomPracticeItems(user.id, user.role === 'admin', user.showSystemData)
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">

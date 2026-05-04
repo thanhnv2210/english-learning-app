@@ -11,6 +11,7 @@ import {
   type IdiomCard,
 } from '@/lib/db/idioms'
 import type { IdiomSkill, IdiomContext } from '@/lib/db/schema'
+import { getCurrentUser } from '@/lib/db/user'
 
 export async function saveIdiomAction(data: {
   idiom: string
@@ -20,14 +21,16 @@ export async function saveIdiomAction(data: {
   contexts: IdiomContext[]
   examples: string[]
 }): Promise<IdiomCard | null> {
-  const result = await saveIdiom(data)
+  const user = await getCurrentUser()
+  const result = await saveIdiom({ ...data, userId: user.id })
   revalidatePath('/idioms')
   revalidatePath('/idioms/practice', 'layout')
   return result
 }
 
 export async function listIdiomAction(): Promise<IdiomCard[]> {
-  return getAllIdioms()
+  const user = await getCurrentUser()
+  return getAllIdioms(user.id, user.role === 'admin', user.showSystemData)
 }
 
 export async function updateIdiomSkillsAction(id: number, skills: IdiomSkill[]): Promise<void> {
@@ -49,7 +52,8 @@ export async function updateIdiomRankAction(id: number, rank: number): Promise<v
 }
 
 export async function deleteIdiomAction(id: number): Promise<void> {
-  await deleteIdiom(id)
+  const user = await getCurrentUser()
+  await deleteIdiom(id, user.id, user.role === 'admin')
   revalidatePath('/idioms')
   revalidatePath('/idioms/practice', 'layout')
 }

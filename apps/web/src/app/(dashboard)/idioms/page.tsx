@@ -1,12 +1,14 @@
 import Link from 'next/link'
 import { getAllIdioms, getIdiomPracticeItems } from '@/lib/db/idioms'
+import { getCurrentUser } from '@/lib/db/user'
 import { IdiomSearch } from './idiom-search'
 import { IdiomList } from './idiom-list'
 
 export default async function IdiomsPage() {
+  const user = await getCurrentUser()
   const [saved, practiceItems] = await Promise.all([
-    getAllIdioms(),
-    getIdiomPracticeItems(),
+    getAllIdioms(user.id, user.role === 'admin', user.showSystemData),
+    getIdiomPracticeItems(user.id, user.role === 'admin', user.showSystemData),
   ])
 
   return (
@@ -30,6 +32,11 @@ export default async function IdiomsPage() {
 
       <IdiomSearch />
 
+      {saved.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          No idioms saved yet.{!user.showSystemData && ' Enable system data in Settings to see built-in idioms, or'} Search above to add your first idiom.
+        </p>
+      )}
       <IdiomList initialItems={saved} />
     </div>
   )

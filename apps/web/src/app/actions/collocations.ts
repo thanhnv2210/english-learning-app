@@ -10,6 +10,7 @@ import {
   type CollocationCard,
 } from '@/lib/db/collocations'
 import type { CollocationSkill } from '@/lib/db/schema'
+import { getCurrentUser } from '@/lib/db/user'
 
 export async function saveCollocationAction(data: {
   phrase: string
@@ -18,7 +19,8 @@ export async function saveCollocationAction(data: {
   skills: CollocationSkill[]
   examples: string[]
 }): Promise<CollocationCard | null> {
-  const result = await saveCollocation(data)
+  const user = await getCurrentUser()
+  const result = await saveCollocation({ ...data, userId: user.id })
   revalidatePath('/collocations')
   revalidatePath('/collocations/practice', 'layout')
   revalidatePath('/essay-builder')
@@ -26,7 +28,8 @@ export async function saveCollocationAction(data: {
 }
 
 export async function listCollocationAction(): Promise<CollocationCard[]> {
-  return getAllCollocations()
+  const user = await getCurrentUser()
+  return getAllCollocations(user.id, user.role === 'admin', user.showSystemData)
 }
 
 export async function updateCollocationSkillsAction(
@@ -47,7 +50,8 @@ export async function updateCollocationRankAction(id: number, rank: number): Pro
 }
 
 export async function deleteCollocationAction(id: number): Promise<void> {
-  await deleteCollocation(id)
+  const user = await getCurrentUser()
+  await deleteCollocation(id, user.id, user.role === 'admin')
   revalidatePath('/collocations')
   revalidatePath('/collocations/practice', 'layout')
   revalidatePath('/essay-builder')

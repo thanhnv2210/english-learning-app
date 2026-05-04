@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getCollocationPracticeItems } from '@/lib/db/collocations'
+import { getCurrentUser } from '@/lib/db/user'
 
 const GAMES = [
   {
@@ -23,7 +24,8 @@ const GAMES = [
 ]
 
 export default async function CollocPracticeHub() {
-  const items = await getCollocationPracticeItems()
+  const user = await getCurrentUser()
+  const items = await getCollocationPracticeItems(user.id, user.role === 'admin', user.showSystemData)
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">

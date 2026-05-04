@@ -7,10 +7,10 @@ import { parseTargetBand } from '@/lib/db/user'
 import { EssayBuilderView } from './essay-builder-view'
 
 export default async function EssayBuilderPage() {
-  const [user, words, collocations, domains, history] = await Promise.all([
-    getCurrentUser(),
+  const user = await getCurrentUser()
+  const [words, collocations, domains, history] = await Promise.all([
     getAllVocabularyWords(),
-    getAllCollocations(),
+    getAllCollocations(user.id, user.role === 'admin', user.showSystemData),
     getAllDomains(),
     getAllEssayBuilderRecords(),
   ])

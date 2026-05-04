@@ -1,12 +1,14 @@
 import Link from 'next/link'
 import { getAllCollocations, getCollocationPracticeItems } from '@/lib/db/collocations'
+import { getCurrentUser } from '@/lib/db/user'
 import { CollocationSearch } from './collocation-search'
 import { CollocationList } from './collocation-list'
 
 export default async function CollocationPage() {
+  const user = await getCurrentUser()
   const [saved, practiceItems] = await Promise.all([
-    getAllCollocations(),
-    getCollocationPracticeItems(),
+    getAllCollocations(user.id, user.role === 'admin', user.showSystemData),
+    getCollocationPracticeItems(user.id, user.role === 'admin', user.showSystemData),
   ])
 
   return (
@@ -31,6 +33,11 @@ export default async function CollocationPage() {
 
       <CollocationSearch />
 
+      {saved.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          No collocations saved yet.{!user.showSystemData && ' Enable system data in Settings to see built-in collocations, or'} Search above to add your first collocation.
+        </p>
+      )}
       <CollocationList initialItems={saved} />
     </div>
   )

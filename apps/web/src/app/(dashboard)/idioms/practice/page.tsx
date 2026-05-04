@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getIdiomPracticeItems } from '@/lib/db/idioms'
+import { getCurrentUser } from '@/lib/db/user'
 
 const GAMES = [
   {
@@ -23,7 +24,8 @@ const GAMES = [
 ]
 
 export default async function IdiomPracticeHub() {
-  const items = await getIdiomPracticeItems()
+  const user = await getCurrentUser()
+  const items = await getIdiomPracticeItems(user.id, user.role === 'admin', user.showSystemData)
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">

@@ -4,7 +4,7 @@ import { WordPairsView } from './word-pairs-view'
 
 export default async function WordPairsPage() {
   const user = await getCurrentUser()
-  const pairs = await getWordPairs(user.id)
+  const pairs = await getWordPairs(user.id, user.role === 'admin', user.showSystemData)
   return (
     <div className="mx-auto max-w-3xl flex flex-col gap-8">
       <div className="rounded-xl border border-border bg-card p-6">
@@ -20,6 +20,11 @@ export default async function WordPairsPage() {
           spelling, or context. Knowing the difference prevents subtle errors in IELTS writing and speaking.
         </p>
       </div>
+      {pairs.length === 0 && (
+        <p className="text-sm text-muted-foreground px-2">
+          No word pairs yet.{!user.showSystemData && ' Enable system data in Settings to see built-in pairs, or'} Add your first pair below.
+        </p>
+      )}
       <WordPairsView initialPairs={pairs} />
     </div>
   )

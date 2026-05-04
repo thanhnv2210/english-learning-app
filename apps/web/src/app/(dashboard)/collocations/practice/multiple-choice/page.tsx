@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { getCollocationPracticeItems } from '@/lib/db/collocations'
+import { getCurrentUser } from '@/lib/db/user'
 import { MultipleChoiceGame } from '@/components/games/multiple-choice-game'
 
 export default async function CollocMultipleChoicePage() {
-  const items = await getCollocationPracticeItems()
+  const user = await getCurrentUser()
+  const items = await getCollocationPracticeItems(user.id, user.role === 'admin', user.showSystemData)
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">
       <Link href="/collocations/practice" className="self-start text-xs text-faint hover:text-muted-foreground transition-colors">

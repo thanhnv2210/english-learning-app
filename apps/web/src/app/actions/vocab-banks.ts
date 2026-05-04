@@ -11,20 +11,23 @@ import {
   type VocabBank,
   type VocabBankWord,
 } from '@/lib/db/vocab-banks'
+import { getCurrentUser } from '@/lib/db/user'
 
 export async function createBankAction(data: {
   topic: string
   description: string
   words: { word: string; type: string; meaning: string; example: string }[]
 }): Promise<VocabBank> {
-  const bank = await createBank({ topic: data.topic, description: data.description })
+  const user = await getCurrentUser()
+  const bank = await createBank({ userId: user.id, topic: data.topic, description: data.description })
   await addWordsToBank(bank.id, data.words)
   revalidatePath('/vocab-banks')
   return bank
 }
 
 export async function deleteBankAction(id: number): Promise<void> {
-  await deleteBank(id)
+  const user = await getCurrentUser()
+  await deleteBank(id, user.id, user.role === 'admin')
   revalidatePath('/vocab-banks')
 }
 

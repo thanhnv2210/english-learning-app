@@ -18,12 +18,17 @@ export type WordPair = {
   createdAt: Date
 }
 
-/** Returns system pairs + pairs owned by the given user, by rank desc then newest first. */
-export async function getWordPairs(userId: number): Promise<WordPair[]> {
+export async function getWordPairs(userId: number, isAdmin: boolean, showSystemData: boolean): Promise<WordPair[]> {
+  const visibilityFilter = isAdmin
+    ? undefined
+    : showSystemData
+      ? or(eq(wordPairs.isSystem, true), eq(wordPairs.userId, userId))
+      : and(eq(wordPairs.isSystem, false), eq(wordPairs.userId, userId))
+
   return db
     .select()
     .from(wordPairs)
-    .where(or(eq(wordPairs.userId, userId), eq(wordPairs.isSystem, true)))
+    .where(visibilityFilter)
     .orderBy(desc(wordPairs.rank), desc(wordPairs.createdAt))
 }
 
@@ -58,15 +63,21 @@ export async function updateWordPairRank(id: number, rank: number): Promise<void
 }
 
 /** All pairs in the library where either wordA or wordB matches the query word. */
-export async function getWordPairsForWord(userId: number, word: string): Promise<WordPair[]> {
+export async function getWordPairsForWord(userId: number, isAdmin: boolean, showSystemData: boolean, word: string): Promise<WordPair[]> {
   const w = word.toLowerCase()
+  const visibilityFilter = isAdmin
+    ? undefined
+    : showSystemData
+      ? or(eq(wordPairs.isSystem, true), eq(wordPairs.userId, userId))
+      : and(eq(wordPairs.isSystem, false), eq(wordPairs.userId, userId))
+
   return db
     .select()
     .from(wordPairs)
     .where(
       and(
         or(eq(wordPairs.wordA, w), eq(wordPairs.wordB, w)),
-        or(eq(wordPairs.userId, userId), eq(wordPairs.isSystem, true)),
+        visibilityFilter,
       ),
     )
     .orderBy(desc(wordPairs.rank), desc(wordPairs.createdAt))

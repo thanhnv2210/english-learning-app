@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { vocabBanks, vocabBankWords } from '@/lib/db/schema'
-import { desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, or, sql } from 'drizzle-orm'
 
 export type VocabBankWord = {
   id: number
@@ -14,6 +14,7 @@ export type VocabBankWord = {
 
 export type VocabBank = {
   id: number
+  userId: number | null
   topic: string
   description: string
   isSystem: boolean
@@ -25,10 +26,17 @@ export type VocabBankWithCount = VocabBank & { wordCount: number }
 
 // ── Banks ─────────────────────────────────────────────────────────────────────
 
-export async function getAllBanks(): Promise<VocabBankWithCount[]> {
+export async function getAllBanks(userId: number, isAdmin: boolean, showSystemData: boolean): Promise<VocabBankWithCount[]> {
+  const visibilityFilter = isAdmin
+    ? undefined
+    : showSystemData
+      ? or(eq(vocabBanks.isSystem, true), eq(vocabBanks.userId, userId))
+      : and(eq(vocabBanks.isSystem, false), eq(vocabBanks.userId, userId))
+
   const rows = await db
     .select({
       id: vocabBanks.id,
+      userId: vocabBanks.userId,
       topic: vocabBanks.topic,
       description: vocabBanks.description,
       isSystem: vocabBanks.isSystem,
@@ -38,6 +46,7 @@ export async function getAllBanks(): Promise<VocabBankWithCount[]> {
     })
     .from(vocabBanks)
     .leftJoin(vocabBankWords, eq(vocabBankWords.bankId, vocabBanks.id))
+    .where(visibilityFilter)
     .groupBy(vocabBanks.id)
     .orderBy(desc(vocabBanks.rank), desc(vocabBanks.createdAt))
   return rows as VocabBankWithCount[]
@@ -57,19 +66,20 @@ export async function findBankByTopic(topic: string): Promise<VocabBank | null> 
   return (rows[0] as VocabBank) ?? null
 }
 
-export async function createBank(data: { topic: string; description: string }): Promise<VocabBank> {
+export async function createBank(data: { userId: number; topic: string; description: string }): Promise<VocabBank> {
   const [row] = await db
     .insert(vocabBanks)
-    .values({ topic: data.topic.trim(), description: data.description })
+    .values({ userId: data.userId, topic: data.topic.trim(), description: data.description, isSystem: false })
     .returning()
   return row as VocabBank
 }
 
-export async function deleteBank(id: number): Promise<void> {
-  // isSystem banks cannot be deleted (cascade deletes words automatically)
-  await db
-    .delete(vocabBanks)
-    .where(sql`${vocabBanks.id} = ${id} and ${vocabBanks.isSystem} = false`)
+export async function deleteBank(id: number, userId: number, isAdmin: boolean): Promise<void> {
+  // isSystem banks cannot be deleted by non-admins
+  const condition = isAdmin
+    ? eq(vocabBanks.id, id)
+    : and(eq(vocabBanks.id, id), eq(vocabBanks.isSystem, false), eq(vocabBanks.userId, userId))
+  await db.delete(vocabBanks).where(condition)
 }
 
 export async function updateBankRank(id: number, rank: number): Promise<void> {

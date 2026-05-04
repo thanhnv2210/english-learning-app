@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   const user = await getCurrentUser()
 
   // 1. Check DB first
-  const dbRows = await getWordPairsForWord(user.id, normalized)
+  const dbRows = await getWordPairsForWord(user.id, user.role === 'admin', user.showSystemData, normalized)
   const dbPairs: DbPairEntry[] = dbRows.map((r) => ({
     id: r.id,
     wordA: r.wordA,
