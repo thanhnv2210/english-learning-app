@@ -5,10 +5,10 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth
   const { pathname } = req.nextUrl
   const isLoginPage = pathname === '/login'
-  const isLandingPage = pathname === '/'
+  const isPublicPage = pathname === '/' || pathname === '/pending' || pathname === '/auth-error'
 
-  // Landing page is public — anyone can see it
-  if (isLandingPage) return NextResponse.next()
+  // Public pages — no auth required
+  if (isPublicPage) return NextResponse.next()
 
   if (!isLoggedIn && !isLoginPage) {
     const loginUrl = new URL('/login', req.nextUrl.origin)

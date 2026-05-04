@@ -10,6 +10,7 @@ export type UserRow = {
   email: string
   name: string | null
   image: string | null
+  status: string
   tier: string
   modelPreference: string
   targetProfile: string
@@ -39,6 +40,7 @@ export default async function AdminUsersPage() {
     email: u.email,
     name: u.name,
     image: u.image,
+    status: u.status,
     tier: u.tier,
     modelPreference: u.modelPreference,
     targetProfile: u.targetProfile,

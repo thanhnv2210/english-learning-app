@@ -4,8 +4,9 @@ import Credentials from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, count } from 'drizzle-orm'
 import { seedDefaultDomains } from '@/lib/db/domains'
+import { getCampaignConfig } from '@/lib/db/campaign'
 
 declare module 'next-auth' {
   interface Session {
@@ -56,7 +57,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           .from(users)
           .where(eq(users.email, profile.email))
           .limit(1)
+
         if (!existing) {
+          // New user — check campaign config
+          const config = await getCampaignConfig()
+
+          if (!config?.isActive) {
+            // Signups closed
+            return '/auth-error?reason=closed'
+          }
+
+          // Count active users to determine status
+          const [{ value: activeCount }] = await db
+            .select({ value: count() })
+            .from(users)
+            .where(eq(users.status, 'active'))
+
+          const status = activeCount < config.userLimit ? 'active' : 'pending'
+
           const [created] = await db
             .insert(users)
             .values({
@@ -64,6 +82,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               name: (profile as { name?: string }).name ?? null,
               image: (profile as { picture?: string }).picture ?? null,
               targetProfile: 'IELTS_Academic_6.5',
+              status,
             })
             .returning()
           await seedDefaultDomains(created.id)
@@ -100,5 +119,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   pages: {
     signIn: '/login',
+    error: '/auth-error',
   },
 })

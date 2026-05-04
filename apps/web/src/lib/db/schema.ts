@@ -21,6 +21,7 @@ export const users = pgTable('users', {
   image: text('image'),
   passwordHash: text('password_hash'),
   role: text('role').notNull().default('student'),            // 'student' | 'admin'
+  status: text('status').notNull().default('active'),         // 'active' | 'pending'
   tier: text('tier').notNull().default('vip'),               // 'free' | 'vip'
   modelPreference: text('model_preference').notNull().default('auto'), // 'auto' | 'free'
   // e.g. 'IELTS_Academic_6.5', 'IELTS_Academic_7.5', 'Business_Fluent'
@@ -637,6 +638,18 @@ export const userDomainPreferencesRelations = relations(userDomainPreferences, (
 export const userSkillTopicsRelations = relations(userSkillTopics, ({ one }) => ({
   user: one(users, { fields: [userSkillTopics.userId], references: [users.id] }),
 }))
+
+// ─── Campaign configuration ───────────────────────────────────────────────────
+// Single-row table — always upserted on id = 1.
+// isActive=false → signups completely closed.
+// isActive=true + userLimit reached → new signups land as status='pending'.
+
+export const campaignConfigs = pgTable('campaign_configs', {
+  id: serial('id').primaryKey(),
+  isActive: boolean('is_active').notNull().default(false),
+  userLimit: integer('user_limit').notNull().default(100),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+})
 
 // ─── Project Management ───────────────────────────────────────────────────────
 

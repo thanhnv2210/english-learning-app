@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { updateUserTierAction, updateUserModelPreferenceAction } from '@/app/actions/admin'
+import { updateUserTierAction, updateUserModelPreferenceAction, approveUserAction } from '@/app/actions/admin'
 import type { UserRow } from './page'
 
 function Avatar({ image, name, email }: { image: string | null; name: string | null; email: string }) {
@@ -80,6 +80,34 @@ function ModelBadge({
   )
 }
 
+function StatusBadge({ userId, status }: { userId: number; status: string }) {
+  const [optimistic, setOptimistic] = useState(status)
+  const [pending, startTransition] = useTransition()
+
+  function approve() {
+    setOptimistic('active')
+    startTransition(() => approveUserAction(userId))
+  }
+
+  if (optimistic === 'pending') {
+    return (
+      <button
+        onClick={approve}
+        disabled={pending}
+        title="Click to approve"
+        className="rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-800/40 px-2.5 py-0.5 text-xs font-semibold transition-colors disabled:opacity-50"
+      >
+        ⏳ Pending
+      </button>
+    )
+  }
+  return (
+    <span className="rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-2.5 py-0.5 text-xs font-semibold">
+      ✓ Active
+    </span>
+  )
+}
+
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(date))
 }
@@ -99,6 +127,7 @@ export function UsersTable({ users }: { users: UserRow[] }) {
           <thead>
             <tr className="border-b border-border bg-subtle">
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-faint">User</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-faint">Status</th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-faint">Provider</th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-faint">Tier</th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-faint">Model</th>
@@ -119,6 +148,9 @@ export function UsersTable({ users }: { users: UserRow[] }) {
                       <p className={`truncate ${u.name ? 'text-xs text-faint' : 'text-sm text-foreground'}`}>{u.email}</p>
                     </div>
                   </div>
+                </td>
+                <td className="px-4 py-3">
+                  <StatusBadge userId={u.id} status={u.status} />
                 </td>
                 <td className="px-4 py-3">
                   <span className={`inline-flex items-center gap-1 text-xs font-medium ${
@@ -168,6 +200,7 @@ export function UsersTable({ users }: { users: UserRow[] }) {
               <span className="text-xs text-faint">{formatDate(u.createdAt)}</span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge userId={u.id} status={u.status} />
               <TierBadge userId={u.id} tier={u.tier} />
               <ModelBadge userId={u.id} preference={u.modelPreference} />
               <span className="text-xs text-muted-foreground">{formatProfile(u.targetProfile)}</span>

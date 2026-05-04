@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import { NavSidebar } from '@/components/nav-sidebar'
 import { MobileHeader } from '@/components/mobile-header'
 import { OllamaDisabledBanner } from '@/components/ollama-disabled-banner'
@@ -5,6 +6,7 @@ import { getCurrentUser } from '@/lib/db/user'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser()
+  if (user.status === 'pending') redirect('/pending')
   return (
     <>
       {/* MobileHeader must live outside the overflow-hidden container —
