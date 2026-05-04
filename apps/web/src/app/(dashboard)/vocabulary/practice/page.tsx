@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getVocabPracticeItems, getWrongVocabPracticeItems } from '@/lib/db/word-sentences'
+import { getCurrentUser } from '@/lib/db/user'
 
 const GAMES = [
   {
@@ -23,9 +24,11 @@ const GAMES = [
 ]
 
 export default async function VocabPracticeHub() {
+  const user = await getCurrentUser()
+  const isAdmin = user.role === 'admin'
   const [items, wrongItems] = await Promise.all([
-    getVocabPracticeItems(),
-    getWrongVocabPracticeItems(),
+    getVocabPracticeItems(user.id, isAdmin, user.showSystemData),
+    getWrongVocabPracticeItems(user.id, isAdmin, user.showSystemData),
   ])
 
   const hasEnough = items.length >= 3

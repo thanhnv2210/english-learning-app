@@ -36,6 +36,7 @@ export function SentencesView({ wordId, initialSentences }: Props) {
     const optimistic: WordSentence = {
       id: Date.now(),
       wordId,
+      userId: null,
       sentence: text.trim(),
       context,
       createdAt: new Date(),

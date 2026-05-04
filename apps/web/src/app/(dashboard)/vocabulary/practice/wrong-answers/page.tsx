@@ -3,6 +3,7 @@ import { getWrongVocabPracticeItems } from '@/lib/db/word-sentences'
 import { FlashcardGame } from '@/components/games/flashcard-game'
 import { MultipleChoiceGame } from '@/components/games/multiple-choice-game'
 import { FillBlankGame } from '@/components/games/fill-blank-game'
+import { getCurrentUser } from '@/lib/db/user'
 
 export default async function WrongAnswersPage({
   searchParams,
@@ -10,7 +11,8 @@ export default async function WrongAnswersPage({
   searchParams: Promise<{ mode?: string }>
 }) {
   const { mode } = await searchParams
-  const items = await getWrongVocabPracticeItems()
+  const user = await getCurrentUser()
+  const items = await getWrongVocabPracticeItems(user.id, user.role === 'admin', user.showSystemData)
 
   const backHref = '/vocabulary/practice/wrong-answers'
   const backLabel = 'Back to Wrong Answers'

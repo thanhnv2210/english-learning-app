@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { getVocabPracticeItems } from '@/lib/db/word-sentences'
 import { MultipleChoiceGame } from '@/components/games/multiple-choice-game'
+import { getCurrentUser } from '@/lib/db/user'
 
 export default async function VocabMultipleChoicePage() {
-  const items = await getVocabPracticeItems()
+  const user = await getCurrentUser()
+  const items = await getVocabPracticeItems(user.id, user.role === 'admin', user.showSystemData)
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">
       <Link href="/vocabulary/practice" className="self-start text-xs text-faint hover:text-muted-foreground transition-colors">

@@ -16,7 +16,8 @@ export async function addSentenceAction(data: {
   context: string
 }): Promise<{ ok: boolean }> {
   if (!data.sentence.trim() || !data.context) return { ok: false }
-  await addSentence(data)
+  const user = await getCurrentUser()
+  await addSentence({ ...data, userId: user.id })
   revalidatePath(`/vocabulary/${data.wordId}/sentences`)
   revalidatePath('/vocabulary/practice', 'layout')
   return { ok: true }

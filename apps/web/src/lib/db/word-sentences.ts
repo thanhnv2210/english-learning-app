@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
-import { wordSentences, vocabularyWords, sentencePracticeSessions, sentencePracticeResults } from '@/lib/db/schema'
-import { eq, desc, inArray } from 'drizzle-orm'
+import { wordSentences, vocabularyWords, sentencePracticeSessions, sentencePracticeResults, userVocabulary } from '@/lib/db/schema'
+import { eq, desc, inArray, or, isNull, and } from 'drizzle-orm'
 import type { PracticeItem } from '@/lib/ielts/vocabulary/practice-types'
 
 export { SENTENCE_CONTEXTS } from '@/lib/ielts/vocabulary/sentence-contexts'
@@ -9,6 +9,7 @@ export type { SentenceContext } from '@/lib/ielts/vocabulary/sentence-contexts'
 export type WordSentence = {
   id: number
   wordId: number
+  userId: number | null
   sentence: string
   context: string
   createdAt: Date
@@ -19,11 +20,25 @@ export type WordSentenceWithWord = WordSentence & {
   wordType: string | null
 }
 
-export async function getSentencesForWord(wordId: number): Promise<WordSentence[]> {
+export async function getSentencesForWord(
+  wordId: number,
+  userId: number,
+  isAdmin = false,
+  showSystemData = true,
+): Promise<WordSentence[]> {
+  const wordFilter = eq(wordSentences.wordId, wordId)
+  let visFilter
+  if (!isAdmin) {
+    if (showSystemData) {
+      visFilter = or(isNull(wordSentences.userId), eq(wordSentences.userId, userId))
+    } else {
+      visFilter = eq(wordSentences.userId, userId)
+    }
+  }
   const rows = await db
     .select()
     .from(wordSentences)
-    .where(eq(wordSentences.wordId, wordId))
+    .where(visFilter ? and(wordFilter, visFilter) : wordFilter)
     .orderBy(desc(wordSentences.createdAt))
   return rows
 }
@@ -38,6 +53,7 @@ export async function getWordById(id: number) {
 }
 
 export async function addSentence(data: {
+  userId: number
   wordId: number
   sentence: string
   context: string
@@ -79,12 +95,33 @@ export async function completePracticeSession(sessionId: number, score: number):
     .where(eq(sentencePracticeSessions.id, sessionId))
 }
 
-/** All sentences across all words — used by games for random sampling. */
-export async function getAllSentences(): Promise<WordSentenceWithWord[]> {
+/** All sentences across all words — used by games and vocabulary page. */
+export async function getAllSentences(
+  userId?: number,
+  isAdmin = true,
+  showSystemData = true,
+): Promise<WordSentenceWithWord[]> {
+  let visFilter
+  if (!isAdmin && userId !== undefined) {
+    if (showSystemData) {
+      visFilter = or(isNull(wordSentences.userId), eq(wordSentences.userId, userId))
+    } else {
+      // Only my sentences, and only for words I've saved
+      const savedWordIds = db
+        .select({ wordId: userVocabulary.wordId })
+        .from(userVocabulary)
+        .where(eq(userVocabulary.userId, userId))
+      visFilter = and(
+        eq(wordSentences.userId, userId),
+        inArray(wordSentences.wordId, savedWordIds),
+      )
+    }
+  }
   const rows = await db
     .select({
       id: wordSentences.id,
       wordId: wordSentences.wordId,
+      userId: wordSentences.userId,
       sentence: wordSentences.sentence,
       context: wordSentences.context,
       createdAt: wordSentences.createdAt,
@@ -93,15 +130,16 @@ export async function getAllSentences(): Promise<WordSentenceWithWord[]> {
     })
     .from(wordSentences)
     .innerJoin(vocabularyWords, eq(wordSentences.wordId, vocabularyWords.id))
+    .where(visFilter)
     .orderBy(desc(wordSentences.createdAt))
   return rows
 }
 
 /**
- * Returns sentence IDs where the most recent practice result was wrong.
- * Once a sentence is answered correctly, it drops off the list.
+ * Returns sentence IDs where the most recent practice result was wrong,
+ * scoped to the given user's practice sessions.
  */
-export async function getWrongSentenceIds(): Promise<Set<number>> {
+export async function getWrongSentenceIds(userId: number): Promise<Set<number>> {
   const results = await db
     .select({
       sentenceId: sentencePracticeResults.sentenceId,
@@ -109,6 +147,11 @@ export async function getWrongSentenceIds(): Promise<Set<number>> {
       createdAt: sentencePracticeResults.createdAt,
     })
     .from(sentencePracticeResults)
+    .innerJoin(
+      sentencePracticeSessions,
+      eq(sentencePracticeResults.sessionId, sentencePracticeSessions.id),
+    )
+    .where(eq(sentencePracticeSessions.userId, userId))
     .orderBy(desc(sentencePracticeResults.createdAt))
 
   const latestPerSentence = new Map<number, boolean>()
@@ -126,8 +169,12 @@ export async function getWrongSentenceIds(): Promise<Set<number>> {
 }
 
 /** Convert vocabulary sentences to the shared PracticeItem format. */
-export async function getVocabPracticeItems(): Promise<PracticeItem[]> {
-  const rows = await getAllSentences()
+export async function getVocabPracticeItems(
+  userId?: number,
+  isAdmin = true,
+  showSystemData = true,
+): Promise<PracticeItem[]> {
+  const rows = await getAllSentences(userId, isAdmin, showSystemData)
   return rows.map((r) => ({
     id: `vocab-${r.id}`,
     sentence: r.sentence,
@@ -140,14 +187,36 @@ export async function getVocabPracticeItems(): Promise<PracticeItem[]> {
 }
 
 /** Sentences where the most recent attempt was wrong — for targeted review. */
-export async function getWrongVocabPracticeItems(): Promise<PracticeItem[]> {
-  const wrongIds = await getWrongSentenceIds()
+export async function getWrongVocabPracticeItems(
+  userId: number,
+  isAdmin = true,
+  showSystemData = true,
+): Promise<PracticeItem[]> {
+  const wrongIds = await getWrongSentenceIds(userId)
   if (wrongIds.size === 0) return []
+
+  // Apply same visibility filter as getAllSentences
+  let visFilter
+  if (!isAdmin) {
+    if (showSystemData) {
+      visFilter = or(isNull(wordSentences.userId), eq(wordSentences.userId, userId))
+    } else {
+      const savedWordIds = db
+        .select({ wordId: userVocabulary.wordId })
+        .from(userVocabulary)
+        .where(eq(userVocabulary.userId, userId))
+      visFilter = and(
+        eq(wordSentences.userId, userId),
+        inArray(wordSentences.wordId, savedWordIds),
+      )
+    }
+  }
 
   const rows = await db
     .select({
       id: wordSentences.id,
       wordId: wordSentences.wordId,
+      userId: wordSentences.userId,
       sentence: wordSentences.sentence,
       context: wordSentences.context,
       createdAt: wordSentences.createdAt,
@@ -156,7 +225,11 @@ export async function getWrongVocabPracticeItems(): Promise<PracticeItem[]> {
     })
     .from(wordSentences)
     .innerJoin(vocabularyWords, eq(wordSentences.wordId, vocabularyWords.id))
-    .where(inArray(wordSentences.id, [...wrongIds]))
+    .where(
+      visFilter
+        ? and(inArray(wordSentences.id, [...wrongIds]), visFilter)
+        : inArray(wordSentences.id, [...wrongIds]),
+    )
 
   return rows.map((r) => ({
     id: `vocab-wrong-${r.id}`,

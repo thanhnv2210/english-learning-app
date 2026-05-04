@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getWordById, getSentencesForWord } from '@/lib/db/word-sentences'
+import { getCurrentUser } from '@/lib/db/user'
 import { SentencesView } from './sentences-view'
 
 export default async function SentencesPage({ params }: { params: Promise<{ id: string }> }) {
@@ -8,9 +9,10 @@ export default async function SentencesPage({ params }: { params: Promise<{ id: 
   const wordId = Number(id)
   if (isNaN(wordId)) notFound()
 
+  const user = await getCurrentUser()
   const [word, sentences] = await Promise.all([
     getWordById(wordId),
-    getSentencesForWord(wordId),
+    getSentencesForWord(wordId, user.id, user.role === 'admin', user.showSystemData),
   ])
 
   if (!word) notFound()

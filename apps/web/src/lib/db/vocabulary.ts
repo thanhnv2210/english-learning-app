@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { vocabularyWords, vocabularyWordDomains, writingDomains, userVocabulary } from '@/lib/db/schema'
-import { asc, eq, inArray, sql, and } from 'drizzle-orm'
+import { asc, desc, eq, inArray, sql, and } from 'drizzle-orm'
 import type { VocabWordFamily, VocabSynonym, VocabExamples, VocabPronunciation } from '@/lib/db/schema'
 
 export type VocabularyCard = {
@@ -21,34 +21,57 @@ export type VocabularyCard = {
   aiModel: string | null  // model that generated this word, null for seeded/manual
 }
 
-/** All words in the catalogue, ordered alphabetically. Uses 2 queries (no N+1).
- *  When showSystemData=false (and not admin), only words the user has saved to
- *  their user_vocabulary are returned. */
+/** All words in the catalogue.
+ *  - Admin: all words, sorted alphabetically, using global rank.
+ *  - User (showSystemData=true): all words, sorted by personal rank DESC then alpha.
+ *  - User (showSystemData=false): only words saved to user_vocabulary, same sort. */
 export async function getAllVocabularyWords(isAdmin = true, showSystemData = true, userId?: number): Promise<VocabularyCard[]> {
-  let filter: ReturnType<typeof inArray> | undefined
-  if (!isAdmin && !showSystemData && userId !== undefined) {
-    const savedIds = db
-      .select({ wordId: userVocabulary.wordId })
-      .from(userVocabulary)
-      .where(eq(userVocabulary.userId, userId))
-    filter = inArray(vocabularyWords.id, savedIds)
+  // Admin path — simple query, no join needed
+  if (isAdmin) {
+    const rows = await db.select().from(vocabularyWords).orderBy(asc(vocabularyWords.word))
+    if (rows.length === 0) return []
+    const domains = await getAllDomainMappings()
+    return rows.map((row) => toCard(row, row.word, domains.get(row.id) ?? [], 'db'))
   }
-  const rows = await db.select().from(vocabularyWords).where(filter).orderBy(asc(vocabularyWords.word))
-  if (rows.length === 0) return []
 
+  // Non-admin: join user_vocabulary to get personal rank (left join so unowned words get rank null)
+  const joined = await db
+    .select({
+      word: vocabularyWords,
+      userRank: userVocabulary.rank,
+    })
+    .from(vocabularyWords)
+    .leftJoin(
+      userVocabulary,
+      and(eq(userVocabulary.wordId, vocabularyWords.id), userId !== undefined ? eq(userVocabulary.userId, userId) : sql`false`),
+    )
+    .where(
+      !showSystemData && userId !== undefined
+        ? inArray(vocabularyWords.id, db.select({ wordId: userVocabulary.wordId }).from(userVocabulary).where(eq(userVocabulary.userId, userId)))
+        : undefined,
+    )
+    .orderBy(desc(sql`coalesce(${userVocabulary.rank}, 1)`), asc(vocabularyWords.word))
+
+  if (joined.length === 0) return []
+  const domains = await getAllDomainMappings()
+  return joined.map(({ word: row, userRank }) =>
+    toCard(row, row.word, domains.get(row.id) ?? [], 'db', undefined, userRank ?? row.rank)
+  )
+}
+
+async function getAllDomainMappings(): Promise<Map<number, string[]>> {
   const allMappings = await db
     .select({ wordId: vocabularyWordDomains.wordId, domainName: writingDomains.name })
     .from(vocabularyWordDomains)
     .innerJoin(writingDomains, eq(vocabularyWordDomains.domainId, writingDomains.id))
 
-  const domainsByWordId = new Map<number, string[]>()
+  const map = new Map<number, string[]>()
   for (const { wordId, domainName } of allMappings) {
-    const list = domainsByWordId.get(wordId) ?? []
+    const list = map.get(wordId) ?? []
     list.push(domainName)
-    domainsByWordId.set(wordId, list)
+    map.set(wordId, list)
   }
-
-  return rows.map((row) => toCard(row, row.word, domainsByWordId.get(row.id) ?? [], 'db'))
+  return map
 }
 
 /** Look up a single word by exact match (case-insensitive). */
@@ -139,8 +162,17 @@ export async function deleteVocabularyWord(id: number): Promise<void> {
   await db.delete(vocabularyWords).where(eq(vocabularyWords.id, id))
 }
 
+/** Admin-only: update the global rank on the shared catalogue. */
 export async function updateVocabularyRank(id: number, rank: number): Promise<void> {
   await db.update(vocabularyWords).set({ rank }).where(eq(vocabularyWords.id, id))
+}
+
+/** User: update the personal rank on their saved copy of the word. */
+export async function updateUserVocabularyRank(userId: number, wordId: number, rank: number): Promise<void> {
+  await db
+    .update(userVocabulary)
+    .set({ rank })
+    .where(and(eq(userVocabulary.userId, userId), eq(userVocabulary.wordId, wordId)))
 }
 
 export async function saveWordPronunciation(id: number, pronunciation: VocabPronunciation): Promise<void> {
@@ -184,6 +216,7 @@ function toCard(
   domains: string[],
   source: 'db' | 'ai',
   aiModelOverride?: string | null,
+  rankOverride?: number,
 ): VocabularyCard {
   return {
     id: row.id,
@@ -197,7 +230,7 @@ function toCard(
     examples: row.examples as VocabExamples,
     pronunciation: (row.pronunciation as VocabPronunciation) ?? null,
     domains,
-    rank: row.rank,
+    rank: rankOverride ?? row.rank,
     userAdded: row.userAdded,
     source,
     aiModel: aiModelOverride !== undefined ? aiModelOverride : (row.aiModel ?? null),

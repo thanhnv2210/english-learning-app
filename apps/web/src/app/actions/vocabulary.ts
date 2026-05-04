@@ -9,6 +9,7 @@ import {
   saveToUserVocabulary,
   deleteVocabularyWord,
   updateVocabularyRank,
+  updateUserVocabularyRank,
   saveWordPronunciation,
   updateWordType,
   type VocabularyCard,
@@ -52,7 +53,12 @@ export async function deleteVocabularyWordAction(id: number): Promise<void> {
 }
 
 export async function updateVocabularyRankAction(id: number, rank: number): Promise<void> {
-  await updateVocabularyRank(id, rank)
+  const user = await getCurrentUser()
+  if (user.role === 'admin') {
+    await updateVocabularyRank(id, rank)
+  } else {
+    await updateUserVocabularyRank(user.id, id, rank)
+  }
   revalidatePath('/vocabulary')
   revalidatePath('/essay-builder')
 }

@@ -11,7 +11,7 @@ export default async function VocabularyPage() {
   const [words, favoriteDomains, sentences] = await Promise.all([
     getAllVocabularyWords(user.role === 'admin', user.showSystemData, user.id),
     getSkillFavorites('vocabulary'),
-    getAllSentences(),
+    getAllSentences(user.id, user.role === 'admin', user.showSystemData),
   ])
 
   // Collect unique domain names across all words (preserving first-seen order)

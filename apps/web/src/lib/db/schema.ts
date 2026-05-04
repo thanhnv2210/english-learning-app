@@ -532,6 +532,7 @@ export const wordSentences = pgTable('word_sentences', {
   wordId: integer('word_id')
     .notNull()
     .references(() => vocabularyWords.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }), // null = system sentence
   sentence: text('sentence').notNull(),
   context: text('context').notNull(), // 'Speaking' | 'Writing' | 'News' | 'Book' | 'Podcast' | 'Other'
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -573,6 +574,7 @@ export const userVocabulary = pgTable(
   {
     userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
     wordId: integer('word_id').notNull().references(() => vocabularyWords.id, { onDelete: 'cascade' }),
+    rank: integer('rank').notNull().default(1),
     savedAt: timestamp('saved_at').notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.wordId] })]
