@@ -4,8 +4,9 @@ import {
   COLLOCATION_BY_PHRASE_PROMPT,
 } from '@/lib/ielts/collocations/prompts'
 import type { CollocationResult } from '@/lib/ielts/collocations/prompts'
-import { findCollocation } from '@/lib/db/collocations'
+import { findCollocation, isInUserCollocations } from '@/lib/db/collocations'
 import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
+import { getCurrentUser } from '@/lib/db/user'
 
 export type CollocationSearchResponse =
   | { mode: 'word'; results: (CollocationResult & { inLibrary: boolean })[] }
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
   }
 
   const normalized = query.trim().toLowerCase()
+  const user = await getCurrentUser()
 
   const prompt =
     mode === 'word'
@@ -59,7 +61,8 @@ export async function POST(req: Request) {
       collocations.map(async (c) => {
         const phrase = c.phrase.toLowerCase()
         const existing = await findCollocation(phrase)
-        return { ...c, phrase, inLibrary: !!existing }
+        const inLibrary = existing ? await isInUserCollocations(user.id, existing.id) : false
+        return { ...c, phrase, inLibrary }
       }),
     )
 
@@ -86,10 +89,11 @@ export async function POST(req: Request) {
   }
 
   const existing = await findCollocation(result.phrase)
+  const inLibrary = existing ? await isInUserCollocations(user.id, existing.id) : false
 
   return Response.json({
     mode: 'phrase',
     valid: true,
-    result: { ...result, inLibrary: !!existing },
+    result: { ...result, inLibrary },
   } satisfies CollocationSearchResponse)
 }

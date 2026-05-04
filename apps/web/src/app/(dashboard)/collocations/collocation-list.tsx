@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useTransition, useOptimistic } from 'react'
-import { deleteCollocationAction, updateCollocationSkillsAction, updateCollocationRankAction } from '@/app/actions/collocations'
+import { deleteCollocationAction, getCollocationUserCountAction, updateCollocationSkillsAction, updateCollocationRankAction } from '@/app/actions/collocations'
 import type { CollocationCard } from '@/lib/db/collocations'
 import type { CollocationSkill } from '@/lib/db/schema'
 
@@ -29,6 +29,7 @@ const SKILL_LABELS: Record<CollocationSkill, string> = {
 
 type Props = {
   initialItems: CollocationCard[]
+  isAdmin?: boolean
 }
 
 type SortKey = 'rank_desc' | 'rank_asc' | 'date_desc' | 'date_asc' | 'alpha_asc' | 'alpha_desc'
@@ -54,7 +55,7 @@ function applySort(items: CollocationCard[], sort: SortKey): CollocationCard[] {
   }
 }
 
-export function CollocationList({ initialItems }: Props) {
+export function CollocationList({ initialItems, isAdmin = false }: Props) {
   const [items, setItems] = useOptimistic(initialItems)
   const [search, setSearch] = useState('')
   const [activeSkill, setActiveSkill] = useState<CollocationSkill | 'all_skills' | null>(null)
@@ -318,7 +319,7 @@ export function CollocationList({ initialItems }: Props) {
                 <SavedCard
                   key={card.id}
                   card={card}
-                  onDelete={() => handleDelete(card.id)}
+                  onDelete={card.savedByMe || isAdmin ? () => handleDelete(card.id) : undefined}
                   onSkillsUpdate={(skills) => handleSkillsUpdate(card.id, skills)}
                   onRankUpdate={(rank) => handleRankUpdate(card.id, rank)}
                   selectMode={selectMode}
@@ -326,6 +327,7 @@ export function CollocationList({ initialItems }: Props) {
                   onToggleSelect={() => toggleSelect(card.id)}
                   isSecondaryMatch={secondaryMatchIds.has(card.id)}
                   showDesc={showDesc}
+                  isAdmin={isAdmin}
                 />
               ))}
             </div>
@@ -346,9 +348,10 @@ function SavedCard({
   onToggleSelect,
   isSecondaryMatch = false,
   showDesc = false,
+  isAdmin = false,
 }: {
   card: CollocationCard
-  onDelete: () => void
+  onDelete?: () => void
   onSkillsUpdate: (skills: CollocationSkill[]) => void
   onRankUpdate: (rank: number) => void
   selectMode?: boolean
@@ -356,6 +359,7 @@ function SavedCard({
   onToggleSelect?: () => void
   isSecondaryMatch?: boolean
   showDesc?: boolean
+  isAdmin?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
   const [editingSkills, setEditingSkills] = useState(false)
@@ -363,6 +367,8 @@ function SavedCard({
   const [localRank, setLocalRank] = useState(card.rank)
   const [hoverRank, setHoverRank] = useState(0)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [userCount, setUserCount] = useState<number | null>(null)
+  const [loadingCount, setLoadingCount] = useState(false)
   const [, startTransition] = useTransition()
 
   function handleRankClick(rank: number) {
@@ -399,18 +405,24 @@ function SavedCard({
       )}
 
       {/* Delete button — two-step confirmation (hidden in select mode) */}
-      {!selectMode && (
+      {!selectMode && onDelete && (
         confirmingDelete ? (
-          <div className="absolute top-2.5 right-3 flex items-center gap-1.5">
+          <div className="absolute top-2.5 right-3 flex items-center gap-1.5 flex-wrap justify-end max-w-[200px]">
+            {isAdmin && (
+              <span className="w-full text-right text-xs text-red-500">
+                {loadingCount ? 'Checking…' : userCount === 0 ? 'No users have this.' : `${userCount} user${userCount === 1 ? '' : 's'} have this saved.`}
+              </span>
+            )}
             <span className="text-xs text-red-600 font-medium">Delete?</span>
             <button
               onClick={(e) => { e.stopPropagation(); onDelete() }}
-              className="rounded px-2 py-0.5 text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors"
+              disabled={isAdmin && loadingCount}
+              className="rounded px-2 py-0.5 text-xs font-semibold bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
             >
               Yes
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); setConfirmingDelete(false) }}
+              onClick={(e) => { e.stopPropagation(); setConfirmingDelete(false); setUserCount(null) }}
               className="rounded px-2 py-0.5 text-xs font-semibold bg-subtle text-muted-foreground hover:bg-border transition-colors"
             >
               No
@@ -418,7 +430,16 @@ function SavedCard({
           </div>
         ) : (
           <button
-            onClick={(e) => { e.stopPropagation(); setConfirmingDelete(true) }}
+            onClick={async (e) => {
+              e.stopPropagation()
+              setConfirmingDelete(true)
+              if (isAdmin) {
+                setLoadingCount(true)
+                const n = await getCollocationUserCountAction(card.id)
+                setUserCount(n)
+                setLoadingCount(false)
+              }
+            }}
             className="absolute top-3 right-3 hidden group-hover:flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-500 hover:bg-red-200 text-xs transition-colors"
             title="Delete"
           >

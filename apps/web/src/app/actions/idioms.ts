@@ -7,7 +7,10 @@ import {
   updateIdiomSkills,
   updateIdiomContexts,
   updateIdiomRank,
+  updateUserIdiomRank,
   deleteIdiom,
+  removeFromUserIdioms,
+  getUserCountForIdiom,
   type IdiomCard,
 } from '@/lib/db/idioms'
 import type { IdiomSkill, IdiomContext } from '@/lib/db/schema'
@@ -46,14 +49,27 @@ export async function updateIdiomContextsAction(id: number, contexts: IdiomConte
 }
 
 export async function updateIdiomRankAction(id: number, rank: number): Promise<void> {
-  await updateIdiomRank(id, rank)
+  const user = await getCurrentUser()
+  if (user.role === 'admin') {
+    await updateIdiomRank(id, rank)
+  } else {
+    await updateUserIdiomRank(user.id, id, rank)
+  }
   revalidatePath('/idioms')
   revalidatePath('/idioms/practice', 'layout')
 }
 
 export async function deleteIdiomAction(id: number): Promise<void> {
   const user = await getCurrentUser()
-  await deleteIdiom(id, user.id, user.role === 'admin')
+  if (user.role === 'admin') {
+    await deleteIdiom(id)
+  } else {
+    await removeFromUserIdioms(user.id, id)
+  }
   revalidatePath('/idioms')
   revalidatePath('/idioms/practice', 'layout')
+}
+
+export async function getIdiomUserCountAction(id: number): Promise<number> {
+  return getUserCountForIdiom(id)
 }

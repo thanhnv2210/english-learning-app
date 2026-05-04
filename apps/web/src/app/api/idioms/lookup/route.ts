@@ -1,8 +1,9 @@
 import { generateText } from 'ai'
 import { IDIOM_LOOKUP_PROMPT } from '@/lib/ielts/idioms/prompts'
 import type { IdiomLookupResult } from '@/lib/ielts/idioms/prompts'
-import { findIdiom } from '@/lib/db/idioms'
+import { findIdiom, isInUserIdioms } from '@/lib/db/idioms'
 import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
+import { getCurrentUser } from '@/lib/db/user'
 
 export type IdiomLookupResponse =
   | { valid: true; result: IdiomLookupResult & { inLibrary: boolean } }
@@ -56,10 +57,12 @@ export async function POST(req: Request) {
     examples: data.examples ?? [],
   }
 
+  const user = await getCurrentUser()
   const existing = await findIdiom(result.idiom)
+  const inLibrary = existing ? await isInUserIdioms(user.id, existing.id) : false
 
   return Response.json({
     valid: true,
-    result: { ...result, inLibrary: !!existing },
+    result: { ...result, inLibrary },
   } satisfies IdiomLookupResponse)
 }

@@ -120,6 +120,7 @@ export async function saveVocabularyWord(data: {
   domainNames: string[]
   userAdded?: boolean
   aiModel?: string | null
+  createdBy?: number | null
 }): Promise<VocabularyCard | null> {
   const [row] = await db
     .insert(vocabularyWords)
@@ -134,6 +135,7 @@ export async function saveVocabularyWord(data: {
       pronunciation: data.pronunciation ?? null,
       userAdded: data.userAdded ?? false,
       aiModel: data.aiModel ?? null,
+      createdBy: data.createdBy ?? null,
     })
     .onConflictDoNothing()
     .returning()

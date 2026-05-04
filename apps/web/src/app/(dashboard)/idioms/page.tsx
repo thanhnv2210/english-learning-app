@@ -37,7 +37,7 @@ export default async function IdiomsPage() {
           No idioms saved yet.{!user.showSystemData && ' Enable system data in Settings to see built-in idioms, or'} Search above to add your first idiom.
         </p>
       )}
-      <IdiomList initialItems={saved} />
+      <IdiomList initialItems={saved} isAdmin={user.role === 'admin'} />
     </div>
   )
 }

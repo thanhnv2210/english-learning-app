@@ -37,6 +37,7 @@ export async function addWordToLibrary(card: VocabularyCard): Promise<{ ok: bool
     domainNames: card.domains,
     userAdded: true,
     aiModel: card.aiModel ?? null,
+    createdBy: user.id,
   })
 
   // Resolve wordId — either newly inserted or already in catalogue

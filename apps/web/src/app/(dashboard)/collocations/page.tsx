@@ -38,7 +38,7 @@ export default async function CollocationPage() {
           No collocations saved yet.{!user.showSystemData && ' Enable system data in Settings to see built-in collocations, or'} Search above to add your first collocation.
         </p>
       )}
-      <CollocationList initialItems={saved} />
+      <CollocationList initialItems={saved} isAdmin={user.role === 'admin'} />
     </div>
   )
 }

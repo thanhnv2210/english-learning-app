@@ -137,6 +137,7 @@ export type VocabExamples = {
 
 export const vocabularyWords = pgTable('vocabulary_words', {
   id: serial('id').primaryKey(),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }), // who first added this entry
   word: text('word').notNull().unique(),
   definition: text('definition').notNull(),
   familyWords: jsonb('family_words').notNull().$type<VocabWordFamily>(),
@@ -368,7 +369,7 @@ export type IdiomContext = 'Speaking' | 'Writing' | 'News' | 'Book' | 'Podcast' 
 
 export const idiomEntries = pgTable('idiom_entries', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }), // who first added this entry
   idiom: text('idiom').notNull().unique(),
   meaning: text('meaning').notNull(),
   register: text('register').notNull().default('neutral'), // 'formal' | 'informal' | 'neutral'
@@ -388,7 +389,7 @@ export type CollocationSkill = 'Writing_1' | 'Writing_2' | 'Speaking'
 
 export const collocationEntries = pgTable('collocation_entries', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }), // who first added this entry
   phrase: text('phrase').notNull().unique(),
   type: text('type').notNull(),
   explanation: text('explanation'),
@@ -578,6 +579,30 @@ export const userVocabulary = pgTable(
     savedAt: timestamp('saved_at').notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.wordId] })]
+)
+
+// ─── User Collocations & Idioms (personal saved lists) ───────────────────────
+
+export const userCollocations = pgTable(
+  'user_collocations',
+  {
+    userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    collocationId: integer('collocation_id').notNull().references(() => collocationEntries.id, { onDelete: 'cascade' }),
+    rank: integer('rank').notNull().default(1),
+    savedAt: timestamp('saved_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.collocationId] })]
+)
+
+export const userIdioms = pgTable(
+  'user_idioms',
+  {
+    userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    idiomId: integer('idiom_id').notNull().references(() => idiomEntries.id, { onDelete: 'cascade' }),
+    rank: integer('rank').notNull().default(1),
+    savedAt: timestamp('saved_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.idiomId] })]
 )
 
 // ─── Spaced Repetition (SM-2) ─────────────────────────────────────────────────

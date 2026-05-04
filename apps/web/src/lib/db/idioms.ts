@@ -1,20 +1,20 @@
 import { db } from '@/lib/db'
-import { idiomEntries } from '@/lib/db/schema'
-import { and, desc, eq, or, sql } from 'drizzle-orm'
+import { idiomEntries, userIdioms } from '@/lib/db/schema'
+import { and, count, desc, eq, inArray, or, sql } from 'drizzle-orm'
 import type { IdiomSkill, IdiomContext } from '@/lib/db/schema'
 import type { PracticeItem } from '@/lib/ielts/vocabulary/practice-types'
 
 export type IdiomCard = {
   id: number
-  userId: number | null
   idiom: string
   meaning: string
   register: string
   skills: IdiomSkill[]
   contexts: IdiomContext[]
   examples: string[]
-  rank: number
+  rank: number      // personal rank when savedByMe, global rank otherwise
   isSystem: boolean
+  savedByMe: boolean
   createdAt: Date
 }
 
@@ -24,7 +24,8 @@ export async function findIdiom(idiom: string): Promise<IdiomCard | null> {
     .from(idiomEntries)
     .where(sql`lower(${idiomEntries.idiom}) = lower(${idiom})`)
     .limit(1)
-  return (rows[0] as IdiomCard) ?? null
+  if (!rows[0]) return null
+  return { ...rows[0], skills: rows[0].skills as IdiomSkill[], contexts: rows[0].contexts as IdiomContext[], examples: rows[0].examples as string[], savedByMe: false }
 }
 
 export async function saveIdiom(data: {
@@ -36,26 +37,84 @@ export async function saveIdiom(data: {
   contexts: IdiomContext[]
   examples: string[]
 }): Promise<IdiomCard | null> {
-  const [row] = await db
+  const idiom = data.idiom.toLowerCase()
+
+  // 1. Upsert into shared catalogue (createdBy only set on first insert)
+  const [inserted] = await db
     .insert(idiomEntries)
-    .values({ ...data, idiom: data.idiom.toLowerCase(), isSystem: false })
+    .values({ idiom, meaning: data.meaning, register: data.register, skills: data.skills, contexts: data.contexts, examples: data.examples, isSystem: false, createdBy: data.userId })
     .onConflictDoNothing()
     .returning()
-  return (row as IdiomCard) ?? null
+
+  // 2. Resolve catalogue id (inserted or pre-existing)
+  const entry = inserted ?? await findIdiomEntry(idiom)
+  if (!entry) return null
+
+  // 3. Link to user's personal list
+  await saveToUserIdioms(data.userId, entry.id)
+
+  return { ...entry, skills: entry.skills as IdiomSkill[], contexts: entry.contexts as IdiomContext[], examples: entry.examples as string[], savedByMe: true }
+}
+
+async function findIdiomEntry(idiom: string) {
+  const rows = await db
+    .select()
+    .from(idiomEntries)
+    .where(sql`lower(${idiomEntries.idiom}) = lower(${idiom})`)
+    .limit(1)
+  return rows[0] ?? null
+}
+
+export async function saveToUserIdioms(userId: number, idiomId: number): Promise<void> {
+  await db.insert(userIdioms).values({ userId, idiomId }).onConflictDoNothing()
+}
+
+export async function isInUserIdioms(userId: number, idiomId: number): Promise<boolean> {
+  const rows = await db
+    .select({ idiomId: userIdioms.idiomId })
+    .from(userIdioms)
+    .where(and(eq(userIdioms.userId, userId), eq(userIdioms.idiomId, idiomId)))
+    .limit(1)
+  return rows.length > 0
+}
+
+export async function removeFromUserIdioms(userId: number, idiomId: number): Promise<void> {
+  await db.delete(userIdioms).where(and(eq(userIdioms.userId, userId), eq(userIdioms.idiomId, idiomId)))
 }
 
 export async function getAllIdioms(userId: number, isAdmin: boolean, showSystemData: boolean): Promise<IdiomCard[]> {
-  const visibilityFilter = isAdmin
-    ? undefined
-    : showSystemData
-      ? or(eq(idiomEntries.isSystem, true), eq(idiomEntries.userId, userId))
-      : and(eq(idiomEntries.isSystem, false), eq(idiomEntries.userId, userId))
+  if (isAdmin) {
+    const rows = await db
+      .select()
+      .from(idiomEntries)
+      .orderBy(desc(idiomEntries.rank), desc(idiomEntries.createdAt))
+    return rows.map((r) => ({ ...r, skills: r.skills as IdiomSkill[], contexts: r.contexts as IdiomContext[], examples: r.examples as string[], savedByMe: false }))
+  }
 
-  return db
-    .select()
+  const savedIds = db
+    .select({ idiomId: userIdioms.idiomId })
+    .from(userIdioms)
+    .where(eq(userIdioms.userId, userId))
+
+  const visFilter = showSystemData
+    ? or(eq(idiomEntries.isSystem, true), inArray(idiomEntries.id, savedIds))
+    : inArray(idiomEntries.id, savedIds)
+
+  const joined = await db
+    .select({ entry: idiomEntries, userRank: userIdioms.rank })
     .from(idiomEntries)
-    .where(visibilityFilter)
-    .orderBy(desc(idiomEntries.rank), desc(idiomEntries.createdAt)) as Promise<IdiomCard[]>
+    .leftJoin(userIdioms, and(eq(userIdioms.idiomId, idiomEntries.id), eq(userIdioms.userId, userId)))
+    .where(visFilter)
+    .orderBy(desc(sql`coalesce(${userIdioms.rank}, ${idiomEntries.rank})`), desc(idiomEntries.createdAt))
+
+  return joined.map(({ entry, userRank }) => ({
+    ...entry,
+    skills: entry.skills as IdiomSkill[],
+    contexts: entry.contexts as IdiomContext[],
+    examples: entry.examples as string[],
+    rank: userRank ?? entry.rank,
+    savedByMe: userRank !== null,
+  }))
 }
 
 export async function updateIdiomSkills(id: number, skills: IdiomSkill[]): Promise<void> {
@@ -66,15 +125,31 @@ export async function updateIdiomContexts(id: number, contexts: IdiomContext[]):
   await db.update(idiomEntries).set({ contexts }).where(eq(idiomEntries.id, id))
 }
 
+/** Admin-only: update the global rank on the shared catalogue. */
 export async function updateIdiomRank(id: number, rank: number): Promise<void> {
   await db.update(idiomEntries).set({ rank }).where(eq(idiomEntries.id, id))
 }
 
-export async function deleteIdiom(id: number, userId: number, isAdmin: boolean): Promise<void> {
-  const condition = isAdmin
-    ? eq(idiomEntries.id, id)
-    : and(eq(idiomEntries.id, id), eq(idiomEntries.isSystem, false), eq(idiomEntries.userId, userId))
-  await db.delete(idiomEntries).where(condition)
+/** User: update the personal rank on their saved copy. */
+export async function updateUserIdiomRank(userId: number, idiomId: number, rank: number): Promise<void> {
+  await db
+    .update(userIdioms)
+    .set({ rank })
+    .where(and(eq(userIdioms.userId, userId), eq(userIdioms.idiomId, idiomId)))
+}
+
+/** Admin-only: hard-delete the idiom from the shared catalogue. */
+export async function deleteIdiom(id: number): Promise<void> {
+  await db.delete(idiomEntries).where(eq(idiomEntries.id, id))
+}
+
+/** Returns how many users have this idiom saved. */
+export async function getUserCountForIdiom(idiomId: number): Promise<number> {
+  const [{ value }] = await db
+    .select({ value: count() })
+    .from(userIdioms)
+    .where(eq(userIdioms.idiomId, idiomId))
+  return value
 }
 
 /**

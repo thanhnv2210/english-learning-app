@@ -3,6 +3,7 @@
 import { useState, useMemo, useTransition, useOptimistic } from 'react'
 import {
   deleteIdiomAction,
+  getIdiomUserCountAction,
   updateIdiomSkillsAction,
   updateIdiomContextsAction,
   updateIdiomRankAction,
@@ -57,7 +58,7 @@ function applySort(items: IdiomCard[], sort: SortKey): IdiomCard[] {
   }
 }
 
-export function IdiomList({ initialItems }: { initialItems: IdiomCard[] }) {
+export function IdiomList({ initialItems, isAdmin = false }: { initialItems: IdiomCard[]; isAdmin?: boolean }) {
   const [items, setItems] = useOptimistic(initialItems)
   const [search, setSearch] = useState('')
   const [activeSkill, setActiveSkill] = useState<IdiomSkill | null>(null)
@@ -220,11 +221,12 @@ export function IdiomList({ initialItems }: { initialItems: IdiomCard[] }) {
                 <IdiomCard
                   key={card.id}
                   card={card}
-                  onDelete={() => handleDelete(card.id)}
+                  onDelete={card.savedByMe || isAdmin ? () => handleDelete(card.id) : undefined}
                   onSkillsUpdate={(skills) => handleSkillsUpdate(card.id, skills)}
                   onContextsUpdate={(contexts) => handleContextsUpdate(card.id, contexts)}
                   onRankUpdate={(rank) => handleRankUpdate(card.id, rank)}
                   isSecondaryMatch={secondaryMatchIds.has(card.id)}
+                  isAdmin={isAdmin}
                 />
               ))}
             </div>
@@ -242,13 +244,15 @@ function IdiomCard({
   onContextsUpdate,
   onRankUpdate,
   isSecondaryMatch = false,
+  isAdmin = false,
 }: {
   card: IdiomCard
-  onDelete: () => void
+  onDelete?: () => void
   onSkillsUpdate: (skills: IdiomSkill[]) => void
   onContextsUpdate: (contexts: IdiomContext[]) => void
   onRankUpdate: (rank: number) => void
   isSecondaryMatch?: boolean
+  isAdmin?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
   const [editingSkills, setEditingSkills] = useState(false)
@@ -258,6 +262,8 @@ function IdiomCard({
   const [localRank, setLocalRank] = useState(card.rank)
   const [hoverRank, setHoverRank] = useState(0)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [userCount, setUserCount] = useState<number | null>(null)
+  const [loadingCount, setLoadingCount] = useState(false)
   const [, startTransition] = useTransition()
 
   function handleRankClick(rank: number) {
@@ -283,19 +289,25 @@ function IdiomCard({
 
   return (
     <div className="group relative flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm gap-3">
-      {/* Delete button — hidden for system/seed idioms */}
-      {!card.isSystem && (
+      {/* Delete button */}
+      {onDelete && (
         confirmingDelete ? (
-          <div className="absolute top-2.5 right-3 flex items-center gap-1.5">
+          <div className="absolute top-2.5 right-3 flex items-center gap-1.5 flex-wrap justify-end max-w-[200px]">
+            {isAdmin && (
+              <span className="w-full text-right text-xs text-red-500">
+                {loadingCount ? 'Checking…' : userCount === 0 ? 'No users have this.' : `${userCount} user${userCount === 1 ? '' : 's'} have this saved.`}
+              </span>
+            )}
             <span className="text-xs text-red-600 font-medium">Delete?</span>
             <button
               onClick={onDelete}
-              className="rounded px-2 py-0.5 text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors"
+              disabled={isAdmin && loadingCount}
+              className="rounded px-2 py-0.5 text-xs font-semibold bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
             >
               Yes
             </button>
             <button
-              onClick={() => setConfirmingDelete(false)}
+              onClick={() => { setConfirmingDelete(false); setUserCount(null) }}
               className="rounded px-2 py-0.5 text-xs font-semibold bg-subtle text-muted-foreground hover:bg-border transition-colors"
             >
               No
@@ -303,7 +315,15 @@ function IdiomCard({
           </div>
         ) : (
           <button
-            onClick={() => setConfirmingDelete(true)}
+            onClick={async () => {
+              setConfirmingDelete(true)
+              if (isAdmin) {
+                setLoadingCount(true)
+                const n = await getIdiomUserCountAction(card.id)
+                setUserCount(n)
+                setLoadingCount(false)
+              }
+            }}
             className="absolute top-3 right-3 hidden group-hover:flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-500 hover:bg-red-200 text-xs transition-colors"
             title="Delete"
           >

@@ -6,7 +6,10 @@ import {
   getAllCollocations,
   updateCollocationSkills,
   updateCollocationRank,
+  updateUserCollocationRank,
   deleteCollocation,
+  removeFromUserCollocations,
+  getUserCountForCollocation,
   type CollocationCard,
 } from '@/lib/db/collocations'
 import type { CollocationSkill } from '@/lib/db/schema'
@@ -43,7 +46,12 @@ export async function updateCollocationSkillsAction(
 }
 
 export async function updateCollocationRankAction(id: number, rank: number): Promise<void> {
-  await updateCollocationRank(id, rank)
+  const user = await getCurrentUser()
+  if (user.role === 'admin') {
+    await updateCollocationRank(id, rank)
+  } else {
+    await updateUserCollocationRank(user.id, id, rank)
+  }
   revalidatePath('/collocations')
   revalidatePath('/collocations/practice', 'layout')
   revalidatePath('/essay-builder')
@@ -51,8 +59,16 @@ export async function updateCollocationRankAction(id: number, rank: number): Pro
 
 export async function deleteCollocationAction(id: number): Promise<void> {
   const user = await getCurrentUser()
-  await deleteCollocation(id, user.id, user.role === 'admin')
+  if (user.role === 'admin') {
+    await deleteCollocation(id)
+  } else {
+    await removeFromUserCollocations(user.id, id)
+  }
   revalidatePath('/collocations')
   revalidatePath('/collocations/practice', 'layout')
   revalidatePath('/essay-builder')
+}
+
+export async function getCollocationUserCountAction(id: number): Promise<number> {
+  return getUserCountForCollocation(id)
 }

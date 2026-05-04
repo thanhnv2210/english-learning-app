@@ -1,19 +1,19 @@
 import { db } from '@/lib/db'
-import { collocationEntries } from '@/lib/db/schema'
-import { and, desc, eq, or, sql } from 'drizzle-orm'
+import { collocationEntries, userCollocations } from '@/lib/db/schema'
+import { and, count, desc, eq, inArray, or, sql } from 'drizzle-orm'
 import type { CollocationSkill } from '@/lib/db/schema'
 import type { PracticeItem } from '@/lib/ielts/vocabulary/practice-types'
 
 export type CollocationCard = {
   id: number
-  userId: number | null
   phrase: string
   type: string
   explanation: string | null
   skills: CollocationSkill[]
   examples: string[]
-  rank: number
+  rank: number      // personal rank when savedByMe, global rank otherwise
   isSystem: boolean
+  savedByMe: boolean
   createdAt: Date
 }
 
@@ -23,7 +23,8 @@ export async function findCollocation(phrase: string): Promise<CollocationCard |
     .from(collocationEntries)
     .where(sql`lower(${collocationEntries.phrase}) = lower(${phrase})`)
     .limit(1)
-  return (rows[0] as CollocationCard) ?? null
+  if (!rows[0]) return null
+  return { ...rows[0], skills: rows[0].skills as CollocationSkill[], examples: rows[0].examples as string[], savedByMe: false }
 }
 
 export async function saveCollocation(data: {
@@ -34,50 +35,120 @@ export async function saveCollocation(data: {
   skills: CollocationSkill[]
   examples: string[]
 }): Promise<CollocationCard | null> {
-  const [row] = await db
+  const phrase = data.phrase.toLowerCase()
+
+  // 1. Upsert into shared catalogue (createdBy only set on first insert)
+  const [inserted] = await db
     .insert(collocationEntries)
-    .values({ ...data, phrase: data.phrase.toLowerCase(), isSystem: false })
+    .values({ phrase, type: data.type, explanation: data.explanation, skills: data.skills, examples: data.examples, isSystem: false, createdBy: data.userId })
     .onConflictDoNothing()
     .returning()
-  return (row as CollocationCard) ?? null
+
+  // 2. Resolve catalogue id (inserted or pre-existing)
+  const entry = inserted ?? await findCollocationEntry(phrase)
+  if (!entry) return null
+
+  // 3. Link to user's personal list
+  await saveToUserCollocations(data.userId, entry.id)
+
+  return { ...entry, skills: entry.skills as CollocationSkill[], examples: entry.examples as string[], savedByMe: true }
+}
+
+async function findCollocationEntry(phrase: string) {
+  const rows = await db
+    .select()
+    .from(collocationEntries)
+    .where(sql`lower(${collocationEntries.phrase}) = lower(${phrase})`)
+    .limit(1)
+  return rows[0] ?? null
+}
+
+export async function saveToUserCollocations(userId: number, collocationId: number): Promise<void> {
+  await db
+    .insert(userCollocations)
+    .values({ userId, collocationId })
+    .onConflictDoNothing()
+}
+
+export async function isInUserCollocations(userId: number, collocationId: number): Promise<boolean> {
+  const rows = await db
+    .select({ collocationId: userCollocations.collocationId })
+    .from(userCollocations)
+    .where(and(eq(userCollocations.userId, userId), eq(userCollocations.collocationId, collocationId)))
+    .limit(1)
+  return rows.length > 0
+}
+
+export async function removeFromUserCollocations(userId: number, collocationId: number): Promise<void> {
+  await db
+    .delete(userCollocations)
+    .where(and(eq(userCollocations.userId, userId), eq(userCollocations.collocationId, collocationId)))
 }
 
 export async function getAllCollocations(userId: number, isAdmin: boolean, showSystemData: boolean): Promise<CollocationCard[]> {
-  const visibilityFilter = isAdmin
-    ? undefined
-    : showSystemData
-      ? or(eq(collocationEntries.isSystem, true), eq(collocationEntries.userId, userId))
-      : and(eq(collocationEntries.isSystem, false), eq(collocationEntries.userId, userId))
+  if (isAdmin) {
+    const rows = await db
+      .select()
+      .from(collocationEntries)
+      .orderBy(desc(collocationEntries.rank), desc(collocationEntries.createdAt))
+    return rows.map((r) => ({ ...r, skills: r.skills as CollocationSkill[], examples: r.examples as string[], savedByMe: false }))
+  }
 
-  return db
-    .select()
+  // Non-admin: join user_collocations to get personal rank + savedByMe flag
+  const savedIds = db
+    .select({ collocationId: userCollocations.collocationId })
+    .from(userCollocations)
+    .where(eq(userCollocations.userId, userId))
+
+  const visFilter = showSystemData
+    ? or(eq(collocationEntries.isSystem, true), inArray(collocationEntries.id, savedIds))
+    : inArray(collocationEntries.id, savedIds)
+
+  const joined = await db
+    .select({ entry: collocationEntries, userRank: userCollocations.rank })
     .from(collocationEntries)
-    .where(visibilityFilter)
-    .orderBy(desc(collocationEntries.rank), desc(collocationEntries.createdAt)) as Promise<CollocationCard[]>
+    .leftJoin(userCollocations, and(eq(userCollocations.collocationId, collocationEntries.id), eq(userCollocations.userId, userId)))
+    .where(visFilter)
+    .orderBy(desc(sql`coalesce(${userCollocations.rank}, ${collocationEntries.rank})`), desc(collocationEntries.createdAt))
+
+  return joined.map(({ entry, userRank }) => ({
+    ...entry,
+    skills: entry.skills as CollocationSkill[],
+    examples: entry.examples as string[],
+    rank: userRank ?? entry.rank,
+    savedByMe: userRank !== null,
+  }))
 }
 
-export async function updateCollocationSkills(
-  id: number,
-  skills: CollocationSkill[],
-): Promise<void> {
-  await db
-    .update(collocationEntries)
-    .set({ skills })
-    .where(eq(collocationEntries.id, id))
+export async function updateCollocationSkills(id: number, skills: CollocationSkill[]): Promise<void> {
+  await db.update(collocationEntries).set({ skills }).where(eq(collocationEntries.id, id))
 }
 
+/** Admin-only: update the global rank on the shared catalogue. */
 export async function updateCollocationRank(id: number, rank: number): Promise<void> {
-  await db
-    .update(collocationEntries)
-    .set({ rank })
-    .where(eq(collocationEntries.id, id))
+  await db.update(collocationEntries).set({ rank }).where(eq(collocationEntries.id, id))
 }
 
-export async function deleteCollocation(id: number, userId: number, isAdmin: boolean): Promise<void> {
-  const condition = isAdmin
-    ? eq(collocationEntries.id, id)
-    : and(eq(collocationEntries.id, id), eq(collocationEntries.isSystem, false), eq(collocationEntries.userId, userId))
-  await db.delete(collocationEntries).where(condition)
+/** User: update the personal rank on their saved copy. */
+export async function updateUserCollocationRank(userId: number, collocationId: number, rank: number): Promise<void> {
+  await db
+    .update(userCollocations)
+    .set({ rank })
+    .where(and(eq(userCollocations.userId, userId), eq(userCollocations.collocationId, collocationId)))
+}
+
+/** Admin-only: hard-delete the collocation from the shared catalogue. */
+export async function deleteCollocation(id: number): Promise<void> {
+  await db.delete(collocationEntries).where(eq(collocationEntries.id, id))
+}
+
+/** Returns how many users have this collocation saved. */
+export async function getUserCountForCollocation(collocationId: number): Promise<number> {
+  const [{ value }] = await db
+    .select({ value: count() })
+    .from(userCollocations)
+    .where(eq(userCollocations.collocationId, collocationId))
+  return value
 }
 
 /**
