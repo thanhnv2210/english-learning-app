@@ -9,7 +9,7 @@ export default async function ListeningPage() {
   const targetBand = parseTargetBand(user.targetProfile)
   const [domains, libraryCounts] = await Promise.all([
     getUserDomains(user.id),
-    getListeningLibraryCounts(),
+    getListeningLibraryCounts(user.id, user.role === 'admin', user.showSystemData),
   ])
 
   return <ListeningTask domains={domains} targetBand={targetBand} libraryCounts={libraryCounts} />

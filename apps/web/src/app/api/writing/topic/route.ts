@@ -1,6 +1,7 @@
 import { generateText } from 'ai'
 import { TOPIC_GENERATION_PROMPT } from '@/lib/ielts/writing/prompts'
 import { saveWritingTopic } from '@/lib/db/writing'
+import { getCurrentUser } from '@/lib/db/user'
 import { OLLAMA_ENABLED, ollamaModel, ollamaDisabledResponse, ollamaDebug } from '@/lib/ai-client'
 
 export type GeneratedTopic = {
@@ -36,7 +37,8 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Failed to parse AI response', raw: text }, { status: 500 })
   }
 
-  await saveWritingTopic({ domain, prompt: parsed.prompt, taskType: parsed.taskType })
+  const user = await getCurrentUser()
+  await saveWritingTopic({ userId: user.id, domain, prompt: parsed.prompt, taskType: parsed.taskType })
 
   return Response.json(parsed)
 }

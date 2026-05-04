@@ -179,11 +179,13 @@ export type ReadingQuestionRow = {
 
 export const readingPassages = pgTable('reading_passages', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   domain: text('domain').notNull(),
   passage: text('passage').notNull(),
   questions: jsonb('questions').notNull().$type<ReadingQuestionRow[]>(),
   rank: integer('rank').notNull().default(1),
+  isSystem: boolean('is_system').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 }, (t) => [
   check('reading_passages_rank_check', sql`${t.rank} between 1 and 5`),
@@ -204,11 +206,13 @@ export type ListeningQuestion = {
 
 export const listeningScripts = pgTable('listening_scripts', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   domain: text('domain').notNull(),
   title: text('title').notNull(),
   transcript: jsonb('transcript').notNull().$type<ListeningTurn[]>(),
   questions: jsonb('questions').notNull().$type<ListeningQuestion[]>(),
   rank: integer('rank').notNull().default(1),
+  isSystem: boolean('is_system').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 }, (t) => [
   check('listening_scripts_rank_check', sql`${t.rank} between 1 and 5`),
@@ -243,10 +247,12 @@ export const speakingPart2Topics = pgTable('speaking_part2_topics', {
 
 export const writingTopics = pgTable('writing_topics', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   domain: text('domain').notNull(),
   prompt: text('prompt').notNull(),
   taskType: text('task_type').notNull(), // 'opinion' | 'discussion' | 'problem_solution' | 'two_part'
   rank: integer('rank').notNull().default(1),
+  isSystem: boolean('is_system').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 }, (t) => [
   check('writing_topics_rank_check', sql`${t.rank} between 1 and 5`),

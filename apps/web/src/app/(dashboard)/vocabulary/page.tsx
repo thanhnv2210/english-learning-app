@@ -2,12 +2,14 @@ import Link from 'next/link'
 import { getAllVocabularyWords } from '@/lib/db/vocabulary'
 import { getSkillFavorites } from '@/lib/db/user-skill-topics'
 import { getAllSentences } from '@/lib/db/word-sentences'
+import { getCurrentUser } from '@/lib/db/user'
 import { VocabularyList } from './vocabulary-list'
 import { VocabSearch } from './vocab-search'
 
 export default async function VocabularyPage() {
+  const user = await getCurrentUser()
   const [words, favoriteDomains, sentences] = await Promise.all([
-    getAllVocabularyWords(),
+    getAllVocabularyWords(user.role === 'admin', user.showSystemData),
     getSkillFavorites('vocabulary'),
     getAllSentences(),
   ])
@@ -43,6 +45,11 @@ export default async function VocabularyPage() {
 
       <VocabSearch />
 
+      {words.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          No personal words yet. Enable system data in Settings to browse the AWL catalogue, or search above to add your first word.
+        </p>
+      )}
       <VocabularyList words={words} domains={domains} favoriteDomains={favoriteDomains} />
     </div>
   )

@@ -8,7 +8,7 @@ export default async function ReadingPage() {
   const targetBand = parseTargetBand(user.targetProfile)
   const [domains, libraryCounts] = await Promise.all([
     getUserDomains(user.id),
-    getLibraryCounts(),
+    getLibraryCounts(user.id, user.role === 'admin', user.showSystemData),
   ])
 
   return <ReadingTask targetBand={targetBand} domains={domains} libraryCounts={libraryCounts} />

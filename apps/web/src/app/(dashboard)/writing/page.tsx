@@ -8,7 +8,7 @@ export default async function WritingPage() {
   const targetBand = parseTargetBand(user.targetProfile)
   const [domains, libraryCounts] = await Promise.all([
     getUserDomains(user.id),
-    getWritingTopicLibraryCounts(),
+    getWritingTopicLibraryCounts(user.id, user.role === 'admin', user.showSystemData),
   ])
 
   return <WritingTask targetBand={targetBand} domains={domains} libraryCounts={libraryCounts} />

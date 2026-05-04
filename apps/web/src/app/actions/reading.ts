@@ -6,6 +6,7 @@ import {
   type LibraryPassage,
 } from '@/lib/db/reading'
 import type { ReadingQuestionRow } from '@/lib/db/schema'
+import { getCurrentUser } from '@/lib/db/user'
 
 export async function savePassageToLibrary(data: {
   title: string
@@ -13,9 +14,11 @@ export async function savePassageToLibrary(data: {
   passage: string
   questions: ReadingQuestionRow[]
 }): Promise<number> {
-  return saveReadingPassage(data)
+  const user = await getCurrentUser()
+  return saveReadingPassage({ ...data, userId: user.id })
 }
 
 export async function pickRandomPassage(domain: string): Promise<LibraryPassage | null> {
-  return getRandomPassageByDomain(domain)
+  const user = await getCurrentUser()
+  return getRandomPassageByDomain(domain, user.id, user.role === 'admin', user.showSystemData)
 }

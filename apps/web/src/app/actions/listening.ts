@@ -3,6 +3,7 @@
 import { saveListeningScript, getRandomScriptByDomain } from '@/lib/db/listening'
 import type { LibraryScript } from '@/lib/db/listening'
 import type { ListeningTurn, ListeningQuestion } from '@/lib/db/schema'
+import { getCurrentUser } from '@/lib/db/user'
 
 export async function saveScriptToLibrary(data: {
   domain: string
@@ -10,9 +11,11 @@ export async function saveScriptToLibrary(data: {
   transcript: ListeningTurn[]
   questions: ListeningQuestion[]
 }): Promise<number> {
-  return saveListeningScript(data)
+  const user = await getCurrentUser()
+  return saveListeningScript({ ...data, userId: user.id })
 }
 
 export async function pickRandomScript(domain: string): Promise<LibraryScript | null> {
-  return getRandomScriptByDomain(domain)
+  const user = await getCurrentUser()
+  return getRandomScriptByDomain(domain, user.id, user.role === 'admin', user.showSystemData)
 }

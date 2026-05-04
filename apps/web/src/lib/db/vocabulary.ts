@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { vocabularyWords, vocabularyWordDomains, writingDomains } from '@/lib/db/schema'
-import { asc, eq, inArray, sql } from 'drizzle-orm'
+import { asc, eq, inArray, sql, and } from 'drizzle-orm'
 import type { VocabWordFamily, VocabSynonym, VocabExamples, VocabPronunciation } from '@/lib/db/schema'
 
 export type VocabularyCard = {
@@ -21,9 +21,11 @@ export type VocabularyCard = {
   aiModel: string | null  // model that generated this word, null for seeded/manual
 }
 
-/** All words in the catalogue, ordered alphabetically. Uses 2 queries (no N+1). */
-export async function getAllVocabularyWords(): Promise<VocabularyCard[]> {
-  const rows = await db.select().from(vocabularyWords).orderBy(asc(vocabularyWords.word))
+/** All words in the catalogue, ordered alphabetically. Uses 2 queries (no N+1).
+ *  When showSystemData=false (and not admin), only user-added words are returned. */
+export async function getAllVocabularyWords(isAdmin = true, showSystemData = true): Promise<VocabularyCard[]> {
+  const filter = (!isAdmin && !showSystemData) ? eq(vocabularyWords.userAdded, true) : undefined
+  const rows = await db.select().from(vocabularyWords).where(filter).orderBy(asc(vocabularyWords.word))
   if (rows.length === 0) return []
 
   const allMappings = await db
