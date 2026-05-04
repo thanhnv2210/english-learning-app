@@ -17,7 +17,7 @@ export default auth((req) => {
   }
 
   if (isLoggedIn && isLoginPage) {
-    return NextResponse.redirect(new URL('/speaking', req.nextUrl.origin))
+    return NextResponse.redirect(new URL('/dashboard', req.nextUrl.origin))
   }
 })
 

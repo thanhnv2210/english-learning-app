@@ -333,7 +333,7 @@ export function NavSidebar({
           ))}
           {userEmail && (
             <button
-              onClick={() => signOut({ callbackUrl: '/login' })}
+              onClick={() => signOut({ callbackUrl: '/' })}
               title={`Sign out (${userName || userEmail})`}
               className="flex h-8 w-8 items-center justify-center rounded-full hover:ring-2 hover:ring-red-400 transition-all overflow-hidden"
             >
@@ -484,7 +484,7 @@ export function NavSidebar({
             )}
             <span className="text-xs text-muted-foreground truncate flex-1 min-w-0">{userName || userEmail}</span>
             <button
-              onClick={() => signOut({ callbackUrl: '/login' })}
+              onClick={() => signOut({ callbackUrl: '/' })}
               title="Sign out"
               className="shrink-0 rounded p-1 text-xs text-faint hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-colors"
             >

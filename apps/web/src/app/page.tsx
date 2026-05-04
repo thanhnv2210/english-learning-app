@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { auth } from '@/auth'
 
 const FEATURES = [
   {
@@ -58,7 +60,9 @@ const STATS = [
   { value: '100%', label: 'Tech-focused content' },
 ]
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = await auth()
+  if (session?.user) redirect('/dashboard')
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* ── Nav ───────────────────────────────────────────────────────────────── */}
@@ -75,7 +79,7 @@ export default function LandingPage() {
               Sign in
             </Link>
             <Link
-              href="/speaking"
+              href="/dashboard"
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 transition-colors"
             >
               Get started free
@@ -103,7 +107,7 @@ export default function LandingPage() {
 
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Link
-            href="/speaking"
+            href="/dashboard"
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-colors sm:w-auto"
           >
             <svg width="18" height="18" viewBox="0 0 48 48" fill="none">
@@ -232,7 +236,7 @@ export default function LandingPage() {
         </p>
         <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Link
-            href="/speaking"
+            href="/dashboard"
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-colors sm:w-auto"
           >
             Get started free
