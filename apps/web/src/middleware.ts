@@ -3,16 +3,21 @@ import { NextResponse } from 'next/server'
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth
-  const isLoginPage = req.nextUrl.pathname === '/login'
+  const { pathname } = req.nextUrl
+  const isLoginPage = pathname === '/login'
+  const isLandingPage = pathname === '/'
+
+  // Landing page is public — anyone can see it
+  if (isLandingPage) return NextResponse.next()
 
   if (!isLoggedIn && !isLoginPage) {
     const loginUrl = new URL('/login', req.nextUrl.origin)
-    loginUrl.searchParams.set('callbackUrl', req.nextUrl.pathname)
+    loginUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
   if (isLoggedIn && isLoginPage) {
-    return NextResponse.redirect(new URL('/', req.nextUrl.origin))
+    return NextResponse.redirect(new URL('/speaking', req.nextUrl.origin))
   }
 })
 
