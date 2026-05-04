@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { CheatSheetBanner } from '@/components/cheat-sheet-banner'
 import { getCurrentUser } from '@/lib/db/user'
 import { getAnalyticsStats } from '@/lib/db/analytics'
 import { db } from '@/lib/db'
@@ -109,6 +110,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
+
+      <CheatSheetBanner />
 
       {/* ── Welcome header ──────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
