@@ -10,12 +10,20 @@ const DEFAULT_EMAIL = 'default@local.dev'
  * Returns the currently authenticated user from the NextAuth session.
  * Throws if not authenticated. Use this in server actions and pages.
  */
+const THIRTY_MINUTES = 30 * 60 * 1000
+
 export async function getCurrentUser() {
   const session = await auth()
   if (!session?.user?.id) throw new Error('Unauthorized')
   const userId = parseInt(session.user.id)
   const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1)
   if (!user) throw new Error('User not found')
+
+  const stale = !user.lastActiveAt || Date.now() - user.lastActiveAt.getTime() > THIRTY_MINUTES
+  if (stale) {
+    await db.update(users).set({ lastActiveAt: new Date() }).where(eq(users.id, userId))
+  }
+
   return user
 }
 

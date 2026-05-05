@@ -28,6 +28,7 @@ export const users = pgTable('users', {
   targetProfile: text('target_profile').notNull().default('IELTS_Academic_6.5'),
   favouritePages: jsonb('favourite_pages').$type<string[]>().notNull().default([]),
   showSystemData: boolean('show_system_data').notNull().default(true),
+  lastActiveAt: timestamp('last_active_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
