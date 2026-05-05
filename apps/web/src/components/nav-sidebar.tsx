@@ -374,7 +374,7 @@ export function NavSidebar({
             <div key={group.label} className="mt-2">
               <button
                 onClick={() => toggleGroup(group.label)}
-                data-tour={group.label === 'Guides' ? 'cheat-sheet' : undefined}
+                data-tour={undefined}
                 className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
                   hasActive
                     ? 'text-blue-600 dark:text-blue-400'
@@ -397,6 +397,7 @@ export function NavSidebar({
                       indent
                       isFav={favs.includes(item.href)}
                       onToggleFav={handleToggleFav}
+                      tourId={item.href === '/getting-started' ? 'getting-started' : undefined}
                     />
                   ))}
                 </div>

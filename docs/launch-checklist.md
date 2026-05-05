@@ -11,8 +11,8 @@ Format: `[ ]` pending · `[x]` done (with finish date)
 | 1 | Deploy app to Vercel | [x] | 2026-05-04 |
 | 2 | Production PostgreSQL on Neon | [x] | 2026-05-04 |
 | 3 | Custom domain registered and configured | [ ] | — |
-| 4 | Environment variables set in Vercel dashboard | [ ] | — |
-| 5 | Anthropic API key (production) configured | [ ] | — |
+| 4 | Environment variables set in Vercel dashboard | [x] | — |
+| 5 | Anthropic API key (production) configured | [x] | — |
 
 ---
 
@@ -66,8 +66,8 @@ Format: `[ ]` pending · `[x]` done (with finish date)
 
 | # | Item | Status | Done |
 |---|------|--------|------|
-| 24 | First-session guided task defined (e.g. "Take your first Writing score") | [ ] | — |
-| 25 | Empty-state screens guide new users to start, not a blank dashboard | [ ] | — |
+| 24 | First-session guided task defined (e.g. "Take your first Writing score") | [x] | 2026-05-06 |
+| 25 | Empty-state screens guide new users to start, not a blank dashboard | [x] | 2026-05-06 |
 | 26 | Follow-up message at 48h for users who haven't returned (Zalo or email) | [ ] | — |
 
 ---
@@ -76,9 +76,9 @@ Format: `[ ]` pending · `[x]` done (with finish date)
 
 | # | Item | Status | Done |
 |---|------|--------|------|
-| 27 | Privacy policy page published (what data is collected, retention period) | [ ] | — |
-| 28 | Consent checkbox on sign-up ("your submissions are stored to power your feedback") | [ ] | — |
-| 29 | Data retention policy decided (e.g. essays kept 12 months, then purged) | [ ] | — |
+| 27 | Privacy policy page published (what data is collected, retention period) | [x] | 2026-05-06 |
+| 28 | Consent notice on login page (link to Privacy Policy) | [x] | 2026-05-06 |
+| 29 | Data retention policy decided (e.g. essays kept as long as account is active) | [x] | 2026-05-06 |
 
 ---
 

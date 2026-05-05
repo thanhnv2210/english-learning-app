@@ -29,6 +29,7 @@ export const users = pgTable('users', {
   favouritePages: jsonb('favourite_pages').$type<string[]>().notNull().default([]),
   showSystemData: boolean('show_system_data').notNull().default(true),
   lastActiveAt: timestamp('last_active_at'),
+  consentedAt: timestamp('consented_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 

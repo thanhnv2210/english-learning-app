@@ -254,9 +254,14 @@ export default async function LandingPage() {
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 text-xs text-faint">
           <span>IELTS Accelerator — for senior engineers targeting Band 6.5</span>
-          <Link href="/login" className="hover:text-muted-foreground transition-colors">
-            Sign in
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-muted-foreground transition-colors">
+              Privacy Policy
+            </Link>
+            <Link href="/login" className="hover:text-muted-foreground transition-colors">
+              Sign in
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

@@ -83,6 +83,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               image: (profile as { picture?: string }).picture ?? null,
               targetProfile: 'IELTS_Academic_6.5',
               status,
+              consentedAt: new Date(),
             })
             .returning()
           await seedDefaultDomains(created.id)

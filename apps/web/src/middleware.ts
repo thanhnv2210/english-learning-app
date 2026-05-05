@@ -4,8 +4,12 @@ import { NextResponse } from 'next/server'
 export default auth((req) => {
   const isLoggedIn = !!req.auth
   const { pathname } = req.nextUrl
-  const isLoginPage = pathname === '/login'
-  const isPublicPage = pathname === '/' || pathname === '/pending' || pathname === '/auth-error'
+  const isLoginPage = pathname === '/login' || pathname === '/admin/login'
+  const isPublicPage =
+    pathname === '/' ||
+    pathname === '/pending' ||
+    pathname === '/auth-error' ||
+    pathname === '/privacy'
 
   // Public pages — no auth required
   if (isPublicPage) return NextResponse.next()

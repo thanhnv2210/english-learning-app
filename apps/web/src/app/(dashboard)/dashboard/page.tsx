@@ -203,17 +203,25 @@ export default async function DashboardPage() {
 
       {/* ── No data state ────────────────────────────────────────────────────── */}
       {stats.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border bg-card px-6 py-10 text-center">
-          <p className="text-sm font-medium text-foreground">No scored sessions yet</p>
+        <div className="rounded-xl border border-dashed border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 px-6 py-10 text-center">
+          <p className="text-sm font-semibold text-foreground">New here? Start with your 30-day plan</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Complete a practice session and request feedback to see your band scores here.
+            A week-by-week guide that takes you from zero to a consistent Band 6.5 practice routine.
           </p>
-          <Link
-            href="/speaking/session"
-            className="mt-4 inline-block rounded-lg bg-blue-600 px-5 py-2 text-xs font-semibold text-white hover:bg-blue-500 transition-colors"
-          >
-            Start Speaking Practice
-          </Link>
+          <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+            <Link
+              href="/getting-started"
+              className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-semibold text-white hover:bg-blue-500 transition-colors"
+            >
+              See your 30-day plan →
+            </Link>
+            <Link
+              href="/writing"
+              className="rounded-lg border border-border bg-card px-5 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              Or jump straight to Writing
+            </Link>
+          </div>
         </div>
       )}
 

@@ -1,38 +1,13 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense } from 'react'
+import Link from 'next/link'
 import { signIn } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 
 function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') ?? '/'
-
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    })
-
-    setLoading(false)
-
-    if (result?.error) {
-      setError('Invalid email or password.')
-    } else {
-      router.push(callbackUrl)
-    }
-  }
+  const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard'
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-subtle">
@@ -40,11 +15,18 @@ function LoginForm() {
         <h1 className="text-xl font-semibold text-foreground mb-1">Sign in</h1>
         <p className="text-sm text-muted-foreground mb-6">IELTS Accelerator</p>
 
-        {/* Google sign-in */}
+        <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+          By signing in you agree to our{' '}
+          <Link href="/privacy" target="_blank" className="underline underline-offset-2 hover:text-foreground transition-colors">
+            Privacy Policy
+          </Link>
+          . We store your practice sessions to power AI feedback.
+        </p>
+
         <button
           type="button"
           onClick={() => signIn('google', { callbackUrl })}
-          className="w-full flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors mb-4"
+          className="w-full flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
         >
           <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M47.532 24.552c0-1.636-.132-3.2-.38-4.704H24v8.896h13.228c-.572 3.064-2.308 5.656-4.92 7.392v6.14h7.968c4.664-4.296 7.256-10.62 7.256-17.724z" fill="#4285F4"/>
@@ -54,51 +36,6 @@ function LoginForm() {
           </svg>
           Sign in with Google
         </button>
-
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex-1 h-px bg-border" />
-          <span className="text-xs text-faint">or admin</span>
-          <div className="flex-1 h-px bg-border" />
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-muted-foreground">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoFocus
-              suppressHydrationWarning
-              className="rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-blue-500/30"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-muted-foreground">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              suppressHydrationWarning
-              className="rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-blue-500/30"
-            />
-          </div>
-
-          {error && (
-            <p className="text-xs text-red-500">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-50 transition-colors"
-          >
-            {loading ? 'Signing in...' : 'Sign in'}
-          </button>
-        </form>
       </div>
     </div>
   )

@@ -30,9 +30,9 @@ const STEPS: Record<Lang, Step[]> = {
       body: 'Hover over any page link and click the ☆ star icon that appears on the right. Pinned pages jump to a "Favourites" section at the top of the sidebar so you can reach them in one click.',
     },
     {
-      target: 'cheat-sheet',
-      title: 'Cheat Sheet — Start Here',
-      body: 'Open the Guides section and click "Cheat Sheet". It maps every tool in the app to a specific IELTS problem — the fastest way to know what to practice next.',
+      target: 'getting-started',
+      title: 'Your 30-Day Plan',
+      body: 'Open the Guides section and click "Getting Started". It gives you a week-by-week study plan with direct links to every feature — the fastest way to build a consistent practice routine.',
     },
     {
       target: 'sign-out',
@@ -52,9 +52,9 @@ const STEPS: Record<Lang, Step[]> = {
       body: 'Di chuột qua bất kỳ đường dẫn nào và nhấn biểu tượng ☆ hiện ra bên phải. Trang đã ghim sẽ xuất hiện trong mục "Favourites" ở đầu sidebar để truy cập nhanh.',
     },
     {
-      target: 'cheat-sheet',
-      title: 'Cheat Sheet — Bắt đầu tại đây',
-      body: 'Mở mục Guides và nhấn "Cheat Sheet". Tài liệu này ánh xạ từng công cụ trong ứng dụng với một vấn đề IELTS cụ thể — cách nhanh nhất để biết nên luyện gì tiếp theo.',
+      target: 'getting-started',
+      title: 'Kế hoạch 30 ngày của bạn',
+      body: 'Mở mục Guides và nhấn "Getting Started". Đây là kế hoạch học tập từng tuần với đường dẫn trực tiếp đến từng tính năng — cách nhanh nhất để xây dựng thói quen luyện tập đều đặn.',
     },
     {
       target: 'sign-out',
@@ -82,6 +82,7 @@ export function OnboardingTour() {
   }, [])
 
   const measureTarget = useCallback((stepIndex: number, currentLang: Lang) => {
+    if (window.innerWidth < 640) { setRect(null); return }
     const target = STEPS[currentLang][stepIndex]?.target
     if (!target) return
     const el = document.querySelector(`[data-tour="${target}"]`)
@@ -172,10 +173,10 @@ export function OnboardingTour() {
 
       {/* ── Tooltip card ───────────────────────────────────────────────────── */}
       <div
-        className="fixed z-[9999] w-[296px] rounded-2xl border border-border bg-card shadow-2xl"
+        className="fixed z-[9999] w-[calc(100vw-32px)] sm:w-[296px] rounded-2xl border border-border bg-card shadow-2xl"
         style={{
-          left: ttX,
-          top: ttY,
+          left: rect ? ttX : 16,
+          top: rect ? ttY : (viewH - 300) / 2,
           transition: 'left 0.25s ease, top 0.25s ease',
         }}
       >
