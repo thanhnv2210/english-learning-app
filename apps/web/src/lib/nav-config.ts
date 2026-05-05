@@ -41,6 +41,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Guides',
     items: [
+      { href: '/getting-started', label: 'Getting Started', icon: '🚀' },
       { href: '/cheat-sheet', label: 'Cheat Sheet', icon: '🗺️' },
       { href: '/how-to-answer', label: 'How to Answer', icon: '💡' },
       { href: '/irregular-verbs', label: 'Irregular Verbs', icon: '🔀' },
