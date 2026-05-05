@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { withSentryConfig } from '@sentry/nextjs'
 
 console.log('[env]', {
   NEXT_PUBLIC_OLLAMA_ENABLED: process.env.NEXT_PUBLIC_OLLAMA_ENABLED,
@@ -29,4 +30,15 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+export default withSentryConfig(nextConfig, {
+  // Suppress Sentry CLI output during builds unless DSN is set
+  silent: !process.env.NEXT_PUBLIC_SENTRY_DSN,
+  // Upload source maps only in CI/production where SENTRY_AUTH_TOKEN is set
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  // Disable source map upload in local dev
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+})

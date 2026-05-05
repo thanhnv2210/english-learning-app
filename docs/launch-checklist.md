@@ -56,9 +56,9 @@ Format: `[ ]` pending · `[x]` done (with finish date)
 
 | # | Item | Status | Done |
 |---|------|--------|------|
-| 21 | Public landing page live (Vietnamese, mobile-optimised) | [ ] | — |
-| 22 | Waitlist / beta signup form (email or Zalo number) | [ ] | — |
-| 23 | "Founding member" CTA on landing page | [ ] | — |
+| 21 | Public landing page live (Vietnamese, mobile-optimised) | [x] | 2026-05-06 |
+| 22 | Waitlist / beta signup form (email or Zalo number) | [x] | 2026-05-06 |
+| 23 | "Founding member" CTA on landing page | [x] | 2026-05-06 |
 
 ---
 
@@ -89,7 +89,7 @@ Format: `[ ]` pending · `[x]` done (with finish date)
 | 30 | Zalo OA or dedicated number set up for beta support | [ ] | — |
 | 31 | Bug triage process defined (Zalo report → GitHub issue or Notion) | [ ] | — |
 | 32 | Response time SLA for beta users (e.g. within 24h) | [ ] | — |
-| 33 | Error monitoring set up (Sentry or Vercel logs alert) | [ ] | — |
+| 33 | Error monitoring set up (Sentry or Vercel logs alert) | [x] | 2026-05-06 |
 
 ---
 
