@@ -1,12 +1,14 @@
 import Link from 'next/link'
 import { getDueReviewWords, getDueReviewCount, getEnrolledCount } from '@/lib/db/vocabulary-srs'
+import { getCurrentUser } from '@/lib/db/user'
 import { ReviewSession } from './review-session'
 
 export default async function VocabularyReviewPage() {
+  const user = await getCurrentUser()
   const [dueWords, dueCount, enrolledCount] = await Promise.all([
-    getDueReviewWords(20),
-    getDueReviewCount(),
-    getEnrolledCount(),
+    getDueReviewWords(user.id, 20),
+    getDueReviewCount(user.id),
+    getEnrolledCount(user.id),
   ])
 
   return (

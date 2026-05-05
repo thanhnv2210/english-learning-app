@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { wordReviewStates, vocabularyWords } from '@/lib/db/schema'
-import { eq, lte, sql } from 'drizzle-orm'
+import { and, eq, lte, sql } from 'drizzle-orm'
 import { sm2, type ReviewQuality } from '@/lib/srs'
 
 export type { ReviewQuality } from '@/lib/srs'
@@ -12,12 +12,15 @@ export type ReviewWord = typeof vocabularyWords.$inferSelect & {
 }
 
 /** Get all words due for review (nextReview <= now), with word data. */
-export async function getDueReviewWords(limit = 20): Promise<ReviewWord[]> {
+export async function getDueReviewWords(userId: number, limit = 20): Promise<ReviewWord[]> {
   const now = new Date()
   const rows = await db
     .select()
     .from(vocabularyWords)
-    .innerJoin(wordReviewStates, eq(wordReviewStates.wordId, vocabularyWords.id))
+    .innerJoin(wordReviewStates, and(
+      eq(wordReviewStates.wordId, vocabularyWords.id),
+      eq(wordReviewStates.userId, userId),
+    ))
     .where(lte(wordReviewStates.nextReview, now))
     .limit(limit)
 
@@ -25,29 +28,29 @@ export async function getDueReviewWords(limit = 20): Promise<ReviewWord[]> {
 }
 
 /** Count of words due for review right now. */
-export async function getDueReviewCount(): Promise<number> {
+export async function getDueReviewCount(userId: number): Promise<number> {
   const now = new Date()
   const [row] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(wordReviewStates)
-    .where(lte(wordReviewStates.nextReview, now))
+    .where(and(eq(wordReviewStates.userId, userId), lte(wordReviewStates.nextReview, now)))
   return row?.count ?? 0
 }
 
 /** Enrol a word for SRS (idempotent — does nothing if already enrolled). */
-export async function enrolWord(wordId: number): Promise<void> {
+export async function enrolWord(userId: number, wordId: number): Promise<void> {
   await db
     .insert(wordReviewStates)
-    .values({ wordId })
+    .values({ userId, wordId })
     .onConflictDoNothing()
 }
 
 /** Record a review result and update SRS state. */
-export async function recordReview(wordId: number, quality: ReviewQuality): Promise<void> {
+export async function recordReview(userId: number, wordId: number, quality: ReviewQuality): Promise<void> {
   const existing = await db
     .select()
     .from(wordReviewStates)
-    .where(eq(wordReviewStates.wordId, wordId))
+    .where(and(eq(wordReviewStates.userId, userId), eq(wordReviewStates.wordId, wordId)))
     .limit(1)
 
   const current = existing[0] ?? { interval: 1, easeFactor: 2.5, repetitions: 0 }
@@ -66,9 +69,10 @@ export async function recordReview(wordId: number, quality: ReviewQuality): Prom
         nextReview: nextReviewDate,
         lastReview: new Date(),
       })
-      .where(eq(wordReviewStates.wordId, wordId))
+      .where(and(eq(wordReviewStates.userId, userId), eq(wordReviewStates.wordId, wordId)))
   } else {
     await db.insert(wordReviewStates).values({
+      userId,
       wordId,
       interval: next.interval,
       easeFactor: next.easeFactor,
@@ -79,10 +83,11 @@ export async function recordReview(wordId: number, quality: ReviewQuality): Prom
   }
 }
 
-/** Total number of words enrolled in SRS. */
-export async function getEnrolledCount(): Promise<number> {
+/** Total number of words enrolled in SRS for this user. */
+export async function getEnrolledCount(userId: number): Promise<number> {
   const [row] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(wordReviewStates)
+    .where(eq(wordReviewStates.userId, userId))
   return row?.count ?? 0
 }

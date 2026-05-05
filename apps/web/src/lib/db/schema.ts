@@ -9,6 +9,7 @@ import {
   boolean,
   primaryKey,
   check,
+  unique,
 } from 'drizzle-orm/pg-core'
 import { relations, sql } from 'drizzle-orm'
 
@@ -609,21 +610,25 @@ export const userIdioms = pgTable(
 )
 
 // ─── Spaced Repetition (SM-2) ─────────────────────────────────────────────────
-// One row per word. Tracks SRS state for the single user (single-user app).
-// Rows are created on first review. nextReview defaults to now → due immediately.
+// One row per (user, word). Tracks SRS state per user.
+// Rows are created on first enrol. nextReview defaults to now → due immediately.
 
 export const wordReviewStates = pgTable('word_review_states', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
   wordId: integer('word_id')
     .notNull()
-    .unique()
     .references(() => vocabularyWords.id, { onDelete: 'cascade' }),
   interval: integer('interval').notNull().default(1),       // days until next review
   easeFactor: real('ease_factor').notNull().default(2.5),   // SM-2 multiplier
   repetitions: integer('repetitions').notNull().default(0), // consecutive correct streak
   nextReview: timestamp('next_review').notNull().defaultNow(),
   lastReview: timestamp('last_review'),
-})
+},
+(t) => [unique('word_review_states_user_word_unique').on(t.userId, t.wordId)]
+)
 
 // ─── Speaking Phrase Bank ─────────────────────────────────────────────────────
 // ─── Word Pairs ───────────────────────────────────────────────────────────────
