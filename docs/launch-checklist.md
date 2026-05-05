@@ -48,7 +48,7 @@ Format: `[ ]` pending · `[x]` done (with finish date)
 |---|------|--------|------|
 | 18 | Model cost per session estimated (Haiku vs Sonnet per feature) | [ ] | — |
 | 19 | Free-tier usage cap defined and enforced (e.g. 3 writing scores/month) | [ ] | — |
-| 20 | Anthropic spend alert set in dashboard | [ ] | — |
+| 20 | Anthropic spend alert set in dashboard | [x] | 2026-05-06 |
 
 ---
 
@@ -130,8 +130,8 @@ Format: `[ ]` pending · `[x]` done (with finish date)
 | # | Item | Status | Done |
 |---|------|--------|------|
 | 45 | `lastActiveAt` column on users table + 30-min throttled update in `getCurrentUser()` | [x] | 2026-05-05 |
-| 46 | Admin engagement page: list all users with last active date, sessions this week, skills used | [ ] | — |
-| 47 | Engagement tier label per user: Active (used in last 7d) / At-risk (8–21d) / Churned (21d+) | [ ] | — |
+| 46 | Admin engagement page: list all users with last active date, sessions this week, skills used | [x] | 2026-05-06 |
+| 47 | Engagement tier label per user: Active (used in last 7d) / At-risk (8–21d) / Churned (21d+) | [x] | 2026-05-06 |
 | 48 | Inactivity reminder: Zalo or email triggered when user crosses 7 days without a session | [ ] | — |
 
 ---

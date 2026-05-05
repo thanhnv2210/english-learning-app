@@ -68,6 +68,7 @@ export const ADMIN_GROUP: NavGroup = {
   label: 'Admin',
   items: [
     { href: '/admin/users', label: 'Users', icon: '👥' },
+    { href: '/admin/engagement', label: 'Engagement', icon: '📈' },
     { href: '/admin/campaign', label: 'Campaign', icon: '📣' },
   ],
 }
