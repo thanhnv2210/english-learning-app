@@ -1,11 +1,13 @@
 import { getAnalyticsStats } from '@/lib/db/analytics'
 import { getWrongDecisionStats } from '@/lib/db/wrong-decisions'
+import { getCurrentUser } from '@/lib/db/user'
 import { AnalyticsView } from './analytics-view'
 import Link from 'next/link'
 
 export default async function AnalyticsPage() {
+  const user = await getCurrentUser()
   const [stats, wrongStats] = await Promise.all([
-    getAnalyticsStats(),
+    getAnalyticsStats(user.id),
     getWrongDecisionStats(),
   ])
   return (

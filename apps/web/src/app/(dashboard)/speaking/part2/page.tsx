@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { mockExams } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { Part2Chat } from './part2-chat'
 import { getCurrentUser, parseTargetBand } from '@/lib/db/user'
 import { getAllPart2Topics } from '@/lib/db/speaking'
@@ -16,10 +16,14 @@ export default async function SpeakingPart2Page({
   let resumeExamId: number | undefined
   let initialCueCard: { id: number; prompt: string } | undefined
 
+  const user = await getCurrentUser()
+  const targetBand = parseTargetBand(user.targetProfile)
+  const topics = await getAllPart2Topics()
+
   if (params.examId) {
     const id = parseInt(params.examId)
     const exam = await db.query.mockExams.findFirst({
-      where: eq(mockExams.id, id),
+      where: and(eq(mockExams.id, id), eq(mockExams.userId, user.id)),
       with: { cueCard: true },
     })
     if (exam) {
@@ -30,10 +34,6 @@ export default async function SpeakingPart2Page({
       }
     }
   }
-
-  const user = await getCurrentUser()
-  const targetBand = parseTargetBand(user.targetProfile)
-  const topics = await getAllPart2Topics()
 
   return (
     <Part2Chat

@@ -2,6 +2,7 @@ import { db } from '@/lib/db'
 import { mockExams, examTags, tags } from '@/lib/db/schema'
 import { eq, and, inArray } from 'drizzle-orm'
 import { HistoryView } from '@/components/history-view'
+import { getCurrentUser } from '@/lib/db/user'
 import Link from 'next/link'
 
 type Filters = {
@@ -10,7 +11,7 @@ type Filters = {
   tag?: string
 }
 
-async function fetchExams(filters: Filters) {
+async function fetchExams(userId: number, filters: Filters) {
   // If filtering by tag name, resolve it to a tag id first
   let filteredExamIds: number[] | undefined
 
@@ -25,6 +26,7 @@ async function fetchExams(filters: Filters) {
 
   const exams = await db.query.mockExams.findMany({
     where: and(
+      eq(mockExams.userId, userId),
       filters.skill ? eq(mockExams.skill, filters.skill) : undefined,
       filters.favorites ? eq(mockExams.isFavorite, true) : undefined,
       filteredExamIds ? inArray(mockExams.id, filteredExamIds) : undefined
@@ -50,7 +52,8 @@ export default async function HistoryPage({
     tag: params.tag,
   }
 
-  const exams = await fetchExams(filters)
+  const user = await getCurrentUser()
+  const exams = await fetchExams(user.id, filters)
   const activeTag = filters.tag
 
   return (

@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { mockExams, type FeedbackResult } from '@/lib/db/schema'
-import { desc, isNotNull } from 'drizzle-orm'
+import { and, desc, eq, isNotNull } from 'drizzle-orm'
 
 export type CriterionStat = {
   criterion: string
@@ -27,11 +27,11 @@ export type SkillStats = {
 
 const SKILL_ORDER = ['speaking', 'speaking_part2', 'writing', 'reading', 'listening']
 
-export async function getAnalyticsStats(): Promise<SkillStats[]> {
+export async function getAnalyticsStats(userId: number): Promise<SkillStats[]> {
   const rows = await db
     .select({ skill: mockExams.skill, feedback: mockExams.feedback, createdAt: mockExams.createdAt })
     .from(mockExams)
-    .where(isNotNull(mockExams.feedback))
+    .where(and(isNotNull(mockExams.feedback), eq(mockExams.userId, userId)))
     .orderBy(desc(mockExams.createdAt))
 
   // Group by skill

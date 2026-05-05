@@ -82,6 +82,7 @@ export const cueCards = pgTable('cue_cards', {
 
 export const mockExams = pgTable('mock_exams', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   // 'speaking' = Part 1 | 'speaking_part2' = Part 2 | 'writing'
   skill: text('skill').notNull(),
   transcript: jsonb('transcript').notNull().$type<TranscriptMessage[]>(),

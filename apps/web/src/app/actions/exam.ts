@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { mockExams, tags, examTags, type TranscriptMessage, type FeedbackResult } from '@/lib/db/schema'
 import { and, eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
+import { getCurrentUser } from '@/lib/db/user'
 
 // ─── Create / update exam ─────────────────────────────────────────────────────
 
@@ -13,9 +14,11 @@ export async function saveExam(input: {
   tagNames?: string[]
   cueCardId?: number
 }) {
+  const user = await getCurrentUser()
   const [exam] = await db
     .insert(mockExams)
     .values({
+      userId: user.id,
       skill: input.skill,
       transcript: input.transcript,
       cueCardId: input.cueCardId,
@@ -31,21 +34,28 @@ export async function saveExam(input: {
 }
 
 export async function updateExamTranscript(examId: number, transcript: TranscriptMessage[]) {
-  await db.update(mockExams).set({ transcript }).where(eq(mockExams.id, examId))
+  const user = await getCurrentUser()
+  await db.update(mockExams).set({ transcript })
+    .where(and(eq(mockExams.id, examId), eq(mockExams.userId, user.id)))
   revalidatePath('/history')
 }
 
 export async function saveFeedback(examId: number, feedback: FeedbackResult) {
-  await db.update(mockExams).set({ feedback }).where(eq(mockExams.id, examId))
+  const user = await getCurrentUser()
+  await db.update(mockExams).set({ feedback })
+    .where(and(eq(mockExams.id, examId), eq(mockExams.userId, user.id)))
   revalidatePath('/history')
 }
 
 // ─── Favorites & tags ─────────────────────────────────────────────────────────
 
 export async function toggleFavorite(examId: number) {
-  const [exam] = await db.select().from(mockExams).where(eq(mockExams.id, examId))
+  const user = await getCurrentUser()
+  const [exam] = await db.select().from(mockExams)
+    .where(and(eq(mockExams.id, examId), eq(mockExams.userId, user.id)))
   if (!exam) return
-  await db.update(mockExams).set({ isFavorite: !exam.isFavorite }).where(eq(mockExams.id, examId))
+  await db.update(mockExams).set({ isFavorite: !exam.isFavorite })
+    .where(and(eq(mockExams.id, examId), eq(mockExams.userId, user.id)))
   revalidatePath('/history')
 }
 

@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { mockExams } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { SpeakingChat } from './speaking-chat'
 import { getCurrentUser, parseTargetBand } from '@/lib/db/user'
 import { getAllSpeakingTopics } from '@/lib/db/speaking'
@@ -15,16 +15,18 @@ export default async function SpeakingPage({
   let initialMessages: TranscriptMessage[] | undefined
   let resumeExamId: number | undefined
 
+  const [user, topics] = await Promise.all([getCurrentUser(), getAllSpeakingTopics()])
+
   if (params.examId) {
     const id = parseInt(params.examId)
-    const exam = await db.query.mockExams.findFirst({ where: eq(mockExams.id, id) })
+    const exam = await db.query.mockExams.findFirst({
+      where: and(eq(mockExams.id, id), eq(mockExams.userId, user.id)),
+    })
     if (exam) {
       initialMessages = exam.transcript
       resumeExamId = exam.id
     }
   }
-
-  const [user, topics] = await Promise.all([getCurrentUser(), getAllSpeakingTopics()])
   const targetBand = parseTargetBand(user.targetProfile)
 
   return (

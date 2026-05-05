@@ -97,7 +97,7 @@ function BandBar({ value, target }: { value: number; target: number }) {
 export default async function DashboardPage() {
   const user = await getCurrentUser()
   const [stats, [wrongRow], [sessionRow]] = await Promise.all([
-    getAnalyticsStats(),
+    getAnalyticsStats(user.id),
     db.select({ count: count() }).from(wrongDecisionLogs).where(eq(wrongDecisionLogs.userId, user.id)),
     db.select({ count: count() }).from(mockExams),
   ])
