@@ -5,13 +5,27 @@ import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { upsertPageConfig } from '@/lib/db/page-configs'
+import { getCurrentUser } from '@/lib/db/user'
+
+async function requireAdmin() {
+  const user = await getCurrentUser()
+  if (user.role !== 'admin') throw new Error('Forbidden')
+}
 
 export async function approveUserAction(userId: number): Promise<void> {
+  await requireAdmin()
   await db.update(users).set({ status: 'active' }).where(eq(users.id, userId))
   revalidatePath('/admin/users')
 }
 
+export async function suspendUserAction(userId: number): Promise<void> {
+  await requireAdmin()
+  await db.update(users).set({ status: 'suspended' }).where(eq(users.id, userId))
+  revalidatePath('/admin/users')
+}
+
 export async function updateUserTierAction(userId: number, tier: 'free' | 'vip'): Promise<void> {
+  await requireAdmin()
   await db.update(users).set({ tier }).where(eq(users.id, userId))
   revalidatePath('/admin/users')
   revalidatePath('/admin/engagement')
@@ -21,6 +35,7 @@ export async function updateUserModelPreferenceAction(
   userId: number,
   preference: 'auto' | 'free',
 ): Promise<void> {
+  await requireAdmin()
   await db.update(users).set({ modelPreference: preference }).where(eq(users.id, userId))
   revalidatePath('/admin/users')
 }

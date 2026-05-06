@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { updateUserTierAction, updateUserModelPreferenceAction, approveUserAction } from '@/app/actions/admin'
+import { updateUserTierAction, updateUserModelPreferenceAction, approveUserAction, suspendUserAction } from '@/app/actions/admin'
 import type { UserRow } from './page'
 
 function Avatar({ image, name, email }: { image: string | null; name: string | null; email: string }) {
@@ -89,6 +89,11 @@ function StatusBadge({ userId, status }: { userId: number; status: string }) {
     startTransition(() => approveUserAction(userId))
   }
 
+  function suspend() {
+    setOptimistic('suspended')
+    startTransition(() => suspendUserAction(userId))
+  }
+
   if (optimistic === 'pending') {
     return (
       <button
@@ -101,10 +106,29 @@ function StatusBadge({ userId, status }: { userId: number; status: string }) {
       </button>
     )
   }
+
+  if (optimistic === 'suspended') {
+    return (
+      <button
+        onClick={approve}
+        disabled={pending}
+        title="Click to reactivate"
+        className="rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800/40 px-2.5 py-0.5 text-xs font-semibold transition-colors disabled:opacity-50"
+      >
+        ✕ Suspended
+      </button>
+    )
+  }
+
   return (
-    <span className="rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-2.5 py-0.5 text-xs font-semibold">
+    <button
+      onClick={suspend}
+      disabled={pending}
+      title="Click to suspend"
+      className="rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900/30 dark:hover:text-red-400 px-2.5 py-0.5 text-xs font-semibold transition-colors disabled:opacity-50"
+    >
       ✓ Active
-    </span>
+    </button>
   )
 }
 
