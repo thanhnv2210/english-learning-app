@@ -23,7 +23,7 @@ export const users = pgTable('users', {
   passwordHash: text('password_hash'),
   role: text('role').notNull().default('student'),            // 'student' | 'admin'
   status: text('status').notNull().default('active'),         // 'active' | 'pending'
-  tier: text('tier').notNull().default('vip'),               // 'free' | 'vip'
+  tier: text('tier').notNull().default('free'),              // 'free' | 'vip'
   modelPreference: text('model_preference').notNull().default('auto'), // 'auto' | 'free'
   // e.g. 'IELTS_Academic_6.5', 'IELTS_Academic_7.5', 'Business_Fluent'
   targetProfile: text('target_profile').notNull().default('IELTS_Academic_6.5'),
@@ -699,6 +699,20 @@ export const userDomainPreferencesRelations = relations(userDomainPreferences, (
 export const userSkillTopicsRelations = relations(userSkillTopics, ({ one }) => ({
   user: one(users, { fields: [userSkillTopics.userId], references: [users.id] }),
 }))
+
+// ─── Monthly AI usage tracking ───────────────────────────────────────────────
+// One row per (user, month). Incremented on each AI scoring call.
+// Free-tier users are capped at FREE_MONTHLY_SCORING_LIMIT per month.
+
+export const userUsage = pgTable(
+  'user_usage',
+  {
+    userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    month: text('month').notNull(), // 'YYYY-MM'
+    writingScores: integer('writing_scores').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.month] })]
+)
 
 // ─── Campaign configuration ───────────────────────────────────────────────────
 // Single-row table — always upserted on id = 1.

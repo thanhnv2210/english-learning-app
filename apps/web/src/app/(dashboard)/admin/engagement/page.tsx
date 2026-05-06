@@ -1,4 +1,5 @@
 import { getEngagementData, summariseEngagement, type EngagementTier, type EngagementRow } from '@/lib/db/engagement'
+import { TierToggle } from '@/components/admin/tier-toggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -86,6 +87,7 @@ export default async function AdminEngagementPage() {
             <thead>
               <tr className="border-b border-border bg-subtle">
                 <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">User</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Tier</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Status</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Last active</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">This week</th>
@@ -109,6 +111,11 @@ export default async function AdminEngagementPage() {
                           <p className="text-xs text-muted-foreground truncate">{row.email}</p>
                         </div>
                       </div>
+                    </td>
+
+                    {/* Subscription tier */}
+                    <td className="px-4 py-3">
+                      <TierToggle userId={row.id} tier={row.tier} />
                     </td>
 
                     {/* Engagement tier */}
@@ -167,7 +174,7 @@ export default async function AdminEngagementPage() {
 
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  <td colSpan={7} className="px-4 py-10 text-center text-sm text-muted-foreground">
                     No users yet.
                   </td>
                 </tr>

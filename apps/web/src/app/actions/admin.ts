@@ -13,6 +13,7 @@ export async function approveUserAction(userId: number): Promise<void> {
 export async function updateUserTierAction(userId: number, tier: 'free' | 'vip'): Promise<void> {
   await db.update(users).set({ tier }).where(eq(users.id, userId))
   revalidatePath('/admin/users')
+  revalidatePath('/admin/engagement')
 }
 
 export async function updateUserModelPreferenceAction(

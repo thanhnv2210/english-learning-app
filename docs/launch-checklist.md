@@ -46,8 +46,8 @@ Format: `[ ]` pending · `[x]` done (with finish date)
 
 | # | Item | Status | Done |
 |---|------|--------|------|
-| 18 | Model cost per session estimated (Haiku vs Sonnet per feature) | [ ] | — |
-| 19 | Free-tier usage cap defined and enforced (e.g. 3 writing scores/month) | [ ] | — |
+| 18 | Model cost per session estimated (Haiku vs Sonnet per feature) | [x] | 2026-05-06 |
+| 19 | Free-tier usage cap defined and enforced (e.g. 3 writing scores/month) | [x] | 2026-05-06 |
 | 20 | Anthropic spend alert set in dashboard | [x] | 2026-05-06 |
 
 ---

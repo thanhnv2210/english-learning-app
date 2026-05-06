@@ -57,9 +57,10 @@ export async function updateTargetProfile(userId: number, profile: string): Prom
  * Returns the user's effective AI context (tier + modelPreference).
  * Use this in API routes instead of calling auth() + getCurrentUser() separately.
  */
-export async function getUserAIContext(): Promise<{ tier: string; modelPreference: 'auto' | 'free' }> {
+export async function getUserAIContext(): Promise<{ userId: number; tier: string; modelPreference: 'auto' | 'free' }> {
   const user = await getCurrentUser()
   return {
+    userId: user.id,
     tier: user.tier ?? 'free',
     modelPreference: (user.modelPreference ?? 'auto') as 'auto' | 'free',
   }

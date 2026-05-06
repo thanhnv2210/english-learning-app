@@ -31,14 +31,14 @@ const nextConfig: NextConfig = {
 }
 
 export default withSentryConfig(nextConfig, {
-  // Suppress Sentry CLI output during builds unless DSN is set
-  silent: !process.env.NEXT_PUBLIC_SENTRY_DSN,
-  // Upload source maps only in CI/production where SENTRY_AUTH_TOKEN is set
+  silent: true,
   authToken: process.env.SENTRY_AUTH_TOKEN,
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
-  // Disable source map upload in local dev
+  // Disable source map upload until SENTRY_ORG and SENTRY_PROJECT are correctly set
   sourcemaps: {
-    disable: !process.env.SENTRY_AUTH_TOKEN,
+    disable: !process.env.SENTRY_AUTH_TOKEN
+      || process.env.SENTRY_ORG?.includes('slug')
+      || process.env.SENTRY_PROJECT?.includes('slug'),
   },
 })
