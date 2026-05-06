@@ -6,6 +6,5 @@ Sentry.init({
   // Capture 10% of transactions for performance monitoring in production
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 
-  // Only show Sentry dialog in production
   debug: false,
 })
