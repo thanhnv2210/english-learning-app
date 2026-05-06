@@ -3,9 +3,10 @@ import { NavSidebar } from '@/components/nav-sidebar'
 import { MobileHeader } from '@/components/mobile-header'
 import { OllamaDisabledBanner } from '@/components/ollama-disabled-banner'
 import { getCurrentUser } from '@/lib/db/user'
+import { getAllPageConfigs } from '@/lib/db/page-configs'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const user = await getCurrentUser()
+  const [user, pageConfigs] = await Promise.all([getCurrentUser(), getAllPageConfigs()])
   if (user.status === 'pending') redirect('/pending')
   return (
     <>
@@ -18,6 +19,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         userEmail={user.email}
         userName={user.name ?? undefined}
         userImage={user.image ?? undefined}
+        pageConfigs={pageConfigs}
       />
 
       <div className="flex h-screen overflow-hidden bg-background">
@@ -28,6 +30,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           userName={user.name ?? undefined}
           userImage={user.image ?? undefined}
           isAdmin={user.role === 'admin'}
+          pageConfigs={pageConfigs}
         />
         <div className="flex flex-1 flex-col overflow-hidden min-w-0">
           {process.env.NEXT_PUBLIC_OLLAMA_ENABLED === 'false' && <OllamaDisabledBanner />}

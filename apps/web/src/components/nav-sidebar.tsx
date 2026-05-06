@@ -8,11 +8,13 @@ import { toggleFavouritePageAction, reorderFavouritePagesAction } from '@/app/ac
 import {
   type NavItem,
   type NavGroup,
+  type PageConfigs,
   STANDALONE,
   NAV_GROUPS,
   ADMIN_GROUP,
   SETTINGS_ITEM,
   ALL_NAV_ITEMS,
+  TAG_STYLES,
 } from '@/lib/nav-config'
 
 const GROUPS = [...NAV_GROUPS, ADMIN_GROUP]
@@ -41,6 +43,16 @@ function groupContainsActive(group: NavGroup, pathname: string) {
   return group.items.some((item) => isActive(item.href, pathname))
 }
 
+function TagBadge({ tag }: { tag: string }) {
+  const style = TAG_STYLES[tag]
+  if (!style) return null
+  return (
+    <span className={`ml-auto shrink-0 rounded px-1 py-0.5 text-[9px] font-bold uppercase leading-none ${style.className}`}>
+      {style.label}
+    </span>
+  )
+}
+
 export function NavSidebar({
   targetProfile = 'IELTS_Academic_6.5',
   favouritePages = [],
@@ -48,6 +60,7 @@ export function NavSidebar({
   userName,
   userImage,
   isAdmin = false,
+  pageConfigs = {},
 }: {
   targetProfile?: string
   favouritePages?: string[]
@@ -55,6 +68,7 @@ export function NavSidebar({
   userName?: string
   userImage?: string
   isAdmin?: boolean
+  pageConfigs?: PageConfigs
 }) {
   const pathname = usePathname()
 
@@ -176,16 +190,17 @@ export function NavSidebar({
     : ALL_NAV_ITEMS.filter((item) => !item.href.startsWith('/admin'))
 
   // Preserve order from favs array (order matters for drag-to-reorder)
+  // Also filter out disabled pages
   const favouritedItems = favs
     .map((href) => visibleNavItems.find((item) => item.href === href))
-    .filter((item): item is NavItem => item !== undefined)
+    .filter((item): item is NavItem => item !== undefined && !pageConfigs[item.href]?.isDisabled)
 
   const VISIBLE_COUNT = 5
   const hasMore = favouritedItems.length > VISIBLE_COUNT
 
   // ── Collapsed: icon-only rail ────────────────────────────────────────────────
   if (isCollapsed) {
-    const nonFavItems = visibleNavItems.filter((item) => !favs.includes(item.href))
+    const nonFavItems = visibleNavItems.filter((item) => !favs.includes(item.href) && !pageConfigs[item.href]?.isDisabled)
     const orderedItems = [...favouritedItems, ...nonFavItems]
 
     return (
@@ -389,17 +404,20 @@ export function NavSidebar({
 
               {open && (
                 <div className="mt-0.5 flex flex-col gap-0.5">
-                  {group.items.map((item) => (
-                    <NavLink
-                      key={item.href}
-                      item={item}
-                      pathname={pathname}
-                      indent
-                      isFav={favs.includes(item.href)}
-                      onToggleFav={handleToggleFav}
-                      tourId={item.href === '/getting-started' ? 'getting-started' : undefined}
-                    />
-                  ))}
+                  {group.items
+                    .filter((item) => !pageConfigs[item.href]?.isDisabled)
+                    .map((item) => (
+                      <NavLink
+                        key={item.href}
+                        item={item}
+                        pathname={pathname}
+                        indent
+                        isFav={favs.includes(item.href)}
+                        onToggleFav={handleToggleFav}
+                        tourId={item.href === '/getting-started' ? 'getting-started' : undefined}
+                        tag={pageConfigs[item.href]?.tag}
+                      />
+                    ))}
                 </div>
               )}
             </div>
@@ -568,6 +586,7 @@ function NavLink({
   isFav,
   onToggleFav,
   tourId,
+  tag,
 }: {
   item: NavItem
   pathname: string
@@ -575,6 +594,7 @@ function NavLink({
   isFav: boolean
   onToggleFav: (href: string) => void
   tourId?: string
+  tag?: string | null
 }) {
   const active = isActive(item.href, pathname)
   return (
@@ -590,7 +610,8 @@ function NavLink({
         }`}
       >
         <span className="text-base">{item.icon}</span>
-        {item.label}
+        <span className="truncate">{item.label}</span>
+        {tag && <TagBadge tag={tag} />}
       </Link>
       <button
         onClick={() => onToggleFav(item.href)}

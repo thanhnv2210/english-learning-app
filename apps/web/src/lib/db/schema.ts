@@ -700,6 +700,18 @@ export const userSkillTopicsRelations = relations(userSkillTopics, ({ one }) => 
   user: one(users, { fields: [userSkillTopics.userId], references: [users.id] }),
 }))
 
+// ─── Page config (tags + disable) ────────────────────────────────────────────
+// One row per page href. Only pages with non-default config have rows.
+// tag: 'new' | 'beta' | 'soon' | 'updated' | null
+// isDisabled: hidden from sidebar nav (page still accessible by URL)
+
+export const pageConfigs = pgTable('page_configs', {
+  href: text('href').primaryKey(),
+  tag: text('tag'),
+  isDisabled: boolean('is_disabled').notNull().default(false),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+})
+
 // ─── Monthly AI usage tracking ───────────────────────────────────────────────
 // One row per (user, month). Incremented on each AI scoring call.
 // Free-tier users are capped at FREE_MONTHLY_SCORING_LIMIT per month.

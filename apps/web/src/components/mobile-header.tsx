@@ -7,10 +7,12 @@ import { signOut } from 'next-auth/react'
 import { toggleFavouritePageAction } from '@/app/actions/favourite-pages'
 import {
   type NavItem,
+  type PageConfigs,
   STANDALONE,
   NAV_GROUPS,
   ADMIN_GROUP,
   ALL_NAV_ITEMS,
+  TAG_STYLES,
 } from '@/lib/nav-config'
 
 const ALL_ITEMS: NavItem[] = ALL_NAV_ITEMS
@@ -32,6 +34,7 @@ export function MobileHeader({
   userEmail,
   userName,
   userImage,
+  pageConfigs = {},
 }: {
   targetProfile?: string
   favouritePages?: string[]
@@ -39,6 +42,7 @@ export function MobileHeader({
   userEmail?: string
   userName?: string
   userImage?: string
+  pageConfigs?: PageConfigs
 }) {
   const [open, setOpen] = useState(false)
   const [favs, setFavs] = useState<string[]>(favouritePages)
@@ -46,9 +50,8 @@ export function MobileHeader({
   const pathname = usePathname()
 
   const visibleGroups = isAdmin ? [...NAV_GROUPS, ADMIN_GROUP] : NAV_GROUPS
-  const visibleItems = isAdmin
-    ? ALL_NAV_ITEMS
-    : ALL_NAV_ITEMS.filter((item) => !item.href.startsWith('/admin'))
+  const visibleItems = (isAdmin ? ALL_NAV_ITEMS : ALL_NAV_ITEMS.filter((item) => !item.href.startsWith('/admin')))
+    .filter((item) => !pageConfigs[item.href]?.isDisabled)
 
   const hasPins = favs.length > 0
   const pinnedItems = visibleItems.filter((item) => favs.includes(item.href))
@@ -151,7 +154,7 @@ export function MobileHeader({
                       <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-faint">
                         {group.label}
                       </p>
-                      {group.items.map((item) => (
+                      {group.items.filter((item) => !pageConfigs[item.href]?.isDisabled).map((item) => (
                         <DrawerLink
                           key={item.href}
                           item={item}
@@ -159,6 +162,7 @@ export function MobileHeader({
                           indent
                           isFav={favs.includes(item.href)}
                           onToggleFav={handleToggleFav}
+                          tag={pageConfigs[item.href]?.tag}
                           onClose={handleClose}
                         />
                       ))}
@@ -210,6 +214,16 @@ export function MobileHeader({
   )
 }
 
+function TagBadge({ tag }: { tag: string }) {
+  const style = TAG_STYLES[tag]
+  if (!style) return null
+  return (
+    <span className={`ml-auto shrink-0 rounded px-1 py-0.5 text-[9px] font-bold uppercase leading-none ${style.className}`}>
+      {style.label}
+    </span>
+  )
+}
+
 function DrawerLink({
   item,
   pathname,
@@ -217,6 +231,7 @@ function DrawerLink({
   isFav,
   onToggleFav,
   onClose,
+  tag,
 }: {
   item: NavItem
   pathname: string
@@ -224,6 +239,7 @@ function DrawerLink({
   isFav: boolean
   onToggleFav: (href: string) => void
   onClose: () => void
+  tag?: string | null
 }) {
   const active = isActive(item.href, pathname)
   return (
@@ -240,7 +256,8 @@ function DrawerLink({
         }`}
       >
         <span className="text-base">{item.icon}</span>
-        {item.label}
+        <span className="truncate">{item.label}</span>
+        {tag && <TagBadge tag={tag} />}
       </Link>
       <button
         onClick={() => onToggleFav(item.href)}

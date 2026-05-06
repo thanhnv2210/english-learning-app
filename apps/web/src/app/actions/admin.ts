@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
+import { upsertPageConfig } from '@/lib/db/page-configs'
 
 export async function approveUserAction(userId: number): Promise<void> {
   await db.update(users).set({ status: 'active' }).where(eq(users.id, userId))
@@ -22,4 +23,13 @@ export async function updateUserModelPreferenceAction(
 ): Promise<void> {
   await db.update(users).set({ modelPreference: preference }).where(eq(users.id, userId))
   revalidatePath('/admin/users')
+}
+
+export async function upsertPageConfigAction(
+  href: string,
+  tag: string | null,
+  isDisabled: boolean
+): Promise<void> {
+  await upsertPageConfig(href, tag, isDisabled)
+  revalidatePath('/', 'layout')
 }

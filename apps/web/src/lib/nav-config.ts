@@ -4,6 +4,20 @@
 export type NavItem = { href: string; label: string; icon: string }
 export type NavGroup = { label: string; items: NavItem[] }
 
+// Page configuration — fetched from DB and passed down as a prop to sidebar components
+export type PageConfig = { tag: string | null; isDisabled: boolean }
+export type PageConfigs = Record<string, PageConfig>
+
+export const PAGE_TAGS = ['new', 'beta', 'soon', 'updated'] as const
+export type PageTag = (typeof PAGE_TAGS)[number]
+
+export const TAG_STYLES: Record<string, { label: string; className: string }> = {
+  new:     { label: 'New',     className: 'bg-green-500 text-white' },
+  beta:    { label: 'Beta',    className: 'bg-indigo-500 text-white' },
+  soon:    { label: 'Soon',    className: 'bg-muted text-muted-foreground' },
+  updated: { label: 'Updated', className: 'bg-amber-500 text-white' },
+}
+
 export const STANDALONE: NavItem[] = [
   { href: '/', label: 'Dashboard', icon: '⊞' },
 ]
@@ -70,6 +84,7 @@ export const ADMIN_GROUP: NavGroup = {
     { href: '/admin/users', label: 'Users', icon: '👥' },
     { href: '/admin/engagement', label: 'Engagement', icon: '📈' },
     { href: '/admin/campaign', label: 'Campaign', icon: '📣' },
+    { href: '/admin/pages', label: 'Pages', icon: '🏷️' },
   ],
 }
 
