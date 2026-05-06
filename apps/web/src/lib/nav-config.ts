@@ -76,6 +76,13 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/history', label: 'History', icon: '🕐' },
     ],
   },
+  {
+    label: 'Support',
+    items: [
+      { href: '/faq', label: 'FAQ', icon: '❓' },
+      { href: '/feedback', label: 'Send Feedback', icon: '💬' },
+    ],
+  },
 ]
 
 export const ADMIN_GROUP: NavGroup = {
@@ -85,6 +92,7 @@ export const ADMIN_GROUP: NavGroup = {
     { href: '/admin/engagement', label: 'Engagement', icon: '📈' },
     { href: '/admin/campaign', label: 'Campaign', icon: '📣' },
     { href: '/admin/pages', label: 'Pages', icon: '🏷️' },
+    { href: '/admin/feedback', label: 'Feedback', icon: '💬' },
   ],
 }
 

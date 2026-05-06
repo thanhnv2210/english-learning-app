@@ -700,6 +700,20 @@ export const userSkillTopicsRelations = relations(userSkillTopics, ({ one }) => 
   user: one(users, { fields: [userSkillTopics.userId], references: [users.id] }),
 }))
 
+// ─── User feedback & bug reports ─────────────────────────────────────────────
+// type: 'bug' | 'suggestion' | 'question' | 'praise'
+// status: 'new' | 'read' | 'resolved'
+
+export const feedbacks = pgTable('feedbacks', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
+  type: text('type').notNull().default('suggestion'), // bug | suggestion | question | praise
+  message: text('message').notNull(),
+  status: text('status').notNull().default('new'),    // new | read | resolved
+  adminNote: text('admin_note'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ─── Page config (tags + disable) ────────────────────────────────────────────
 // One row per page href. Only pages with non-default config have rows.
 // tag: 'new' | 'beta' | 'soon' | 'updated' | null
