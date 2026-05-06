@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { updateUserTierAction, updateUserModelPreferenceAction, approveUserAction, suspendUserAction } from '@/app/actions/admin'
+import { updateUserTierAction, updateUserModelPreferenceAction, approveUserAction, suspendUserAction, sendCustomEmailAction } from '@/app/actions/admin'
 import type { UserRow } from './page'
 
 function Avatar({ image, name, email }: { image: string | null; name: string | null; email: string }) {
@@ -132,6 +132,112 @@ function StatusBadge({ userId, status }: { userId: number; status: string }) {
   )
 }
 
+const DEFAULT_SUBJECT = 'Your IELTS Accelerator account is ready'
+
+function buildDefaultContent(name: string | null): string {
+  const firstName = name?.split(' ')[0] ?? 'there'
+  return `Hi ${firstName}, your account has been approved. You can now sign in and start practising.\n\nhttps://your-app-url.com/login`
+}
+
+function SendEmailButton({ userId, name }: { userId: number; name: string | null }) {
+  const [open, setOpen] = useState(false)
+  const [subject, setSubject] = useState(DEFAULT_SUBJECT)
+  const [content, setContent] = useState(() => buildDefaultContent(name))
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+
+  function openModal() {
+    setSubject(DEFAULT_SUBJECT)
+    setContent(buildDefaultContent(name))
+    setState('idle')
+    setOpen(true)
+  }
+
+  async function send(e: React.FormEvent) {
+    e.preventDefault()
+    setState('sending')
+    try {
+      const result = await sendCustomEmailAction(userId, subject, content)
+      setState(result.ok ? 'sent' : 'error')
+      if (result.ok) setTimeout(() => setOpen(false), 1500)
+    } catch {
+      setState('error')
+    }
+  }
+
+  return (
+    <>
+      <button
+        onClick={openModal}
+        title="Send email"
+        className="text-xs text-faint hover:text-foreground transition-colors"
+      >
+        ✉
+      </button>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setOpen(false) }}
+        >
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-card shadow-xl p-6 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold text-foreground">Send email</h2>
+              <button onClick={() => setOpen(false)} className="text-faint hover:text-foreground text-lg leading-none">×</button>
+            </div>
+
+            <form onSubmit={send} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-muted-foreground">Subject</label>
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  required
+                  className="rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-blue-500/30"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-muted-foreground">Content</label>
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  required
+                  rows={6}
+                  className="rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-blue-500/30 resize-y"
+                />
+                <p className="text-xs text-faint">Blank lines become paragraphs.</p>
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <span className={`text-xs font-medium ${state === 'sent' ? 'text-emerald-500' : state === 'error' ? 'text-red-500' : 'invisible'}`}>
+                  {state === 'sent' ? 'Email sent!' : 'Failed to send.'}
+                </span>
+                <div className="flex gap-2 ml-auto">
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={state === 'sending'}
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50 transition-colors"
+                  >
+                    {state === 'sending' ? 'Sending...' : 'Send'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(date))
 }
@@ -159,6 +265,7 @@ export function UsersTable({ users }: { users: UserRow[] }) {
               <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-faint">Mistakes</th>
               <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-faint">Practice</th>
               <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-faint">Joined</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-faint">Email</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -205,6 +312,7 @@ export function UsersTable({ users }: { users: UserRow[] }) {
                 <td className="px-4 py-3 text-right text-sm tabular-nums text-muted-foreground">{u.wrongDecisionCount}</td>
                 <td className="px-4 py-3 text-right text-sm tabular-nums text-muted-foreground">{u.practiceSessionCount}</td>
                 <td className="px-4 py-3 text-right text-xs text-faint whitespace-nowrap">{formatDate(u.createdAt)}</td>
+                <td className="px-4 py-3 text-center"><SendEmailButton userId={u.id} name={u.name} /></td>
               </tr>
             ))}
           </tbody>
@@ -231,6 +339,7 @@ export function UsersTable({ users }: { users: UserRow[] }) {
               <span className="text-xs text-faint ml-auto">
                 {u.wrongDecisionCount} mistakes · {u.practiceSessionCount} sessions
               </span>
+              <SendEmailButton userId={u.id} name={u.name} />
             </div>
           </div>
         ))}

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { getCurrentUser } from '@/lib/db/user'
 import Link from 'next/link'
+import { PendingStatusPoller } from '@/components/pending-status-poller'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,6 +19,8 @@ export default async function PendingPage() {
   const isSuspended = user.status === 'suspended'
 
   return (
+    <>
+    {!isSuspended && <PendingStatusPoller />}
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm text-center">
         <div className="mb-4 flex justify-center">
@@ -57,5 +60,6 @@ export default async function PendingPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

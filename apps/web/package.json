@@ -42,7 +42,8 @@
     "ollama-ai-provider": "^1.2.0",
     "postgres": "^3.4.9",
     "react": "^19",
-    "react-dom": "^19"
+    "react-dom": "^19",
+    "resend": "^6.12.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
