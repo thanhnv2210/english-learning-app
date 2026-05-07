@@ -29,6 +29,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: '/speaking/session', label: 'Speaking (Full)', icon: '🎙' },
       { href: '/speaking', label: 'Speaking Pt 1', icon: '🎤' },
       { href: '/speaking/part2', label: 'Speaking Pt 2', icon: '🎤' },
+      { href: '/speaking/drill', label: 'Read-Aloud Drill', icon: '🎯' },
       { href: '/writing', label: 'Writing Task 2', icon: '✍' },
       { href: '/writing/task1', label: 'Writing Task 1', icon: '📊' },
       { href: '/reading', label: 'Reading', icon: '📖' },

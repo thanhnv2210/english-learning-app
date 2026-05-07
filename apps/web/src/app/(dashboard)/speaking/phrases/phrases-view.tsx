@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useOptimistic, useTransition } from 'react'
+import Link from 'next/link'
 import { useLocalBoolean } from '@/lib/hooks/use-local-boolean'
 import { addPhraseAction, deletePhraseAction } from '@/app/actions/speaking-phrases'
 import { SPEAKING_PHRASE_CATEGORIES, WRITING_PHRASE_CATEGORIES } from '@/lib/ielts/speaking/phrase-categories'
@@ -209,6 +210,17 @@ export function PhrasesView({ initialPhrases, skill }: Props) {
 
               {p.note && (
                 <p className="text-xs text-faint italic">{p.note}</p>
+              )}
+
+              {skill === 'speaking' && (
+                <div className="pt-1">
+                  <Link
+                    href={`/speaking/drill?text=${encodeURIComponent(p.phrase)}`}
+                    className="inline-flex items-center gap-1 rounded-md bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1 text-xs font-medium text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+                  >
+                    🎯 Drill
+                  </Link>
+                </div>
               )}
             </div>
           ))

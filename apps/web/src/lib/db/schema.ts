@@ -630,6 +630,45 @@ export const wordReviewStates = pgTable('word_review_states', {
 (t) => [unique('word_review_states_user_word_unique').on(t.userId, t.wordId)]
 )
 
+// ─── Read-Aloud Drill ─────────────────────────────────────────────────────────
+// drillTexts: system-seeded library of short paragraphs for pronunciation practice.
+// drillResults: per-user attempt history (original text, what was heard, accuracy).
+
+export type DrillMistakeSaved = {
+  type: 'sub' | 'del'
+  original: string
+  spoken?: string
+  context: string
+  csPhenomenon?: string // e.g. 'elision'
+  csTip?: string        // learner-facing tip text
+}
+
+export const drillTexts = pgTable('drill_texts', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  text: text('text').notNull(),
+  category: text('category').notNull().default('General'),
+  difficulty: text('difficulty').notNull().default('medium'), // 'easy' | 'medium' | 'hard'
+  rank: integer('rank').notNull().default(3),
+  isSystem: boolean('is_system').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (t) => [
+  check('drill_texts_rank_check', sql`${t.rank} between 1 and 5`),
+])
+
+export const drillResults = pgTable('drill_results', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  drillTextId: integer('drill_text_id').references(() => drillTexts.id, { onDelete: 'set null' }),
+  originalText: text('original_text').notNull(),
+  spokenText: text('spoken_text').notNull(),
+  accuracy: integer('accuracy').notNull(),
+  correctCount: integer('correct_count').notNull(),
+  totalCount: integer('total_count').notNull(),
+  mistakes: jsonb('mistakes').notNull().$type<DrillMistakeSaved[]>(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ─── Speaking Phrase Bank ─────────────────────────────────────────────────────
 // ─── Word Pairs ───────────────────────────────────────────────────────────────
 // Interchangeable word pairs with explanation of difference.
