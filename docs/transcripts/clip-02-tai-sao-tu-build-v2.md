@@ -51,6 +51,20 @@ Sáu tháng học theo cách này tạo ra thứ không có app thương mại n
 
 ---
 
+## Mô tả YouTube
+
+```
+Một sản phẩm làm cho hàng triệu người không thể tối ưu cho bạn.
+Nhưng tool bạn tự xây thì có thể — vì bạn xây nó từ đúng điểm yếu của mình.
+
+Clip này giải thích tại sao việc tự thiết kế cách học lại hiệu quả hơn dùng tool của người khác,
+và tại sao "build" không có nghĩa là bạn phải biết lập trình.
+
+Series: Tự xây nền tảng học của chính mình
+```
+
+---
+
 ## Ghi chú khi thu âm
 
 - Đây là clip nặng về lý thuyết nhất — nói chậm, rõ ràng, đừng vội

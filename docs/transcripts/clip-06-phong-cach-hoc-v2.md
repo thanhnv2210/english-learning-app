@@ -41,6 +41,19 @@ Không phải để so sánh. Mà vì thấy người khác đang làm điều t
 
 ---
 
+## Mô tả YouTube
+
+```
+Không có một cách học đúng duy nhất — chỉ có cách học phù hợp với bạn.
+Và khả năng tự tìm ra điều đó là một trong những tài sản có giá trị nhất bạn có thể xây dựng.
+
+Clip cuối của series. Không phải về IELTS, không phải về app — mà về điều bạn mang theo sau tất cả.
+
+Series: Tự xây nền tảng học của chính mình
+```
+
+---
+
 ## Ghi chú khi thu âm
 
 - Đây là clip cá nhân và thành thật nhất trong series — nói tự nhiên nhất có thể

@@ -57,6 +57,19 @@ Bạn không cần build cái này. Bạn không cần biết lập trình để
 
 ---
 
+## Mô tả YouTube
+
+```
+Đây là app luyện IELTS mình tự build — không phải để bán, không phải để bạn copy.
+Chỉ để cho thấy ý tưởng "tự xây tool học theo điểm yếu của mình" trông như thế nào trong thực tế.
+
+Mỗi tính năng trong app sinh ra từ một điểm yếu cụ thể — không phải vì nó hay, mà vì mình cần nó.
+
+Series: Tự xây nền tảng học của chính mình
+```
+
+---
+
 ## Ghi chú khi thu âm
 
 - Mở đầu clip cần nhấn rõ: "không phải để bạn dùng nó, không phải để bạn copy" — nói thẳng điều này

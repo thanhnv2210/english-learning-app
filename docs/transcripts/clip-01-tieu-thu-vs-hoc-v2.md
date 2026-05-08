@@ -25,6 +25,20 @@ Mình sẽ dùng một ví dụ cụ thể xuyên suốt — một app luyện I
 
 ---
 
+## Mô tả YouTube
+
+```
+Bạn dùng app học mỗi ngày nhưng sau vài tháng nhìn lại vẫn không thấy tiến bộ rõ rệt?
+Có thể vấn đề không phải ở bạn — mà ở cách bạn đang học.
+
+Clip này nói về sự khác biệt giữa tiêu thụ nội dung và học thật sự,
+và một cách tiếp cận khác: tự xây cách học theo đúng điểm yếu của mình.
+
+Series: Tự xây nền tảng học của chính mình
+```
+
+---
+
 ## Ghi chú khi thu âm
 
 - Câu đầu tiên quan trọng nhất — nói chậm, để người xem nhận ra mình trong đó

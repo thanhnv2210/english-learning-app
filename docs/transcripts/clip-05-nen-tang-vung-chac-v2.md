@@ -49,6 +49,20 @@ Và thứ quan trọng hơn: nền tảng đó không biến mất sau kỳ thi.
 
 ---
 
+## Mô tả YouTube
+
+```
+Học để thi và xây nền tảng trông giống nhau từ bên ngoài.
+Nhưng sau sáu tháng, kết quả rất khác nhau.
+
+Clip này nói về sự khác biệt đó — và tại sao điểm số là hệ quả của nền tảng,
+không phải mục tiêu của quá trình học.
+
+Series: Tự xây nền tảng học của chính mình
+```
+
+---
+
 ## Ghi chú khi thu âm
 
 - Đoạn "học để thi vs. xây nền tảng" — nói đủ chậm để người xem nhận ra mình đang ở nhóm nào
