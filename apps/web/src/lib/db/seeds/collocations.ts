@@ -563,10 +563,11 @@ async function seed() {
         explanation: c.explanation,
         skills: c.skills,
         examples: c.examples,
+        isSystem: true,
       })
       .onConflictDoUpdate({
         target: schema.collocationEntries.phrase,
-        set: { explanation: c.explanation },
+        set: { explanation: c.explanation, isSystem: true },
       })
       .returning({
         id: schema.collocationEntries.id,
