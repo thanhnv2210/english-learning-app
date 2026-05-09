@@ -30,20 +30,20 @@ type Mistake = {
 
 // ── Web Speech API (minimal types) ────────────────────────────────────────────
 
-interface SpeechRecognitionResultItem { transcript: string }
-interface SpeechRecognitionResult {
+interface DrillSTTResultItem { transcript: string }
+interface DrillSTTResult {
   readonly isFinal: boolean
-  [index: number]: SpeechRecognitionResultItem
+  [index: number]: DrillSTTResultItem
 }
-interface SpeechRecognitionEvent extends Event {
+interface DrillSTTEvent extends Event {
   readonly resultIndex: number
-  readonly results: { length: number; [index: number]: SpeechRecognitionResult }
+  readonly results: { length: number; [index: number]: DrillSTTResult }
 }
-interface ISpeechRecognition extends EventTarget {
+interface IDrillSTT extends EventTarget {
   lang: string
   continuous: boolean
   interimResults: boolean
-  onresult: ((e: SpeechRecognitionEvent) => void) | null
+  onresult: ((e: DrillSTTEvent) => void) | null
   onerror: (() => void) | null
   onend: (() => void) | null
   start(): void
@@ -194,7 +194,7 @@ export function DrillView({
   const [resultCopied, setResultCopied] = useState(false)
   const [copiedHistoryId, setCopiedHistoryId] = useState<number | null>(null)
 
-  const recognitionRef = useRef<ISpeechRecognition | null>(null)
+  const recognitionRef = useRef<IDrillSTT | null>(null)
   const spokenAccRef = useRef('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -273,8 +273,8 @@ export function DrillView({
     if (!text.trim()) return
 
     const SR =
-      (window as Window & { SpeechRecognition?: new () => ISpeechRecognition }).SpeechRecognition ??
-      (window as Window & { webkitSpeechRecognition?: new () => ISpeechRecognition }).webkitSpeechRecognition
+      (window as Window & { SpeechRecognition?: new () => unknown }).SpeechRecognition ??
+      (window as Window & { webkitSpeechRecognition?: new () => unknown }).webkitSpeechRecognition
 
     if (!SR) { setSupported(false); return }
 
@@ -299,12 +299,12 @@ export function DrillView({
         .catch(() => null)
     }
 
-    const recognition: ISpeechRecognition = new SR()
+    const recognition = new SR() as IDrillSTT
     recognition.lang = 'en-US'
     recognition.continuous = true
     recognition.interimResults = true
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: DrillSTTEvent) => {
       let interimChunk = ''
       let finalChunk = ''
       for (let k = event.resultIndex; k < event.results.length; k++) {

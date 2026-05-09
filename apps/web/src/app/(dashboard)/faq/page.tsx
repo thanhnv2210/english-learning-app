@@ -106,7 +106,7 @@ const FAQS: { section: string; items: FAQItem[] }[] = [
             <Link href="/feedback" className="text-blue-500 hover:underline">
               Gửi phản hồi
             </Link>{' '}
-            và chọn loại "Góp ý". Các tính năng được nhiều người yêu cầu sẽ được ưu tiên xây dựng trước.
+            và chọn loại &ldquo;Góp ý&rdquo;. Các tính năng được nhiều người yêu cầu sẽ được ưu tiên xây dựng trước.
           </>
         ),
       },
