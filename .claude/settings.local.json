@@ -90,7 +90,8 @@
       "Bash(source /Users/ThanhNguyen/.zshrc)",
       "Bash(ls /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/admin)",
       "Bash(ls /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(auth\\\\\\)/)",
-      "Bash(/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/.env.local:*)"
+      "Bash(/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/.env.local:*)",
+      "Bash(python3 -c \":*)"
     ]
   }
 }

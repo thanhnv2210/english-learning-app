@@ -62,8 +62,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // New user — check campaign config
           const config = await getCampaignConfig()
 
-          if (!config?.isActive) {
-            // Signups closed
+          // Only block if a config row explicitly exists and isActive=false.
+          // No config row (null) → treat as open (local dev / fresh deploy).
+          if (config !== null && !config.isActive) {
             return '/auth-error?reason=closed'
           }
 
@@ -73,7 +74,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             .from(users)
             .where(eq(users.status, 'active'))
 
-          const status = activeCount < config.userLimit ? 'active' : 'pending'
+          const userLimit = config?.userLimit ?? Infinity
+          const status = activeCount < userLimit ? 'active' : 'pending'
 
           const [created] = await db
             .insert(users)
