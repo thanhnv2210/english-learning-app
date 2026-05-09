@@ -1,6 +1,7 @@
 'use client'
 
 import { useOptimistic, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { updateTargetProfileAction, updateModelPreferenceAction, updateShowSystemDataAction } from '@/app/actions/user'
 import { useTheme } from '@/components/theme-provider'
 
@@ -72,6 +73,7 @@ export function SettingsForm({
   showSystemData: boolean
 }) {
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
   const { theme, setTheme } = useTheme()
   const [optimisticPref, setOptimisticPref] = useOptimistic(modelPreference)
   const [optimisticSystemData, setOptimisticSystemData] = useOptimistic(showSystemData)
@@ -93,6 +95,7 @@ export function SettingsForm({
     startTransition(async () => {
       setOptimisticSystemData(!optimisticSystemData)
       await updateShowSystemDataAction(!optimisticSystemData)
+      router.refresh()
     })
   }
 
