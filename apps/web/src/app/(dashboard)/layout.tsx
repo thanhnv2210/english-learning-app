@@ -8,6 +8,7 @@ import { getAllPageConfigs } from '@/lib/db/page-configs'
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [user, pageConfigs] = await Promise.all([getCurrentUser(), getAllPageConfigs()])
   if (user.status === 'pending' || user.status === 'suspended') redirect('/pending')
+  if (!user.onboardingCompletedAt) redirect('/onboarding')
   return (
     <>
       {/* MobileHeader must live outside the overflow-hidden container —

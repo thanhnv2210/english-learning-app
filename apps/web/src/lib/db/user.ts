@@ -92,3 +92,23 @@ export async function reorderFavouritePages(userId: number, orderedPages: string
 export async function updateShowSystemData(userId: number, showSystemData: boolean): Promise<void> {
   await db.update(users).set({ showSystemData }).where(eq(users.id, userId))
 }
+
+export async function completeOnboarding(
+  userId: number,
+  data: {
+    bio: string
+    weakSkills: string[]
+    targetProfile: string
+    onboardingReasons: string[]
+    favouritePages: string[]
+  },
+): Promise<void> {
+  await db.update(users).set({
+    bio: data.bio || null,
+    weakSkills: data.weakSkills,
+    targetProfile: data.targetProfile,
+    onboardingReasons: data.onboardingReasons,
+    favouritePages: data.favouritePages,
+    onboardingCompletedAt: new Date(),
+  }).where(eq(users.id, userId))
+}

@@ -32,6 +32,10 @@ export const users = pgTable('users', {
   lastActiveAt: timestamp('last_active_at'),
   consentedAt: timestamp('consented_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
+  onboardingCompletedAt: timestamp('onboarding_completed_at'),
+  bio: text('bio'),
+  onboardingReasons: jsonb('onboarding_reasons').$type<string[]>(),
+  weakSkills: jsonb('weak_skills').$type<string[]>(),
 })
 
 export const sessions = pgTable('sessions', {

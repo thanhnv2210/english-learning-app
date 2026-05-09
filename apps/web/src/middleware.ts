@@ -5,6 +5,7 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth
   const { pathname } = req.nextUrl
   const isLoginPage = pathname === '/login' || pathname === '/admin/login'
+  const isOnboardingPage = pathname === '/onboarding'
   const isPublicPage =
     pathname === '/' ||
     pathname === '/pending' ||
@@ -23,6 +24,9 @@ export default auth((req) => {
   if (isLoggedIn && isLoginPage) {
     return NextResponse.redirect(new URL('/dashboard', req.nextUrl.origin))
   }
+
+  // Logged-in users can freely access /onboarding (no redirect away)
+  if (isLoggedIn && isOnboardingPage) return NextResponse.next()
 })
 
 export const config = {
