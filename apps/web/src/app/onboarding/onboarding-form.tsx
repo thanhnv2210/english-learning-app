@@ -280,7 +280,7 @@ export function OnboardingForm({ defaultName, defaultProfile }: Props) {
             })}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
             <button
               onClick={() => setStep(2)}
               disabled={isPending}
@@ -300,7 +300,7 @@ export function OnboardingForm({ defaultName, defaultProfile }: Props) {
               disabled={isPending}
               className="flex-[2] rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:opacity-40"
             >
-              {isPending ? 'Saving…' : 'Apply & continue →'}
+              {isPending ? 'Saving…' : 'Apply →'}
             </button>
           </div>
         </div>
