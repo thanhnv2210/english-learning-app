@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import {
   createSprintAction,
   updateSprintAction,
@@ -237,6 +238,8 @@ function SprintCard({
   onEdit: (id: number, data: EditData) => void
   onDelete: (id: number) => void
 }) {
+  const { projectId } = useParams<{ projectId: string }>()
+  const boardHref = projectId ? `/projects/${projectId}` : '/projects'
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [starting, setStarting] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -291,7 +294,7 @@ function SprintCard({
 
         <div className="flex items-center gap-1 shrink-0">
           <Link
-            href="/projects"
+            href={boardHref}
             className="rounded px-2 py-1 text-xs font-medium text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
           >
             Board →

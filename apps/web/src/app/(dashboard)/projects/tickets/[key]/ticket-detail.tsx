@@ -11,9 +11,10 @@ type Props = {
   ticket: Ticket
   initialComments: TicketComment[]
   sprints: Sprint[]
+  projectId: number
 }
 
-export function TicketDetail({ ticket: initialTicket, initialComments, sprints }: Props) {
+export function TicketDetail({ ticket: initialTicket, initialComments, sprints, projectId }: Props) {
   const [ticket, setTicket] = useState(initialTicket)
   const [comments, setComments] = useState(initialComments)
   const [editing, setEditing] = useState(false)
@@ -82,9 +83,11 @@ export function TicketDetail({ ticket: initialTicket, initialComments, sprints }
 
       {/* Breadcrumb */}
       <div className="flex items-center gap-1.5 text-xs text-faint">
-        <Link href="/projects" className="hover:text-blue-500 transition-colors">Board</Link>
+        <Link href="/projects" className="hover:text-blue-500 transition-colors">Projects</Link>
         <span>/</span>
-        <Link href="/projects/backlog" className="hover:text-blue-500 transition-colors">Backlog</Link>
+        <Link href={`/projects/${projectId}`} className="hover:text-blue-500 transition-colors">Board</Link>
+        <span>/</span>
+        <Link href={`/projects/${projectId}/backlog`} className="hover:text-blue-500 transition-colors">Backlog</Link>
         <span>/</span>
         <span className="font-mono text-muted-foreground">{ticket.key}</span>
       </div>

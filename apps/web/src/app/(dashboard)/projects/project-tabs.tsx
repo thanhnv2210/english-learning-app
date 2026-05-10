@@ -3,17 +3,18 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const TABS = [
-  { href: '/projects',         label: 'Board' },
-  { href: '/projects/backlog', label: 'Backlog' },
-  { href: '/projects/sprints', label: 'Sprints' },
-]
-
-export function ProjectTabs() {
+export function ProjectTabs({ projectId }: { projectId: number }) {
   const pathname = usePathname()
+  const base = `/projects/${projectId}`
+
+  const TABS = [
+    { href: base,                label: 'Board' },
+    { href: `${base}/backlog`,   label: 'Backlog' },
+    { href: `${base}/sprints`,   label: 'Sprints' },
+  ]
 
   function isActive(href: string) {
-    if (href === '/projects') return pathname === '/projects'
+    if (href === base) return pathname === base
     return pathname.startsWith(href)
   }
 

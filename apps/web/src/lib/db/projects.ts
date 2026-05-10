@@ -25,6 +25,28 @@ export async function getDefaultProject(): Promise<Project> {
   return created
 }
 
+export async function getAllProjects(): Promise<Project[]> {
+  return db.select().from(projects).orderBy(asc(projects.createdAt))
+}
+
+export async function getProjectById(id: number): Promise<Project | null> {
+  const rows = await db.select().from(projects).where(eq(projects.id, id)).limit(1)
+  return rows[0] ?? null
+}
+
+export async function createProject(data: {
+  name: string
+  key: string
+  description?: string
+}): Promise<Project> {
+  const [row] = await db.insert(projects).values(data).returning()
+  return row
+}
+
+export async function deleteProject(id: number): Promise<void> {
+  await db.delete(projects).where(eq(projects.id, id))
+}
+
 // ── Sprints ───────────────────────────────────────────────────────────────────
 
 export async function getSprints(projectId: number): Promise<Sprint[]> {

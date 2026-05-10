@@ -5,10 +5,24 @@ import {
   createTicket, updateTicket, deleteTicket, cloneTemplate, reorderTickets,
   createSprint, updateSprint, updateSprintStatus, deleteSprint,
   addComment, deleteComment,
+  createProject, deleteProject,
   type TicketStatus, type TicketPriority, type TicketType, type SprintStatus,
 } from '@/lib/db/projects'
 
 const REVALIDATE = () => revalidatePath('/projects', 'layout')
+
+// ── Projects ──────────────────────────────────────────────────────────────────
+
+export async function createProjectAction(data: { name: string; key: string; description?: string }) {
+  const project = await createProject(data)
+  REVALIDATE()
+  return project
+}
+
+export async function deleteProjectAction(id: number) {
+  await deleteProject(id)
+  REVALIDATE()
+}
 
 // ── Tickets ───────────────────────────────────────────────────────────────────
 
