@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import type { DrillResult, DrillMistakeSaved, DrillCsAnalysis } from '@/lib/db/schema'
+import type { DrillResult } from '@/lib/db/drill'
+import type { DrillMistakeSaved, DrillCsAnalysis } from '@/lib/db/schema'
 import { PHENOMENON_LABELS, getPhenomenonColor } from '@/lib/ielts/connected-speech/prompts'
 import type { Phenomenon } from '@/lib/ielts/connected-speech/prompts'
 

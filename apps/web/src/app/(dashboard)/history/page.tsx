@@ -56,24 +56,30 @@ export default async function HistoryPage({
 
   const user = await getCurrentUser()
   const isDrillTab = filters.skill === 'drill'
+  const isAllTab = !filters.skill && !filters.favorites && !filters.tag
   const activeTag = filters.tag
 
   const [exams, drillRecords] = await Promise.all([
     isDrillTab ? [] : fetchExams(user.id, filters),
-    isDrillTab ? getDrillResults(user.id) : [],
+    isDrillTab || isAllTab ? getDrillResults(user.id) : [],
   ])
 
-  const count = isDrillTab ? drillRecords.length : exams.length
-  const label = isDrillTab ? 'result' : 'session'
+  const totalCount = (isDrillTab ? drillRecords.length : exams.length) + (isAllTab ? drillRecords.length : 0)
 
   return (
     <div className="mx-auto max-w-2xl xl:max-w-3xl 2xl:max-w-6xl">
       <h1 className="text-2xl font-bold text-foreground">History</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{count} {label}{count !== 1 ? 's' : ''}</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {isDrillTab
+          ? `${drillRecords.length} drill result${drillRecords.length !== 1 ? 's' : ''}`
+          : isAllTab
+          ? `${exams.length} session${exams.length !== 1 ? 's' : ''} · ${drillRecords.length} drill result${drillRecords.length !== 1 ? 's' : ''}`
+          : `${exams.length} session${exams.length !== 1 ? 's' : ''}`}
+      </p>
 
       {/* Filter bar */}
       <div className="mt-5 flex flex-wrap gap-2">
-        <FilterChip label="All" href="/history" active={!filters.skill && !filters.favorites && !activeTag} />
+        <FilterChip label="All" href="/history" active={isAllTab} />
         <FilterChip label="★ Favorites" href="/history?favorites=true" active={!!filters.favorites} />
         {EXAM_SKILLS.map((s) => (
           <FilterChip
@@ -89,11 +95,22 @@ export default async function HistoryPage({
         )}
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 flex flex-col gap-8">
         {isDrillTab ? (
           <DrillHistoryView records={drillRecords} />
         ) : (
-          <HistoryView exams={exams} />
+          <>
+            <HistoryView exams={exams} />
+            {isAllTab && drillRecords.length > 0 && (
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-sm font-semibold text-foreground">Read-Aloud Drill</h2>
+                  <span className="text-xs text-faint">{drillRecords.length} result{drillRecords.length !== 1 ? 's' : ''}</span>
+                </div>
+                <DrillHistoryView records={drillRecords} />
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

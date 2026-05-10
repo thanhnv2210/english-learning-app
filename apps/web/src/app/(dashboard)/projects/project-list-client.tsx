@@ -57,7 +57,7 @@ export function ProjectList({ initialProjects }: { initialProjects: ProjectWithS
     setProjects((prev) =>
       prev.map((p) => (p.id === id ? { ...p, name: data.name, description: data.description ?? null } : p)),
     )
-    startTransition(() => updateProjectAction(id, data))
+    startTransition(() => { void updateProjectAction(id, data) })
   }
 
   function handleDelete(id: number) {

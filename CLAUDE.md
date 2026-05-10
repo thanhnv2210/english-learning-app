@@ -20,24 +20,28 @@
 apps/web/src/
 ├── app/
 │   ├── (auth)/
+│   ├── (auth)/
+│   ├── onboarding/               # first-login purpose/profile/skills collector
 │   ├── (dashboard)/
-│   │   ├── speaking/             # Part 1 topic selector; part2/; session/
+│   │   ├── speaking/             # Part 1 topic selector; part2/; session/; drill/
 │   │   ├── writing/              # Writing Task 2
 │   │   ├── reading/
 │   │   ├── listening/
 │   │   ├── vocabulary/           # AWL browser; [id]/sentences/ for sentence library
 │   │   ├── collocations/
+│   │   ├── word-pairs/           # word pair browser + drill/
 │   │   ├── analytics/
 │   │   ├── essay-builder/        # generate + analyse + history
 │   │   ├── wrong-decisions/      # mistake journal + AI analysis
 │   │   ├── paraphrase/           # static guide, 4 skills × 3 levels
-│   │   ├── history/
+│   │   ├── history/              # exam + drill history; filter tabs per skill
 │   │   ├── how-to-answer/        # static guides; listening/ subdirectory
-│   │   └── projects/             # kanban board; backlog/; sprints/; tickets/[key]/
+│   │   └── projects/             # project list; [projectId]/ board · backlog · sprints; tickets/[key]/
 │   ├── actions/                  # server actions (exam, reading, writing, projects, etc.)
 │   └── api/                      # thin route handlers → lib/ielts/
 ├── components/
 │   ├── projects/                 # kanban-board, ticket-form, ticket-badge
+│   ├── admin/                    # activity-section (engagement dashboard)
 │   └── games/                   # fill-blank-game, multiple-choice-game, flashcard-game
 ├── lib/
 │   ├── ai-client.ts              # centralised Ollama client
@@ -45,7 +49,8 @@ apps/web/src/
 │   │   └── seeds/                # seed scripts (vocabulary, projects, etc.)
 │   ├── guides/                   # static content (listening, reading, writing, speaking, paraphrase)
 │   ├── ielts/                    # core domain logic (prompts, scoring, types)
-│   └── projects/                 # constants.ts — client-safe STATUSES, PRIORITIES, TYPES, EPICS
+│   ├── onboarding/               # suggestions.ts — suggested pages by profile + skill
+│   └── projects/                 # constants.ts, epic-colors.ts, epics-context.tsx
 └── types/
 packages/shared/src/types/        # TargetProfile, FeedbackSchema
 ```
@@ -124,6 +129,12 @@ PORT=3000 pnpm dev:clean
 - STT: Chrome Web Speech API; filler detection post-session (`filler-detector.ts`)
 - Topic selector: pinned chips + `···` dropdown; topic passed via `useChat body`
 
+### Read-Aloud Drill (`/speaking/drill`)
+- `drill_results` table: `id`, `userId`, `passageId`, `wordsSpoken` (jsonb), `accuracy`, `wpm`, `csAnalysis` (jsonb `DrillCsAnalysis | null`), `createdAt`
+- `DrillCsAnalysis` type inline in `schema.ts`: `{ transformedText, instances: DrillCsInstance[] }`
+- **Auto-save**: fires once on `handleStop()` when not in `practiceOnly` mode; no manual button; status shown as `Saving… → ✓ Saved`
+- History view: `components/drill-history-view.tsx` — expandable cards with annotated transcript (orange=wrong, red=skipped), top mistakes + CS tips, full CS analysis
+
 ### Writing (`/writing`)
 - Pass 1: `POST /api/writing/audit` · Pass 2: `POST /api/writing/vocabulary` · Pass 3: `POST /api/writing/score` (streaming)
 - On-demand: `POST /api/writing/gap` · Drafting: `POST /api/writing/outline`
@@ -143,11 +154,14 @@ PORT=3000 pnpm dev:clean
 - AWL browser; `POST /api/vocabulary/lookup` (informal→academic) · `POST /api/vocabulary/search`
 - `vocabulary_words` table with `pronunciation` jsonb; pronunciation source: Free Dictionary API → AI fallback
 - `user_skill_topics` table for pinned domain chips (lazy default seeding)
+- UI toggles: Show descriptions · Show rank (default on); client-side `useState` — no server round-trip
+- Pagination: `PaginationBar` component; page size 20; `components/pagination-bar.tsx`
 
 ### Collocations (`/collocations`)
 - `POST /api/collocations/search`: by-word (up to 8) or by-phrase (single card)
 - `collocation_entries` table: `id`, `phrase` (unique, lowercase), `type`, `skills` (jsonb), `examples` (jsonb), `rank`
 - Phrase always lowercased before AI prompt and DB ops
+- UI toggles: Show rank · Show skills (default on); pagination via `PaginationBar`
 
 ### Essay Builder (`/essay-builder`)
 - Three tabs: Builder · History · Analyse
@@ -170,22 +184,46 @@ PORT=3000 pnpm dev:clean
 - Data: `mock_exams` where `feedback IS NOT NULL`; no new table
 - `SkillStats`: `{ skill, sessionCount, avgBand, targetBand, gap, criteriaStats, recentSessions }`
 
+### History (`/history`)
+- Filter tabs: All · ★ Favorites · Speaking · Speaking_part2 · Writing · Read-Aloud Drill
+- **All tab**: fetches both mock exams and drill records in parallel; displays `HistoryView` + labelled `DrillHistoryView` section
+- **Drill tab** (`?skill=drill`): shows only `DrillHistoryView`
+- Subtitle shows combined counts: `"N sessions · M drill results"` on All tab
+
+### Word Pairs (`/word-pairs`, `/word-pairs/drill`)
+- `word_pairs` table; browser at `/word-pairs` with Add form
+- **Drill** (`/word-pairs/drill`): queue-based flashcard — front shows word A / word B + category badge; flip reveals explanation + examples
+  - "Got it ✓" advances queue; "Review again ↩" re-queues at end, adds to `missedIds`
+  - Summary screen: score %, missed chips, "Drill missed (N)" + "Restart all" buttons
+  - `shuffle<T>()` helper; `DrillStage = 'drilling' | 'summary'`
+
+### Onboarding (`/onboarding`)
+- First-login flow gated by `middleware.ts` — redirects new users before dashboard access
+- Collects: target profile (6.5 / 7.5 / Business), weak skills (multi-select), study reason
+- `completeOnboardingAction` saves choices + marks `onboardingComplete = true` on user; redirects to dashboard
+- `getSuggestedPages()` in `lib/onboarding/suggestions.ts` — returns relevant pages by profile + skill selection
+- Schema: `onboardingComplete boolean` column on `users` table
+
 ### Static Guides
 - **How to Answer** (`/how-to-answer`): all 4 skills; content in `lib/guides/<skill>.ts`
 - **Paraphrase** (`/paraphrase`): 4 skills × 3 levels; content in `lib/guides/paraphrase.ts`
 - **Topic Ideas** (`/topic-ideas`): 10 topics, static content in `lib/topic-ideas/index.ts`
 - **AI Prompt Library** (`/prompt-library`): 5 prompts × 4 skills × 3 platforms; profile-aware interpolation
 
-### Project Management (`/projects`)
-Single-project, single-user kanban tracker. Tables: `projects`, `sprints`, `tickets`, `ticket_comments`.
+### Project Management (`/projects`, `/projects/[projectId]`)
+Multi-project kanban tracker. Tables: `projects`, `project_epics`, `sprints`, `tickets`, `ticket_comments`.
 
-- **Board** (`/projects`): uses `getCurrentSprint` — shows active sprint, or falls back to most recent planning sprint with yellow banner. Sprint info bar shows name, goal, date range, color-coded countdown pill (blue→orange→red / overdue).
-- **Backlog** (`/projects/backlog`): backlog tickets + template tickets grouped by epic. Filter toggle: All / Custom. "Clone → Backlog" returns cloned ticket for instant optimistic append. System templates (isSystem=true) show no delete button.
-- **Sprints** (`/projects/sprints`): create (name, goal, start date, end date), edit inline, start (inline date confirm), complete, delete. Cards grouped: Active · Planning · Completed (collapsed).
+- **Project list** (`/projects`): `project-list-client.tsx` — lists all projects, create new, switch active project, delete
+- **Per-project routes** under `/projects/[projectId]/`:
+  - **Board** (`/projects/[projectId]`): uses `getCurrentSprint` — shows active sprint, or falls back to most recent planning sprint with yellow banner. Sprint info bar shows name, goal, date range, color-coded countdown pill (blue→orange→red / overdue).
+  - **Backlog** (`/projects/[projectId]/backlog`): backlog tickets + template tickets grouped by epic. Filter toggle: All / Custom. "Clone → Backlog" returns cloned ticket for instant optimistic append. System templates (isSystem=true) show no delete button.
+  - **Sprints** (`/projects/[projectId]/sprints`): create (name, goal, start date, end date), edit inline, start (inline date confirm), complete (moves remaining tickets to next sprint or backlog), delete. Cards grouped: Active · Planning · Completed (collapsed).
 - **Ticket detail** (`/projects/tickets/[key]`): inline edit title/description, field selectors for status/priority/type/epic/sprint, comments with optimistic add/delete.
 
+**Custom Epics**: user-created epics stored in `project_epics` table. `EpicsProvider` context in `lib/projects/epics-context.tsx` merges system epics (`EPICS` from constants) + user epics; `useEpics()` hook for client components. `lib/projects/epic-colors.ts`: 8 color palette (`rose`, `cyan`, `teal`, etc.), `getEpicColor()` safe getter, `nextColorKey()` cycle helper.
+
 **Key schema fields on `tickets`:**
-- `epic`: `writing | reading | listening | speaking | cross-skill | null`
+- `epic`: system value (`writing | reading | listening | speaking | cross-skill`) or user-created epic slug
 - `isTemplate`: clone-per-sprint reuse pattern (no junction table)
 - `isSystem`: protected seed data — `deleteTicket()` skips rows where `isSystem = true`
 
@@ -234,6 +272,17 @@ Single-project, single-user kanban tracker. Tables: `projects`, `sprints`, `tick
 - Client/server separation: never import `lib/db/*` in client components — extract constants/types to a dedicated client-safe file under `lib/ielts/` or `lib/projects/`
 - **`Module not found: Can't resolve 'fs'`** — means a `'use client'` component imports (directly or transitively) from `lib/db/*`, which pulls in `postgres` (a Node.js-only module). Fix: move the constants/types the client needs into a separate `lib/ielts/<feature>/constants.ts` file with no DB imports, then import from there in the client component. The DB file can re-export from the constants file for server-side convenience.
 
+### Admin Activity Tracking (`/admin/engagement`)
+- `getEngagementData()` in `lib/db/engagement.ts`: queries users + `sentencePracticeSessions` + `wrongDecisionLogs` for engagement tiers
+- `getActivityEvents()`: returns flat `ActivityEvent[]` from 10 tables (speaking/writing exams, drills, practices, wrong decisions, reading/listening generated, vocab/colloc saved, word pairs)
+- **Cost tier classification** for AI cost awareness:
+  - `free` — no AI: `sentence_practice_sessions`
+  - `low` — Haiku (~$0.001/call): `drill_results`, `user_vocabulary`, `user_collocations`, `word_pairs` (userId not null), `reading_passages` (isSystem=false), `listening_scripts` (isSystem=false)
+  - `high` — Sonnet (~$0.01+/call): `mock_exams`, `wrong_decision_logs`
+- **Not trackable per-user**: `ai_generated_content` (no userId), `connected_speech_analyses` (no userId) — future: add userId column
+- `ActivitySection` (`components/admin/activity-section.tsx`): period toggle (week/month), cost tier summary cards, stacked bar chart (last 8 weeks / 6 months), action type horizontal bar breakdown, per-user expandable table with mini chart + action type pills
+- `userUsage` table currently only tracks `writingScores` per month — could be extended to track all high-cost actions for billing/quota enforcement
+
 ## Roadmap
 
 | Phase | Status | Focus |
@@ -243,4 +292,5 @@ Single-project, single-user kanban tracker. Tables: `projects`, `sprints`, `tick
 | 2 | Done | Speaking simulator, STT, filler detection |
 | 3 | Done | Reading, Listening, Vocab Search, Writing Topics, How to Answer, Topic Ideas, Connected Speech, Collocations, Nav, Target Switcher, AI Prompts, Essay Builder, Analytics |
 | 4 | Done | Wrong Decision Log ✅ · Paraphrase Guide ✅ · Dark Mode ✅ · Favourite Pages ✅ · Question Anatomy ✅ · Sentence Library ✅ · Practice Games ✅ · Project Management ✅ |
-| 5 | Pending | Peer Review · Mock Integration · Multi-project support · Epic filter on board |
+| 5 | Done | Multi-project support ✅ · Custom epics ✅ · Sprint completion ✅ · Word Pairs drill ✅ · Drill auto-save + CS analysis history ✅ · Vocabulary/Collocation rank+skill toggles + pagination ✅ · Onboarding flow ✅ · Admin activity tracking ✅ |
+| 6 | Pending | Peer Review · Mock Integration · Epic filter on board · userId on ai_generated_content + connected_speech_analyses |

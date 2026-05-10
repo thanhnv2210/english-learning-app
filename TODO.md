@@ -90,7 +90,32 @@
 
 ---
 
-## Phase 4 — Release & Community
+## Phase 4 — Progress Focus & Community
 
+- [x] **4.1 — Wrong Decision Log**: `/wrong-decisions` — mistake journal for all 4 skills; AI analysis (delimiter format); 7 question roles; stats bar; filters; save/edit/delete; `wrong_decision_logs` table
+- [x] **4.2 — Paraphrase Guide**: `/paraphrase` — fully static; 4 skills × 3 levels; technique blocks with expandable example cards + change tables
+- [x] **4.3 — Dark Mode**: Semantic CSS token system (`text-foreground`, `text-muted-foreground`, `text-faint`, `bg-card`, `bg-muted`, `bg-subtle`, `border-border`); applied across all dashboard pages
+- [x] **4.4 — Favourite Pages**: `favouritePages jsonb` on `users`; `toggleFavouritePageAction`; starred items in sidebar with amber divider (expanded + collapsed rail)
+- [x] **4.5 — Question Anatomy**: 7 question roles with colour-coded breakdown; `QuestionAnatomyGuide` component; integrated into Wrong Decision Log role chips
+- [x] **4.6 — Sentence Library**: `/vocabulary/[id]/sentences` — `word_sentences` table; context tags (`speaking/writing/news/book/podcast/other`); `sentence_practice_sessions` + `sentence_practice_results` for tracking
+- [x] **4.7 — Practice Games**: Fill-in-the-blank, Multiple Choice, Flashcard — source-agnostic `PracticeItem[]`; works for vocab sentences + collocation examples; wrong-answer tracking; hub at `/vocabulary/practice/wrong-answers`
+- [x] **4.8 — Project Management**: `/projects` kanban; board, backlog, sprints, ticket detail; template tickets (clone-per-sprint); system seed (`pnpm db:seed:projects`); `projects`, `sprints`, `tickets`, `ticket_comments` tables
+- [ ] **Peer Review Mode**: Allow other users to review and comment on practice essays
+- [ ] **Official mock integration**: Connect to IDP / British Council resources for final-stage testing
+
+---
+
+## Phase 5 — Scale & Polish
+
+- [x] **5.1 — Onboarding Flow**: `/onboarding` — multi-step form collecting target profile, weak skills, study reason; gated by middleware; `completeOnboardingAction` sets `users.onboardingComplete`; `getSuggestedPages()` in `lib/onboarding/suggestions.ts`
+- [x] **5.2 — Multi-Project Support**: `/projects/[projectId]/` routes (board, backlog, sprints); `project-list-client.tsx` for project switching/creation; all actions accept `projectId`
+- [x] **5.3 — Custom Epics**: `project_epics` table; `EpicsProvider` context (`lib/projects/epics-context.tsx`); 8-colour palette in `lib/projects/epic-colors.ts`; inline create/delete in backlog
+- [x] **5.4 — Sprint Completion**: "Complete sprint" moves unfinished tickets to next sprint or backlog; ticket detail sprint selector; completion summary on sprint cards
+- [x] **5.5 — Word Pairs Drill**: `/word-pairs/drill` — flashcard queue; "Got it ✓" / "Review again ↩"; missed-only restart; summary screen with score %
+- [x] **5.6 — Drill Auto-Save + CS Analysis History**: `drill_results.cs_analysis` jsonb column; auto-save on stop; `DrillHistoryView` with annotated transcript + CS analysis; drill tab + All-tab drill section on `/history`
+- [x] **5.7 — Vocab/Colloc UI Enhancements**: Show rank toggle (vocab); Show rank + show skills toggles (collocations); `PaginationBar` component (page size 20) on both pages
+- [x] **5.8 — Admin Activity Tracking**: `getActivityEvents()` across 10 tables; `ACTIVITY_META` cost tiers (free/low/high); `ActivitySection` with period toggle, stacked bar chart, action type breakdown, per-user expandable table
+- [ ] **Epic filter on kanban board**: Filter board columns by epic
+- [ ] **userId on ai_generated_content + connected_speech_analyses**: Enable per-user tracking for essay builder and connected speech
 - [ ] **Peer Review Mode**: Allow other users to review and comment on practice essays
 - [ ] **Official mock integration**: Connect to IDP / British Council resources for final-stage testing

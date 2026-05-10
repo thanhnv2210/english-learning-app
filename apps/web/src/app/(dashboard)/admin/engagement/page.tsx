@@ -1,5 +1,8 @@
-import { getEngagementData, summariseEngagement, type EngagementTier, type EngagementRow } from '@/lib/db/engagement'
+import { getEngagementData, summariseEngagement, getActivityEvents, type EngagementTier, type EngagementRow } from '@/lib/db/engagement'
 import { TierToggle } from '@/components/admin/tier-toggle'
+import { ActivitySection } from '@/components/admin/activity-section'
+import { db } from '@/lib/db'
+import { users } from '@/lib/db/schema'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +41,11 @@ function Avatar({ user }: { user: Pick<EngagementRow, 'name' | 'email' | 'image'
 }
 
 export default async function AdminEngagementPage() {
-  const rows = await getEngagementData()
+  const [rows, activityEvents, allUsers] = await Promise.all([
+    getEngagementData(),
+    getActivityEvents(),
+    db.select({ id: users.id, name: users.name, email: users.email }).from(users),
+  ])
   const summary = summariseEngagement(rows)
 
   return (
@@ -188,6 +195,11 @@ export default async function AdminEngagementPage() {
         Tier rules: New = joined ≤3d ago · Active = last seen ≤7d · At-risk = 8–21d · Churned = &gt;21d or never returned.
         Activity counts sentence practice sessions and wrong decision logs only.
       </p>
+
+      {/* ── Activity breakdown ── */}
+      <div className="rounded-xl border border-border bg-card p-6">
+        <ActivitySection events={activityEvents} users={allUsers} />
+      </div>
     </div>
   )
 }

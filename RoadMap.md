@@ -170,10 +170,16 @@
 ## Phase 4: Progress Focus & Community
 - [x] **Wrong Decision Log**: Manual mistake journal — record wrong answers with source text, reasoning, correct answer, AI analytic, solution, and question role tags.
 - [x] **Paraphrase Guide**: Static guide covering all 4 IELTS skills (Writing, Reading, Speaking, Listening) × 3 difficulty levels (Beginner / Intermediate / Advanced) with expandable examples, change tables, and exam tips.
+- [x] **Dark Mode**: Semantic CSS token system (`text-foreground`, `bg-card`, etc.) applied across all dashboard pages.
+- [x] **Favourite Pages**: Star/unstar any nav page; starred items shown first in sidebar with amber divider.
+- [x] **Question Anatomy**: Interactive guide — 7 question roles with colour-coded breakdown; integrated with Wrong Decision Log.
+- [x] **Sentence Library**: `/vocabulary/[id]/sentences` — add sentences with context tags; 3 practice game modes (fill-in-the-blank, multiple choice, flashcard).
+- [x] **Practice Games**: Source-agnostic `PracticeItem[]` games work for both vocabulary sentences and collocation examples; wrong-answer tracking + hub at `/vocabulary/practice/wrong-answers`.
+- [x] **Project Management**: Single-user kanban — board, backlog, sprints, ticket detail; template tickets; system seed data.
 - [ ] **Question Anatomy deep-dive**: Interactive practice mode for decoding question structure (role identification drill or try-it-yourself mode).
 - [ ] **Peer Review Mode**: Let other "Tech Guys" review each other's practice essays.
-- [ ] **Official Mock Integration**: Connect to official [IELTS by IDP](url) or [British Council](url) resources for final testing.
-- [ ] **User Roles System**: Multi-role support — `admin`, `student`, `admin of a student group` (group admin manages a cohort); currently single-user (`DEFAULT_EMAIL`); requires auth layer and RBAC before implementation.
+- [ ] **Official Mock Integration**: Connect to official IELTS by IDP or British Council resources for final testing.
+- [ ] **User Roles System**: Multi-role support — `admin`, `student`, `admin of a student group`; currently single-user (`DEFAULT_EMAIL`); requires auth layer and RBAC before implementation.
 
 ## Phase 4 Sprint Tasks
 
@@ -188,6 +194,58 @@
 - **Analytics page**: `WrongDecisionCard` appended to `/analytics` — total, most-missed role, most-error skill, link to full log
 - **DB**: `wrong_decision_logs` — `(userId, skill, sourceText?, question, myThought, actualAnswer, analytic?, solution?, questionRoles jsonb, createdAt)`
 - **Server actions** (`app/actions/wrong-decisions.ts`): `saveWrongDecisionAction`, `updateWrongDecisionAction`, `deleteWrongDecisionAction` — all call `revalidatePath('/wrong-decisions')`
+
+## Phase 5: Scale & Polish
+
+### Task 5.1 — Onboarding Flow ✅
+- `/onboarding` page gated by `middleware.ts` — redirects new users before dashboard access
+- Multi-step form: target profile selector (6.5 / 7.5 / Business) → weak skill checkboxes → study reason selector
+- `completeOnboardingAction` saves choices + sets `users.onboardingComplete = true`; redirects to `/dashboard`
+- `getSuggestedPages()` in `lib/onboarding/suggestions.ts` — returns relevant starting pages by profile + skill selection
+- Schema: `onboardingComplete boolean` + `studyReason text` columns on `users` table
+
+### Task 5.2 — Multi-Project Support ✅
+- `/projects` now shows project list (`project-list-client.tsx`); each project has its own `/projects/[projectId]/` routes (board, backlog, sprints)
+- `projects` table extended; project context propagated through all actions
+- All project actions accept `projectId` and call `revalidatePath('/projects', 'layout')`
+
+### Task 5.3 — Custom Epics ✅
+- `project_epics` table: user-created epics per project; `label`, `colorKey`, `projectId`
+- `EpicsProvider` context (`lib/projects/epics-context.tsx`): merges system epics + user epics; `useEpics()` hook used in kanban, backlog, ticket form
+- 8-colour palette in `lib/projects/epic-colors.ts`; `nextColorKey()` auto-selects next unused colour
+- Backlog UI: "Add epic" inline form; delete custom epic; filter toggle All / Custom
+
+### Task 5.4 — Sprint Completion Logic ✅
+- "Complete sprint" action moves unfinished tickets to next sprint (if exists) or backlog
+- Ticket detail page shows sprint selector to reassign tickets
+- Sprint cards in `/projects/[projectId]/sprints` show completion summary
+
+### Task 5.5 — Word Pairs Drill ✅
+- `/word-pairs/drill` — flashcard drill for all saved word pairs
+- Queue-based: "Got it ✓" advances; "Review again ↩" re-queues; `missedIds` Set tracks misses
+- Summary screen: score %, missed pair chips, "Drill missed (N)" + "Restart all" restart options
+- Progress bar + running tally during drill; category badge on card front
+
+### Task 5.6 — Drill Auto-Save + CS Analysis History ✅
+- `drill_results.cs_analysis` column (jsonb `DrillCsAnalysis | null`) — saves connected speech analysis with each result
+- Auto-save fires once on `handleStop()` (non-practiceOnly mode); no manual button; inline `Saving… → ✓ Saved` status
+- `components/drill-history-view.tsx`: expandable history cards — annotated transcript (orange=wrong, red=skipped), top mistakes with CS tips, full CS instance list
+- History page now shows drill results in both "All" tab and "Read-Aloud Drill" filter tab
+
+### Task 5.7 — Vocabulary & Collocation UI Enhancements ✅
+- **Show rank toggle** on vocabulary page (default on); hides star widget to reduce visual clutter
+- **Show rank + show skills toggles** on collocations page (default on); toggles are client-side `useState`
+- **Pagination**: `PaginationBar` component (`components/pagination-bar.tsx`); page size 20 on both vocabulary and collocations lists
+
+### Task 5.8 — Admin Activity Tracking ✅
+- `getActivityEvents()` in `lib/db/engagement.ts` — 10 parallel queries across all activity tables
+- `ACTIVITY_META` cost tier classification: `free` / `low` (Haiku) / `high` (Sonnet)
+- `ActivitySection` client component (`components/admin/activity-section.tsx`):
+  - Period toggle (weekly last 8 / monthly last 6)
+  - Cost tier summary cards (3)
+  - Stacked bar chart with hover tooltips
+  - Action type horizontal bar breakdown
+  - Per-user expandable rows with mini chart + action type pills
 
 ### Task 4.2 — Paraphrase Guide ✅
 - Route `/paraphrase` — fully static guide (no DB, no AI); added to Guides group in nav sidebar

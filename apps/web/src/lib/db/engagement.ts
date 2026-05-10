@@ -1,6 +1,21 @@
 import { db } from '@/lib/db'
-import { users, sentencePracticeSessions, wrongDecisionLogs } from '@/lib/db/schema'
-import { desc, count, gte, eq } from 'drizzle-orm'
+import {
+  users,
+  sentencePracticeSessions,
+  wrongDecisionLogs,
+  mockExams,
+  drillResults,
+  userVocabulary,
+  userCollocations,
+  readingPassages,
+  listeningScripts,
+  wordPairs,
+} from '@/lib/db/schema'
+import { desc, count, gte, eq, isNotNull, and } from 'drizzle-orm'
+
+export type { CostTier, ActivityType, ActivityEvent } from '@/lib/ielts/engagement/types'
+export { ACTIVITY_META } from '@/lib/ielts/engagement/types'
+import type { ActivityType, ActivityEvent } from '@/lib/ielts/engagement/types'
 
 export type EngagementTier = 'new' | 'active' | 'at-risk' | 'churned'
 
@@ -98,6 +113,82 @@ export async function getEngagementData(): Promise<EngagementRow[]> {
       skillsTouched: Array.from(skillsMap[u.id] ?? []),
     }
   })
+}
+
+// ── Activity breakdown ────────────────────────────────────────────────────────
+
+export async function getActivityEvents(): Promise<ActivityEvent[]> {
+  const [
+    speakingExams,
+    writingExams,
+    drills,
+    practices,
+    wrongDecisions,
+    readingGens,
+    listeningGens,
+    vocabSaved,
+    collocSaved,
+    wordPairAdded,
+  ] = await Promise.all([
+    db.select({ userId: mockExams.userId, date: mockExams.createdAt })
+      .from(mockExams)
+      .where(and(isNotNull(mockExams.userId), eq(mockExams.skill, 'speaking'))),
+
+    db.select({ userId: mockExams.userId, date: mockExams.createdAt })
+      .from(mockExams)
+      .where(and(isNotNull(mockExams.userId), eq(mockExams.skill, 'writing'))),
+
+    db.select({ userId: drillResults.userId, date: drillResults.createdAt })
+      .from(drillResults),
+
+    db.select({ userId: sentencePracticeSessions.userId, date: sentencePracticeSessions.createdAt })
+      .from(sentencePracticeSessions)
+      .where(isNotNull(sentencePracticeSessions.userId)),
+
+    db.select({ userId: wrongDecisionLogs.userId, date: wrongDecisionLogs.createdAt })
+      .from(wrongDecisionLogs)
+      .where(isNotNull(wrongDecisionLogs.userId)),
+
+    db.select({ userId: readingPassages.userId, date: readingPassages.createdAt })
+      .from(readingPassages)
+      .where(and(isNotNull(readingPassages.userId), eq(readingPassages.isSystem, false))),
+
+    db.select({ userId: listeningScripts.userId, date: listeningScripts.createdAt })
+      .from(listeningScripts)
+      .where(and(isNotNull(listeningScripts.userId), eq(listeningScripts.isSystem, false))),
+
+    db.select({ userId: userVocabulary.userId, date: userVocabulary.savedAt })
+      .from(userVocabulary),
+
+    db.select({ userId: userCollocations.userId, date: userCollocations.savedAt })
+      .from(userCollocations),
+
+    db.select({ userId: wordPairs.userId, date: wordPairs.createdAt })
+      .from(wordPairs)
+      .where(isNotNull(wordPairs.userId)),
+  ])
+
+  function toEvents(
+    rows: { userId: number | null; date: Date }[],
+    actionType: ActivityType,
+  ): ActivityEvent[] {
+    return rows
+      .filter((r): r is { userId: number; date: Date } => r.userId != null)
+      .map((r) => ({ userId: r.userId, actionType, date: r.date }))
+  }
+
+  return [
+    ...toEvents(speakingExams,  'speaking_exam'),
+    ...toEvents(writingExams,   'writing_exam'),
+    ...toEvents(drills,         'drill'),
+    ...toEvents(practices,      'practice'),
+    ...toEvents(wrongDecisions, 'wrong_decision'),
+    ...toEvents(readingGens,    'reading_gen'),
+    ...toEvents(listeningGens,  'listening_gen'),
+    ...toEvents(vocabSaved,     'vocab_saved'),
+    ...toEvents(collocSaved,    'colloc_saved'),
+    ...toEvents(wordPairAdded,  'word_pair'),
+  ]
 }
 
 export type EngagementSummary = {
