@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import {
   createTicket, updateTicket, deleteTicket, cloneTemplate, reorderTickets,
-  createSprint, updateSprint, updateSprintStatus, deleteSprint,
+  createSprint, updateSprint, updateSprintStatus, completeSprint, deleteSprint,
   addComment, deleteComment,
   createProject, deleteProject,
   createProjectEpic, deleteProjectEpic,
@@ -93,7 +93,11 @@ export async function updateSprintStatusAction(
   status: SprintStatus,
   dates?: { startDate?: Date; endDate?: Date },
 ) {
-  await updateSprintStatus(id, status, dates)
+  if (status === 'completed') {
+    await completeSprint(id)
+  } else {
+    await updateSprintStatus(id, status, dates)
+  }
   REVALIDATE()
 }
 

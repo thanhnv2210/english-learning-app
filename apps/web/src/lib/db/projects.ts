@@ -123,6 +123,21 @@ export async function updateSprintStatus(
   await db.update(sprints).set({ status, ...dates }).where(eq(sprints.id, id))
 }
 
+/** Complete a sprint: move all non-done tickets to backlog, then mark sprint completed. */
+export async function completeSprint(id: number): Promise<void> {
+  await db
+    .update(tickets)
+    .set({ sprintId: null })
+    .where(
+      and(
+        eq(tickets.sprintId, id),
+        eq(tickets.isTemplate, false),
+        sql`${tickets.status} != 'done'`,
+      ),
+    )
+  await db.update(sprints).set({ status: 'completed' }).where(eq(sprints.id, id))
+}
+
 export async function updateSprint(
   id: number,
   data: Partial<Pick<Sprint, 'name' | 'goal' | 'startDate' | 'endDate'>>,
