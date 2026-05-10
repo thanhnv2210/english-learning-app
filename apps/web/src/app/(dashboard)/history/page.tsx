@@ -2,7 +2,9 @@ import { db } from '@/lib/db'
 import { mockExams, examTags, tags } from '@/lib/db/schema'
 import { eq, and, inArray } from 'drizzle-orm'
 import { HistoryView } from '@/components/history-view'
+import { DrillHistoryView } from '@/components/drill-history-view'
 import { getCurrentUser } from '@/lib/db/user'
+import { getDrillResults } from '@/lib/db/drill'
 import Link from 'next/link'
 
 type Filters = {
@@ -38,7 +40,7 @@ async function fetchExams(userId: number, filters: Filters) {
   return exams
 }
 
-const SKILLS = ['speaking', 'speaking_part2', 'writing']
+const EXAM_SKILLS = ['speaking', 'speaking_part2', 'writing']
 
 export default async function HistoryPage({
   searchParams,
@@ -53,19 +55,27 @@ export default async function HistoryPage({
   }
 
   const user = await getCurrentUser()
-  const exams = await fetchExams(user.id, filters)
+  const isDrillTab = filters.skill === 'drill'
   const activeTag = filters.tag
+
+  const [exams, drillRecords] = await Promise.all([
+    isDrillTab ? [] : fetchExams(user.id, filters),
+    isDrillTab ? getDrillResults(user.id) : [],
+  ])
+
+  const count = isDrillTab ? drillRecords.length : exams.length
+  const label = isDrillTab ? 'result' : 'session'
 
   return (
     <div className="mx-auto max-w-2xl xl:max-w-3xl 2xl:max-w-6xl">
       <h1 className="text-2xl font-bold text-foreground">History</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{exams.length} session{exams.length !== 1 ? 's' : ''}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{count} {label}{count !== 1 ? 's' : ''}</p>
 
       {/* Filter bar */}
       <div className="mt-5 flex flex-wrap gap-2">
         <FilterChip label="All" href="/history" active={!filters.skill && !filters.favorites && !activeTag} />
         <FilterChip label="★ Favorites" href="/history?favorites=true" active={!!filters.favorites} />
-        {SKILLS.map((s) => (
+        {EXAM_SKILLS.map((s) => (
           <FilterChip
             key={s}
             label={s.charAt(0).toUpperCase() + s.slice(1)}
@@ -73,13 +83,18 @@ export default async function HistoryPage({
             active={filters.skill === s}
           />
         ))}
+        <FilterChip label="Read-Aloud Drill" href="/history?skill=drill" active={isDrillTab} />
         {activeTag && (
           <FilterChip label={`#${activeTag}`} href={`/history?tag=${activeTag}`} active />
         )}
       </div>
 
       <div className="mt-6">
-        <HistoryView exams={exams} />
+        {isDrillTab ? (
+          <DrillHistoryView records={drillRecords} />
+        ) : (
+          <HistoryView exams={exams} />
+        )}
       </div>
     </div>
   )

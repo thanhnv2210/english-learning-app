@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { drillTexts, drillResults, type DrillMistakeSaved } from '@/lib/db/schema'
+import { drillTexts, drillResults, type DrillMistakeSaved, type DrillCsAnalysis } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 
 export type DrillText = typeof drillTexts.$inferSelect
@@ -21,6 +21,7 @@ export async function saveDrillResult(data: {
   correctCount: number
   totalCount: number
   mistakes: DrillMistakeSaved[]
+  csAnalysis?: DrillCsAnalysis | null
 }): Promise<DrillResult> {
   const [result] = await db.insert(drillResults).values(data).returning()
   return result

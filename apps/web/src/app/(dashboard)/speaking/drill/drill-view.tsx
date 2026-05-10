@@ -341,9 +341,33 @@ export function DrillView({
     setInterimText('')
 
     const ops = alignWords(origWords, tokenize(allSpoken))
+    const topMistakes = computeMistakes(ops, csAnalysis?.instances ?? [])
     setFinalOps(ops)
-    setMistakes(computeMistakes(ops, csAnalysis?.instances ?? []))
+    setMistakes(topMistakes)
     setStage('results')
+
+    // Auto-save silently (skip in practice-only mode or if nothing was spoken)
+    if (!practiceOnly && allSpoken) {
+      setSaveStatus('saving')
+      const correctCount = ops.filter((o) => o.op === 'match').length
+      saveDrillResultAction({
+        drillTextId: activeDrillTextId,
+        originalText: text.trim(),
+        spokenText: allSpoken,
+        accuracy: origWords.length > 0 ? Math.round((correctCount / origWords.length) * 100) : 0,
+        correctCount,
+        totalCount: origWords.length,
+        mistakes: topMistakes.map((m) => ({
+          type: m.type,
+          original: m.original,
+          spoken: m.spoken,
+          context: m.context,
+          csPhenomenon: m.csTip?.phenomenon,
+          csTip: m.csTip?.tip,
+        })),
+        csAnalysis: csAnalysis ?? null,
+      }).then(() => setSaveStatus('saved')).catch(() => setSaveStatus('idle'))
+    }
   }
 
   function handleReset() {
@@ -357,34 +381,7 @@ export function DrillView({
     spokenAccRef.current = ''
   }
 
-  // ── Save / History ─────────────────────────────────────────────────────────
-
-  async function handleSave() {
-    if (saveStatus !== 'idle') return
-    setSaveStatus('saving')
-    try {
-      const correctCount = finalOps.filter((o) => o.op === 'match').length
-      await saveDrillResultAction({
-        drillTextId: activeDrillTextId,
-        originalText: text.trim(),
-        spokenText,
-        accuracy: origWords.length > 0 ? Math.round((correctCount / origWords.length) * 100) : 0,
-        correctCount,
-        totalCount: origWords.length,
-        mistakes: mistakes.map((m) => ({
-          type: m.type,
-          original: m.original,
-          spoken: m.spoken,
-          context: m.context,
-          csPhenomenon: m.csTip?.phenomenon,
-          csTip: m.csTip?.tip,
-        })),
-      })
-      setSaveStatus('saved')
-    } catch {
-      setSaveStatus('idle')
-    }
-  }
+  // ── History ────────────────────────────────────────────────────────────────
 
   async function openHistory() {
     setHistoryOpen(true)
@@ -645,17 +642,14 @@ export function DrillView({
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-2 shrink-0">
-              {saveStatus === 'saved' ? (
-                <span className="text-xs text-green-600 font-medium text-center">Saved</span>
-              ) : (
-                <button
-                  onClick={handleSave}
-                  disabled={saveStatus === 'saving'}
-                  className="rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted disabled:opacity-40 transition-colors"
-                >
-                  {saveStatus === 'saving' ? 'Saving…' : 'Save result'}
-                </button>
+            <div className="flex flex-col gap-2 shrink-0 items-center">
+              {!practiceOnly && (
+                <span className={`text-xs font-medium ${
+                  saveStatus === 'saved' ? 'text-green-600' :
+                  saveStatus === 'saving' ? 'text-faint' : 'text-faint'
+                }`}>
+                  {saveStatus === 'saved' ? '✓ Saved' : saveStatus === 'saving' ? 'Saving…' : ''}
+                </span>
               )}
               <button
                 onClick={handleStart}

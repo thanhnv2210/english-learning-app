@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/db/user'
 import { saveDrillResult, getDrillResults } from '@/lib/db/drill'
-import type { DrillMistakeSaved } from '@/lib/db/schema'
+import type { DrillMistakeSaved, DrillCsAnalysis } from '@/lib/db/schema'
 
 export async function saveDrillResultAction(data: {
   drillTextId?: number
@@ -13,6 +13,7 @@ export async function saveDrillResultAction(data: {
   correctCount: number
   totalCount: number
   mistakes: DrillMistakeSaved[]
+  csAnalysis?: DrillCsAnalysis | null
 }) {
   const user = await getCurrentUser()
   const result = await saveDrillResult({ userId: user.id, ...data })

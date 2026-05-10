@@ -647,6 +647,19 @@ export type DrillMistakeSaved = {
   csTip?: string        // learner-facing tip text
 }
 
+export type DrillCsInstance = {
+  original: string
+  transformed: string
+  phenomenon: string
+  description: string
+  tip: string
+}
+
+export type DrillCsAnalysis = {
+  transformedText: string
+  instances: DrillCsInstance[]
+}
+
 export const drillTexts = pgTable('drill_texts', {
   id: serial('id').primaryKey(),
   title: text('title').notNull(),
@@ -670,6 +683,7 @@ export const drillResults = pgTable('drill_results', {
   correctCount: integer('correct_count').notNull(),
   totalCount: integer('total_count').notNull(),
   mistakes: jsonb('mistakes').notNull().$type<DrillMistakeSaved[]>(),
+  csAnalysis: jsonb('cs_analysis').$type<DrillCsAnalysis>(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
