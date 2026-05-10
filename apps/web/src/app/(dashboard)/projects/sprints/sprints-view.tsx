@@ -11,12 +11,15 @@ import {
 } from '@/app/actions/projects'
 import type { Sprint, SprintStatus } from '@/lib/db/projects'
 
+type SprintStat = { total: number; done: number }
+
 type Props = {
   projectId: number
   initialSprints: Sprint[]
+  sprintStats?: Record<number, SprintStat>
 }
 
-export function SprintsView({ projectId, initialSprints }: Props) {
+export function SprintsView({ projectId, initialSprints, sprintStats = {} }: Props) {
   const [sprints, setSprints] = useState(initialSprints)
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
@@ -148,6 +151,7 @@ export function SprintsView({ projectId, initialSprints }: Props) {
         <SprintGroup
           label="Active"
           sprints={active}
+          sprintStats={sprintStats}
           onStatus={handleStatus}
           onEdit={handleEdit}
           onDelete={handleDelete}
@@ -159,6 +163,7 @@ export function SprintsView({ projectId, initialSprints }: Props) {
       <SprintGroup
         label="Planning"
         sprints={planning}
+        sprintStats={sprintStats}
         onStatus={handleStatus}
         onEdit={handleEdit}
         onDelete={handleDelete}
@@ -170,6 +175,7 @@ export function SprintsView({ projectId, initialSprints }: Props) {
         <SprintGroup
           label="Completed"
           sprints={completed}
+          sprintStats={sprintStats}
           onStatus={handleStatus}
           onEdit={handleEdit}
           onDelete={handleDelete}
@@ -186,10 +192,11 @@ export function SprintsView({ projectId, initialSprints }: Props) {
 type EditData = { name: string; goal: string; startDate: string; endDate: string }
 
 function SprintGroup({
-  label, sprints, onStatus, onEdit, onDelete, labelClass = '', emptyText, collapsed = false,
+  label, sprints, sprintStats, onStatus, onEdit, onDelete, labelClass = '', emptyText, collapsed = false,
 }: {
   label: string
   sprints: Sprint[]
+  sprintStats: Record<number, SprintStat>
   onStatus: (id: number, status: SprintStatus, dates?: { startDate?: Date; endDate?: Date }) => void
   onEdit: (id: number, data: EditData) => void
   onDelete: (id: number) => void
@@ -220,7 +227,7 @@ function SprintGroup({
             </div>
           )}
           {sprints.map((sprint) => (
-            <SprintCard key={sprint.id} sprint={sprint} onStatus={onStatus} onEdit={onEdit} onDelete={onDelete} />
+            <SprintCard key={sprint.id} sprint={sprint} stats={sprintStats[sprint.id]} onStatus={onStatus} onEdit={onEdit} onDelete={onDelete} />
           ))}
         </div>
       )}
@@ -231,9 +238,10 @@ function SprintGroup({
 // ── SprintCard ────────────────────────────────────────────────────────────────
 
 function SprintCard({
-  sprint, onStatus, onEdit, onDelete,
+  sprint, stats, onStatus, onEdit, onDelete,
 }: {
   sprint: Sprint
+  stats?: SprintStat
   onStatus: (id: number, status: SprintStatus, dates?: { startDate?: Date; endDate?: Date }) => void
   onEdit: (id: number, data: EditData) => void
   onDelete: (id: number) => void
@@ -289,6 +297,21 @@ function SprintCard({
             <p className="text-xs text-faint ml-0.5">
               {formatDate(sprint.startDate)} {sprint.startDate && sprint.endDate && '→'} {formatDate(sprint.endDate)}
             </p>
+          )}
+
+          {/* Progress bar */}
+          {stats && stats.total > 0 && (
+            <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex-1 bg-border rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="h-full bg-green-500 rounded-full transition-all"
+                  style={{ width: `${Math.round((stats.done / stats.total) * 100)}%` }}
+                />
+              </div>
+              <span className="text-[10px] text-faint shrink-0">
+                {stats.done}/{stats.total} done
+              </span>
+            </div>
           )}
         </div>
 

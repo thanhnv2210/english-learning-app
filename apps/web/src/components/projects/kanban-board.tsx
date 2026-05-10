@@ -63,10 +63,9 @@ export function KanbanBoard({ sprint, initialTickets, projectId }: Props) {
     startTransition(() => updateTicketAction(ticket.id, { status: newStatus as never }))
   }
 
-  const epicCounts = allEpics.map((e) => ({
-    ...e,
-    count: tickets.filter((t) => t.epic === e.value).length,
-  }))
+  const epicCounts = allEpics
+    .map((e) => ({ ...e, count: tickets.filter((t) => t.epic === e.value).length }))
+    .filter((e) => e.count > 0)
   const noneCount = tickets.filter((t) => !t.epic).length
 
   return (

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getProjectById, getSprints } from '@/lib/db/projects'
+import { getProjectById, getSprints, getSprintStats } from '@/lib/db/projects'
 import { SprintsView } from '../../sprints/sprints-view'
 
 export default async function SprintsPage({
@@ -15,6 +15,14 @@ export default async function SprintsPage({
   if (!project) notFound()
 
   const sprints = await getSprints(project.id)
+  const statsArr = await Promise.all(sprints.map((s) => getSprintStats(s.id)))
+  const sprintStats = Object.fromEntries(sprints.map((s, i) => [s.id, statsArr[i]]))
 
-  return <SprintsView projectId={project.id} initialSprints={sprints} />
+  return (
+    <SprintsView
+      projectId={project.id}
+      initialSprints={sprints}
+      sprintStats={sprintStats}
+    />
+  )
 }

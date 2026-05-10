@@ -44,6 +44,14 @@ export async function createProject(data: {
   return row
 }
 
+export async function updateProject(
+  id: number,
+  data: { name: string; description?: string | null },
+): Promise<Project> {
+  const [row] = await db.update(projects).set(data).where(eq(projects.id, id)).returning()
+  return row
+}
+
 export async function deleteProject(id: number): Promise<void> {
   await db.delete(projects).where(eq(projects.id, id))
 }
@@ -204,6 +212,19 @@ export async function updateTicket(
 export async function deleteTicket(id: number): Promise<void> {
   // System tickets are protected — never delete them
   await db.delete(tickets).where(and(eq(tickets.id, id), eq(tickets.isSystem, false)))
+}
+
+export async function getSprintStats(
+  sprintId: number,
+): Promise<{ total: number; done: number }> {
+  const rows = await db
+    .select({
+      total: sql<number>`count(*)::int`,
+      done:  sql<number>`count(*) filter (where ${tickets.status} = 'done')::int`,
+    })
+    .from(tickets)
+    .where(and(eq(tickets.sprintId, sprintId), eq(tickets.isTemplate, false)))
+  return { total: rows[0]?.total ?? 0, done: rows[0]?.done ?? 0 }
 }
 
 export async function getSprintTickets(sprintId: number): Promise<Ticket[]> {

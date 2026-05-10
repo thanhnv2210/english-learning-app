@@ -46,6 +46,10 @@ export default async function BoardPage({
 
   const tickets = await getSprintTickets(sprint.id)
 
+  const totalTickets = tickets.length
+  const doneTickets  = tickets.filter((t) => t.status === 'done').length
+  const progressPct  = totalTickets > 0 ? Math.round((doneTickets / totalTickets) * 100) : 0
+
   const daysRemaining = sprint.endDate ? getDaysRemaining(sprint.endDate) : null
   const isOverdue = daysRemaining !== null && daysRemaining < 0
 
@@ -77,6 +81,19 @@ export default async function BoardPage({
             <p className="text-xs text-muted-foreground truncate">{sprint.goal}</p>
           )}
         </div>
+
+        {/* Progress bar */}
+        {totalTickets > 0 && (
+          <div className="flex items-center gap-2 w-full sm:w-40 shrink-0">
+            <div className="flex-1 bg-border rounded-full h-1.5 overflow-hidden">
+              <div
+                className="h-full bg-green-500 rounded-full transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+            <span className="text-[10px] text-faint shrink-0">{doneTickets}/{totalTickets}</span>
+          </div>
+        )}
 
         {/* Right: dates + countdown */}
         <div className="flex items-center gap-4 shrink-0">

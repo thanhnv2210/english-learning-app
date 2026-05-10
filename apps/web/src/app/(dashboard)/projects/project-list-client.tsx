@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { createProjectAction, deleteProjectAction } from '@/app/actions/projects'
+import { createProjectAction, updateProjectAction, deleteProjectAction } from '@/app/actions/projects'
 import type { Project, Sprint } from '@/lib/db/projects'
 
 type ProjectWithSprint = Project & { activeSprint: Sprint | null }
@@ -51,6 +51,13 @@ export function ProjectList({ initialProjects }: { initialProjects: ProjectWithS
         prev.map((p) => (p.id === optimistic.id ? { ...created, activeSprint: null } : p)),
       )
     })
+  }
+
+  function handleUpdate(id: number, data: { name: string; description?: string | null }) {
+    setProjects((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, name: data.name, description: data.description ?? null } : p)),
+    )
+    startTransition(() => updateProjectAction(id, data))
   }
 
   function handleDelete(id: number) {
@@ -139,7 +146,7 @@ export function ProjectList({ initialProjects }: { initialProjects: ProjectWithS
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} onDelete={handleDelete} />
+            <ProjectCard key={project.id} project={project} onUpdate={handleUpdate} onDelete={handleDelete} />
           ))}
         </div>
       )}
@@ -149,67 +156,132 @@ export function ProjectList({ initialProjects }: { initialProjects: ProjectWithS
 
 function ProjectCard({
   project,
+  onUpdate,
   onDelete,
 }: {
   project: ProjectWithSprint
+  onUpdate: (id: number, data: { name: string; description?: string | null }) => void
   onDelete: (id: number) => void
 }) {
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState(project.name)
+  const [editDesc, setEditDesc] = useState(project.description ?? '')
   const [confirmDelete, setConfirmDelete] = useState(false)
+
+  function handleSave(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editName.trim()) return
+    onUpdate(project.id, { name: editName.trim(), description: editDesc.trim() || null })
+    setEditing(false)
+  }
+
+  function handleCancelEdit() {
+    setEditName(project.name)
+    setEditDesc(project.description ?? '')
+    setEditing(false)
+  }
 
   return (
     <div className="group rounded-xl border border-border bg-card p-4 flex flex-col gap-3 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 text-[10px] font-mono font-semibold self-start">
-            {project.key}
-          </span>
-          <h2 className="text-sm font-semibold text-foreground mt-1 truncate">{project.name}</h2>
-          {project.description && (
-            <p className="text-xs text-muted-foreground line-clamp-2">{project.description}</p>
-          )}
-        </div>
-
-        {confirmDelete ? (
-          <div className="flex items-center gap-1 shrink-0">
+      {editing ? (
+        <form onSubmit={handleSave} className="flex flex-col gap-2">
+          <input
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            className="w-full rounded-lg border border-border bg-input px-3 py-1.5 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-blue-500/30"
+            autoFocus
+          />
+          <input
+            value={editDesc}
+            onChange={(e) => setEditDesc(e.target.value)}
+            placeholder="Description (optional)"
+            className="w-full rounded-lg border border-border bg-input px-3 py-1.5 text-xs text-foreground placeholder:text-faint outline-none focus:ring-2 focus:ring-blue-500/30"
+          />
+          <div className="flex justify-end gap-2">
             <button
-              onClick={() => onDelete(project.id)}
-              className="rounded px-2 py-0.5 text-xs font-semibold bg-red-500 text-white hover:bg-red-600"
+              type="button"
+              onClick={handleCancelEdit}
+              className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-subtle transition-colors"
             >
-              Yes
+              Cancel
             </button>
             <button
-              onClick={() => setConfirmDelete(false)}
-              className="rounded px-2 py-0.5 text-xs text-muted-foreground hover:bg-subtle"
+              type="submit"
+              disabled={!editName.trim()}
+              className="rounded px-2 py-1 text-xs font-semibold bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-40 transition-colors"
             >
-              No
+              Save
             </button>
           </div>
-        ) : (
-          <button
-            onClick={() => setConfirmDelete(true)}
-            className="hidden group-hover:flex w-6 h-6 items-center justify-center rounded-full bg-red-100 text-red-500 hover:bg-red-200 text-xs shrink-0"
+        </form>
+      ) : (
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <span className="rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 text-[10px] font-mono font-semibold self-start">
+              {project.key}
+            </span>
+            <h2 className="text-sm font-semibold text-foreground mt-1 truncate">{project.name}</h2>
+            {project.description && (
+              <p className="text-xs text-muted-foreground line-clamp-2">{project.description}</p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+            {!confirmDelete && (
+              <button
+                onClick={() => setEditing(true)}
+                className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-subtle transition-colors"
+              >
+                Edit
+              </button>
+            )}
+            {confirmDelete ? (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => onDelete(project.id)}
+                  className="rounded px-2 py-0.5 text-xs font-semibold bg-red-500 text-white hover:bg-red-600"
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="rounded px-2 py-0.5 text-xs text-muted-foreground hover:bg-subtle"
+                >
+                  No
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="w-6 h-6 flex items-center justify-center rounded-full bg-red-100 text-red-500 hover:bg-red-200 text-xs"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!editing && (
+        <>
+          <div className="text-xs text-faint">
+            {project.activeSprint ? (
+              <span className="text-green-600 dark:text-green-400 font-medium">
+                ● {project.activeSprint.name}
+              </span>
+            ) : (
+              <span>No active sprint</span>
+            )}
+          </div>
+
+          <Link
+            href={`/projects/${project.id}`}
+            className="mt-auto rounded-lg border border-border bg-subtle px-3 py-1.5 text-xs font-medium text-foreground text-center hover:bg-muted transition-colors"
           >
-            ✕
-          </button>
-        )}
-      </div>
-
-      <div className="text-xs text-faint">
-        {project.activeSprint ? (
-          <span className="text-green-600 dark:text-green-400 font-medium">
-            ● {project.activeSprint.name}
-          </span>
-        ) : (
-          <span>No active sprint</span>
-        )}
-      </div>
-
-      <Link
-        href={`/projects/${project.id}`}
-        className="mt-auto rounded-lg border border-border bg-subtle px-3 py-1.5 text-xs font-medium text-foreground text-center hover:bg-muted transition-colors"
-      >
-        Open →
-      </Link>
+            Open →
+          </Link>
+        </>
+      )}
     </div>
   )
 }
