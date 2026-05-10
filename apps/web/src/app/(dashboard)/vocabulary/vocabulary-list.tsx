@@ -53,6 +53,7 @@ export function VocabularyList({ words, domains, favoriteDomains, isAdmin = fals
   const [activeRank, setActiveRank] = useState<number | null>(null)
   const [sort, setSort] = useState<SortKey>('alpha_asc')
   const [showDesc, setShowDesc] = useState(true)
+  const [showRank, setShowRank] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
 
   // Favourite domain management
@@ -251,15 +252,26 @@ export function VocabularyList({ words, domains, favoriteDomains, isAdmin = fals
           Showing <span className="font-semibold text-muted-foreground">{filtered.length}</span> of{' '}
           {words.length} words
         </p>
-        <label className="flex items-center gap-1.5 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={showDesc}
-            onChange={(e) => setShowDesc(e.target.checked)}
-            className="rounded border-border accent-blue-600 w-3.5 h-3.5"
-          />
-          <span className="text-xs font-medium text-muted-foreground">Show definitions</span>
-        </label>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-1.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showDesc}
+              onChange={(e) => setShowDesc(e.target.checked)}
+              className="rounded border-border accent-blue-600 w-3.5 h-3.5"
+            />
+            <span className="text-xs font-medium text-muted-foreground">Show definitions</span>
+          </label>
+          <label className="flex items-center gap-1.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showRank}
+              onChange={(e) => setShowRank(e.target.checked)}
+              className="rounded border-border accent-blue-600 w-3.5 h-3.5"
+            />
+            <span className="text-xs font-medium text-muted-foreground">Show rank</span>
+          </label>
+        </div>
       </div>
 
       {/* ── Word grid ── */}
@@ -278,6 +290,7 @@ export function VocabularyList({ words, domains, favoriteDomains, isAdmin = fals
                 onRankUpdate={(rank) => handleRankUpdate(word.id, rank)}
                 isSecondaryMatch={secondaryMatchIds.has(word.id)}
                 showDesc={showDesc}
+                showRank={showRank}
                 isAdmin={isAdmin}
               />
             ))}
@@ -303,6 +316,7 @@ export function WordCard({
   onRankUpdate,
   isSecondaryMatch = false,
   showDesc = false,
+  showRank = true,
   isAdmin = false,
 }: {
   word: VocabularyCard
@@ -310,6 +324,7 @@ export function WordCard({
   onRankUpdate?: (rank: number) => void
   isSecondaryMatch?: boolean
   showDesc?: boolean
+  showRank?: boolean
   isAdmin?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
@@ -620,24 +635,26 @@ export function WordCard({
       )}
 
       {/* Rank */}
-      <div className="flex items-center gap-1.5 mb-2">
-        <span className="text-xs text-faint">Rank</span>
-        <div className="flex gap-0.5" onMouseLeave={() => setHoverRank(0)}>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onClick={() => handleRankClick(star)}
-              onMouseEnter={() => setHoverRank(star)}
-              title={`Rank ${star}`}
-              className="text-base leading-none transition-transform hover:scale-110"
-            >
-              <span className={(hoverRank || localRank) >= star ? 'text-amber-400' : 'text-border'}>
-                ★
-              </span>
-            </button>
-          ))}
+      {showRank && (
+        <div className="flex items-center gap-1.5 mb-2">
+          <span className="text-xs text-faint">Rank</span>
+          <div className="flex gap-0.5" onMouseLeave={() => setHoverRank(0)}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => handleRankClick(star)}
+                onMouseEnter={() => setHoverRank(star)}
+                title={`Rank ${star}`}
+                className="text-base leading-none transition-transform hover:scale-110"
+              >
+                <span className={(hoverRank || localRank) >= star ? 'text-amber-400' : 'text-border'}>
+                  ★
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Footer actions */}
       <div className="mt-auto flex items-center gap-4">

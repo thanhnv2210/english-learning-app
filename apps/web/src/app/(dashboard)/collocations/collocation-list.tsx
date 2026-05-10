@@ -65,6 +65,8 @@ export function CollocationList({ initialItems, isAdmin = false }: Props) {
   const [activeRank, setActiveRank] = useState<number | null>(null)
   const [sort, setSort] = useState<SortKey>('rank_desc')
   const [showDesc, setShowDesc] = useState(true)
+  const [showRank, setShowRank] = useState(true)
+  const [showSkill, setShowSkill] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
 
   // Essay generator state
@@ -176,6 +178,24 @@ export function CollocationList({ initialItems, isAdmin = false }: Props) {
               className="rounded border-border accent-blue-600 w-3.5 h-3.5"
             />
             <span className="text-xs font-medium text-muted-foreground">Show descriptions</span>
+          </label>
+          <label className="flex items-center gap-1.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showRank}
+              onChange={(e) => setShowRank(e.target.checked)}
+              className="rounded border-border accent-blue-600 w-3.5 h-3.5"
+            />
+            <span className="text-xs font-medium text-muted-foreground">Show rank</span>
+          </label>
+          <label className="flex items-center gap-1.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showSkill}
+              onChange={(e) => setShowSkill(e.target.checked)}
+              className="rounded border-border accent-blue-600 w-3.5 h-3.5"
+            />
+            <span className="text-xs font-medium text-muted-foreground">Show skills</span>
           </label>
           <span className="text-xs text-faint">{items.length} saved</span>
           {items.length >= 2 && (
@@ -337,6 +357,8 @@ export function CollocationList({ initialItems, isAdmin = false }: Props) {
                     onToggleSelect={() => toggleSelect(card.id)}
                     isSecondaryMatch={secondaryMatchIds.has(card.id)}
                     showDesc={showDesc}
+                    showRank={showRank}
+                    showSkill={showSkill}
                     isAdmin={isAdmin}
                   />
                 ))}
@@ -366,6 +388,8 @@ function SavedCard({
   onToggleSelect,
   isSecondaryMatch = false,
   showDesc = false,
+  showRank = true,
+  showSkill = true,
   isAdmin = false,
 }: {
   card: CollocationCard
@@ -377,6 +401,8 @@ function SavedCard({
   onToggleSelect?: () => void
   isSecondaryMatch?: boolean
   showDesc?: boolean
+  showRank?: boolean
+  showSkill?: boolean
   isAdmin?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
@@ -480,27 +506,29 @@ function SavedCard({
       )}
 
       {/* Rank */}
-      <div className={`flex items-center gap-1.5 ${selectMode ? 'pointer-events-none opacity-60' : ''}`}>
-        <span className="text-xs text-faint">Rank</span>
-        <div className="flex gap-0.5" onMouseLeave={() => setHoverRank(0)}>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onClick={() => handleRankClick(star)}
-              onMouseEnter={() => setHoverRank(star)}
-              title={`Rank ${star}`}
-              className="text-base leading-none transition-transform hover:scale-110"
-            >
-              <span className={(hoverRank || localRank) >= star ? 'text-amber-400' : 'text-border'}>
-                ★
-              </span>
-            </button>
-          ))}
+      {showRank && (
+        <div className={`flex items-center gap-1.5 ${selectMode ? 'pointer-events-none opacity-60' : ''}`}>
+          <span className="text-xs text-faint">Rank</span>
+          <div className="flex gap-0.5" onMouseLeave={() => setHoverRank(0)}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => handleRankClick(star)}
+                onMouseEnter={() => setHoverRank(star)}
+                title={`Rank ${star}`}
+                className="text-base leading-none transition-transform hover:scale-110"
+              >
+                <span className={(hoverRank || localRank) >= star ? 'text-amber-400' : 'text-border'}>
+                  ★
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Skills */}
-      <div className={`flex flex-col gap-1 ${selectMode ? 'pointer-events-none opacity-60' : ''}`}>
+      {showSkill && <div className={`flex flex-col gap-1 ${selectMode ? 'pointer-events-none opacity-60' : ''}`}>
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5 flex-wrap">
             {card.skills.length === 0 ? (
@@ -546,7 +574,7 @@ function SavedCard({
             })}
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Examples */}
       {card.examples.length > 0 && (
