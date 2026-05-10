@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo, useTransition, useOptimistic } from 'react'
+import { useState, useMemo, useTransition, useOptimistic, useEffect } from 'react'
+import { PaginationBar } from '@/components/pagination-bar'
 import { deleteCollocationAction, getCollocationUserCountAction, updateCollocationSkillsAction, updateCollocationRankAction } from '@/app/actions/collocations'
 import type { CollocationCard } from '@/lib/db/collocations'
 import type { CollocationSkill } from '@/lib/db/schema'
@@ -32,6 +33,8 @@ type Props = {
   isAdmin?: boolean
 }
 
+const PAGE_SIZE = 20
+
 type SortKey = 'rank_desc' | 'rank_asc' | 'date_desc' | 'date_asc' | 'alpha_asc' | 'alpha_desc'
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
@@ -62,6 +65,7 @@ export function CollocationList({ initialItems, isAdmin = false }: Props) {
   const [activeRank, setActiveRank] = useState<number | null>(null)
   const [sort, setSort] = useState<SortKey>('rank_desc')
   const [showDesc, setShowDesc] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
 
   // Essay generator state
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
@@ -134,6 +138,11 @@ export function CollocationList({ initialItems, isAdmin = false }: Props) {
         .map((c) => c.id)
     )
   }, [items, search])
+
+  useEffect(() => { setCurrentPage(1) }, [activeSkill, activeRank, search, sort])
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   function handleDelete(id: number) {
     setItems((prev) => prev.filter((c) => c.id !== id))
@@ -314,22 +323,31 @@ export function CollocationList({ initialItems, isAdmin = false }: Props) {
               <p className="text-sm text-faint">No collocations match your filter.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {filtered.map((card) => (
-                <SavedCard
-                  key={card.id}
-                  card={card}
-                  onDelete={card.savedByMe || isAdmin ? () => handleDelete(card.id) : undefined}
-                  onSkillsUpdate={(skills) => handleSkillsUpdate(card.id, skills)}
-                  onRankUpdate={(rank) => handleRankUpdate(card.id, rank)}
-                  selectMode={selectMode}
-                  selected={selectedIds.has(card.id)}
-                  onToggleSelect={() => toggleSelect(card.id)}
-                  isSecondaryMatch={secondaryMatchIds.has(card.id)}
-                  showDesc={showDesc}
-                  isAdmin={isAdmin}
-                />
-              ))}
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {paginated.map((card) => (
+                  <SavedCard
+                    key={card.id}
+                    card={card}
+                    onDelete={card.savedByMe || isAdmin ? () => handleDelete(card.id) : undefined}
+                    onSkillsUpdate={(skills) => handleSkillsUpdate(card.id, skills)}
+                    onRankUpdate={(rank) => handleRankUpdate(card.id, rank)}
+                    selectMode={selectMode}
+                    selected={selectedIds.has(card.id)}
+                    onToggleSelect={() => toggleSelect(card.id)}
+                    isSecondaryMatch={secondaryMatchIds.has(card.id)}
+                    showDesc={showDesc}
+                    isAdmin={isAdmin}
+                  />
+                ))}
+              </div>
+              <PaginationBar
+                page={currentPage}
+                totalPages={totalPages}
+                totalItems={filtered.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setCurrentPage}
+              />
             </div>
           )}
         </>

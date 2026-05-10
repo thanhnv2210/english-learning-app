@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useOptimistic, useTransition, useRef, useEffect } from 'react'
+import { PaginationBar } from '@/components/pagination-bar'
 import Link from 'next/link'
 import { deleteVocabularyWordAction, getWordUserCountAction, updateVocabularyRankAction, updateWordPronunciationAction, updateWordTypeAction, detectWordTypeAction } from '@/app/actions/vocabulary'
 import { addSentenceAction } from '@/app/actions/word-sentences'
@@ -34,6 +35,8 @@ function applySort(items: VocabularyCard[], sort: SortKey): VocabularyCard[] {
   }
 }
 
+const PAGE_SIZE = 24
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 type Props = {
@@ -50,6 +53,7 @@ export function VocabularyList({ words, domains, favoriteDomains, isAdmin = fals
   const [activeRank, setActiveRank] = useState<number | null>(null)
   const [sort, setSort] = useState<SortKey>('alpha_asc')
   const [showDesc, setShowDesc] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
 
   // Favourite domain management
   const [localFavorites, setLocalFavorites] = useState<string[]>(favoriteDomains ?? [])
@@ -66,6 +70,8 @@ export function VocabularyList({ words, domains, favoriteDomains, isAdmin = fals
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
+
+  useEffect(() => { setCurrentPage(1) }, [activeDomain, activeRank, search, sort])
 
   function handleToggleFavorite(domain: string) {
     setLocalFavorites((prev) =>
@@ -112,6 +118,9 @@ export function VocabularyList({ words, domains, favoriteDomains, isAdmin = fals
         .map((w) => w.id)
     )
   }, [items, search])
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   function handleDelete(id: number) {
     setItems((prev) => prev.filter((w) => w.id !== id))
@@ -259,18 +268,27 @@ export function VocabularyList({ words, domains, favoriteDomains, isAdmin = fals
           <p className="text-sm text-faint">No words match your filter.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {filtered.map((word) => (
-            <WordCard
-              key={word.word}
-              word={word}
-              onDelete={word.userAdded || isAdmin ? () => handleDelete(word.id) : undefined}
-              onRankUpdate={(rank) => handleRankUpdate(word.id, rank)}
-              isSecondaryMatch={secondaryMatchIds.has(word.id)}
-              showDesc={showDesc}
-              isAdmin={isAdmin}
-            />
-          ))}
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {paginated.map((word) => (
+              <WordCard
+                key={word.word}
+                word={word}
+                onDelete={word.userAdded || isAdmin ? () => handleDelete(word.id) : undefined}
+                onRankUpdate={(rank) => handleRankUpdate(word.id, rank)}
+                isSecondaryMatch={secondaryMatchIds.has(word.id)}
+                showDesc={showDesc}
+                isAdmin={isAdmin}
+              />
+            ))}
+          </div>
+          <PaginationBar
+            page={currentPage}
+            totalPages={totalPages}
+            totalItems={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
     </div>
