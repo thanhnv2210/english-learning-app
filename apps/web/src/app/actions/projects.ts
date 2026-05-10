@@ -6,6 +6,7 @@ import {
   createSprint, updateSprint, updateSprintStatus, deleteSprint,
   addComment, deleteComment,
   createProject, deleteProject,
+  createProjectEpic, deleteProjectEpic,
   type TicketStatus, type TicketPriority, type TicketType, type SprintStatus,
 } from '@/lib/db/projects'
 
@@ -36,8 +37,9 @@ export async function createTicketAction(data: {
   epic?: string | null
   isTemplate?: boolean
 }) {
-  await createTicket(data)
+  const ticket = await createTicket(data)
   REVALIDATE()
+  return ticket
 }
 
 export async function updateTicketAction(
@@ -97,6 +99,24 @@ export async function updateSprintStatusAction(
 
 export async function deleteSprintAction(id: number) {
   await deleteSprint(id)
+  REVALIDATE()
+}
+
+// ── Epics ─────────────────────────────────────────────────────────────────────
+
+export async function createEpicAction(data: {
+  projectId: number
+  label: string
+  value: string
+  colorKey: string
+}) {
+  const epic = await createProjectEpic(data)
+  REVALIDATE()
+  return epic
+}
+
+export async function deleteEpicAction(id: number) {
+  await deleteProjectEpic(id)
   REVALIDATE()
 }
 

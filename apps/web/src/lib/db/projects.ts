@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { projects, sprints, tickets, ticketComments } from '@/lib/db/schema'
+import { projects, sprints, tickets, ticketComments, projectEpics } from '@/lib/db/schema'
 import { eq, and, isNull, asc, desc, sql } from 'drizzle-orm'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -9,10 +9,11 @@ export type TicketPriority = 'low' | 'medium' | 'high' | 'critical'
 export type TicketType     = 'task' | 'bug' | 'story'
 export type SprintStatus   = 'planning' | 'active' | 'completed'
 
-export type Project = typeof projects.$inferSelect
-export type Sprint  = typeof sprints.$inferSelect
-export type Ticket  = typeof tickets.$inferSelect
+export type Project      = typeof projects.$inferSelect
+export type Sprint       = typeof sprints.$inferSelect
+export type Ticket       = typeof tickets.$inferSelect
 export type TicketComment = typeof ticketComments.$inferSelect
+export type ProjectEpic  = typeof projectEpics.$inferSelect
 
 // ── Project ───────────────────────────────────────────────────────────────────
 
@@ -45,6 +46,30 @@ export async function createProject(data: {
 
 export async function deleteProject(id: number): Promise<void> {
   await db.delete(projects).where(eq(projects.id, id))
+}
+
+// ── Project Epics ─────────────────────────────────────────────────────────────
+
+export async function getProjectEpics(projectId: number): Promise<ProjectEpic[]> {
+  return db
+    .select()
+    .from(projectEpics)
+    .where(eq(projectEpics.projectId, projectId))
+    .orderBy(asc(projectEpics.createdAt))
+}
+
+export async function createProjectEpic(data: {
+  projectId: number
+  label: string
+  value: string
+  colorKey: string
+}): Promise<ProjectEpic> {
+  const [row] = await db.insert(projectEpics).values(data).returning()
+  return row
+}
+
+export async function deleteProjectEpic(id: number): Promise<void> {
+  await db.delete(projectEpics).where(eq(projectEpics.id, id))
 }
 
 // ── Sprints ───────────────────────────────────────────────────────────────────

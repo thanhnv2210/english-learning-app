@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { createTicketAction, updateTicketAction } from '@/app/actions/projects'
-import { PRIORITIES, TYPES, EPICS } from '@/lib/projects/constants'
+import { PRIORITIES, TYPES } from '@/lib/projects/constants'
+import { useEpics } from '@/lib/projects/epics-context'
 import type { Ticket } from '@/lib/db/projects'
 
 type Props = {
@@ -11,9 +12,11 @@ type Props = {
   ticket?: Ticket          // if provided → edit mode
   isTemplate?: boolean
   onClose: () => void
+  onCreated?: (ticket: Ticket) => void
 }
 
-export function TicketForm({ projectId, sprintId, ticket, isTemplate, onClose }: Props) {
+export function TicketForm({ projectId, sprintId, ticket, isTemplate, onClose, onCreated }: Props) {
+  const { allEpics } = useEpics()
   const [title, setTitle] = useState(ticket?.title ?? '')
   const [description, setDescription] = useState(ticket?.description ?? '')
   const [priority, setPriority] = useState(ticket?.priority ?? 'medium')
@@ -29,7 +32,8 @@ export function TicketForm({ projectId, sprintId, ticket, isTemplate, onClose }:
       if (ticket) {
         await updateTicketAction(ticket.id, { title: title.trim(), description: description.trim(), priority: priority as never, type: type as never, epic: epicVal })
       } else {
-        await createTicketAction({ projectId, sprintId, title: title.trim(), description: description.trim(), priority: priority as never, type: type as never, epic: epicVal, isTemplate })
+        const created = await createTicketAction({ projectId, sprintId, title: title.trim(), description: description.trim(), priority: priority as never, type: type as never, epic: epicVal, isTemplate })
+        if (created && onCreated) onCreated(created)
       }
       onClose()
     })
@@ -80,7 +84,7 @@ export function TicketForm({ projectId, sprintId, ticket, isTemplate, onClose }:
         <label className="text-xs text-faint">Epic</label>
         <select value={epic} onChange={(e) => setEpic(e.target.value)} className="rounded-lg border border-border bg-input text-foreground px-2 py-1.5 text-sm outline-none">
           <option value="">— No epic —</option>
-          {EPICS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
+          {allEpics.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
         </select>
       </div>
 

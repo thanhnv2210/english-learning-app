@@ -843,9 +843,19 @@ export const ticketComments = pgTable('ticket_comments', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
+export const projectEpics = pgTable('project_epics', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  label: text('label').notNull(),
+  value: text('value').notNull(),   // slug, unique per project
+  colorKey: text('color_key').notNull().default('rose'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 export const projectsRelations = relations(projects, ({ many }) => ({
   sprints: many(sprints),
   tickets: many(tickets),
+  epics: many(projectEpics),
 }))
 
 export const sprintsRelations = relations(sprints, ({ one, many }) => ({

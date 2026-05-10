@@ -4,7 +4,8 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { updateTicketAction, addCommentAction, deleteCommentAction } from '@/app/actions/projects'
 import { StatusBadge, PriorityDot, TypeIcon } from '@/components/projects/ticket-badge'
-import { STATUSES, PRIORITIES, TYPES, EPICS } from '@/lib/projects/constants'
+import { STATUSES, PRIORITIES, TYPES } from '@/lib/projects/constants'
+import { useEpics } from '@/lib/projects/epics-context'
 import type { Ticket, Sprint, TicketComment, TicketStatus, TicketPriority, TicketType } from '@/lib/db/projects'
 
 type Props = {
@@ -15,6 +16,7 @@ type Props = {
 }
 
 export function TicketDetail({ ticket: initialTicket, initialComments, sprints, projectId }: Props) {
+  const { allEpics } = useEpics()
   const [ticket, setTicket] = useState(initialTicket)
   const [comments, setComments] = useState(initialComments)
   const [editing, setEditing] = useState(false)
@@ -173,7 +175,7 @@ export function TicketDetail({ ticket: initialTicket, initialComments, sprints, 
               className="rounded border border-border bg-input text-xs text-foreground px-2 py-1 outline-none"
             >
               <option value="">— None —</option>
-              {EPICS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
+              {allEpics.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
             </select>
           </div>
 

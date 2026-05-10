@@ -2,10 +2,12 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { createTicketAction, updateTicketAction, deleteTicketAction, cloneTemplateAction } from '@/app/actions/projects'
+import { createTicketAction, updateTicketAction, deleteTicketAction, cloneTemplateAction, createEpicAction, deleteEpicAction } from '@/app/actions/projects'
 import { TicketForm } from '@/components/projects/ticket-form'
 import { StatusBadge, PriorityDot, TypeIcon, EpicBadge, EpicDot } from '@/components/projects/ticket-badge'
 import { EPICS } from '@/lib/projects/constants'
+import { useEpics } from '@/lib/projects/epics-context'
+import { nextColorKey, getEpicColor, CUSTOM_EPIC_COLOR_KEYS } from '@/lib/projects/epic-colors'
 import type { Ticket, Sprint } from '@/lib/db/projects'
 
 type Props = {
@@ -18,11 +20,16 @@ type Props = {
 type Filter = 'all' | 'custom'
 
 export function BacklogView({ projectId, initialBacklog, initialTemplates, sprints }: Props) {
+  const { allEpics, addEpic, removeEpic } = useEpics()
+  const customEpics = allEpics.filter((e) => !EPICS.some((sys) => sys.value === e.value))
+
   const [backlog, setBacklog] = useState(initialBacklog)
   const [templates, setTemplates] = useState(initialTemplates)
   const [showTicketForm, setShowTicketForm] = useState(false)
   const [showTemplateForm, setShowTemplateForm] = useState(false)
   const [templateFilter, setTemplateFilter] = useState<Filter>('all')
+  const [showEpicForm, setShowEpicForm] = useState(false)
+  const [newEpicLabel, setNewEpicLabel] = useState('')
   const [, startTransition] = useTransition()
 
   function handleMoveToSprint(ticketId: number, sprintId: number) {
@@ -49,6 +56,28 @@ export function BacklogView({ projectId, initialBacklog, initialTemplates, sprin
   function handleDeleteTemplate(id: number) {
     setTemplates((prev) => prev.filter((t) => t.id !== id))
     startTransition(() => deleteTicketAction(id))
+  }
+
+  function handleCreateEpic(e: React.FormEvent) {
+    e.preventDefault()
+    const label = newEpicLabel.trim()
+    if (!label) return
+    const value = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    const usedColorKeys = customEpics
+      .map((ep) => CUSTOM_EPIC_COLOR_KEYS.find((k) => getEpicColor(k).dot === ep.dot) ?? '')
+      .filter(Boolean)
+    const colorKey = nextColorKey(usedColorKeys)
+    setNewEpicLabel('')
+    setShowEpicForm(false)
+    startTransition(async () => {
+      const created = await createEpicAction({ projectId, label, value, colorKey })
+      addEpic({ value: created.value, label: created.label, dbId: created.id, ...getEpicColor(created.colorKey) })
+    })
+  }
+
+  function handleDeleteEpic(epicValue: string, dbId: number) {
+    removeEpic(epicValue)
+    startTransition(() => deleteEpicAction(dbId))
   }
 
   const visibleTemplates = templateFilter === 'custom'
@@ -86,7 +115,12 @@ export function BacklogView({ projectId, initialBacklog, initialTemplates, sprin
 
         {showTicketForm && (
           <div className="rounded-xl border border-border bg-card p-4">
-            <TicketForm projectId={projectId} sprintId={null} onClose={() => setShowTicketForm(false)} />
+            <TicketForm
+              projectId={projectId}
+              sprintId={null}
+              onClose={() => setShowTicketForm(false)}
+              onCreated={(ticket) => setBacklog((prev) => [...prev, ticket])}
+            />
           </div>
         )}
 
@@ -185,6 +219,81 @@ export function BacklogView({ projectId, initialBacklog, initialTemplates, sprin
           <p className="text-[10px] text-faint text-center">
             {systemCount} default IELTS Academic templates · cannot be deleted
           </p>
+        )}
+      </section>
+
+      {/* ── Custom Epics ─────────────────────────────────────────────────────── */}
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-foreground">Custom Epics</h2>
+            <span className="text-xs text-faint">({customEpics.length})</span>
+          </div>
+          <button
+            onClick={() => setShowEpicForm((v) => !v)}
+            className="text-xs font-medium text-blue-500 hover:text-blue-700 transition-colors"
+          >
+            + New epic
+          </button>
+        </div>
+
+        {showEpicForm && (
+          <form
+            onSubmit={handleCreateEpic}
+            className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3"
+          >
+            <input
+              value={newEpicLabel}
+              onChange={(e) => setNewEpicLabel(e.target.value)}
+              placeholder="Epic name (e.g. Grammar, Pronunciation)"
+              className="flex-1 rounded-lg border border-border bg-input px-3 py-1.5 text-sm text-foreground placeholder:text-faint outline-none focus:ring-2 focus:ring-blue-500/30"
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={() => { setShowEpicForm(false); setNewEpicLabel('') }}
+              className="rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:bg-subtle transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!newEpicLabel.trim()}
+              className="rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-600 disabled:opacity-40 transition-colors"
+            >
+              Create
+            </button>
+          </form>
+        )}
+
+        {customEpics.length === 0 && !showEpicForm ? (
+          <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center">
+            <p className="text-xs text-faint">
+              No custom epics yet. Create one to categorise your tickets beyond the defaults.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {customEpics.map((epic) => (
+              <div
+                key={epic.value}
+                className="group flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1"
+              >
+                <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${epic.dot}`} />
+                <span className={`text-[11px] font-semibold rounded-full px-1.5 py-0.5 ${epic.color}`}>
+                  {epic.label}
+                </span>
+                {epic.dbId !== undefined && (
+                  <button
+                    onClick={() => handleDeleteEpic(epic.value, epic.dbId!)}
+                    className="hidden group-hover:flex w-4 h-4 items-center justify-center rounded-full bg-red-100 text-red-500 hover:bg-red-200 text-[9px] shrink-0 transition-colors"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </section>
     </div>

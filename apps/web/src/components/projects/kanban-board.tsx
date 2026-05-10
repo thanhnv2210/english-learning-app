@@ -13,7 +13,8 @@ import {
 } from '@dnd-kit/core'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { updateTicketAction } from '@/app/actions/projects'
-import { STATUSES, PRIORITIES, EPICS } from '@/lib/projects/constants'
+import { STATUSES, PRIORITIES } from '@/lib/projects/constants'
+import { useEpics } from '@/lib/projects/epics-context'
 import { StatusBadge, PriorityDot, TypeIcon, EpicBadge } from './ticket-badge'
 import { TicketForm } from './ticket-form'
 import type { Ticket, Sprint } from '@/lib/db/projects'
@@ -29,6 +30,7 @@ type Props = {
 // ── Board ─────────────────────────────────────────────────────────────────────
 
 export function KanbanBoard({ sprint, initialTickets, projectId }: Props) {
+  const { allEpics } = useEpics()
   const [tickets, setTickets] = useState(initialTickets)
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null)
   const [addingToColumn, setAddingToColumn] = useState<string | null>(null)
@@ -61,7 +63,7 @@ export function KanbanBoard({ sprint, initialTickets, projectId }: Props) {
     startTransition(() => updateTicketAction(ticket.id, { status: newStatus as never }))
   }
 
-  const epicCounts = EPICS.map((e) => ({
+  const epicCounts = allEpics.map((e) => ({
     ...e,
     count: tickets.filter((t) => t.epic === e.value).length,
   }))
