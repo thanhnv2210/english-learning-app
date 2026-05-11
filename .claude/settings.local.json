@@ -92,7 +92,8 @@
       "Bash(ls /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(auth\\\\\\)/)",
       "Bash(/Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/.env.local:*)",
       "Bash(python3 -c \":*)",
-      "Bash(source .env.local)"
+      "Bash(source .env.local)",
+      "Bash(echo $DATABASE_URL)"
     ]
   }
 }

@@ -720,6 +720,21 @@ export const speakingPhrases = pgTable('speaking_phrases', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
+// ─── Official IELTS Exam Results ─────────────────────────────────────────────
+
+export const officialIeltsResults = pgTable('official_ielts_results', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  examDate: text('exam_date').notNull(),          // ISO date string e.g. '2026-05-03'
+  listening: real('listening').notNull(),
+  reading: real('reading').notNull(),
+  writing: real('writing').notNull(),
+  speaking: real('speaking').notNull(),
+  overall: real('overall').notNull(),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const wordSentencesRelations = relations(wordSentences, ({ one, many }) => ({

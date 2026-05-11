@@ -71,6 +71,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Progress',
     items: [
+      { href: '/learning-plan', label: 'Learning Plan', icon: '🗓️' },
       { href: '/projects', label: 'Projects', icon: '📋' },
       { href: '/analytics', label: 'Analytics', icon: '📊' },
       { href: '/wrong-decisions', label: 'Wrong Decisions', icon: '❌' },
