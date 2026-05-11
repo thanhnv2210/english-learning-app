@@ -872,6 +872,20 @@ export const ticketComments = pgTable('ticket_comments', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
+// ─── Ticket Completions (habit tracker for recurring tasks) ───────────────────
+// One row per (ticket, date) — clicking the same date again deletes the row.
+
+export const ticketCompletions = pgTable(
+  'ticket_completions',
+  {
+    id: serial('id').primaryKey(),
+    ticketId: integer('ticket_id').notNull().references(() => tickets.id, { onDelete: 'cascade' }),
+    completedDate: text('completed_date').notNull(), // ISO 'YYYY-MM-DD'
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.ticketId, t.completedDate)],
+)
+
 export const projectEpics = pgTable('project_epics', {
   id: serial('id').primaryKey(),
   projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),

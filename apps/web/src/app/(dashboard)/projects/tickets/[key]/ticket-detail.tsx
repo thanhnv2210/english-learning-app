@@ -7,15 +7,18 @@ import { StatusBadge, PriorityDot, TypeIcon } from '@/components/projects/ticket
 import { STATUSES, PRIORITIES, TYPES } from '@/lib/projects/constants'
 import { useEpics } from '@/lib/projects/epics-context'
 import type { Ticket, Sprint, TicketComment, TicketStatus, TicketPriority, TicketType } from '@/lib/db/projects'
+import { HabitStrip } from './habit-strip'
 
 type Props = {
   ticket: Ticket
   initialComments: TicketComment[]
   sprints: Sprint[]
   projectId: number
+  initialCompletions: string[]
+  ticketSprint: Sprint | null
 }
 
-export function TicketDetail({ ticket: initialTicket, initialComments, sprints, projectId }: Props) {
+export function TicketDetail({ ticket: initialTicket, initialComments, sprints, projectId, initialCompletions, ticketSprint }: Props) {
   const { allEpics } = useEpics()
   const [ticket, setTicket] = useState(initialTicket)
   const [comments, setComments] = useState(initialComments)
@@ -244,6 +247,25 @@ export function TicketDetail({ ticket: initialTicket, initialComments, sprints, 
           </div>
         )}
       </div>
+
+      {/* Habit Tracker — shown when the ticket lives in a sprint with date bounds */}
+      {ticketSprint?.startDate && ticketSprint?.endDate && (
+        <div className="rounded-xl border border-border bg-card p-6 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-foreground">Completion Tracker</h2>
+            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+              {ticketSprint.name}
+            </span>
+          </div>
+          <HabitStrip
+            ticketId={ticket.id}
+            ticketKey={ticket.key}
+            sprintStart={new Date(ticketSprint.startDate).toISOString().slice(0, 10)}
+            sprintEnd={new Date(ticketSprint.endDate).toISOString().slice(0, 10)}
+            initialCompletions={initialCompletions}
+          />
+        </div>
+      )}
 
       {/* Comments */}
       <div className="rounded-xl border border-border bg-card p-6 flex flex-col gap-4">
