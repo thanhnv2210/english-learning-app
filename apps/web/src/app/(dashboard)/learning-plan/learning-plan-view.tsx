@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { saveOfficialResultAction, deleteOfficialResultAction } from '@/app/actions/learning-plan'
+import { getCurrentPhaseStatus, daysUntil, PLAN_START, PLAN_END } from '@/lib/ielts/plan-phases'
 
 type OfficialResult = {
   id: number
@@ -307,6 +309,144 @@ function ResultCard({ result }: { result: OfficialResult }) {
   )
 }
 
+// ─── Today's Focus Card ──────────────────────────────────────────────────────
+
+function TodayFocusCard() {
+  const now = new Date()
+  const status = getCurrentPhaseStatus(now)
+
+  if (status.type === 'before') {
+    const days = daysUntil(PLAN_START, now)
+    return (
+      <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <p className="text-sm font-semibold text-foreground">Plan starts in {days} day{days !== 1 ? 's' : ''}</p>
+        <p className="mt-1 text-xs text-muted-foreground">Your 3-month study plan begins on 11 May 2026. Get ready!</p>
+      </div>
+    )
+  }
+
+  if (status.type === 'complete') {
+    return (
+      <div className="rounded-xl border border-green-300 bg-green-50 p-5 dark:border-green-800 dark:bg-green-950/30">
+        <p className="text-sm font-semibold text-green-800 dark:text-green-300">Plan complete! 🎉</p>
+        <p className="mt-1 text-xs text-green-700 dark:text-green-400">
+          You have reached the end of your 3-month plan. Record your retake result in the Results tab.
+        </p>
+      </div>
+    )
+  }
+
+  const { phase, daysRemaining, phaseLengthDays, daysIntoPhase, overallPct } = status
+  const totalDays = Math.ceil((PLAN_END.getTime() - PLAN_START.getTime()) / 86_400_000)
+
+  const alertStyles: Record<string, string> = {
+    normal:  'border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30',
+    warning: 'border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30',
+    trip:    'border-purple-200 bg-purple-50 dark:border-purple-900 dark:bg-purple-950/30',
+    complete:'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30',
+  }
+  const textStyles: Record<string, string> = {
+    normal:  'text-blue-700 dark:text-blue-300',
+    warning: 'text-amber-700 dark:text-amber-300',
+    trip:    'text-purple-700 dark:text-purple-300',
+    complete:'text-green-700 dark:text-green-300',
+  }
+  const badgeStyles: Record<string, string> = {
+    normal:  'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    warning: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+    trip:    'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+    complete:'bg-green-100 text-green-700',
+  }
+
+  const al = phase.alertLevel
+
+  return (
+    <div className={`rounded-xl border p-5 shadow-sm ${alertStyles[al]}`}>
+      {/* Header */}
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${badgeStyles[al]}`}>
+              {phase.name}
+            </span>
+            <span className="text-xs text-muted-foreground">{phase.dateRange}</span>
+          </div>
+          <p className={`mt-1 text-sm font-medium ${textStyles[al]}`}>{phase.focus}</p>
+        </div>
+
+        {/* Countdown */}
+        {phase.milestone && (
+          <div className="text-right">
+            <p className="text-2xl font-bold text-foreground">
+              {daysUntil(phase.milestone.date, now)}
+            </p>
+            <p className="text-xs text-muted-foreground">days until {phase.milestone.label}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Overall progress bar */}
+      <div className="mb-4">
+        <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+          <span>Overall plan progress</span>
+          <span>{overallPct}% · Day {Math.floor((now.getTime() - PLAN_START.getTime()) / 86_400_000) + 1} of {totalDays}</span>
+        </div>
+        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className={`h-2 rounded-full transition-all ${al === 'trip' ? 'bg-purple-500' : al === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}`}
+            style={{ width: `${overallPct}%` }}
+          />
+        </div>
+        {/* Phase progress sub-bar */}
+        <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-1 rounded-full bg-foreground/20 transition-all"
+            style={{ width: `${Math.round((daysIntoPhase / phaseLengthDays) * 100)}%` }}
+          />
+        </div>
+        <p className="mt-0.5 text-right text-xs text-faint">
+          {daysRemaining} day{daysRemaining !== 1 ? 's' : ''} left in this phase
+        </p>
+      </div>
+
+      {/* Today's tasks */}
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Today&apos;s Tasks</p>
+        <div className="space-y-2">
+          {phase.todayTasks.map((task) => (
+            <div key={task.label} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-faint">·</span>
+                {task.href ? (
+                  <Link href={task.href} className={`text-sm truncate hover:underline ${textStyles[al]}`}>
+                    {task.label}
+                  </Link>
+                ) : (
+                  <span className="text-sm truncate text-foreground">{task.label}</span>
+                )}
+              </div>
+              <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                {task.time}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Link to project board */}
+      <div className="mt-4 border-t border-border pt-3">
+        <Link
+          href="/projects"
+          className={`text-xs font-medium hover:underline ${textStyles[al]}`}
+        >
+          View IELTS project board →
+        </Link>
+        <span className="ml-3 text-xs text-faint">Track ticket progress on the kanban board</span>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main View ────────────────────────────────────────────────────────────────
 
 export function LearningPlanView({ initialResults }: { initialResults: OfficialResult[] }) {
@@ -315,6 +455,9 @@ export function LearningPlanView({ initialResults }: { initialResults: OfficialR
 
   return (
     <div className="space-y-6">
+      {/* Today's Focus */}
+      <TodayFocusCard />
+
       {/* Target Banner */}
       <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/30">
         <div className="flex flex-wrap items-center gap-4">

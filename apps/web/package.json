@@ -28,7 +28,8 @@
     "db:seed:speaking-phrases": "dotenv -e .env.local -- tsx src/lib/db/seeds/speaking-phrases.ts",
     "db:seed:word-pairs": "dotenv -e .env.local -- tsx src/lib/db/seeds/word-pairs.ts",
     "db:seed:drill-texts": "dotenv -e .env.local -- tsx src/lib/db/seeds/drill-texts.ts",
-    "db:seed:ielts-results": "dotenv -e .env.local -- tsx src/lib/db/seeds/ielts-results.ts"
+    "db:seed:ielts-results": "dotenv -e .env.local -- tsx src/lib/db/seeds/ielts-results.ts",
+    "db:seed:ielts-plan": "dotenv -e .env.local -- tsx src/lib/db/seeds/ielts-plan.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",
