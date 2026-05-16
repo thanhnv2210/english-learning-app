@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ContactForm } from '@/app/partner/contact-form'
 
 const TOP_5_VALUE_POINTS = [
   {
@@ -448,30 +449,27 @@ export default function DoiTacPage() {
       {/* ── Liên hệ ───────────────────────────────────────────────────────────── */}
       <section id="lien-he" className="border-t border-border bg-card">
         <div className="mx-auto max-w-6xl px-6 py-24">
-          <div className="mx-auto max-w-2xl rounded-2xl border border-blue-500/30 bg-blue-500/5 p-12 text-center">
-            <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
-              Sẵn sàng trao đổi?
-            </h2>
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Chúng tôi đang xây dựng nền tảng IELTS hàng đầu cho cộng đồng chuyên gia Việt Nam.
-              Nếu bạn thấy cơ hội này, hãy liên hệ ngay.
-            </p>
-            <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <a
-                href="mailto:doitac@ieltsaccelerator.app"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-colors sm:w-auto"
-              >
-                Gửi email trực tiếp
-              </a>
-              <Link
-                href="/login"
-                className="w-full rounded-xl border border-border px-8 py-3.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors sm:w-auto"
-              >
-                Dùng thử sản phẩm
-              </Link>
+          <div className="mx-auto max-w-2xl">
+            <div className="mb-8 text-center">
+              <div className="mb-3 text-xs font-semibold uppercase tracking-widest text-blue-500">
+                Liên hệ
+              </div>
+              <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
+                Sẵn sàng trao đổi?
+              </h2>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Điền form bên dưới và chúng tôi sẽ phản hồi qua email trong vòng 24 giờ.
+                Bạn sẽ nhận được email xác nhận ngay sau khi gửi.
+              </p>
             </div>
-            <p className="mt-6 text-xs text-muted-foreground">
-              Chúng tôi phản hồi mọi yêu cầu hợp tác trong vòng 24 giờ. Có thể liên hệ qua Zalo để trao đổi nhanh hơn.
+            <div className="rounded-2xl border border-border bg-background p-8">
+              <ContactForm lang="vi" />
+            </div>
+            <p className="mt-4 text-center text-xs text-faint">
+              Muốn dùng thử trước?{' '}
+              <Link href="/login" className="underline hover:text-muted-foreground transition-colors">
+                Đăng nhập và khám phá sản phẩm
+              </Link>
             </p>
           </div>
         </div>

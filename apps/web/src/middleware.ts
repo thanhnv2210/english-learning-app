@@ -8,6 +8,8 @@ export default auth((req) => {
   const isOnboardingPage = pathname === '/onboarding'
   const isPublicPage =
     pathname === '/' ||
+    pathname === '/partner' ||
+    pathname === '/doi-tac' ||
     pathname === '/pending' ||
     pathname === '/auth-error' ||
     pathname === '/privacy'

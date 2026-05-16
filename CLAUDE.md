@@ -108,6 +108,9 @@ PORT=3000 pnpm dev:clean
 | `NEXT_PUBLIC_OLLAMA_ENABLED` | `true` | Set `false` to disable AI routes; shows amber banner |
 | `OLLAMA_DEBUG` | `false` | Set `true` to log full raw AI response |
 | `DATABASE_URL` | — | PostgreSQL connection string |
+| `RESEND_API_KEY` | — | Resend API key; required to send any email (activation + feedback notifications) |
+| `EMAIL_FROM` | `IELTS Accelerator <onboarding@resend.dev>` | Sender address for all outbound emails |
+| `EMAIL_NOTIFY_TO` | — | Your inbox address; receives a notification email on every new user feedback submission |
 
 ## Stale Data
 

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ContactForm } from './contact-form'
 
 const TOP_5_VALUE_POINTS = [
   {
@@ -419,32 +420,29 @@ export default function PartnerLandingPage() {
         </div>
       </section>
 
-      {/* ── Contact / CTA ─────────────────────────────────────────────────────── */}
+      {/* ── Contact form ─────────────────────────────────────────────────────── */}
       <section id="contact" className="mx-auto max-w-6xl px-6 py-24">
-        <div className="mx-auto max-w-2xl rounded-2xl border border-blue-500/30 bg-blue-500/5 p-12 text-center">
-          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
-            Ready to explore a partnership?
-          </h2>
-          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            We are building the go-to IELTS platform for the global developer community.
-            If you see the opportunity, let&apos;s talk.
-          </p>
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <a
-              href="mailto:partner@ieltsaccelerator.app"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-colors sm:w-auto"
-            >
-              Email us directly
-            </a>
-            <Link
-              href="/login"
-              className="w-full rounded-xl border border-border px-8 py-3.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors sm:w-auto"
-            >
-              Try the product live
-            </Link>
+        <div className="mx-auto max-w-2xl">
+          <div className="mb-8 text-center">
+            <div className="mb-3 text-xs font-semibold uppercase tracking-widest text-blue-500">
+              Get in touch
+            </div>
+            <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
+              Ready to explore a partnership?
+            </h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Fill in the form and we will reply to your email within 24 hours.
+              You will also receive a confirmation immediately after submitting.
+            </p>
           </div>
-          <p className="mt-6 text-xs text-muted-foreground">
-            We respond to all partnership enquiries within 24 hours.
+          <div className="rounded-2xl border border-border bg-card p-8">
+            <ContactForm lang="en" />
+          </div>
+          <p className="mt-4 text-center text-xs text-faint">
+            Prefer to try first?{' '}
+            <Link href="/login" className="underline hover:text-muted-foreground transition-colors">
+              Sign in and explore the product live
+            </Link>
           </p>
         </div>
       </section>

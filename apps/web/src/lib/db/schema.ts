@@ -915,3 +915,17 @@ export const ticketsRelations = relations(tickets, ({ one, many }) => ({
 export const ticketCommentsRelations = relations(ticketComments, ({ one }) => ({
   ticket: one(tickets, { fields: [ticketComments.ticketId], references: [tickets.id] }),
 }))
+
+// ─── Partner inquiries (from /partner and /doi-tac contact forms) ─────────────
+// tag: 'distribution' | 'investor' | 'integration' | 'other'
+// status: 'new' | 'read' | 'replied'
+
+export const partnerInquiries = pgTable('partner_inquiries', {
+  id:        serial('id').primaryKey(),
+  email:     text('email').notNull(),
+  phone:     text('phone').notNull(),
+  tag:       text('tag').notNull().default('other'),
+  message:   text('message').notNull(),
+  status:    text('status').notNull().default('new'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
