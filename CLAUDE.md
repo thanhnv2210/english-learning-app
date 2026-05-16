@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**IELTS 6.5 Accelerator for Software Engineers** — AI-powered app helping senior engineers achieve IELTS Band 6.5 using technical topics. Evaluation engine uses Claude as a strict IELTS examiner grading against four criteria: Task Response, Coherence, Lexical Resource, and Grammatical Range.
+**IELTS Accelerator** — AI-powered app helping professionals achieve their IELTS band target by leveraging their existing domain knowledge. Primary beachhead segment: software engineers (tech-domain content). Platform is domain-adaptive and designed to extend to healthcare, finance, education, and other professional segments. Evaluation engine uses Claude as a strict IELTS examiner grading against four criteria: Task Response, Coherence, Lexical Resource, and Grammatical Range.
 
 ## Tech Stack
 

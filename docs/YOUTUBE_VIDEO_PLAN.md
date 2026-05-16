@@ -1,4 +1,4 @@
-# YouTube Video Plan — IELTS 6.5 Accelerator for Software Engineers
+# YouTube Video Plan — IELTS Accelerator (Primary audience: software engineers)
 
 ---
 
@@ -34,12 +34,9 @@ who show their work, not people who perform for a camera.
 
 Two goals running in parallel:
 
-**Goal 1 — Practical:** Show engineers that IELTS prep can be done on technical topics
-with real AI feedback, not generic drills.
+**Goal 1 — Practical:** Show professionals (engineers first, others to follow) that IELTS prep can be done using the domain they already know — with real AI feedback, not generic drills. The hook is engineers; the message scales to anyone with deep expertise and an IELTS deadline.
 
-**Goal 2 — Long-term mindset:** Inspire students to build their own version.
-Not clone-and-use — clone-and-modify. The long-term idea is that building a personal
-learning tool compounds in a way that using someone else's tool never does.
+**Goal 2 — Long-term mindset:** Inspire viewers to build their own version — or at least take ownership of their learning process. Not clone-and-use — clone-and-modify. The long-term idea is that building a personal learning tool compounds in a way that using someone else's tool never does.
 
 ---
 

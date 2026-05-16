@@ -47,16 +47,16 @@ const FEATURES = [
 
 const PAIN_POINTS = [
   {
-    problem: 'Học bằng đề thi generic về "du lịch" hay "môi trường"',
-    solution: 'Toàn bộ nội dung dùng chủ đề tech bạn đã biết: microservices, Agile, remote work...',
+    problem: 'Học bằng đề thi generic về "du lịch" hay "môi trường" — không liên quan đến công việc',
+    solution: 'Nội dung bám sát lĩnh vực chuyên môn bạn đã biết: kỹ sư dùng chủ đề tech, dân tài chính dùng chủ đề finance...',
   },
   {
     problem: 'Không biết mình đang ở band mấy',
     solution: 'AI chấm điểm theo 4 tiêu chí IELTS sau mỗi bài — như examiner thật.',
   },
   {
-    problem: 'Dùng từ "dev slang" không academic',
-    solution: 'Vocabulary Engine tự động đề xuất AWL alternatives phù hợp band 6.5+.',
+    problem: 'Từ vựng chuyên ngành nhưng không academic',
+    solution: 'Vocabulary Engine đề xuất AWL alternatives phù hợp với ngữ cảnh và band 6.5+.',
   },
   {
     problem: 'Mỗi lần luyện không biết bắt đầu từ đâu',
@@ -97,17 +97,17 @@ export default async function LandingPage() {
       {/* ── Hero ──────────────────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-6 pb-20 pt-24 text-center">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-medium text-blue-400">
-          Dành riêng cho kỹ sư phần mềm
+          Dành cho người đi làm có deadline IELTS
         </div>
 
         <h1 className="mx-auto max-w-3xl text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
           Đạt IELTS Band 6.5<br />
-          <span className="text-blue-500">bằng kiến thức tech của bạn</span>
+          <span className="text-blue-500">bằng kiến thức bạn đã có</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground sm:text-lg">
-          Nền tảng luyện thi AI duy nhất dùng chủ đề lập trình để bạn học nhanh hơn.
-          Không học lại từ đầu — tận dụng thứ bạn đã biết.
+          AI chấm bài theo đúng tiêu chí IELTS, nội dung bám sát lĩnh vực chuyên môn của bạn.
+          Không học lại từ đầu — tận dụng thứ bạn đã biết để lên band nhanh hơn.
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -142,8 +142,8 @@ export default async function LandingPage() {
           {[
             { value: '4', label: 'kỹ năng IELTS' },
             { value: '20+', label: 'công cụ AI' },
-            { value: 'Band 6.5', label: 'mục tiêu cho kỹ sư' },
-            { value: '100%', label: 'nội dung tech' },
+            { value: 'Band 6.5', label: 'mục tiêu phổ biến nhất' },
+            { value: '0', label: 'nội dung chung chung' },
           ].map(({ value, label }) => (
             <div key={label} className="flex flex-col items-center px-6 py-8 text-center">
               <span className="text-2xl font-extrabold text-foreground sm:text-3xl">{value}</span>
@@ -157,10 +157,10 @@ export default async function LandingPage() {
       <section className="mx-auto max-w-6xl px-6 py-24">
         <div className="mb-12 text-center">
           <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
-            Kỹ sư học IELTS khác người bình thường
+            Người đi làm học IELTS khác học sinh phổ thông
           </h2>
           <p className="mt-3 text-sm text-muted-foreground">
-            Bạn không cần học lại từ đầu — bạn cần đúng công cụ.
+            Bạn có kiến thức chuyên môn — bạn cần công cụ biết tận dụng điều đó.
           </p>
         </div>
 
@@ -188,7 +188,7 @@ export default async function LandingPage() {
               Đủ mọi công cụ để đạt Band 6.5
             </h2>
             <p className="mt-3 text-sm text-muted-foreground">
-              Được xây dựng cho kỹ sư — không phải học sinh phổ thông.
+              Được xây dựng cho người đi làm có deadline — không phải học sinh phổ thông.
             </p>
           </div>
 

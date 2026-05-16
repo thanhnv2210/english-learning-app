@@ -1,4 +1,4 @@
-# Launch Checklist — IELTS Accelerator for Software Engineers
+# Launch Checklist — IELTS Accelerator
 
 Format: `[ ]` pending · `[x]` done (with finish date)
 

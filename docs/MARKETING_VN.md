@@ -1,7 +1,8 @@
 # Marketing Plan — Vietnam Market
-# IELTS 6.5 Accelerator for Software Engineers
+# IELTS Accelerator — Học IELTS nhanh hơn bằng kiến thức bạn đã có
 
 **Date:** May 2026
+**Revised:** 2026-05-16
 **Status:** Draft — seeking user and expert feedback
 
 ---
@@ -17,16 +18,16 @@ Vietnam is one of the fastest-growing IELTS markets in Southeast Asia. Demand is
 - **Corporate requirement** — tech companies (FPT, VNG, Axon, global outsourcing firms) list IELTS scores in senior engineering JDs
 - **Promotion criteria** — many mid-large tech companies require Band 6.5+ for principal/lead/manager roles interacting with overseas clients
 
-Vietnam's software engineering workforce is estimated at 530,000+ (VINASA 2025), a growing segment that is underserved by generic IELTS prep tools.
+Vietnam's software engineering workforce is estimated at 530,000+ (VINASA 2025) — the primary beachhead segment. Beyond engineers, hundreds of thousands of Vietnamese professionals in healthcare, finance, education, and business also need IELTS for immigration and career mobility, and face the same mismatch problem.
 
 ### The Gap in the Market
 
 Existing IELTS tools (IELTS.org practice tests, IELTS Liz, British Council prep) are:
-- Generic — not tailored to engineers' domain vocabulary
+- Generic — built around everyday topics (food, travel, environment) irrelevant to working professionals
 - Passive — no AI feedback loop
 - Expensive for full prep courses (VND 5–15M per course)
 
-This app fills a specific niche: **AI-driven IELTS prep using software engineering as the learning context**, directly relevant to the candidate's daily work.
+This app fills a structural gap: **AI-driven IELTS prep that uses the learner's own domain as the learning context** — leveraging knowledge they already own instead of forcing them to start from zero with unfamiliar topics. Software engineers are the primary initial segment; the platform is designed to serve any professional preparing under time pressure.
 
 ---
 
@@ -47,14 +48,23 @@ This app fills a specific niche: **AI-driven IELTS prep using software engineeri
 - Preparing for grad-school applications or first jobs at global companies
 - Price-sensitive; strong word-of-mouth potential within university groups
 
+### Expansion: Other Professionals with Domain Depth
+- **Healthcare workers** (nurses, pharmacists, doctors): need IELTS for overseas registration
+- **Finance & banking professionals**: need IELTS for international roles or study abroad
+- **Education sector**: teachers applying for overseas programmes or higher degrees
+- Shared profile: existing professional expertise + specific IELTS deadline + time-poor
+- Acquisition: LinkedIn, professional association groups, immigration advisor referrals
+
 ---
 
 ## 3. Positioning
 
-**Tagline (EN):** "IELTS prep that speaks your language — written in code."
-**Tagline (VI):** "Luyện IELTS theo ngôn ngữ lập trình — chấm điểm bởi AI, không phải giáo viên."
+**Tagline (EN):** "IELTS prep that meets you where your knowledge already is."
+**Tagline (VI):** "Luyện IELTS bằng kiến thức bạn đã có — AI chấm điểm, không phải giáo viên."
 
-**Core message:** You already know the domain. The app makes your technical knowledge the bridge to Band 6.5 — using topics you think about every day (system design, agile, code review) to build the vocabulary, collocations, and writing structure IELTS rewards.
+**Core message:** Bạn đã có kiến thức chuyên môn sâu trong lĩnh vực của mình. App này biến thứ đó thành lợi thế — dùng chủ đề bạn nghĩ đến mỗi ngày (dù là hệ thống phần mềm, quy trình bệnh viện, hay báo cáo tài chính) để xây dựng vốn từ vựng, collocations, và cấu trúc bài IELTS mà examiner đánh giá cao. Bạn không cần học lại từ đầu — bạn cần đúng công cụ.
+
+**Primary market message (engineers):** "Học bằng chủ đề tech bạn đã biết rõ — không mất thời gian học lại những thứ không liên quan."
 
 ---
 

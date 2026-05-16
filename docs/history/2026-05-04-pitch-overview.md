@@ -7,20 +7,24 @@
 
 ## The One-Paragraph Summary (Use This First)
 
-"Mình đang xây dựng một ứng dụng luyện IELTS dành riêng cho lập trình viên Việt Nam. App dùng AI để chấm bài Writing và Speaking theo đúng tiêu chí của IELTS — Task Response, Coherence, Lexical Resource, Grammatical Range — và đưa ra phản hồi cụ thể như một giám khảo thật. Điểm khác biệt là toàn bộ nội dung xoay quanh ngôn ngữ và chủ đề của ngành phần mềm, thứ mà người học đã quen thuộc, để học nhanh hơn và bám sát mục tiêu 6.5. Mình đang ở giai đoạn đầu và muốn tìm người cùng xây dựng."
+"Mình đang xây dựng một ứng dụng luyện IELTS cho người đi làm có deadline thi — visa định cư, thăng chức, hoặc học sau đại học. App dùng AI để chấm bài Writing và Speaking theo đúng 4 tiêu chí của IELTS, và tạo nội dung luyện tập xoay quanh chính lĩnh vực chuyên môn của người học — không phải những chủ đề chung chung như du lịch hay ẩm thực. Người học tốn ít thời gian hơn vì họ không cần học lại từ đầu — họ dùng kiến thức chuyên môn đã có để xây vốn từ và kỹ năng IELTS nhanh hơn. Hiện tại mình đang tập trung vào nhóm kỹ sư phần mềm — thị trường mình hiểu rõ nhất — và muốn tìm người cùng xây dựng."
+
+*(Note: khi nói chuyện với người không phải kỹ sư, thay "kỹ sư phần mềm" bằng lĩnh vực phù hợp — y tế, tài chính, giáo dục...)*
 
 ---
 
 ## The Problem (Why This Exists)
 
-There are over 500,000 software engineers in Vietnam. A large portion of them need IELTS 6.5 — for visa applications, for promotion criteria at companies working with overseas clients, or to switch to international teams.
+There are over 500,000 software engineers in Vietnam — and beyond them, hundreds of thousands of nurses, finance professionals, teachers, and business analysts — all needing IELTS for visa applications, career advancement, or international study.
 
 The problem with existing tools:
-- Generic IELTS apps use topics like "tourism" and "the environment" — irrelevant to an engineer's daily thinking
-- Offline courses cost VND 5–10M and require fixed schedules — hard for engineers with full-time jobs
+- Generic IELTS apps use topics like "tourism" and "the environment" — irrelevant to any professional's daily thinking
+- Offline courses cost VND 5–10M and require fixed schedules — hard for people with full-time jobs and a specific deadline
 - There is no immediate, honest feedback — a student submits an essay and waits days for a teacher to reply
 
-The result: engineers spend months preparing, lose motivation, and many fail on the first attempt not because they lack English ability but because they do not know what the examiner is actually looking for.
+The result: motivated professionals spend months preparing with content that doesn't connect to their world, lose motivation, and many fail on the first attempt not because they lack English ability but because they never practised in a context that felt real.
+
+The engineers are the primary segment because that is the domain this product knows best. The pattern generalises to any professional with deep domain expertise and a near-term IELTS goal.
 
 ---
 
@@ -136,8 +140,8 @@ Chưa có doanh thu, nhưng model rõ ràng: freemium với gói Pro 149k/tháng
 **"AI chấm bài có chính xác không?"**
 Độ chính xác đủ để học — nó chấm theo đúng 4 tiêu chí của IELTS và giải thích rõ từng điểm. Mình đang tìm giáo viên IELTS để validate thêm. Mục tiêu không phải thay thế giám khảo — mà là cho người học phản hồi ngay lập tức thay vì chờ đợi.
 
-**"Tại sao chỉ tập trung vào lập trình viên?"**
-Vì đây là thị trường mình hiểu rõ nhất, và không ai đang làm điều này. Khi đã có chỗ đứng vững ở niche này thì mở rộng dễ hơn nhiều so với cạnh tranh trực tiếp với IELTS Liz hay British Council ngay từ đầu.
+**"Tại sao bắt đầu với lập trình viên?"**
+Vì đây là thị trường mình hiểu rõ nhất, và không ai đang làm điều này tốt. Mô hình có thể mở rộng sang các lĩnh vực khác (y tế, tài chính, giáo dục) — nhưng mở rộng dễ hơn nhiều khi đã có product-market fit với một nhóm cụ thể trước, thay vì cạnh tranh trực tiếp với IELTS Liz hay British Council ngay từ đầu với một sản phẩm generic.
 
 **"Mình có cần bỏ công việc hiện tại không?"**
 Không — ít nhất là chưa. Giai đoạn đầu cần 5–10 tiếng mỗi tuần. Nếu sản phẩm phát triển, chúng ta sẽ bàn thêm.
