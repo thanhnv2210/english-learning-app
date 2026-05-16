@@ -1,32 +1,23 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import {
-  PHENOMENON_LABELS,
-  getPhenomenonColor,
-  type AnalysisResult,
-  type ConnectedSpeechInstance,
-} from '@/lib/ielts/connected-speech/prompts'
+import type { AnalysisResult } from '@/lib/ielts/connected-speech/prompts'
 import { saveDrillResultAction, getDrillHistoryAction } from '@/app/actions/drill'
 import type { DrillText, DrillResult } from '@/lib/db/drill'
+import {
+  type EditOp,
+  type Mistake,
+  alignWords,
+  computeMistakes,
+  countMatchedWords,
+  opsToPlainText,
+  tokenize,
+} from './utils'
+import { MistakeCard } from './components/mistake-card'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type Stage = 'setup' | 'speaking' | 'results'
-
-type EditOp =
-  | { op: 'match'; orig: string; spoken: string }
-  | { op: 'sub'; orig: string; spoken: string }
-  | { op: 'del'; orig: string }
-  | { op: 'ins'; spoken: string }
-
-type Mistake = {
-  type: 'sub' | 'del'
-  original: string
-  spoken?: string
-  context: string
-  csTip?: ConnectedSpeechInstance
-}
 
 // ── Web Speech API (minimal types) ────────────────────────────────────────────
 
@@ -50,110 +41,6 @@ interface IDrillSTT extends EventTarget {
   stop(): void
 }
 
-// ── Utilities ─────────────────────────────────────────────────────────────────
-
-function normalize(w: string): string {
-  return w.toLowerCase().replace(/[^a-z0-9']/g, '')
-}
-
-function tokenize(text: string): string[] {
-  return text.trim().split(/\s+/).filter(Boolean)
-}
-
-function alignWords(orig: string[], spoken: string[]): EditOp[] {
-  const n = orig.length
-  const m = spoken.length
-  const origN = orig.map(normalize)
-  const spokenN = spoken.map(normalize)
-
-  const dp: number[][] = Array.from({ length: n + 1 }, (_, i) =>
-    Array.from({ length: m + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)),
-  )
-  for (let i = 1; i <= n; i++) {
-    for (let j = 1; j <= m; j++) {
-      dp[i][j] =
-        origN[i - 1] === spokenN[j - 1]
-          ? dp[i - 1][j - 1]
-          : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1])
-    }
-  }
-
-  const ops: EditOp[] = []
-  let i = n
-  let j = m
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && origN[i - 1] === spokenN[j - 1]) {
-      ops.unshift({ op: 'match', orig: orig[i - 1], spoken: spoken[j - 1] })
-      i--; j--
-    } else if (i > 0 && j > 0 && dp[i][j] === dp[i - 1][j - 1] + 1) {
-      ops.unshift({ op: 'sub', orig: orig[i - 1], spoken: spoken[j - 1] })
-      i--; j--
-    } else if (i > 0 && (j === 0 || dp[i][j] === dp[i - 1][j] + 1)) {
-      ops.unshift({ op: 'del', orig: orig[i - 1] })
-      i--
-    } else {
-      ops.unshift({ op: 'ins', spoken: spoken[j - 1] })
-      j--
-    }
-  }
-  return ops
-}
-
-function computeMistakes(ops: EditOp[], csInstances: ConnectedSpeechInstance[]): Mistake[] {
-  function findCsTip(word: string): ConnectedSpeechInstance | undefined {
-    const wn = normalize(word)
-    return csInstances.find((inst) =>
-      inst.original.toLowerCase().split(/\s+/).some((w) => normalize(w) === wn),
-    )
-  }
-
-  const origWords: string[] = ops
-    .filter((o) => o.op !== 'ins')
-    .map((o) => (o as { orig: string }).orig)
-
-  let origIdx = 0
-  const mistakes: Mistake[] = []
-
-  for (const op of ops) {
-    if (op.op === 'ins') continue
-    const idx = origIdx++
-    if (op.op === 'match') continue
-    const contextWords = origWords.slice(Math.max(0, idx - 2), idx + 3)
-    if (op.op === 'sub') {
-      mistakes.push({ type: 'sub', original: op.orig, spoken: op.spoken, context: contextWords.join(' '), csTip: findCsTip(op.orig) })
-    } else {
-      mistakes.push({ type: 'del', original: op.orig, context: contextWords.join(' '), csTip: findCsTip(op.orig) })
-    }
-  }
-
-  return mistakes
-    .sort((a, b) => ((b.csTip ? 2 : 0) + (b.type === 'sub' ? 1 : 0)) - ((a.csTip ? 2 : 0) + (a.type === 'sub' ? 1 : 0)))
-    .slice(0, 5)
-}
-
-function countMatchedWords(origWords: string[], spokenWords: string[]): number {
-  if (spokenWords.length === 0) return 0
-  const ops = alignWords(origWords, spokenWords)
-  let origIdx = 0
-  let lastMatchedOrig = -1
-  for (const op of ops) {
-    if (op.op === 'ins') continue   // extra spoken word — don't advance orig pointer
-    if (op.op === 'match') lastMatchedOrig = origIdx
-    origIdx++
-  }
-  return lastMatchedOrig + 1
-}
-
-function opsToPlainText(ops: EditOp[]): string {
-  return ops
-    .filter((op) => op.op !== 'ins')
-    .map((op) => {
-      if (op.op === 'sub') return `[${op.orig}]`
-      if (op.op === 'del') return `~~${op.orig}~~`
-      return op.orig
-    })
-    .join(' ')
-}
 
 const DIFFICULTY_COLORS = {
   easy: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
@@ -877,53 +764,3 @@ export function DrillView({
   )
 }
 
-// ── Mistake card ───────────────────────────────────────────────────────────────
-
-function MistakeCard({ mistake, rank }: { mistake: Mistake; rank: number }) {
-  const c = mistake.csTip ? getPhenomenonColor(mistake.csTip.phenomenon) : null
-  return (
-    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-      <div className="flex items-start gap-3">
-        <span className="shrink-0 text-sm font-bold text-faint w-6 text-right">#{rank}</span>
-        <div className="flex-1 space-y-1.5">
-          {mistake.type === 'sub' ? (
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold text-foreground">Wrong word:</span>
-              <span className="font-mono rounded px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400">
-                &ldquo;{mistake.original}&rdquo;
-              </span>
-              <span className="text-faint text-xs">— you said —</span>
-              <span className="font-mono rounded px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
-                &ldquo;{mistake.spoken}&rdquo;
-              </span>
-            </div>
-          ) : (
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold text-foreground">Skipped:</span>
-              <span className="font-mono rounded px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 line-through">
-                &ldquo;{mistake.original}&rdquo;
-              </span>
-            </div>
-          )}
-          <p className="text-xs text-faint">
-            Context: &ldquo;<span className="italic">{mistake.context}</span>&rdquo;
-          </p>
-        </div>
-      </div>
-
-      {mistake.csTip && c && (
-        <div className={`rounded-lg border p-3 ${c.bg} ${c.border} ml-9`}>
-          <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${c.text}`}>
-            Connected Speech: {PHENOMENON_LABELS[mistake.csTip.phenomenon]}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            <span className={`font-mono font-semibold ${c.text}`}>
-              {mistake.csTip.original} → {mistake.csTip.transformed}
-            </span>
-            {' — '}{mistake.csTip.tip}
-          </p>
-        </div>
-      )}
-    </div>
-  )
-}

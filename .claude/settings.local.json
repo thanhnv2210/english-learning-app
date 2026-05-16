@@ -97,7 +97,16 @@
       "Bash(pnpm exec:*)",
       "Bash(grep -rn \"revalidatePath\\(''''/'''', ''''layout''''\\)\" app/actions/)",
       "Bash(find src:*)",
-      "Bash(echo \"=== Large files \\(>200 lines\\) ===\")"
+      "Bash(echo \"=== Large files \\(>200 lines\\) ===\")",
+      "Bash(head -909 /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/essay-builder/essay-builder-view.tsx)",
+      "Bash(cp /tmp/essay-builder-clean.tsx /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/essay-builder/essay-builder-view.tsx)",
+      "Bash(wc -l /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/essay-builder/essay-builder-view.tsx)",
+      "Bash(head -707 /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/writing/writing-task.tsx)",
+      "Bash(cp /tmp/wt-clean.tsx /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/writing/writing-task.tsx)",
+      "Bash(wc -l /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/writing/writing-task.tsx)",
+      "Bash(head -769 /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/speaking/drill/drill-view.tsx)",
+      "Bash(cp /tmp/dv-final.tsx /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/speaking/drill/drill-view.tsx)",
+      "Bash(wc -l /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/speaking/drill/drill-view.tsx)"
     ]
   }
 }
