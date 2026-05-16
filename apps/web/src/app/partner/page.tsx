@@ -77,6 +77,12 @@ export default function PartnerLandingPage() {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/doi-tac"
+              className="rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Tiếng Việt
+            </Link>
             <a
               href="#contact"
               className="rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
