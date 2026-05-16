@@ -5,5 +5,9 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "devDependencies": {
+    "@vitest/ui": "^4.1.6",
+    "vitest": "^4.1.6"
+  }
 }
