@@ -130,12 +130,16 @@ export type PhaseStatus =
   | { type: 'active'; phase: PlanPhase; daysIntoPhase: number; daysRemaining: number; phaseLengthDays: number; overallPct: number }
   | { type: 'complete' }
 
-export function getCurrentPhaseStatus(now: Date): PhaseStatus {
-  if (now < PLAN_START) return { type: 'before' }
-  if (now >= PLAN_END)  return { type: 'complete' }
+export function getCurrentPhaseStatus(
+  now: Date,
+  planStart = PLAN_START,
+  planEnd = PLAN_END,
+): PhaseStatus {
+  if (now < planStart) return { type: 'before' }
+  if (now >= planEnd)  return { type: 'complete' }
 
-  const totalMs = PLAN_END.getTime() - PLAN_START.getTime()
-  const elapsedMs = now.getTime() - PLAN_START.getTime()
+  const totalMs = planEnd.getTime() - planStart.getTime()
+  const elapsedMs = now.getTime() - planStart.getTime()
   const overallPct = Math.round((elapsedMs / totalMs) * 100)
 
   for (const phase of PHASES) {

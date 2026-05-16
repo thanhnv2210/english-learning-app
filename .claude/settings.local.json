@@ -94,7 +94,10 @@
       "Bash(python3 -c \":*)",
       "Bash(source .env.local)",
       "Bash(echo $DATABASE_URL)",
-      "Bash(pnpm exec:*)"
+      "Bash(pnpm exec:*)",
+      "Bash(grep -rn \"revalidatePath\\(''''/'''', ''''layout''''\\)\" app/actions/)",
+      "Bash(find src:*)",
+      "Bash(echo \"=== Large files \\(>200 lines\\) ===\")"
     ]
   }
 }

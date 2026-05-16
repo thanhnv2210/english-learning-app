@@ -9,13 +9,15 @@ import {
   createProjectEpic, deleteProjectEpic,
   type TicketStatus, type TicketPriority, type TicketType, type SprintStatus,
 } from '@/lib/db/projects'
+import { getCurrentUser } from '@/lib/db/user'
 
 const REVALIDATE = () => revalidatePath('/projects', 'layout')
 
 // ── Projects ──────────────────────────────────────────────────────────────────
 
 export async function createProjectAction(data: { name: string; key: string; description?: string }) {
-  const project = await createProject(data)
+  const user = await getCurrentUser()
+  const project = await createProject({ ...data, userId: user.id })
   REVALIDATE()
   return project
 }

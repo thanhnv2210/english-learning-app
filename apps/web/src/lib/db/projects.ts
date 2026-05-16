@@ -17,17 +17,15 @@ export type ProjectEpic  = typeof projectEpics.$inferSelect
 
 // ── Project ───────────────────────────────────────────────────────────────────
 
-const DEFAULT_PROJECT = { name: 'My Project', key: 'PROJ', description: 'Default project' }
-
-export async function getDefaultProject(): Promise<Project> {
-  const existing = await db.select().from(projects).limit(1)
+export async function getDefaultProject(userId: number): Promise<Project> {
+  const existing = await db.select().from(projects).where(eq(projects.userId, userId)).limit(1)
   if (existing[0]) return existing[0]
-  const [created] = await db.insert(projects).values(DEFAULT_PROJECT).returning()
+  const [created] = await db.insert(projects).values({ name: 'My Project', key: 'PROJ', description: 'Default project', userId }).returning()
   return created
 }
 
-export async function getAllProjects(): Promise<Project[]> {
-  return db.select().from(projects).orderBy(asc(projects.createdAt))
+export async function getAllProjects(userId: number): Promise<Project[]> {
+  return db.select().from(projects).where(eq(projects.userId, userId)).orderBy(asc(projects.createdAt))
 }
 
 export async function getProjectById(id: number): Promise<Project | null> {
@@ -36,12 +34,19 @@ export async function getProjectById(id: number): Promise<Project | null> {
 }
 
 export async function createProject(data: {
+  userId: number
   name: string
   key: string
   description?: string
 }): Promise<Project> {
   const [row] = await db.insert(projects).values(data).returning()
   return row
+}
+
+export async function getProjectSprints(projectKey: string): Promise<Sprint[]> {
+  const proj = await db.select({ id: projects.id }).from(projects).where(eq(projects.key, projectKey)).limit(1)
+  if (!proj[0]) return []
+  return db.select().from(sprints).where(eq(sprints.projectId, proj[0].id)).orderBy(asc(sprints.startDate))
 }
 
 export async function updateProject(

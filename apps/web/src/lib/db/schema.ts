@@ -296,6 +296,7 @@ export const userDomainPreferences = pgTable(
 
 export const connectedSpeechAnalyses = pgTable('connected_speech_analyses', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   originalText: text('original_text').notNull(),
   transformedText: text('transformed_text').notNull(),
   instances: jsonb('instances').notNull().$type<import('@/lib/ielts/connected-speech/prompts').ConnectedSpeechInstance[]>(),
@@ -432,6 +433,7 @@ export const essayBuilderConfigs = pgTable(
 
 export const aiGeneratedContent = pgTable('ai_generated_content', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   skill: text('skill').notNull(), // 'writing_task1' | 'writing_task2' | 'speaking'
   domain: text('domain').notNull(),
   topic: text('topic').notNull(),
@@ -828,12 +830,13 @@ export const campaignConfigs = pgTable('campaign_configs', {
 
 export const projects = pgTable('projects', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
-  key: text('key').notNull().unique(),       // short code e.g. "PROJ"
+  key: text('key').notNull(),                // short code e.g. "PROJ"; unique per user
   description: text('description'),
   ticketCounter: integer('ticket_counter').notNull().default(0),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-})
+}, (t) => [unique().on(t.userId, t.key)])
 
 export const sprints = pgTable('sprints', {
   id: serial('id').primaryKey(),

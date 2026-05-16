@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { saveOfficialResultAction, deleteOfficialResultAction } from '@/app/actions/learning-plan'
 import { getCurrentPhaseStatus, daysUntil, PLAN_START, PLAN_END } from '@/lib/ielts/plan-phases'
 
+type PlanBounds = { planStart?: Date; planEnd?: Date }
+
 type OfficialResult = {
   id: number
   userId: number
@@ -311,12 +313,14 @@ function ResultCard({ result }: { result: OfficialResult }) {
 
 // ─── Today's Focus Card ──────────────────────────────────────────────────────
 
-function TodayFocusCard() {
+function TodayFocusCard({ planStart, planEnd }: PlanBounds) {
   const now = new Date()
-  const status = getCurrentPhaseStatus(now)
+  const resolvedPlanStart = planStart ?? PLAN_START
+  const resolvedPlanEnd   = planEnd   ?? PLAN_END
+  const status = getCurrentPhaseStatus(now, resolvedPlanStart, resolvedPlanEnd)
 
   if (status.type === 'before') {
-    const days = daysUntil(PLAN_START, now)
+    const days = daysUntil(resolvedPlanStart, now)
     return (
       <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
         <p className="text-sm font-semibold text-foreground">Plan starts in {days} day{days !== 1 ? 's' : ''}</p>
@@ -337,7 +341,7 @@ function TodayFocusCard() {
   }
 
   const { phase, daysRemaining, phaseLengthDays, daysIntoPhase, overallPct } = status
-  const totalDays = Math.ceil((PLAN_END.getTime() - PLAN_START.getTime()) / 86_400_000)
+  const totalDays = Math.ceil((resolvedPlanEnd.getTime() - resolvedPlanStart.getTime()) / 86_400_000)
 
   const alertStyles: Record<string, string> = {
     normal:  'border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30',
@@ -389,7 +393,7 @@ function TodayFocusCard() {
       <div className="mb-4">
         <div className="mb-1 flex justify-between text-xs text-muted-foreground">
           <span>Overall plan progress</span>
-          <span>{overallPct}% · Day {Math.floor((now.getTime() - PLAN_START.getTime()) / 86_400_000) + 1} of {totalDays}</span>
+          <span>{overallPct}% · Day {Math.floor((now.getTime() - resolvedPlanStart.getTime()) / 86_400_000) + 1} of {totalDays}</span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
           <div
@@ -449,14 +453,14 @@ function TodayFocusCard() {
 
 // ─── Main View ────────────────────────────────────────────────────────────────
 
-export function LearningPlanView({ initialResults }: { initialResults: OfficialResult[] }) {
+export function LearningPlanView({ initialResults, planStart, planEnd }: { initialResults: OfficialResult[] } & PlanBounds) {
   const [showForm, setShowForm] = useState(false)
   const [activeTab, setActiveTab] = useState<'plan' | 'analysis' | 'results'>('plan')
 
   return (
     <div className="space-y-6">
       {/* Today's Focus */}
-      <TodayFocusCard />
+      <TodayFocusCard planStart={planStart} planEnd={planEnd} />
 
       {/* Target Banner */}
       <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/30">
