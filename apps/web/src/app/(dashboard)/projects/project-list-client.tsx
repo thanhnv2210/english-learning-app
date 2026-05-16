@@ -31,6 +31,7 @@ export function ProjectList({ initialProjects }: { initialProjects: ProjectWithS
     if (!name.trim() || !key.trim()) return
     const optimistic: ProjectWithSprint = {
       id: Date.now(),
+      userId: null,
       name: name.trim(),
       key: key.trim().toUpperCase(),
       description: description.trim() || null,

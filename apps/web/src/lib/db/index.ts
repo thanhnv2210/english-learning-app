@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
-import * as schema from './schema'
+import * as schema from './schema/index'
 
 // In development, hot-module-replacement re-executes this file on every reload.
 // Without the singleton, each reload opens a new connection pool and the old one

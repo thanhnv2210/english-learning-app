@@ -15,6 +15,13 @@
       "when": 1775461201100,
       "tag": "0001_hot_santa_claus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778933059292,
+      "tag": "0002_bitter_toro",
+      "breakpoints": true
     }
   ]
 }
