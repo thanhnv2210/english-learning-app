@@ -106,7 +106,10 @@
       "Bash(wc -l /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/writing/writing-task.tsx)",
       "Bash(head -769 /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/speaking/drill/drill-view.tsx)",
       "Bash(cp /tmp/dv-final.tsx /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/speaking/drill/drill-view.tsx)",
-      "Bash(wc -l /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/speaking/drill/drill-view.tsx)"
+      "Bash(wc -l /Users/ThanhNguyen/AI_WS/english-learning-app/apps/web/src/app/\\\\\\(dashboard\\\\\\)/speaking/drill/drill-view.tsx)",
+      "Bash(git push:*)",
+      "Bash(git:*)",
+      "Bash(nc -z -w1 localhost 3128)"
     ]
   }
 }
