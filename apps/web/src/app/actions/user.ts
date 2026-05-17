@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { updateTargetProfile, updateModelPreference, updateShowSystemData, getCurrentUser } from '@/lib/db/user'
 
-const VALID_PROFILES = ['IELTS_Academic_6.5', 'IELTS_Academic_7.5', 'Business_Fluent'] as const
+const VALID_PROFILES = ['IELTS_Academic_5', 'IELTS_Academic_5.5', 'IELTS_Academic_6', 'IELTS_Academic_6.5', 'IELTS_Academic_7', 'Business_Fluent'] as const
 
 export async function updateModelPreferenceAction(preference: 'auto' | 'free'): Promise<void> {
   const user = await getCurrentUser()

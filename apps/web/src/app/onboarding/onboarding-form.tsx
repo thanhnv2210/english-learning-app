@@ -5,9 +5,12 @@ import { completeOnboardingAction } from '@/app/actions/onboarding'
 import { getSuggestedPages, type SuggestedPage } from '@/lib/onboarding/suggestions'
 
 const PROFILES = [
+  { value: 'IELTS_Academic_5',   label: 'IELTS Band 5',   description: 'Modest user — partial command of the language' },
+  { value: 'IELTS_Academic_5.5', label: 'IELTS Band 5.5', description: 'Modest user — partial grasp of overall meaning' },
+  { value: 'IELTS_Academic_6',   label: 'IELTS Band 6',   description: 'Competent user — generally effective despite inaccuracies' },
   { value: 'IELTS_Academic_6.5', label: 'IELTS Band 6.5', description: 'University admission / general competency' },
-  { value: 'IELTS_Academic_7.5', label: 'IELTS Band 7.5', description: 'Competitive postgrad / professional registration' },
-  { value: 'Business_Fluent',    label: 'Business Fluent', description: 'Professional workplace communication' },
+  { value: 'IELTS_Academic_7',   label: 'IELTS Band 7',   description: 'Good user — handles complex language with minor errors' },
+  { value: 'Business_Fluent',    label: 'Professional',    description: 'Professional workplace communication' },
 ]
 
 const SKILLS = [
@@ -168,32 +171,25 @@ export function OnboardingForm({ defaultName, defaultProfile }: Props) {
 
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-foreground">Target profile</label>
-            <div className="flex flex-col gap-2">
-              {PROFILES.map((p) => {
-                const active = profile === p.value
-                return (
-                  <button
-                    key={p.value}
-                    onClick={() => setProfile(p.value)}
-                    className={`flex items-center justify-between rounded-xl border-2 px-4 py-3 text-left transition-all ${
-                      active
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                        : 'border-border bg-card hover:opacity-80'
-                    }`}
-                  >
-                    <div>
-                      <p className={`text-sm font-semibold ${active ? 'text-blue-700 dark:text-blue-300' : 'text-foreground'}`}>
-                        {p.label}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{p.description}</p>
-                    </div>
-                    <div className={`h-4 w-4 shrink-0 rounded-full border-2 transition-colors ${
-                      active ? 'border-transparent bg-blue-500' : 'border-border'
-                    }`} />
-                  </button>
-                )
-              })}
+            <div className="relative rounded-xl border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20">
+              <select
+                value={profile}
+                onChange={(e) => setProfile(e.target.value)}
+                className="w-full appearance-none bg-transparent px-4 py-3 pr-10 text-sm font-semibold text-foreground focus:outline-none cursor-pointer"
+              >
+                {PROFILES.map((p) => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
+            <p className="text-xs text-muted-foreground px-1">
+              {PROFILES.find((p) => p.value === profile)?.description}
+            </p>
           </div>
 
           <div className="flex flex-col gap-3">
