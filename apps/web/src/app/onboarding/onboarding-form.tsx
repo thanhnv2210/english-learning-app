@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react'
 import { completeOnboardingAction } from '@/app/actions/onboarding'
-import { getSuggestedPages, type SuggestedPage } from '@/lib/onboarding/suggestions'
 
 const PROFILES = [
   { value: 'IELTS_Academic_5',   label: 'IELTS Band 5',   description: 'Modest user — partial command of the language' },
@@ -40,15 +39,12 @@ export function OnboardingForm({ defaultName, defaultProfile }: Props) {
   // Step 1
   const [bio, setBio] = useState('')
   const [weakSkills, setWeakSkills] = useState<string[]>([])
+  const [returningUser, setReturningUser] = useState(false)
 
   // Step 2
   const [profile, setProfile] = useState(defaultProfile)
   const [selectedReasons, setSelectedReasons] = useState<string[]>([])
   const [otherReason, setOtherReason] = useState('')
-
-  // Step 3
-  const [suggestions, setSuggestions] = useState<SuggestedPage[]>([])
-  const [selectedPages, setSelectedPages] = useState<string[]>([])
 
   function toggleSkill(skill: string) {
     setWeakSkills((prev) =>
@@ -62,24 +58,7 @@ export function OnboardingForm({ defaultName, defaultProfile }: Props) {
     )
   }
 
-  function togglePage(href: string) {
-    setSelectedPages((prev) =>
-      prev.includes(href) ? prev.filter((p) => p !== href) : [...prev, href]
-    )
-  }
-
-  function goToStep3() {
-    const allReasons = [
-      ...selectedReasons,
-      ...(otherReason.trim() ? [otherReason.trim()] : []),
-    ]
-    const pages = getSuggestedPages(weakSkills, allReasons)
-    setSuggestions(pages)
-    setSelectedPages(pages.map((p) => p.href))
-    setStep(3)
-  }
-
-  function submit(applyPages: boolean) {
+  function submit() {
     const allReasons = [
       ...selectedReasons,
       ...(otherReason.trim() ? [otherReason.trim()] : []),
@@ -90,7 +69,8 @@ export function OnboardingForm({ defaultName, defaultProfile }: Props) {
         weakSkills,
         targetProfile: profile,
         onboardingReasons: allReasons,
-        favouritePages: applyPages ? selectedPages : [],
+        favouritePages: [],
+        returningUser,
       })
     )
   }
@@ -99,7 +79,7 @@ export function OnboardingForm({ defaultName, defaultProfile }: Props) {
     <div className="w-full max-w-lg">
       {/* Progress */}
       <div className="flex items-center gap-2 mb-8">
-        {[1, 2, 3].map((n) => (
+        {[1, 2].map((n) => (
           <div key={n} className="flex items-center gap-2 flex-1">
             <div className={`h-1.5 flex-1 rounded-full transition-colors ${n <= step ? 'bg-blue-500' : 'bg-muted'}`} />
           </div>
@@ -151,6 +131,38 @@ export function OnboardingForm({ defaultName, defaultProfile }: Props) {
               })}
             </div>
           </div>
+
+          <button
+            onClick={() => setReturningUser((v) => !v)}
+            className={`flex items-center justify-between rounded-xl border-2 px-4 py-3 transition-all ${
+              returningUser
+                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                : 'border-border bg-card hover:opacity-80'
+            }`}
+          >
+            <div className="text-left">
+              <p className={`text-sm font-semibold ${returningUser ? 'text-green-700 dark:text-green-300' : 'text-foreground'}`}>
+                I&apos;m already familiar with this app
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Skip the guided setup and go straight to your dashboard
+              </p>
+            </div>
+            <div className={`relative h-6 w-11 rounded-full transition-colors ${returningUser ? 'bg-green-500' : 'bg-muted'}`}>
+              <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform ${returningUser ? 'translate-x-6' : 'translate-x-1'}`} />
+            </div>
+          </button>
+
+          {returningUser && (
+            <div className="flex items-start gap-3 rounded-xl border border-amber-400 bg-amber-50 dark:bg-amber-900/20 px-4 py-3">
+              <svg className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+              <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
+                All guided steps — including suggested bookmarks and skill recommendations — will be skipped. You can restart the setup anytime from <span className="font-semibold">Settings</span>.
+              </p>
+            </div>
+          )}
 
           <button
             onClick={() => setStep(2)}
@@ -228,79 +240,16 @@ export function OnboardingForm({ defaultName, defaultProfile }: Props) {
               ← Back
             </button>
             <button
-              onClick={goToStep3}
-              className="flex-[2] rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
-            >
-              Continue →
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Step 3: Suggested pages ───────────────────────────────────────── */}
-      {step === 3 && (
-        <div className="flex flex-col gap-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Suggested bookmarks</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Based on your goals, these pages will be pinned to your sidebar. Deselect any you don&apos;t want.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {suggestions.map((page) => {
-              const selected = selectedPages.includes(page.href)
-              return (
-                <button
-                  key={page.href}
-                  onClick={() => togglePage(page.href)}
-                  className={`flex items-start gap-3 rounded-xl border-2 px-4 py-3 text-left transition-all ${
-                    selected
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                      : 'border-border bg-card opacity-50'
-                  }`}
-                >
-                  <div className={`mt-0.5 h-4 w-4 shrink-0 rounded border-2 flex items-center justify-center transition-colors ${
-                    selected ? 'border-blue-500 bg-blue-500' : 'border-border'
-                  }`}>
-                    {selected && <span className="text-white text-[10px] font-bold">✓</span>}
-                  </div>
-                  <div>
-                    <p className={`text-sm font-semibold ${selected ? 'text-blue-700 dark:text-blue-300' : 'text-foreground'}`}>
-                      {page.label}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{page.reason}</p>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-
-          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
-            <button
-              onClick={() => setStep(2)}
-              disabled={isPending}
-              className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-muted-foreground hover:opacity-80 transition-colors disabled:opacity-40"
-            >
-              ← Back
-            </button>
-            <button
-              onClick={() => submit(false)}
-              disabled={isPending}
-              className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-muted-foreground hover:opacity-80 transition-colors disabled:opacity-40"
-            >
-              Skip
-            </button>
-            <button
-              onClick={() => submit(true)}
+              onClick={submit}
               disabled={isPending}
               className="flex-[2] rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:opacity-40"
             >
-              {isPending ? 'Saving…' : 'Apply →'}
+              {isPending ? 'Saving…' : 'Finish →'}
             </button>
           </div>
         </div>
       )}
+
     </div>
   )
 }

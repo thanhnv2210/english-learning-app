@@ -12,6 +12,7 @@ export default async function SettingsPage() {
         tier={user.tier}
         modelPreference={(user.modelPreference ?? 'auto') as 'auto' | 'free'}
         showSystemData={user.showSystemData}
+        returningUser={user.returningUser}
       />
     </div>
   )

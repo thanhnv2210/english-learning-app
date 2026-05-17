@@ -3,6 +3,7 @@
 import { useOptimistic, useTransition, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateTargetProfileAction, updateModelPreferenceAction, updateShowSystemDataAction } from '@/app/actions/user'
+import { resetOnboardingAction } from '@/app/actions/onboarding'
 import { useTheme } from '@/components/theme-provider'
 
 type TargetProfileValue = 'IELTS_Academic_5' | 'IELTS_Academic_5.5' | 'IELTS_Academic_6' | 'IELTS_Academic_6.5' | 'IELTS_Academic_7' | 'Business_Fluent'
@@ -90,11 +91,13 @@ export function SettingsForm({
   tier,
   modelPreference,
   showSystemData,
+  returningUser,
 }: {
   currentProfile: string
   tier: string
   modelPreference: 'auto' | 'free'
   showSystemData: boolean
+  returningUser: boolean
 }) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -305,6 +308,33 @@ export function SettingsForm({
           </div>
         </section>
       )}
+
+      {/* Onboarding */}
+      <section>
+        <h2 className="text-sm font-semibold text-foreground mb-1">Onboarding</h2>
+        <p className="text-xs text-muted-foreground mb-3">
+          {returningUser
+            ? 'You skipped the guided setup. Reset to go through it as a new user.'
+            : 'Restart the onboarding flow to reconfigure your profile and bookmarks from scratch.'}
+        </p>
+        <button
+          onClick={() => startTransition(() => resetOnboardingAction())}
+          disabled={isPending}
+          className="w-full rounded-xl border-2 border-border bg-card p-4 text-left transition-all hover:opacity-80 disabled:opacity-60"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Reset onboarding</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Clears your setup choices and takes you back to the onboarding flow
+              </p>
+            </div>
+            <svg className="h-4 w-4 shrink-0 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+        </button>
+      </section>
     </div>
   )
 }

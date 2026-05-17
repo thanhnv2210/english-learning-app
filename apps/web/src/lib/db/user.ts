@@ -93,6 +93,16 @@ export async function updateShowSystemData(userId: number, showSystemData: boole
   await db.update(users).set({ showSystemData }).where(eq(users.id, userId))
 }
 
+export async function resetOnboarding(userId: number): Promise<void> {
+  await db.update(users).set({
+    onboardingCompletedAt: null,
+    returningUser: false,
+    bio: null,
+    weakSkills: [],
+    onboardingReasons: [],
+  }).where(eq(users.id, userId))
+}
+
 export async function completeOnboarding(
   userId: number,
   data: {
@@ -101,6 +111,7 @@ export async function completeOnboarding(
     targetProfile: string
     onboardingReasons: string[]
     favouritePages: string[]
+    returningUser: boolean
   },
 ): Promise<void> {
   await db.update(users).set({
@@ -109,6 +120,7 @@ export async function completeOnboarding(
     targetProfile: data.targetProfile,
     onboardingReasons: data.onboardingReasons,
     favouritePages: data.favouritePages,
+    returningUser: data.returningUser,
     onboardingCompletedAt: new Date(),
   }).where(eq(users.id, userId))
 }
