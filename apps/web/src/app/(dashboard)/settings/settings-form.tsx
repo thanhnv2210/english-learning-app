@@ -107,6 +107,7 @@ export function SettingsForm({
   const [savedProfile, setSavedProfile] = useState<TargetProfileValue>(currentProfile as TargetProfileValue)
   const [pendingProfile, setPendingProfile] = useState<TargetProfileValue | null>(null)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
 
   function handleProfileChange(profile: TargetProfileValue) {
     if (profile === savedProfile) { setPendingProfile(null); return }
@@ -318,7 +319,7 @@ export function SettingsForm({
             : 'Restart the onboarding flow to reconfigure your profile and bookmarks from scratch.'}
         </p>
         <button
-          onClick={() => startTransition(() => resetOnboardingAction())}
+          onClick={() => setShowResetConfirm(true)}
           disabled={isPending}
           className="w-full rounded-xl border-2 border-border bg-card p-4 text-left transition-all hover:opacity-80 disabled:opacity-60"
         >
@@ -335,6 +336,44 @@ export function SettingsForm({
           </div>
         </button>
       </section>
+
+      {/* Reset onboarding confirm dialog */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-card p-6 shadow-xl">
+            <h3 className="text-base font-semibold text-foreground mb-2">Reset onboarding?</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              This will clear your current setup — bio, weak skills, study reasons, and onboarding history. You&apos;ll be taken back to the onboarding flow as a new user.
+            </p>
+            <div className="flex items-start gap-3 rounded-xl border border-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2.5 mb-6">
+              <svg className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                Your theme will be reset to <span className="font-semibold">Dark mode</span> as the default.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-muted-foreground hover:opacity-80 transition-opacity"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowResetConfirm(false)
+                  setTheme('dark')
+                  startTransition(() => resetOnboardingAction())
+                }}
+                className="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

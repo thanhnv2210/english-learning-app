@@ -93,6 +93,12 @@ export async function updateShowSystemData(userId: number, showSystemData: boole
   await db.update(users).set({ showSystemData }).where(eq(users.id, userId))
 }
 
+export async function unlockPage(userId: number, href: string): Promise<void> {
+  const [user] = await db.select({ unlockedPages: users.unlockedPages }).from(users).where(eq(users.id, userId))
+  if (!user || user.unlockedPages.includes(href)) return
+  await db.update(users).set({ unlockedPages: [...user.unlockedPages, href] }).where(eq(users.id, userId))
+}
+
 export async function resetOnboarding(userId: number): Promise<void> {
   await db.update(users).set({
     onboardingCompletedAt: null,

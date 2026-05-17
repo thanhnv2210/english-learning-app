@@ -13,6 +13,7 @@ import {
   ADMIN_GROUP,
   ALL_NAV_ITEMS,
   TAG_STYLES,
+  ALWAYS_VISIBLE_HREFS,
 } from '@/lib/nav-config'
 
 const ALL_ITEMS: NavItem[] = ALL_NAV_ITEMS
@@ -35,6 +36,8 @@ export function MobileHeader({
   userName,
   userImage,
   pageConfigs = {},
+  isNewUser = false,
+  unlockedPages = [],
 }: {
   targetProfile?: string
   favouritePages?: string[]
@@ -43,6 +46,8 @@ export function MobileHeader({
   userName?: string
   userImage?: string
   pageConfigs?: PageConfigs
+  isNewUser?: boolean
+  unlockedPages?: string[]
 }) {
   const [open, setOpen] = useState(false)
   const [favs, setFavs] = useState<string[]>(favouritePages)
@@ -52,6 +57,7 @@ export function MobileHeader({
   const visibleGroups = isAdmin ? [...NAV_GROUPS, ADMIN_GROUP] : NAV_GROUPS
   const visibleItems = (isAdmin ? ALL_NAV_ITEMS : ALL_NAV_ITEMS.filter((item) => !item.href.startsWith('/admin')))
     .filter((item) => !pageConfigs[item.href]?.isDisabled)
+    .filter((item) => !isNewUser || ALWAYS_VISIBLE_HREFS.has(item.href) || unlockedPages.includes(item.href))
 
   const hasPins = favs.length > 0
   const pinnedItems = visibleItems.filter((item) => favs.includes(item.href))
@@ -142,32 +148,51 @@ export function MobileHeader({
               {/* ── Full page list (always shown when no pins, collapsible when pins exist) ── */}
               {(!hasPins || allPagesOpen) && (
                 <>
-                  <DrawerLink
-                    item={STANDALONE[0]}
-                    pathname={pathname}
-                    isFav={favs.includes(STANDALONE[0].href)}
-                    onToggleFav={handleToggleFav}
-                    onClose={handleClose}
-                  />
-                  {visibleGroups.map((group) => (
-                    <div key={group.label} className="mt-3">
-                      <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-faint">
-                        {group.label}
-                      </p>
-                      {group.items.filter((item) => !pageConfigs[item.href]?.isDisabled).map((item) => (
+                  {!isNewUser && (
+                    <DrawerLink
+                      item={STANDALONE[0]}
+                      pathname={pathname}
+                      isFav={favs.includes(STANDALONE[0].href)}
+                      onToggleFav={handleToggleFav}
+                      onClose={handleClose}
+                    />
+                  )}
+                  {isNewUser && !isAdmin ? (
+                    <div className="mt-3">
+                      <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-faint">Getting started</p>
+                      {visibleItems.filter((item) => item.href !== '/').map((item) => (
                         <DrawerLink
                           key={item.href}
                           item={item}
                           pathname={pathname}
-                          indent
                           isFav={favs.includes(item.href)}
                           onToggleFav={handleToggleFav}
-                          tag={pageConfigs[item.href]?.tag}
+                          tag={unlockedPages.includes(item.href) ? 'new' : (pageConfigs[item.href]?.tag ?? null)}
                           onClose={handleClose}
                         />
                       ))}
                     </div>
-                  ))}
+                  ) : (
+                    visibleGroups.map((group) => (
+                      <div key={group.label} className="mt-3">
+                        <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-faint">
+                          {group.label}
+                        </p>
+                        {group.items.filter((item) => !pageConfigs[item.href]?.isDisabled).map((item) => (
+                          <DrawerLink
+                            key={item.href}
+                            item={item}
+                            pathname={pathname}
+                            indent
+                            isFav={favs.includes(item.href)}
+                            onToggleFav={handleToggleFav}
+                            tag={pageConfigs[item.href]?.tag}
+                            onClose={handleClose}
+                          />
+                        ))}
+                      </div>
+                    ))
+                  )}
                 </>
               )}
             </nav>

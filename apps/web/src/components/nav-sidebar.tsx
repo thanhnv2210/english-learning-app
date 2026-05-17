@@ -15,6 +15,7 @@ import {
   SETTINGS_ITEM,
   ALL_NAV_ITEMS,
   TAG_STYLES,
+  ALWAYS_VISIBLE_HREFS,
 } from '@/lib/nav-config'
 
 const GROUPS = [...NAV_GROUPS, ADMIN_GROUP]
@@ -61,6 +62,8 @@ export function NavSidebar({
   userImage,
   isAdmin = false,
   pageConfigs = {},
+  isNewUser = false,
+  unlockedPages = [],
 }: {
   targetProfile?: string
   favouritePages?: string[]
@@ -69,6 +72,8 @@ export function NavSidebar({
   userImage?: string
   isAdmin?: boolean
   pageConfigs?: PageConfigs
+  isNewUser?: boolean
+  unlockedPages?: string[]
 }) {
   const pathname = usePathname()
 
@@ -368,8 +373,8 @@ export function NavSidebar({
           </div>
         )}
 
-        {/* Standalone top */}
-        {STANDALONE.map((item) => (
+        {/* Standalone top — hidden for new users (Dashboard moves into the flat list) */}
+        {!isNewUser && STANDALONE.map((item) => (
           <NavLink
             key={item.href}
             item={item}
@@ -380,8 +385,32 @@ export function NavSidebar({
           />
         ))}
 
-        {/* Collapsible groups */}
-        {(isAdmin ? GROUPS : NAV_GROUPS).map((group) => {
+        {/* New-user mode: flat list of allowed pages only */}
+        {isNewUser && !isAdmin ? (
+          <>
+            <p className="mt-3 mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-faint">Getting started</p>
+            {ALL_NAV_ITEMS
+              .filter((item) =>
+                !pageConfigs[item.href]?.isDisabled &&
+                (ALWAYS_VISIBLE_HREFS.has(item.href) || unlockedPages.includes(item.href))
+              )
+              .map((item) => (
+                <NavLink
+                  key={item.href}
+                  item={item}
+                  pathname={pathname}
+                  isFav={favs.includes(item.href)}
+                  onToggleFav={handleToggleFav}
+                  tag={unlockedPages.includes(item.href) ? 'new' : (pageConfigs[item.href]?.tag ?? null)}
+                  tourId={item.href === '/getting-started' ? 'getting-started' : undefined}
+                />
+              ))
+            }
+          </>
+        ) : (
+
+        /* Collapsible groups */
+        (isAdmin ? GROUPS : NAV_GROUPS).map((group) => {
           const open = openGroups[group.label] ?? false
           const hasActive = groupContainsActive(group, pathname)
 
@@ -422,7 +451,8 @@ export function NavSidebar({
               )}
             </div>
           )
-        })}
+        })
+        )}
 
       </nav>
 

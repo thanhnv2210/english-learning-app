@@ -100,6 +100,24 @@ export const ADMIN_GROUP: NavGroup = {
 
 export const SETTINGS_ITEM: NavItem = { href: '/settings', label: 'Settings', icon: '⚙️' }
 
+// Pages always visible to new (non-returning) users regardless of what they've unlocked.
+// Stored as a Set for O(1) lookup.
+export const ALWAYS_VISIBLE_HREFS = new Set([
+  '/',
+  '/analytics',
+  '/getting-started',
+  '/cheat-sheet',
+])
+
+// Pages that become visible in the nav once the user visits them (progressive unlock).
+// Key = href prefix to match against the current URL, value = nav href to unlock.
+export const UNLOCK_MAP: Record<string, string> = {
+  '/speaking':  '/speaking',
+  '/writing':   '/writing',
+  '/reading':   '/reading',
+  '/listening': '/listening',
+}
+
 export const ALL_NAV_ITEMS: NavItem[] = [
   ...STANDALONE,
   ...NAV_GROUPS.flatMap((g) => g.items),
