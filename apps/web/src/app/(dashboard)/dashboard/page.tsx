@@ -49,6 +49,8 @@ const TOOL_LINKS = [
   { href: '/projects', icon: '📋', label: 'Projects' },
 ]
 
+const NEW_USER_LOCKED_HREFS = new Set(['/essay-builder', '/wrong-decisions', '/projects'])
+
 const SKILL_LABEL: Record<string, string> = {
   speaking: 'Speaking Pt 1',
   speaking_part2: 'Speaking Pt 2',
@@ -105,6 +107,7 @@ export default async function DashboardPage() {
   const totalSessions = sessionRow?.count ?? 0
   const wrongCount = wrongRow?.count ?? 0
   const firstName = user.name?.split(' ')[0] ?? 'there'
+  const isNewUser = !user.returningUser
 
   const bandMatch = user.targetProfile.match(/(\d+\.\d+|\d+)$/)
   const targetBand = bandMatch ? parseFloat(bandMatch[1]) : 6.5
@@ -231,16 +234,32 @@ export default async function DashboardPage() {
           Tools
         </h2>
         <div className="flex flex-wrap gap-2">
-          {TOOL_LINKS.map(({ href, icon, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            >
-              <span>{icon}</span>
-              {label}
-            </Link>
-          ))}
+          {TOOL_LINKS.map(({ href, icon, label }) => {
+            const locked = isNewUser && NEW_USER_LOCKED_HREFS.has(href)
+            if (locked) {
+              return (
+                <span
+                  key={href}
+                  title="Complete a few sessions to unlock"
+                  className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-faint cursor-not-allowed opacity-50"
+                >
+                  <span>{icon}</span>
+                  {label}
+                  <span className="ml-0.5 text-[10px]">🔒</span>
+                </span>
+              )
+            }
+            return (
+              <Link
+                key={href}
+                href={href}
+                className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <span>{icon}</span>
+                {label}
+              </Link>
+            )
+          })}
         </div>
       </section>
 

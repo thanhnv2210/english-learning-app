@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { signOut } from 'next-auth/react'
 import { toggleFavouritePageAction, reorderFavouritePagesAction } from '@/app/actions/favourite-pages'
 import {
@@ -35,6 +35,12 @@ const FONT_STORAGE = 'ielts-font-scale'
 const COLLAPSE_STORAGE = 'ielts-sidebar-collapsed'
 const NAV_GROUPS_STORAGE = 'ielts-nav-groups'
 const NAV_FAVS_EXPANDED_STORAGE = 'ielts-nav-favs-expanded'
+const SIDEBAR_WIDTH_STORAGE = 'ielts-sidebar-width'
+const NEW_USER_ORDER_STORAGE = 'ielts-newuser-nav-order'
+
+const SIDEBAR_WIDTH_DEFAULT = 208 // w-52
+const SIDEBAR_WIDTH_MIN = 160
+const SIDEBAR_WIDTH_MAX = 400
 
 function isActive(href: string, pathname: string) {
   return pathname === href || pathname.startsWith(href + '/')
@@ -88,12 +94,29 @@ export function NavSidebar({
   const [favsExpanded, setFavsExpanded] = useState(false)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
+  const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_WIDTH_DEFAULT)
+  const [newUserNavOrder, setNewUserNavOrder] = useState<string[]>([])
+
+  const isResizing = useRef(false)
+  const resizeStartX = useRef(0)
+  const resizeStartWidth = useRef(0)
 
   const isCollapsed = isNarrow || userCollapsed
 
   useEffect(() => {
     const stored = localStorage.getItem(COLLAPSE_STORAGE)
     if (stored === 'true') setUserCollapsed(true)
+
+    const widthStored = localStorage.getItem(SIDEBAR_WIDTH_STORAGE)
+    if (widthStored !== null) {
+      const w = Number(widthStored)
+      if (w >= SIDEBAR_WIDTH_MIN && w <= SIDEBAR_WIDTH_MAX) setSidebarWidth(w)
+    }
+
+    try {
+      const orderStored = localStorage.getItem(NEW_USER_ORDER_STORAGE)
+      if (orderStored) setNewUserNavOrder(JSON.parse(orderStored))
+    } catch { }
 
     const fontStored = localStorage.getItem(FONT_STORAGE)
     if (fontStored !== null) {
@@ -188,6 +211,51 @@ export function NavSidebar({
     const newOrder = [href, ...favs.filter((f) => f !== href)]
     setFavs(newOrder)
     reorderFavouritePagesAction(newOrder)
+  }
+
+  function handleNewUserDrop(currentOrderedHrefs: string[]) {
+    if (dragIndex === null || dropIndex === null || dragIndex === dropIndex) {
+      setDragIndex(null)
+      setDropIndex(null)
+      return
+    }
+    const newOrder = [...currentOrderedHrefs]
+    const [moved] = newOrder.splice(dragIndex, 1)
+    newOrder.splice(dropIndex, 0, moved)
+    setNewUserNavOrder(newOrder)
+    try { localStorage.setItem(NEW_USER_ORDER_STORAGE, JSON.stringify(newOrder)) } catch { }
+    setDragIndex(null)
+    setDropIndex(null)
+  }
+
+  const handleResizeMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing.current) return
+    const delta = e.clientX - resizeStartX.current
+    const next = Math.min(SIDEBAR_WIDTH_MAX, Math.max(SIDEBAR_WIDTH_MIN, resizeStartWidth.current + delta))
+    setSidebarWidth(next)
+  }, [])
+
+  const handleResizeMouseUp = useCallback((e: MouseEvent) => {
+    if (!isResizing.current) return
+    isResizing.current = false
+    document.body.style.cursor = ''
+    document.body.style.userSelect = ''
+    const delta = e.clientX - resizeStartX.current
+    const next = Math.min(SIDEBAR_WIDTH_MAX, Math.max(SIDEBAR_WIDTH_MIN, resizeStartWidth.current + delta))
+    try { localStorage.setItem(SIDEBAR_WIDTH_STORAGE, String(next)) } catch { }
+    window.removeEventListener('mousemove', handleResizeMouseMove)
+    window.removeEventListener('mouseup', handleResizeMouseUp)
+  }, [handleResizeMouseMove])
+
+  function handleResizeMouseDown(e: React.MouseEvent) {
+    e.preventDefault()
+    isResizing.current = true
+    resizeStartX.current = e.clientX
+    resizeStartWidth.current = sidebarWidth
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    window.addEventListener('mousemove', handleResizeMouseMove)
+    window.addEventListener('mouseup', handleResizeMouseUp)
   }
 
   const visibleNavItems = isAdmin
@@ -309,7 +377,10 @@ export function NavSidebar({
 
   // ── Expanded: full sidebar ───────────────────────────────────────────────────
   return (
-    <aside className="hidden sm:flex h-screen w-52 shrink-0 flex-col border-r border-border bg-card px-3 py-6 2xl:w-64">
+    <aside
+      className="hidden sm:flex h-screen shrink-0 flex-col border-r border-border bg-card px-3 py-6 relative"
+      style={{ width: sidebarWidth }}
+    >
       {/* Header */}
       <div className="mb-6 flex items-center justify-between px-2">
         <p data-tour="target-profile" className="text-xs font-semibold uppercase tracking-widest text-faint">
@@ -328,8 +399,8 @@ export function NavSidebar({
 
       <nav className="flex flex-col gap-0.5 overflow-y-auto flex-1">
 
-        {/* Favourites section */}
-        {favouritedItems.length > 0 && (
+        {/* Favourites section — hidden for new users */}
+        {favouritedItems.length > 0 && !isNewUser && (
           <div className="mb-2">
             <div className="flex items-center justify-between px-3 pb-1">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-500 dark:text-amber-400">
@@ -385,29 +456,45 @@ export function NavSidebar({
           />
         ))}
 
-        {/* New-user mode: flat list of allowed pages only */}
-        {isNewUser && !isAdmin ? (
-          <>
-            <p className="mt-3 mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-faint">Getting started</p>
-            {ALL_NAV_ITEMS
-              .filter((item) =>
-                !pageConfigs[item.href]?.isDisabled &&
-                (ALWAYS_VISIBLE_HREFS.has(item.href) || unlockedPages.includes(item.href))
-              )
-              .map((item) => (
-                <NavLink
+        {/* New-user mode: draggable flat list, no favourites */}
+        {isNewUser && !isAdmin ? (() => {
+          const baseItems = ALL_NAV_ITEMS.filter((item) =>
+            !pageConfigs[item.href]?.isDisabled &&
+            (ALWAYS_VISIBLE_HREFS.has(item.href) || unlockedPages.includes(item.href))
+          )
+          // Apply saved order; append newly unlocked items not yet in saved order
+          const orderedItems = newUserNavOrder.length > 0
+            ? [
+                ...newUserNavOrder.map((h) => baseItems.find((i) => i.href === h)).filter((i): i is NavItem => i !== undefined),
+                ...baseItems.filter((i) => !newUserNavOrder.includes(i.href)),
+              ]
+            : baseItems
+          const orderedHrefs = orderedItems.map((i) => i.href)
+          return (
+            <>
+              <p className="mt-3 mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-faint">Getting started</p>
+              {orderedItems.map((item, index) => (
+                <FavDragItem
                   key={item.href}
                   item={item}
+                  index={index}
                   pathname={pathname}
-                  isFav={favs.includes(item.href)}
                   onToggleFav={handleToggleFav}
+                  dragIndex={dragIndex}
+                  dropIndex={dropIndex}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDrop={() => handleNewUserDrop(orderedHrefs)}
+                  onDragEnd={handleDragEnd}
+                  onMoveToTop={handleMoveToTop}
+                  hideFavControls
                   tag={unlockedPages.includes(item.href) ? 'new' : (pageConfigs[item.href]?.tag ?? null)}
                   tourId={item.href === '/getting-started' ? 'getting-started' : undefined}
                 />
-              ))
-            }
-          </>
-        ) : (
+              ))}
+            </>
+          )
+        })() : (
 
         /* Collapsible groups */
         (isAdmin ? GROUPS : NAV_GROUPS).map((group) => {
@@ -528,6 +615,13 @@ export function NavSidebar({
           </div>
         )}
       </div>
+
+      {/* Resize handle */}
+      <div
+        onMouseDown={handleResizeMouseDown}
+        className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-400/40 active:bg-blue-400/60 transition-colors"
+        title="Drag to resize"
+      />
     </aside>
   )
 }
@@ -544,6 +638,9 @@ function FavDragItem({
   onDrop,
   onDragEnd,
   onMoveToTop,
+  hideFavControls = false,
+  tag,
+  tourId,
 }: {
   item: NavItem
   index: number
@@ -556,6 +653,9 @@ function FavDragItem({
   onDrop: () => void
   onDragEnd: () => void
   onMoveToTop: (href: string) => void
+  hideFavControls?: boolean
+  tag?: string | null
+  tourId?: string
 }) {
   const active = isActive(item.href, pathname)
   const isDragging = dragIndex === index
@@ -568,11 +668,12 @@ function FavDragItem({
       onDragOver={(e) => { e.preventDefault(); onDragOver(index) }}
       onDrop={(e) => { e.preventDefault(); onDrop() }}
       onDragEnd={onDragEnd}
+      data-tour={tourId}
       className={`group relative transition-opacity ${isDragging ? 'opacity-40' : ''} ${isDropTarget ? 'border-t-2 border-amber-400' : ''}`}
     >
       <Link
         href={item.href}
-        className={`flex items-center gap-2 rounded-lg py-2 px-3 text-sm font-medium transition-colors pr-7 ${
+        className={`flex items-center gap-2 rounded-lg py-2 px-3 text-sm font-medium transition-colors ${hideFavControls ? '' : 'pr-7'} ${
           active
             ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
             : 'text-muted-foreground hover:bg-subtle hover:text-foreground'
@@ -585,26 +686,29 @@ function FavDragItem({
           ⠿
         </span>
         <span className="text-base shrink-0">{item.icon}</span>
-        {item.label}
+        <span className="truncate">{item.label}</span>
+        {tag && <TagBadge tag={tag} />}
       </Link>
-      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
-        {index > 0 && (
+      {!hideFavControls && (
+        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
+          {index > 0 && (
+            <button
+              onClick={() => onMoveToTop(item.href)}
+              title="Move to top"
+              className="rounded p-0.5 text-xs leading-none text-faint hover:text-amber-500 transition-colors"
+            >
+              ⇑
+            </button>
+          )}
           <button
-            onClick={() => onMoveToTop(item.href)}
-            title="Move to top"
-            className="rounded p-0.5 text-xs leading-none text-faint hover:text-amber-500 transition-colors"
+            onClick={() => onToggleFav(item.href)}
+            title="Remove from favourites"
+            className="rounded p-0.5 text-sm leading-none text-amber-400 hover:text-red-400 transition-colors"
           >
-            ⇑
+            ★
           </button>
-        )}
-        <button
-          onClick={() => onToggleFav(item.href)}
-          title="Remove from favourites"
-          className="rounded p-0.5 text-sm leading-none text-amber-400 hover:text-red-400 transition-colors"
-        >
-          ★
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   )
 }
