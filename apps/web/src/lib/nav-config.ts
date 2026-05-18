@@ -19,7 +19,7 @@ export const TAG_STYLES: Record<string, { label: string; className: string }> = 
 }
 
 export const STANDALONE: NavItem[] = [
-  { href: '/', label: 'Dashboard', icon: '⊞' },
+  { href: '/dashboard', label: 'Dashboard', icon: '⊞' },
 ]
 
 export const NAV_GROUPS: NavGroup[] = [
@@ -103,7 +103,7 @@ export const SETTINGS_ITEM: NavItem = { href: '/settings', label: 'Settings', ic
 // Pages always visible to new (non-returning) users regardless of what they've unlocked.
 // Stored as a Set for O(1) lookup.
 export const ALWAYS_VISIBLE_HREFS = new Set([
-  '/',
+  '/dashboard',
   '/analytics',
   '/getting-started',
   '/cheat-sheet',

@@ -22,10 +22,6 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{
           __html: `(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}})()`
         }} />
-        {/* Force reload when browser restores page from bfcache (iOS Safari back/forward) */}
-        <script dangerouslySetInnerHTML={{
-          __html: `window.addEventListener('pageshow',function(e){if(e.persisted)window.location.reload();});`
-        }} />
       </head>
       <body className={inter.className}>
         <ThemeProvider>{children}</ThemeProvider>

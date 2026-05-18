@@ -28,11 +28,10 @@ const REASON_OPTIONS = [
 ]
 
 type Props = {
-  defaultName: string
   defaultProfile: string
 }
 
-export function OnboardingForm({ defaultName, defaultProfile }: Props) {
+export function OnboardingForm({ defaultProfile }: Props) {
   const [step, setStep] = useState(1)
   const [isPending, startTransition] = useTransition()
 

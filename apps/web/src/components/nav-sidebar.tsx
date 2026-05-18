@@ -37,7 +37,7 @@ const NAV_GROUPS_STORAGE = 'ielts-nav-groups'
 const NAV_FAVS_EXPANDED_STORAGE = 'ielts-nav-favs-expanded'
 
 function isActive(href: string, pathname: string) {
-  return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
+  return pathname === href || pathname.startsWith(href + '/')
 }
 
 function groupContainsActive(group: NavGroup, pathname: string) {
@@ -381,7 +381,7 @@ export function NavSidebar({
             pathname={pathname}
             isFav={favs.includes(item.href)}
             onToggleFav={handleToggleFav}
-            tourId={item.href === '/' ? 'pin-page' : undefined}
+            tourId={item.href === '/dashboard' ? 'pin-page' : undefined}
           />
         ))}
 

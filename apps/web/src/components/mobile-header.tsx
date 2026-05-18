@@ -16,10 +16,9 @@ import {
   ALWAYS_VISIBLE_HREFS,
 } from '@/lib/nav-config'
 
-const ALL_ITEMS: NavItem[] = ALL_NAV_ITEMS
 
 function isActive(href: string, pathname: string) {
-  return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
+  return pathname === href || pathname.startsWith(href + '/')
 }
 
 function formatTarget(profile: string): string {

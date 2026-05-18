@@ -8,7 +8,6 @@ export default async function OnboardingPage() {
 
   return (
     <OnboardingForm
-      defaultName={user.name ?? ''}
       defaultProfile={user.targetProfile}
     />
   )

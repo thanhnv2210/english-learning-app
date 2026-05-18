@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CheatSheetBanner } from '@/components/cheat-sheet-banner'
 import { OnboardingTour } from '@/components/onboarding-tour'
@@ -97,7 +96,6 @@ function BandBar({ value, target }: { value: number; target: number }) {
 
 export default async function DashboardPage() {
   const user = await getCurrentUser()
-  if (!user.returningUser) redirect('/analytics')
   const [stats, [wrongRow], [sessionRow]] = await Promise.all([
     getAnalyticsStats(user.id),
     db.select({ count: count() }).from(wrongDecisionLogs).where(eq(wrongDecisionLogs.userId, user.id)),

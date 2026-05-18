@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
+import { getCurrentUser } from '@/lib/db/user'
 
 const FEATURES = [
   {
@@ -66,7 +67,10 @@ const PAIN_POINTS = [
 
 export default async function LandingPage() {
   const session = await auth()
-  if (session?.user) redirect('/dashboard')
+  if (session?.user) {
+    const user = await getCurrentUser()
+    redirect(user.returningUser ? '/dashboard' : '/analytics')
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">

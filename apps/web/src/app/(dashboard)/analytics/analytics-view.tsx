@@ -233,7 +233,7 @@ function WrongDecisionCard({ wrongStats }: { wrongStats: WrongDecisionStats }) {
 
 // ── Main view ─────────────────────────────────────────────────────────────────
 
-export function AnalyticsView({ stats, wrongDecisionStats }: { stats: SkillStats[]; wrongDecisionStats: WrongDecisionStats }) {
+export function AnalyticsView({ stats, wrongDecisionStats, isNewUser = false }: { stats: SkillStats[]; wrongDecisionStats: WrongDecisionStats | null; isNewUser?: boolean }) {
   if (stats.length === 0) {
     return (
       <div className="flex flex-col gap-4">
@@ -259,7 +259,7 @@ export function AnalyticsView({ stats, wrongDecisionStats }: { stats: SkillStats
             ))}
           </div>
         </div>
-        <WrongDecisionCard wrongStats={wrongDecisionStats} />
+        {!isNewUser && wrongDecisionStats && <WrongDecisionCard wrongStats={wrongDecisionStats} />}
       </div>
     )
   }
@@ -270,7 +270,7 @@ export function AnalyticsView({ stats, wrongDecisionStats }: { stats: SkillStats
       {stats.map((stat) => (
         <SkillCard key={stat.skill} stat={stat} />
       ))}
-      <WrongDecisionCard wrongStats={wrongDecisionStats} />
+      {!isNewUser && wrongDecisionStats && <WrongDecisionCard wrongStats={wrongDecisionStats} />}
     </div>
   )
 }
