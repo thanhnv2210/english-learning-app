@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
@@ -12,7 +13,7 @@ const DEFAULT_EMAIL = 'default@local.dev'
  */
 const THIRTY_MINUTES = 30 * 60 * 1000
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async () => {
   const session = await auth()
   if (!session?.user?.id) throw new Error('Unauthorized')
   const userId = parseInt(session.user.id)
@@ -21,11 +22,12 @@ export async function getCurrentUser() {
 
   const stale = !user.lastActiveAt || Date.now() - user.lastActiveAt.getTime() > THIRTY_MINUTES
   if (stale) {
-    await db.update(users).set({ lastActiveAt: new Date() }).where(eq(users.id, userId))
+    // Fire-and-forget — don't block rendering for a bookkeeping write
+    db.update(users).set({ lastActiveAt: new Date() }).where(eq(users.id, userId)).catch(() => {})
   }
 
   return user
-}
+})
 
 export async function getDefaultUser() {
   const existing = await db.select().from(users).where(eq(users.email, DEFAULT_EMAIL)).limit(1)
