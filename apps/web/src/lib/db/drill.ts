@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import { db } from '@/lib/db'
 import { drillTexts, drillResults, type DrillMistakeSaved, type DrillCsAnalysis } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
@@ -5,12 +6,14 @@ import { eq, desc } from 'drizzle-orm'
 export type DrillText = typeof drillTexts.$inferSelect
 export type DrillResult = typeof drillResults.$inferSelect
 
-export async function getAllDrillTexts(): Promise<DrillText[]> {
-  return db
+export const getAllDrillTexts = unstable_cache(
+  async (): Promise<DrillText[]> => db
     .select()
     .from(drillTexts)
-    .orderBy(drillTexts.rank, drillTexts.category, drillTexts.createdAt)
-}
+    .orderBy(drillTexts.rank, drillTexts.category, drillTexts.createdAt),
+  ['drill-texts'],
+  { tags: ['drill-texts'] },
+)
 
 export async function saveDrillResult(data: {
   userId: number

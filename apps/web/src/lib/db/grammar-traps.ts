@@ -1,8 +1,11 @@
+import { unstable_cache, revalidateTag } from 'next/cache'
 import { db } from '@/lib/db'
 import { grammarTrapEntries } from '@/lib/db/schema'
 import type { GrammarTrapExample } from '@/lib/db/schema'
 import { eq, desc, asc } from 'drizzle-orm'
 import type { PracticeItem } from '@/lib/ielts/vocabulary/practice-types'
+
+const GRAMMAR_TRAPS_TAG = 'grammar-traps'
 
 // Re-export client-safe constants so server code can import from one place.
 // Client components must import directly from lib/ielts/grammar-traps/constants.ts
@@ -22,12 +25,14 @@ export type GrammarTrapCard = {
   createdAt: Date
 }
 
-export async function getAllGrammarTraps(): Promise<GrammarTrapCard[]> {
-  return db
+export const getAllGrammarTraps = unstable_cache(
+  async (): Promise<GrammarTrapCard[]> => db
     .select()
     .from(grammarTrapEntries)
-    .orderBy(desc(grammarTrapEntries.rank), asc(grammarTrapEntries.phrase))
-}
+    .orderBy(desc(grammarTrapEntries.rank), asc(grammarTrapEntries.phrase)),
+  [GRAMMAR_TRAPS_TAG],
+  { tags: [GRAMMAR_TRAPS_TAG] },
+)
 
 export async function findGrammarTrap(phrase: string): Promise<GrammarTrapCard | null> {
   const rows = await db
@@ -60,11 +65,13 @@ export async function saveGrammarTrap(data: {
       },
     })
     .returning()
+  revalidateTag(GRAMMAR_TRAPS_TAG)
   return row
 }
 
 export async function deleteGrammarTrap(id: number): Promise<void> {
   await db.delete(grammarTrapEntries).where(eq(grammarTrapEntries.id, id))
+  revalidateTag(GRAMMAR_TRAPS_TAG)
 }
 
 export async function updateGrammarTrapRank(id: number, rank: number): Promise<void> {
@@ -72,28 +79,33 @@ export async function updateGrammarTrapRank(id: number, rank: number): Promise<v
     .update(grammarTrapEntries)
     .set({ rank })
     .where(eq(grammarTrapEntries.id, id))
+  revalidateTag(GRAMMAR_TRAPS_TAG)
 }
 
-export async function getGrammarTrapPracticeItems(): Promise<PracticeItem[]> {
-  const rows = await db
-    .select()
-    .from(grammarTrapEntries)
-    .orderBy(desc(grammarTrapEntries.rank), asc(grammarTrapEntries.phrase))
+export const getGrammarTrapPracticeItems = unstable_cache(
+  async (): Promise<PracticeItem[]> => {
+    const rows = await db
+      .select()
+      .from(grammarTrapEntries)
+      .orderBy(desc(grammarTrapEntries.rank), asc(grammarTrapEntries.phrase))
 
-  const items: PracticeItem[] = []
-  for (const row of rows) {
-    for (let i = 0; i < row.examples.length; i++) {
-      const ex = row.examples[i]
-      if (!ex.correct) continue
-      items.push({
-        id: `grammar_trap_${row.id}_${i}`,
-        sentence: ex.correct,
-        answer: row.correction,
-        hint: CATEGORY_LABELS[row.category] ?? row.category,
-        context: 'Grammar',
-        source: 'grammar_trap',
-      })
+    const items: PracticeItem[] = []
+    for (const row of rows) {
+      for (let i = 0; i < row.examples.length; i++) {
+        const ex = row.examples[i]
+        if (!ex.correct) continue
+        items.push({
+          id: `grammar_trap_${row.id}_${i}`,
+          sentence: ex.correct,
+          answer: row.correction,
+          hint: CATEGORY_LABELS[row.category] ?? row.category,
+          context: 'Grammar',
+          source: 'grammar_trap',
+        })
+      }
     }
-  }
-  return items
-}
+    return items
+  },
+  [`${GRAMMAR_TRAPS_TAG}-practice`],
+  { tags: [GRAMMAR_TRAPS_TAG] },
+)

@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import { db } from '@/lib/db'
 import { speakingTopics, speakingPart2Topics } from '@/lib/db/schema'
 import { asc } from 'drizzle-orm'
@@ -18,10 +19,14 @@ export type SpeakingPart2Topic = {
   examplePrompts: string[]
 }
 
-export async function getAllSpeakingTopics(): Promise<SpeakingTopic[]> {
-  return db.select().from(speakingTopics).orderBy(asc(speakingTopics.rank))
-}
+export const getAllSpeakingTopics = unstable_cache(
+  async (): Promise<SpeakingTopic[]> => db.select().from(speakingTopics).orderBy(asc(speakingTopics.rank)),
+  ['speaking-topics'],
+  { tags: ['speaking-topics'] },
+)
 
-export async function getAllPart2Topics(): Promise<SpeakingPart2Topic[]> {
-  return db.select().from(speakingPart2Topics).orderBy(asc(speakingPart2Topics.rank))
-}
+export const getAllPart2Topics = unstable_cache(
+  async (): Promise<SpeakingPart2Topic[]> => db.select().from(speakingPart2Topics).orderBy(asc(speakingPart2Topics.rank)),
+  ['speaking-part2-topics'],
+  { tags: ['speaking-part2-topics'] },
+)
