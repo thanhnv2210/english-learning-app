@@ -1,5 +1,6 @@
 import { unstable_cache, revalidateTag } from 'next/cache'
 import { db } from '@/lib/db'
+import { CACHE_REVALIDATE_SECONDS } from '@/lib/cache-config'
 import { grammarTrapEntries } from '@/lib/db/schema'
 import type { GrammarTrapExample } from '@/lib/db/schema'
 import { eq, desc, asc } from 'drizzle-orm'
@@ -31,7 +32,7 @@ export const getAllGrammarTraps = unstable_cache(
     .from(grammarTrapEntries)
     .orderBy(desc(grammarTrapEntries.rank), asc(grammarTrapEntries.phrase)),
   [GRAMMAR_TRAPS_TAG],
-  { tags: [GRAMMAR_TRAPS_TAG] },
+  { tags: [GRAMMAR_TRAPS_TAG], revalidate: CACHE_REVALIDATE_SECONDS },
 )
 
 export async function findGrammarTrap(phrase: string): Promise<GrammarTrapCard | null> {
@@ -107,5 +108,5 @@ export const getGrammarTrapPracticeItems = unstable_cache(
     return items
   },
   [`${GRAMMAR_TRAPS_TAG}-practice`],
-  { tags: [GRAMMAR_TRAPS_TAG] },
+  { tags: [GRAMMAR_TRAPS_TAG], revalidate: CACHE_REVALIDATE_SECONDS },
 )

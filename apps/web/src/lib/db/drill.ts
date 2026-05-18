@@ -1,5 +1,6 @@
 import { unstable_cache } from 'next/cache'
 import { db } from '@/lib/db'
+import { CACHE_REVALIDATE_SECONDS } from '@/lib/cache-config'
 import { drillTexts, drillResults, type DrillMistakeSaved, type DrillCsAnalysis } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 
@@ -12,7 +13,7 @@ export const getAllDrillTexts = unstable_cache(
     .from(drillTexts)
     .orderBy(drillTexts.rank, drillTexts.category, drillTexts.createdAt),
   ['drill-texts'],
-  { tags: ['drill-texts'] },
+  { tags: ['drill-texts'], revalidate: CACHE_REVALIDATE_SECONDS },
 )
 
 export async function saveDrillResult(data: {

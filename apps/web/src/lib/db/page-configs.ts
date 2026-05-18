@@ -1,5 +1,6 @@
 import { unstable_cache, revalidateTag } from 'next/cache'
 import { db } from '@/lib/db'
+import { CACHE_REVALIDATE_SECONDS } from '@/lib/cache-config'
 import { pageConfigs } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import type { PageConfigs } from '@/lib/nav-config'
@@ -15,7 +16,7 @@ export const getAllPageConfigs = unstable_cache(
     )
   },
   [PAGE_CONFIGS_TAG],
-  { tags: [PAGE_CONFIGS_TAG] },
+  { tags: [PAGE_CONFIGS_TAG], revalidate: CACHE_REVALIDATE_SECONDS },
 )
 
 /**

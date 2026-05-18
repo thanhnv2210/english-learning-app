@@ -107,6 +107,7 @@ PORT=3000 pnpm dev:clean
 | `OLLAMA_MODEL` | `qwen2.5-coder:7b` | Ollama model name (local dev fallback) |
 | `NEXT_PUBLIC_OLLAMA_ENABLED` | `true` | Set `false` to disable AI routes; shows amber banner |
 | `OLLAMA_DEBUG` | `false` | Set `true` to log full raw AI response |
+| `CACHE_REVALIDATE_SECONDS` | `300` | TTL for `unstable_cache` entries (speaking topics, drill texts, grammar traps, page configs). Set `0` for tag-invalidation only. |
 | `DATABASE_URL` | — | PostgreSQL connection string |
 | `RESEND_API_KEY` | — | Resend API key; required to send any email (activation + feedback notifications) |
 | `EMAIL_FROM` | `IELTS Accelerator <onboarding@resend.dev>` | Sender address for all outbound emails |
